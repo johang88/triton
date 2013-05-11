@@ -1,0 +1,12 @@
+_ReSharper.Tinyrocket/
+*/obj/
+*/bin/
+*.suo
+*.dll
+*exe
+*.pdb
+Build/Logs
+*.manifest
+OpenTK.GLControl.xml
+Newtonsoft.Json.xml
+Rymdspelet.cfg
