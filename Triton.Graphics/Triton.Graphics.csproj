@@ -53,6 +53,7 @@
     <Compile Include="Resources\ShaderProgram.cs" />
     <Compile Include="Resources\Texture.cs" />
     <Compile Include="Resources\TextureLoader.cs" />
+    <Compile Include="Shaders\Preprocessor.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Triton.Common\Triton.Common.csproj">

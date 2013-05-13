@@ -6,6 +6,14 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.Resources
 {
+	/// <summary>
+	/// Resource loader for shader programs
+	/// Shaders are defined in a single glsl file, the defines VERTEX_SHADER and FRAGMENT_SHADER
+	/// are used to differ between the compiled shader type. 
+	/// 
+	/// Various pragmas and preprocessor defines are also setup.
+	/// 
+	/// </summary>
 	class ShaderLoader : Triton.Common.IResourceLoader<ShaderProgram>
 	{
 		private readonly Backend Backend;
@@ -35,23 +43,18 @@ namespace Triton.Graphics.Resources
 
 			var shader = (ShaderProgram)resource;
 
-			var vertexShaderName = resource.Name + ".v.glsl";
-			var fragmentShaderName = resource.Name + ".f.glsl";
+			var filename = resource.Name + ".glsl";
 
-			string vertexShaderSource = "";
-			string fragmentShaderSource = "";
+			var shaderSource = ""; // Complete source of both shaders before splitting them
 
-			using (var stream = FileSystem.OpenRead(vertexShaderName))
+			using (var stream = FileSystem.OpenRead(filename))
 			using (var reader = new System.IO.StreamReader(stream))
 			{
-				vertexShaderSource = reader.ReadToEnd();
+				shaderSource = reader.ReadToEnd();
 			}
 
-			using (var stream = FileSystem.OpenRead(vertexShaderName))
-			using (var reader = new System.IO.StreamReader(stream))
-			{
-				fragmentShaderSource = reader.ReadToEnd();
-			}
+			var vertexShaderSource = "#define VERTEX_SHADER\n" + shaderSource;
+			var fragmentShaderSource = "#define FRAGMENT_SHADER\n" + shaderSource;
 
 			var attribs = parameters.Split(',');
 
