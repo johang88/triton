@@ -48,11 +48,17 @@
   <ItemGroup>
     <Compile Include="BinaryReaderExtensions.cs" />
     <Compile Include="BinaryWriterExtensions.cs" />
+    <Compile Include="ILogOutputHandler.cs" />
+    <Compile Include="Log.cs" />
     <Compile Include="Factory.cs" />
     <Compile Include="HashedString.cs" />
     <Compile Include="HashedStringTable.cs" />
     <Compile Include="IO\FileSystem.cs" />
+    <Compile Include="IO\FileSystemPackage.cs" />
+    <Compile Include="IO\IPackage.cs" />
+    <Compile Include="IO\PackagePriority.cs" />
     <Compile Include="IResourceLoader.cs" />
+    <Compile Include="LogLevel.cs" />
     <Compile Include="Resource.cs" />
     <Compile Include="ResourceManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
