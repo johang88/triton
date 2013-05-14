@@ -2,10 +2,12 @@
 
 #if VERTEX_SHADER
 
-attrib(vec3, iPosition, Position)
-attrib(vec3, iNormal, Normal)
-attrib(vec3, iTangent, Tangent)
-attrib(vec2, iTexCoord, TexCoord)
+import(shaders/lighting/cook_torrance);
+
+attrib(vec3, iPosition, Position);
+attrib(vec3, iNormal, Normal);
+attrib(vec3, iTangent, Tangent);
+attrib(vec2, iTexCoord, TexCoord);
 
 out vec3 normal;
 out vec3 tangent;
@@ -13,9 +15,9 @@ out vec3 bitangent;
 out vec2 texCoord;
 out vec3 cameraDirection;
 
-uniform(mat4x4, modelViewProjection, ModelViewProjection)
-uniform(mat4x4, world, World)
-uniform(vec3, cameraPosition, CameraPosition)
+uniform(mat4x4, modelViewProjection, ModelViewProjection);
+uniform(mat4x4, world, World);
+uniform(vec3, cameraPosition, CameraPosition);
 
 void main()
 {
@@ -34,8 +36,8 @@ void main()
 
 #else if FRAGMENT_SHADER
 
-include(shaders/utility/utils)
-include(shaders/lighting/cook_torrance)
+import(shaders/utility/utils);
+import(shaders/lighting/cook_torrance);
 
 in vec3 normal;
 in vec3 tangent;
@@ -45,13 +47,13 @@ in vec3 cameraDirection;
 
 out vec4 oColor;
 
-uniform(vec3, lightDir)
-uniform(vec3, lightColor)
-uniform(vec3, ambientColor)
+uniform(vec3, lightDir, LightDir);
+uniform(vec3, lightColor, LightColor);
+uniform(vec3, ambientColor, AmbientColor);
 
-sampler(2D, samplerDiffuse, diffuse)
-sampler(2D, samplerNormal, normal)
-sampler(2D, samplerSpecular, specular)
+sampler(2D, samplerDiffuse, diffuse);
+sampler(2D, samplerNormal, normal);
+sampler(2D, samplerSpecular, specular);
 
 void main()
 {

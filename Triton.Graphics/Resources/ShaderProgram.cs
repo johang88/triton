@@ -17,7 +17,13 @@ namespace Triton.Graphics.Resources
 			Handle = -1;
 		}
 
-		public enum Attrib
+		public struct Attrib
+		{
+			public AttribType Type;
+			public string Name;
+		}
+
+		public enum AttribType
 		{
 			Position = 0,
 			Normal = 1,
