@@ -33,7 +33,7 @@ namespace Triton.Graphics.Resources
 
 		public Common.Resource Create(string name, string parameters)
 		{
-			return new ShaderProgram(name, parameters);
+			return new ShaderProgram(name, parameters, Backend);
 		}
 
 		public void Load(Common.Resource resource, string parameters)
@@ -56,7 +56,8 @@ namespace Triton.Graphics.Resources
 			var preProcessor = new Shaders.Preprocessor(FileSystem);
 
 			Shaders.Attrib[] shaderAttribs;
-			shaderSource = preProcessor.Process(shaderSource, out shaderAttribs);
+			Shaders.Uniform[] uniforms;
+			shaderSource = preProcessor.Process(shaderSource, out shaderAttribs, out uniforms);
 
 			var vertexShaderSource = "#define VERTEX_SHADER\n" + shaderSource;
 			var fragmentShaderSource = "#define FRAGMENT_SHADER\n" + shaderSource;
@@ -68,6 +69,12 @@ namespace Triton.Graphics.Resources
 			{
 				var attrib = shaderAttribs[i];
 				attribs[(int)attrib.Type] = attrib.Name;
+			}
+
+			// Setup uniforms, the bind locations wont be resolved until they are used
+			for (var i = 0; i < uniforms.Length; i++)
+			{
+				shader.AddUniform(uniforms[i].BindName, uniforms[i].Name);
 			}
 
 			if (shader.Handle == -1)

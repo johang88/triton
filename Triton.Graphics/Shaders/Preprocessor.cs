@@ -31,6 +31,7 @@ namespace Triton.Graphics.Shaders
 		private static Regex PreprocessorImportRegex = new Regex(@"^imprt\(([ \t\w /]+)\);", RegexOptions.Multiline);
 
 		private List<Attrib> Attribs;
+		private List<Uniform> Uniforms;
 
 		public Preprocessor(Triton.Common.IO.FileSystem fileSystem)
 		{
@@ -40,14 +41,16 @@ namespace Triton.Graphics.Shaders
 			FileSystem = fileSystem;
 		}
 
-		public string Process(string source, out Attrib[] attribs)
+		public string Process(string source, out Attrib[] attribs, out Uniform[] uniforms)
 		{
 			Attribs = new List<Attrib>();
+			Uniforms = new List<Uniform>();
 
 			var output = PreprocessorImportRegex.Replace(source, PreprocessorImportReplacer);
 			output = PreprocessorRegex.Replace(output, PreprocessorReplacer);
 
 			attribs = Attribs.ToArray();
+			uniforms = Uniforms.ToArray();
 
 			return output;
 		}
@@ -79,6 +82,11 @@ namespace Triton.Graphics.Shaders
 			}
 			else if (verb == "uniform")
 			{
+				Uniforms.Add(new Uniform
+				{
+					Name = match.Groups[3].Value,
+					BindName = match.Groups[4].Value
+				});
 				return string.Format("uniform {0} {1};", match.Groups[2].Value, match.Groups[3].Value);
 			}
 			else if (verb == "sampler")
