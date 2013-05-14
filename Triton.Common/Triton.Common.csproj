@@ -49,6 +49,8 @@
     <Compile Include="BinaryReaderExtensions.cs" />
     <Compile Include="BinaryWriterExtensions.cs" />
     <Compile Include="Factory.cs" />
+    <Compile Include="HashedString.cs" />
+    <Compile Include="HashedStringTable.cs" />
     <Compile Include="IO\FileSystem.cs" />
     <Compile Include="IResourceLoader.cs" />
     <Compile Include="Resource.cs" />
