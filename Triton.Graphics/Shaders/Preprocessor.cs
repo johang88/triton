@@ -13,7 +13,7 @@ namespace Triton.Graphics.Shaders
 		private static Regex PreprocessorRegex = new Regex(@"^(attrib|uniform|sampler)\(([ \t\w]*)(,[ \t\w]*)+\)$", RegexOptions.Multiline);
 		private static Regex PreprocessorImportRegex = new Regex(@"^imprt\(([ \t\w /]+)\);", RegexOptions.Multiline);
 
-		private List<Resources.ShaderProgram.Attrib> Attribs;
+		private List<Attrib> Attribs;
 
 		public Preprocessor(Triton.Common.IO.FileSystem fileSystem)
 		{
@@ -23,9 +23,9 @@ namespace Triton.Graphics.Shaders
 			FileSystem = fileSystem;
 		}
 
-		public string Process(string source, out Resources.ShaderProgram.Attrib[] attribs)
+		public string Process(string source, out Attrib[] attribs)
 		{
-			Attribs = new List<Resources.ShaderProgram.Attrib>();
+			Attribs = new List<Attrib>();
 
 			var output = PreprocessorImportRegex.Replace(source, PreprocessorImportReplacer);
 			output = PreprocessorRegex.Replace(output, PreprocessorReplacer);
@@ -51,8 +51,8 @@ namespace Triton.Graphics.Shaders
 
 			if (verb == "attrib")
 			{
-				var type = (Resources.ShaderProgram.AttribType)Enum.Parse(typeof(Resources.ShaderProgram.AttribType), match.Groups[4].Value, true);
-				Attribs.Add(new Resources.ShaderProgram.Attrib
+				var type = (AttribType)Enum.Parse(typeof(AttribType), match.Groups[4].Value, true);
+				Attribs.Add(new Attrib
 				{
 					Name = match.Groups[2].Value,
 					Type = type

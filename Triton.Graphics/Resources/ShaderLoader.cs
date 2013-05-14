@@ -53,10 +53,22 @@ namespace Triton.Graphics.Resources
 				shaderSource = reader.ReadToEnd();
 			}
 
+			var preProcessor = new Shaders.Preprocessor(FileSystem);
+
+			Shaders.Attrib[] shaderAttribs;
+			shaderSource = preProcessor.Process(shaderSource, out shaderAttribs);
+
 			var vertexShaderSource = "#define VERTEX_SHADER\n" + shaderSource;
 			var fragmentShaderSource = "#define FRAGMENT_SHADER\n" + shaderSource;
 
-			var attribs = parameters.Split(',');
+			// Convert attribs to the correct format
+			// The format is attribIndex => name
+			string[] attribs = new string[3];
+			for (var i = 0; i < shaderAttribs.Length; i++)
+			{
+				var attrib = shaderAttribs[i];
+				attribs[(int)attrib.Type] = attrib.Name;
+			}
 
 			if (shader.Handle == -1)
 				shader.Handle = Backend.RenderSystem.CreateShader(vertexShaderSource, fragmentShaderSource, attribs, OnError);

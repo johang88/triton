@@ -53,6 +53,8 @@
     <Compile Include="Resources\ShaderProgram.cs" />
     <Compile Include="Resources\Texture.cs" />
     <Compile Include="Resources\TextureLoader.cs" />
+    <Compile Include="Shaders\Attrib.cs" />
+    <Compile Include="Shaders\AttribType.cs" />
     <Compile Include="Shaders\Preprocessor.cs" />
   </ItemGroup>
   <ItemGroup>
