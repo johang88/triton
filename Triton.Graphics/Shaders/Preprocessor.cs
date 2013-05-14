@@ -21,7 +21,7 @@ namespace Triton.Graphics.Shaders
 	///		- Example: attrib(vec3, iPosition, Position) => in vec3 iPosition;
 	///	 * uniform(type, name, externalName)
 	///		- Declares a uniform and exposes it to the code, might be automatically bound depending on the external name.
-	///		  Any automaitc bounding depends on the implementing application.
+	///		  Any automaitc binding depends on the implementing application.
 	///		- Example: uniform(vec3, lightColor, LightColor) => uniform vec3 lightColor
 	/// </summary>
 	class Preprocessor
