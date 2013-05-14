@@ -43,6 +43,9 @@ namespace Triton.Graphics.Resources
 
 			var shader = (ShaderProgram)resource;
 
+			// This will reset some cache data like uniform locations
+			shader.Reset();
+
 			var filename = resource.Name + ".glsl";
 
 			var shaderSource = ""; // Complete source of both shaders before splitting them

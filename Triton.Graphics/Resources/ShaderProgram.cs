@@ -9,8 +9,8 @@ namespace Triton.Graphics.Resources
 	public class ShaderProgram : Triton.Common.Resource
 	{
 		public int Handle { get; internal set; }
-		private readonly Dictionary<Triton.Common.HashedString, int> Uniforms = new Dictionary<Common.HashedString, int>();
-		private readonly Dictionary<string, string> BindNamesToVarNames = new Dictionary<string, string>();
+		private Dictionary<Triton.Common.HashedString, int> Uniforms = new Dictionary<Common.HashedString, int>();
+		private Dictionary<string, string> BindNamesToVarNames = new Dictionary<string, string>();
 		private readonly Backend Backend;
 
 		public ShaderProgram(string name, string parameters, Backend backend)
@@ -18,6 +18,12 @@ namespace Triton.Graphics.Resources
 		{
 			Handle = -1;
 			Backend = backend;
+		}
+
+		internal void Reset()
+		{
+			Uniforms = new Dictionary<Common.HashedString, int>();
+			BindNamesToVarNames = new Dictionary<string, string>();
 		}
 
 		public int GetUniform(Triton.Common.HashedString name)
