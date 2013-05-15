@@ -67,7 +67,7 @@ namespace Triton.Graphics.Resources
 
 			// Convert attribs to the correct format
 			// The format is attribIndex => name
-			string[] attribs = new string[3];
+			string[] attribs = new string[4];
 			for (var i = 0; i < shaderAttribs.Length; i++)
 			{
 				var attrib = shaderAttribs[i];
