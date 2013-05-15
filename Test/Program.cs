@@ -37,7 +37,7 @@ namespace Test
 				while (WaitHandle.WaitAny(new WaitHandle[] { RendererShuttingDown, MainLoopReady }) == 1)
 				{
 					backend.BeginScene();
-					backend.BeginPass();
+					backend.BeginPass(new OpenTK.Vector4(0.25f, 0.5f, 0.75f, 1.0f));
 					backend.EndPass();
 					backend.EndScene();
 

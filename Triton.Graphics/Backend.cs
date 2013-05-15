@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.IO;
 using System.Collections.Concurrent;
+using Triton.Common;
 
 namespace Triton.Graphics
 {
@@ -143,7 +144,10 @@ namespace Triton.Graphics
 				switch (cmd)
 				{
 					case OpCode.BeginPass:
-						RenderSystem.Clear(Vector4.One, true);
+						{
+							var color = reader.ReadVector4();
+							RenderSystem.Clear(color, true);
+						}
 						break;
 					case OpCode.EndPass:
 						break;
@@ -212,9 +216,10 @@ namespace Triton.Graphics
 			DoubleBufferSynchronizer.Release();
 		}
 
-		public void BeginPass()
+		public void BeginPass(OpenTK.Vector4 clearColor)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BeginPass);
+			PrimaryBuffer.Writer.Write(clearColor);
 		}
 
 		public void EndPass()
