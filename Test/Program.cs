@@ -10,6 +10,8 @@ namespace Test
 	class Program
 	{
 		ManualResetEvent RendererReady = new ManualResetEvent(false);
+		ManualResetEvent RendererShuttingDown = new ManualResetEvent(false);
+		ManualResetEvent MainLoopReady = new ManualResetEvent(true);
 
 		void Run()
 		{
@@ -22,13 +24,25 @@ namespace Test
 
 			using (var backend = new Triton.Graphics.Backend(1280, 720, "Awesome Test Application", false, () => RendererReady.Set()))
 			{
+				backend.OnShuttingDown += () => RendererShuttingDown.Set();
+
 				WaitHandle.WaitAll(new WaitHandle[] { RendererReady });
 
 				Triton.Graphics.Resources.ResourceLoaders.Init(resourceManager, backend, fileSystem);
 
 				var shader = resourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/generic");
-				var mesh = resourceManager.Load<Triton.Graphics.Resources.Mesh>("models/test");
-				var texture = resourceManager.Load<Triton.Graphics.Resources.Texture>("textures/test");
+				//var mesh = resourceManager.Load<Triton.Graphics.Resources.Mesh>("models/test");
+				//var texture = resourceManager.Load<Triton.Graphics.Resources.Texture>("textures/test");
+
+				while (WaitHandle.WaitAny(new WaitHandle[] { RendererShuttingDown, MainLoopReady }) == 1)
+				{
+					backend.BeginScene();
+					backend.BeginPass();
+					backend.EndPass();
+					backend.EndScene();
+
+					MainLoopReady.Set();
+				}
 			}
 		}
 
