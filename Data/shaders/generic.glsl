@@ -1,4 +1,4 @@
-#if VERTEX_SHADER
+#ifdef VERTEX_SHADER
 
 attrib(vec3, iPosition, Position);
 attrib(vec3, iNormal, Normal);
