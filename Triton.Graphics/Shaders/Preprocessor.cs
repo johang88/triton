@@ -28,7 +28,7 @@ namespace Triton.Graphics.Shaders
 	{
 		private readonly Triton.Common.IO.FileSystem FileSystem;
 		private static Regex PreprocessorRegex = new Regex(@"^(attrib|uniform|sampler)\(([ \t\w]*)(,[ \t\w]*)+\)$", RegexOptions.Multiline);
-		private static Regex PreprocessorImportRegex = new Regex(@"^imprt\(([ \t\w /]+)\);", RegexOptions.Multiline);
+		private static Regex PreprocessorImportRegex = new Regex(@"^import\(([ \t\w /]+)\);", RegexOptions.Multiline);
 
 		private List<Attrib> Attribs;
 		private List<Uniform> Uniforms;
