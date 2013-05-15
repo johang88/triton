@@ -48,8 +48,8 @@ namespace Triton.Renderer
 			var graphicsMode = new GraphicsMode(32, 16, 0, 0);
 
 			Context = new GraphicsContext(graphicsMode, WindowInfo, 3, 0, GraphicsContextFlags.ForwardCompatible);
-			Context.LoadAll();
 			Context.MakeCurrent(WindowInfo);
+			Context.LoadAll();
 
 			TextureManager = new Textures.TextureManager();
 			MeshManager = new Meshes.MeshManager();
