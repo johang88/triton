@@ -62,8 +62,8 @@ namespace Triton.Graphics.Resources
 			Shaders.Uniform[] uniforms;
 			shaderSource = preProcessor.Process(shaderSource, out shaderAttribs, out uniforms);
 
-			var vertexShaderSource = "#define VERTEX_SHADER\n" + shaderSource;
-			var fragmentShaderSource = "#define FRAGMENT_SHADER\n" + shaderSource;
+			var vertexShaderSource = "#version 150\n#define VERTEX_SHADER\n" + shaderSource;
+			var fragmentShaderSource = "#version 150\n#define FRAGMENT_SHADER\n" + shaderSource;
 
 			// Convert attribs to the correct format
 			// The format is attribIndex => name

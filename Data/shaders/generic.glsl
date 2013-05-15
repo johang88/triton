@@ -1,5 +1,3 @@
-#version 150
-
 #if VERTEX_SHADER
 
 attrib(vec3, iPosition, Position);
@@ -32,7 +30,7 @@ void main()
 	gl_Position = modelViewProjection * vec4(iPosition, 1);
 }
 
-#else if FRAGMENT_SHADER
+#else
 
 import(shaders/utility/utils);
 import(shaders/lighting/cook_torrance);
