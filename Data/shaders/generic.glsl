@@ -2,8 +2,6 @@
 
 #if VERTEX_SHADER
 
-import(shaders/lighting/cook_torrance);
-
 attrib(vec3, iPosition, Position);
 attrib(vec3, iNormal, Normal);
 attrib(vec3, iTangent, Tangent);
