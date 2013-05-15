@@ -38,13 +38,12 @@ namespace Triton.Graphics
 	///			EndPass
 	///		EndScene
 	/// </summary>
-	public class Backend : IDisposable
+	public class Backend
 	{
 		const long MaxTimeForMiscProcessing = 32;
 		public INativeWindow Window { get; private set; }
 
 		public Triton.Renderer.RenderSystem RenderSystem { get; private set; }
-		private bool Disposed = false;
 		private readonly Thread RenderThread;
 
 		private CommandBuffer PrimaryBuffer = new CommandBuffer();
@@ -56,6 +55,8 @@ namespace Triton.Graphics
 
 		public Action OnShuttingDown = null;
 
+		private bool IsExiting = false;
+
 		public Backend(int width, int height, string title, bool fullscreen, Action onReady = null)
 		{
 			RenderThread = new Thread(() =>
@@ -64,6 +65,8 @@ namespace Triton.Graphics
 
 				Window = new NativeWindow(width, height, title, fullscreen ? GameWindowFlags.Fullscreen : GameWindowFlags.Default, graphicsMode, DisplayDevice.Default);
 				Window.Visible = true;
+				Window.Closing += Window_Closing;
+
 				RenderSystem = new Renderer.RenderSystem(Window.WindowInfo, ProcessQueue.Enqueue);
 
 				if (onReady != null)
@@ -74,21 +77,9 @@ namespace Triton.Graphics
 			RenderThread.Start();
 		}
 
-		public void Dispose()
+		void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		protected virtual void Dispose(bool isDisposing)
-		{
-			if (!isDisposing || Disposed)
-				return;
-
-			RenderSystem.Dispose();
-			Window.Dispose();
-
-			Disposed = true;
+			IsExiting = true;
 		}
 
 		void RenderLoop()
@@ -96,21 +87,24 @@ namespace Triton.Graphics
 			var watch = new System.Diagnostics.Stopwatch();
 			watch.Start();
 
-			while (Window.Exists)
+			while (Window.Exists && !IsExiting)
 			{
 				Window.ProcessEvents();
 
-				if (SecondaryBuffer.Stream.Position == 0)
-					continue;
+				if (!Window.Exists || IsExiting)
+					break;
 
-				DoubleBufferSynchronizer.WaitOne();
+				if (SecondaryBuffer.Stream.Position != 0)
+				{
+					DoubleBufferSynchronizer.WaitOne();
 
-				ExecuteCommandStream();
+					ExecuteCommandStream();
 
-				RenderSystem.SwapBuffers();
+					RenderSystem.SwapBuffers();
 
-				SecondaryBuffer.Stream.Position = 0;
-				DoubleBufferSynchronizer.Release();
+					SecondaryBuffer.Stream.Position = 0;
+					DoubleBufferSynchronizer.Release();
+				}
 
 				// Do some misc processing, ie usually resource loading etc
 				var miscProccessingStart = watch.ElapsedMilliseconds;
@@ -123,6 +117,9 @@ namespace Triton.Graphics
 
 				watch.Restart();
 			}
+
+			RenderSystem.Dispose();
+			Window.Dispose();
 
 			if (OnShuttingDown != null)
 				OnShuttingDown();
