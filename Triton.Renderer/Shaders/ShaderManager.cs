@@ -128,7 +128,7 @@ namespace Triton.Renderer.Shaders
 				NextFree = Handles[NextFree].Id;
 			}
 
-			var id = Handles[index].Id++;
+			var id = ++Handles[index].Id;
 			Handles[index].Initialized = false;
 			Handles[index].VertexHandle = 0;
 			Handles[index].FragmentHandle = 0;
@@ -189,11 +189,11 @@ namespace Triton.Renderer.Shaders
 
 			// Compile shaders
 
-			GL.ShaderSource(DefaultVertexHandle, DefaultVertexShaderSource);
-			GL.ShaderSource(DefaultFragmentHandle, DefaultFragmentShaderSource);
+			GL.ShaderSource(Handles[index].VertexHandle, vertexShader);
+			GL.ShaderSource(Handles[index].FragmentHandle, fragmentShader);
 
-			GL.CompileShader(DefaultVertexHandle);
-			GL.CompileShader(DefaultFragmentHandle);
+			GL.CompileShader(Handles[index].VertexHandle);
+			GL.CompileShader(Handles[index].FragmentHandle);
 
 			// Check for compilation errors
 			GL.GetShaderInfoLog(Handles[index].VertexHandle, out errors);
