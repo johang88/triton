@@ -53,6 +53,8 @@ namespace Triton.Graphics
 
 		private readonly ConcurrentQueue<Action> ProcessQueue = new ConcurrentQueue<Action>();
 
+		public Action OnShuttingDown = null;
+
 		public Backend(int width, int height, string title, bool fullscreen, Action onReady = null)
 		{
 			RenderThread = new Thread(() =>
@@ -120,6 +122,9 @@ namespace Triton.Graphics
 
 				watch.Restart();
 			}
+
+			if (OnShuttingDown != null)
+				OnShuttingDown();
 		}
 
 		void ExecuteCommandStream()
