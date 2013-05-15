@@ -53,7 +53,7 @@ namespace Triton.Graphics
 
 		private readonly ConcurrentQueue<Action> ProcessQueue = new ConcurrentQueue<Action>();
 
-		public Backend(int width, int height, string title, bool fullscreen)
+		public Backend(int width, int height, string title, bool fullscreen, Action onReady = null)
 		{
 			RenderThread = new Thread(() =>
 			{
@@ -62,6 +62,9 @@ namespace Triton.Graphics
 				Window = new NativeWindow(width, height, title, fullscreen ? GameWindowFlags.Fullscreen : GameWindowFlags.Default, graphicsMode, DisplayDevice.Default);
 				Window.Visible = true;
 				RenderSystem = new Renderer.RenderSystem(Window.WindowInfo, ProcessQueue.Enqueue);
+
+				if (onReady != null)
+					onReady();
 
 				RenderLoop();
 			});
@@ -123,7 +126,7 @@ namespace Triton.Graphics
 		{
 			// We never clear the stream so there can be a lot of crap after the written position, 
 			// this means that we cant use Stream.Length
-			var length = SecondaryBuffer.Stream.Position; 
+			var length = SecondaryBuffer.Stream.Position;
 
 			SecondaryBuffer.Stream.Position = 0;
 			var reader = SecondaryBuffer.Reader;
