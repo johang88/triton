@@ -46,6 +46,8 @@ namespace MeshConverter.Importers
 						}
 					}
 
+					subMesh.TriangleCount = faceCount * 3;
+
 					reader.ReadToFollowing("geometry");
 					int vertexCount = int.Parse(reader.GetAttribute("vertexcount"), CultureInfo.InvariantCulture);
 
@@ -54,8 +56,6 @@ namespace MeshConverter.Importers
 					bool normals = bool.Parse(reader.GetAttribute("normals"));
 					bool tangents = bool.Parse(reader.GetAttribute("tangents"));
 					int textureCoords = int.Parse(reader.GetAttribute("texture_coords"), CultureInfo.InvariantCulture);
-
-					short offset = 0;
 
 					if (!positions)
 						throw new ArgumentException("invalid mesh, no positions");
