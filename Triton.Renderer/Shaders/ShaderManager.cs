@@ -196,11 +196,18 @@ namespace Triton.Renderer.Shaders
 			GL.CompileShader(Handles[index].FragmentHandle);
 
 			// Check for compilation errors
-			GL.GetShaderInfoLog(Handles[index].VertexHandle, out errors);
-			if (errors.Length == 0 || errors.Contains("hardware"))
-				GL.GetShaderInfoLog(Handles[index].FragmentHandle, out errors);
+			int errorCode;
 
-			if (errors.Length > 0 && !errors.Contains("hardware"))
+			GL.GetShader(Handles[index].VertexHandle, ShaderParameter.CompileStatus, out errorCode);
+			GL.GetShaderInfoLog(Handles[index].VertexHandle, out errors);
+
+			if (errorCode == 1)
+			{
+				GL.GetShader(Handles[index].FragmentHandle, ShaderParameter.CompileStatus, out errorCode);
+				GL.GetShaderInfoLog(Handles[index].FragmentHandle, out errors);
+			}
+
+			if (errorCode != 1)
 			{
 				// Clean up the shader stuff so we don't risk a leak :)
 				GL.DeleteShader(Handles[index].VertexHandle);
@@ -228,9 +235,9 @@ namespace Triton.Renderer.Shaders
 			GL.LinkProgram(Handles[index].ProgramHandle);
 
 			// Check for link errors
-			int tmp;
-			GL.GetProgram(Handles[index].ProgramHandle, ProgramParameter.LinkStatus, out tmp);
-			if (tmp != 1)
+
+			GL.GetProgram(Handles[index].ProgramHandle, ProgramParameter.LinkStatus, out errorCode);
+			if (errorCode != 1)
 			{
 				GL.GetProgramInfoLog(Handles[index].ProgramHandle, out errors);
 
