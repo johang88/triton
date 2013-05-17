@@ -163,7 +163,7 @@ namespace Triton.Renderer
 
 			GL.BindVertexArray(vertexArrayObjectId);
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexBufferId);
-			GL.DrawElements(BeginMode.Triangles, triangleCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
+			GL.DrawElements(BeginMode.Triangles, triangleCount * 3, DrawElementsType.UnsignedInt, IntPtr.Zero);
 		}
 
 		public void SwapBuffers()
