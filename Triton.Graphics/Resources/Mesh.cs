@@ -13,7 +13,7 @@ namespace Triton.Graphics.Resources
 		public Mesh(string name, string parameters)
 			: base(name, parameters)
 		{
-			Handles = null;
+			Handles = new int[0];
 		}
 	}
 }
