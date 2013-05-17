@@ -84,10 +84,12 @@ namespace MeshConverter.Importers
 								writer.Write(ReadVector3(reader));
 
 								reader.ReadToFollowing("texcoord");
-								writer.Write(ReadUV(reader));
+								var texCoord = ReadUV(reader);
 
 								reader.ReadToFollowing("tangent");
 								writer.Write(ReadVector3(reader));
+
+								writer.Write(texCoord);
 							}
 
 							subMesh.Vertices = memStream.GetBuffer();
