@@ -118,5 +118,16 @@ namespace Triton.Common
 
 			ResourceLoaders.Add(typeof(TResource), loader);
 		}
+
+		public bool AllResourcesLoaded()
+		{
+			foreach (var resource in Resources)
+			{
+				if (!resource.Value.IsLoaded)
+					return false;
+			}
+
+			return true;
+		}
 	}
 }
