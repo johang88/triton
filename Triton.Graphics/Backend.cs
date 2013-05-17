@@ -229,7 +229,7 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write((byte)OpCode.BeginInstance);
 
 			PrimaryBuffer.Writer.Write(shaderHandle);
-			PrimaryBuffer.Writer.Write((byte)textures.Length);
+			PrimaryBuffer.Writer.Write(textures.Length);
 
 			for (var i = 0; i < textures.Length; i++)
 			{
