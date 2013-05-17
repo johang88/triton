@@ -30,7 +30,7 @@ namespace Test
 			Triton.Graphics.Resources.ResourceLoaders.Init(resourceManager, backend, fileSystem);
 
 			var shader = resourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/generic");
-			//var mesh = resourceManager.Load<Triton.Graphics.Resources.Mesh>("models/test");
+			var mesh = resourceManager.Load<Triton.Graphics.Resources.Mesh>("models/box");
 			var texture = resourceManager.Load<Triton.Graphics.Resources.Texture>("textures/test");
 
 			while (WaitHandle.WaitAny(new WaitHandle[] { RendererShuttingDown, MainLoopReady }) == 1)
