@@ -75,7 +75,7 @@ namespace Triton.Renderer.Meshes
 				NextFree = Handles[NextFree].Id;
 			}
 
-			var id = Handles[index].Id++;
+			var id = ++Handles[index].Id;
 			Handles[index].Initialized = false;
 
 			return CreateHandle(index, id);

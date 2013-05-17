@@ -84,7 +84,7 @@ namespace Triton.Renderer.Textures
 				NextFree = Handles[NextFree].Id;
 			}
 
-			var id = Handles[index].Id++;
+			var id = ++Handles[index].Id;
 			Handles[index].Initialized = false;
 			Handles[index].OpenGLHandle = 0;
 
