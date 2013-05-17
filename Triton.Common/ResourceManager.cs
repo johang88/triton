@@ -83,8 +83,8 @@ namespace Triton.Common
 			{
 				loader.Load(resource, parameters);
 			});
-			
-			return default(TResource);
+
+			return (TResource)resource;
 		}
 
 		public void Unload(Resource resource, bool async = true)
