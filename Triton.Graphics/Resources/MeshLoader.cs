@@ -59,6 +59,12 @@ namespace Triton.Graphics.Resources
 				var meshCount = reader.ReadInt32();
 				mesh.Handles = new int[meshCount];
 
+				Renderer.RenderSystem.OnLoadedCallback onLoaded = (handle, success, errors) =>
+				{
+					Console.WriteLine(errors);
+					resource.IsLoaded = true;
+				};
+
 				for (var i = 0; i < meshCount; i++)
 				{
 					var triangleCount = reader.ReadInt32();
@@ -68,7 +74,7 @@ namespace Triton.Graphics.Resources
 					var vertices = reader.ReadBytes(vertexCount);
 					var indices = reader.ReadBytes(indexCount);
 
-					mesh.Handles[i] = Backend.RenderSystem.CreateMesh(triangleCount, vertices, indices);
+					mesh.Handles[i] = Backend.RenderSystem.CreateMesh(triangleCount, vertices, indices, onLoaded);
 				}
 
 				resource.Parameters = parameters;

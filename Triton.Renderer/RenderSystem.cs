@@ -35,6 +35,8 @@ namespace Triton.Renderer
 		private bool Disposed = false;
 		private readonly Action<Action> AddToWorkQueue;
 
+		public delegate void OnLoadedCallback(int handle, bool success, string errors);
+
 		public RenderSystem(OpenTK.Platform.IWindowInfo windowInfo, Action<Action> addToWorkQueue)
 		{
 			if (windowInfo == null)
@@ -76,18 +78,18 @@ namespace Triton.Renderer
 			Disposed = true;
 		}
 
-		public int CreateTexture(int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type)
+		public int CreateTexture(int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, OnLoadedCallback loadedCallback)
 		{
 			var handle = TextureManager.Create();
-			SetTextureData(handle, width, height, data, format, internalFormat, type);
+			SetTextureData(handle, width, height, data, format, internalFormat, type, loadedCallback);
 
 			return handle;
 		}
 
-		public int CreateTexture(int width, int height, IntPtr data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type)
+		public int CreateTexture(int width, int height, IntPtr data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, OnLoadedCallback loadedCallback)
 		{
 			var handle = TextureManager.Create();
-			SetTextureData(handle, width, height, data, format, internalFormat, type);
+			SetTextureData(handle, width, height, data, format, internalFormat, type, loadedCallback);
 
 			return handle;
 		}
@@ -97,19 +99,21 @@ namespace Triton.Renderer
 			TextureManager.Destroy(handle);
 		}
 
-		public void SetTextureData(int handle, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type)
+		public void SetTextureData(int handle, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, OnLoadedCallback loadedCallback)
 		{
 			AddToWorkQueue(() =>
 			{
 				TextureManager.SetPixelData(handle, width, height, data, format, internalFormat, type);
+				loadedCallback(handle, true, "");
 			});
 		}
 
-		public void SetTextureData(int handle, int width, int height, IntPtr data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type)
+		public void SetTextureData(int handle, int width, int height, IntPtr data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, OnLoadedCallback loadedCallback)
 		{
 			AddToWorkQueue(() =>
 			{
 				TextureManager.SetPixelData(handle, width, height, data, format, internalFormat, type);
+				loadedCallback(handle, true, "");
 			});
 		}
 
@@ -127,10 +131,10 @@ namespace Triton.Renderer
 			GL.BindTexture(TextureTarget.Texture2D, 0);
 		}
 
-		public int CreateMesh(int triangleCount, byte[] vertexData, byte[] indexData)
+		public int CreateMesh(int triangleCount, byte[] vertexData, byte[] indexData, OnLoadedCallback loadedCallback)
 		{
 			var handle = MeshManager.Create();
-			SetMeshData(handle, triangleCount, vertexData, indexData);
+			SetMeshData(handle, triangleCount, vertexData, indexData, loadedCallback);
 
 			return handle;
 		}
@@ -140,11 +144,12 @@ namespace Triton.Renderer
 			MeshManager.Destroy(handle);
 		}
 
-		public void SetMeshData(int mesh, int triangleCount, byte[] vertexData, byte[] indexData)
+		public void SetMeshData(int handle, int triangleCount, byte[] vertexData, byte[] indexData, OnLoadedCallback loadedCallback)
 		{
 			AddToWorkQueue(() =>
 			{
-				MeshManager.SetData(mesh, triangleCount, vertexData, indexData);
+				MeshManager.SetData(handle, triangleCount, vertexData, indexData);
+				loadedCallback(handle, true, "");
 			});
 		}
 
@@ -166,10 +171,10 @@ namespace Triton.Renderer
 			Context.SwapBuffers();
 		}
 
-		public int CreateShader(string vertexShaderSource, string fragmentShaderSource, string[] attribs, Action<int, string> errorCallback)
+		public int CreateShader(string vertexShaderSource, string fragmentShaderSource, string[] attribs, OnLoadedCallback loadedCallback)
 		{
 			var handle = ShaderManager.Create();
-			SetShaderData(handle, vertexShaderSource, fragmentShaderSource, attribs, errorCallback);
+			SetShaderData(handle, vertexShaderSource, fragmentShaderSource, attribs, loadedCallback);
 
 			return handle;
 		}
@@ -179,15 +184,13 @@ namespace Triton.Renderer
 			ShaderManager.Destroy(handle);
 		}
 
-		public void SetShaderData(int handle, string vertexShaderSource, string fragmentShaderSource, string[] attribs, Action<int, string> errorCallback)
+		public void SetShaderData(int handle, string vertexShaderSource, string fragmentShaderSource, string[] attribs, OnLoadedCallback loadedCallback)
 		{
 			AddToWorkQueue(() =>
 			{
 				string errors;
-				if (!ShaderManager.SetShaderData(handle, vertexShaderSource, fragmentShaderSource, attribs, out errors))
-				{
-					errorCallback(handle, errors);
-				}
+				bool success = ShaderManager.SetShaderData(handle, vertexShaderSource, fragmentShaderSource, attribs, out errors);
+				loadedCallback(handle, success, errors);
 			});
 		}
 

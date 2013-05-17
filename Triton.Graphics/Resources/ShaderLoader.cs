@@ -79,18 +79,18 @@ namespace Triton.Graphics.Resources
 				shader.AddUniform(uniforms[i].BindName, uniforms[i].Name);
 			}
 
-			if (shader.Handle == -1)
-				shader.Handle = Backend.RenderSystem.CreateShader(vertexShaderSource, fragmentShaderSource, attribs, OnError);
-			else
-				Backend.RenderSystem.SetShaderData(shader.Handle, vertexShaderSource, fragmentShaderSource, attribs, OnError);
-
 			resource.Parameters = parameters;
-			resource.IsLoaded = true;
-		}
 
-		void OnError(int shaderHandle, string errors)
-		{
-			Console.WriteLine(errors);
+			Renderer.RenderSystem.OnLoadedCallback onLoaded = (handle, success, errors) =>
+			{
+				Console.WriteLine(errors);
+				resource.IsLoaded = true;
+			};
+
+			if (shader.Handle == -1)
+				shader.Handle = Backend.RenderSystem.CreateShader(vertexShaderSource, fragmentShaderSource, attribs, onLoaded);
+			else
+				Backend.RenderSystem.SetShaderData(shader.Handle, vertexShaderSource, fragmentShaderSource, attribs, onLoaded);
 		}
 
 		public void Unload(Common.Resource resource)

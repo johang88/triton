@@ -77,10 +77,16 @@ namespace Triton.Graphics.Resources
 
 				var data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
 
+				Renderer.RenderSystem.OnLoadedCallback onLoaded = (handle, success, errors) =>
+				{
+					Console.WriteLine(errors);
+					resource.IsLoaded = true;
+				};
+
 				if (texture.Handle == -1)
-					texture.Handle = Backend.RenderSystem.CreateTexture(bitmap.Width, bitmap.Height, data.Scan0, pf, pif, pt);
+					texture.Handle = Backend.RenderSystem.CreateTexture(bitmap.Width, bitmap.Height, data.Scan0, pf, pif, pt, onLoaded);
 				else
-					Backend.RenderSystem.SetTextureData(texture.Handle, bitmap.Width, bitmap.Height, data.Scan0, pf, pif, pt);
+					Backend.RenderSystem.SetTextureData(texture.Handle, bitmap.Width, bitmap.Height, data.Scan0, pf, pif, pt, onLoaded);
 
 				resource.Parameters = parameters;
 				resource.IsLoaded = true;
