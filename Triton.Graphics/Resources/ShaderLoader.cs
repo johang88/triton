@@ -28,7 +28,6 @@ namespace Triton.Graphics.Resources
 
 			Backend = backend;
 			FileSystem = fileSystem;
-
 		}
 
 		public Common.Resource Create(string name, string parameters)
@@ -84,6 +83,9 @@ namespace Triton.Graphics.Resources
 				shader.Handle = Backend.RenderSystem.CreateShader(vertexShaderSource, fragmentShaderSource, attribs, OnError);
 			else
 				Backend.RenderSystem.SetShaderData(shader.Handle, vertexShaderSource, fragmentShaderSource, attribs, OnError);
+
+			resource.Parameters = parameters;
+			resource.IsLoaded = true;
 		}
 
 		void OnError(int shaderHandle, string errors)
