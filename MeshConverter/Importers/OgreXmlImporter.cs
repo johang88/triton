@@ -46,7 +46,7 @@ namespace MeshConverter.Importers
 						}
 					}
 
-					subMesh.TriangleCount = faceCount * 3;
+					subMesh.TriangleCount = faceCount;
 
 					reader.ReadToFollowing("geometry");
 					int vertexCount = int.Parse(reader.GetAttribute("vertexcount"), CultureInfo.InvariantCulture);
