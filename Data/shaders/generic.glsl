@@ -41,7 +41,7 @@ in vec3 bitangent;
 in vec2 texCoord;
 in vec3 cameraDirection;
 
-out vec4 oColor;
+out(vec4, oColor, 0);
 
 uniform(vec3, lightDir, LightDir);
 uniform(vec3, lightColor, LightColor);
@@ -69,6 +69,6 @@ void main()
 	
 	vec3 c = (ambientColor + ls.x) * (lightColor * ls.y + diffuse.xyz);
 	
-	oColor = vec4(c, 1.0f);
+	oColor = vec4(1, 0, 1, 1.0f);
 }
 #endif

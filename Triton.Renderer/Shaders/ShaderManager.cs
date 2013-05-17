@@ -169,7 +169,7 @@ namespace Triton.Renderer.Shaders
 			Handles[index].Initialized = false;
 		}
 
-		public bool SetShaderData(int handle, string vertexShader, string fragmentShader, string[] attribs, out string errors)
+		public bool SetShaderData(int handle, string vertexShader, string fragmentShader, string[] attribs, string[] fragDataLocations, out string errors)
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
@@ -230,6 +230,15 @@ namespace Triton.Renderer.Shaders
 					continue;
 
 				GL.BindAttribLocation(Handles[index].ProgramHandle, i, attribName);
+			}
+
+			for (var i = 0; i < fragDataLocations.Length; i++)
+			{
+				var fragDataLocationName = fragDataLocations[i];
+				if (string.IsNullOrWhiteSpace(fragDataLocationName))
+					continue;
+
+				GL.BindFragDataLocation(Handles[index].ProgramHandle, i, fragDataLocationName);
 			}
 
 			GL.LinkProgram(Handles[index].ProgramHandle);

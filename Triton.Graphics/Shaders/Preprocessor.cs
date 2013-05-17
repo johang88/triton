@@ -27,11 +27,12 @@ namespace Triton.Graphics.Shaders
 	class Preprocessor
 	{
 		private readonly Triton.Common.IO.FileSystem FileSystem;
-		private static Regex PreprocessorRegex = new Regex(@"^(attrib|uniform|sampler)\(([ \t\w]*),([ \t\w]*),([ \t\w]*)\);", RegexOptions.Multiline);
+		private static Regex PreprocessorRegex = new Regex(@"^(attrib|uniform|sampler|out)\(([ \t\w]*),([ \t\w]*),([ \t\w]*)\);", RegexOptions.Multiline);
 		private static Regex PreprocessorImportRegex = new Regex(@"^import\(([ \t\w /]+)\);", RegexOptions.Multiline);
 
 		private List<Attrib> Attribs;
 		private List<Uniform> Uniforms;
+		private List<FragDataLocation> FragDataLocations;
 
 		public Preprocessor(Triton.Common.IO.FileSystem fileSystem)
 		{
@@ -41,16 +42,18 @@ namespace Triton.Graphics.Shaders
 			FileSystem = fileSystem;
 		}
 
-		public string Process(string source, out Attrib[] attribs, out Uniform[] uniforms)
+		public string Process(string source, out Attrib[] attribs, out Uniform[] uniforms, out FragDataLocation[] fragDataLocations)
 		{
 			Attribs = new List<Attrib>();
 			Uniforms = new List<Uniform>();
+			FragDataLocations = new List<FragDataLocation>();
 
 			var output = PreprocessorImportRegex.Replace(source, PreprocessorImportReplacer);
 			output = PreprocessorRegex.Replace(output, PreprocessorReplacer);
 
 			attribs = Attribs.ToArray();
 			uniforms = Uniforms.ToArray();
+			fragDataLocations = FragDataLocations.ToArray();
 
 			return output;
 		}
@@ -92,6 +95,17 @@ namespace Triton.Graphics.Shaders
 			else if (verb == "sampler")
 			{
 				return string.Format("uniform sampler{0} {1};", match.Groups[2].Value, match.Groups[3].Value);
+			}
+			else if (verb == "out")
+			{
+				var type = (AttribType)Enum.Parse(typeof(AttribType), match.Groups[4].Value, true);
+				FragDataLocations.Add(new FragDataLocation
+				{
+					Name = match.Groups[3].Value,
+					Index = Common.StringConverter.Parse<int>(match.Groups[4].Value)
+				});
+
+				return string.Format("out {0} {1};", match.Groups[2].Value, match.Groups[3].Value);
 			}
 
 			return "";

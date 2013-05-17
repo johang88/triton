@@ -55,6 +55,7 @@
     <Compile Include="Resources\TextureLoader.cs" />
     <Compile Include="Shaders\Attrib.cs" />
     <Compile Include="Shaders\AttribType.cs" />
+    <Compile Include="Shaders\FragDataLocation.cs" />
     <Compile Include="Shaders\Preprocessor.cs" />
     <Compile Include="Shaders\Uniform.cs" />
   </ItemGroup>

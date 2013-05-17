@@ -59,18 +59,27 @@ namespace Triton.Graphics.Resources
 
 			Shaders.Attrib[] shaderAttribs;
 			Shaders.Uniform[] uniforms;
-			shaderSource = preProcessor.Process(shaderSource, out shaderAttribs, out uniforms);
+			Shaders.FragDataLocation[] shaderFragDataLocations;
+			shaderSource = preProcessor.Process(shaderSource, out shaderAttribs, out uniforms, out shaderFragDataLocations);
 
 			var vertexShaderSource = "#version 150\n#define VERTEX_SHADER\n" + shaderSource;
 			var fragmentShaderSource = "#version 150\n#define FRAGMENT_SHADER\n" + shaderSource;
 
 			// Convert attribs to the correct format
 			// The format is attribIndex => name
-			string[] attribs = new string[4];
+			var attribs = new string[4];
 			for (var i = 0; i < shaderAttribs.Length; i++)
 			{
 				var attrib = shaderAttribs[i];
 				attribs[(int)attrib.Type] = attrib.Name;
+			}
+
+			// Convert frag data locations to the correct format
+			var fragDataLocations = new string[shaderFragDataLocations.Length];
+			for (var i = 0; i < shaderFragDataLocations.Length; i++)
+			{
+				var fragDataLocation = shaderFragDataLocations[i];
+				fragDataLocations[fragDataLocation.Index] = fragDataLocation.Name;
 			}
 
 			// Setup uniforms, the bind locations wont be resolved until they are used
@@ -88,9 +97,9 @@ namespace Triton.Graphics.Resources
 			};
 
 			if (shader.Handle == -1)
-				shader.Handle = Backend.RenderSystem.CreateShader(vertexShaderSource, fragmentShaderSource, attribs, onLoaded);
+				shader.Handle = Backend.RenderSystem.CreateShader(vertexShaderSource, fragmentShaderSource, attribs, fragDataLocations, onLoaded);
 			else
-				Backend.RenderSystem.SetShaderData(shader.Handle, vertexShaderSource, fragmentShaderSource, attribs, onLoaded);
+				Backend.RenderSystem.SetShaderData(shader.Handle, vertexShaderSource, fragmentShaderSource, attribs, fragDataLocations, onLoaded);
 		}
 
 		public void Unload(Common.Resource resource)

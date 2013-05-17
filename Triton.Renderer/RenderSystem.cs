@@ -171,10 +171,10 @@ namespace Triton.Renderer
 			Context.SwapBuffers();
 		}
 
-		public int CreateShader(string vertexShaderSource, string fragmentShaderSource, string[] attribs, OnLoadedCallback loadedCallback)
+		public int CreateShader(string vertexShaderSource, string fragmentShaderSource, string[] attribs, string[] fragDataLocations, OnLoadedCallback loadedCallback)
 		{
 			var handle = ShaderManager.Create();
-			SetShaderData(handle, vertexShaderSource, fragmentShaderSource, attribs, loadedCallback);
+			SetShaderData(handle, vertexShaderSource, fragmentShaderSource, attribs, fragDataLocations, loadedCallback);
 
 			return handle;
 		}
@@ -184,12 +184,12 @@ namespace Triton.Renderer
 			ShaderManager.Destroy(handle);
 		}
 
-		public void SetShaderData(int handle, string vertexShaderSource, string fragmentShaderSource, string[] attribs, OnLoadedCallback loadedCallback)
+		public void SetShaderData(int handle, string vertexShaderSource, string fragmentShaderSource, string[] attribs, string[] fragDataLocations, OnLoadedCallback loadedCallback)
 		{
 			AddToWorkQueue(() =>
 			{
 				string errors;
-				bool success = ShaderManager.SetShaderData(handle, vertexShaderSource, fragmentShaderSource, attribs, out errors);
+				bool success = ShaderManager.SetShaderData(handle, vertexShaderSource, fragmentShaderSource, attribs, fragDataLocations, out errors);
 				loadedCallback(handle, success, errors);
 			});
 		}
