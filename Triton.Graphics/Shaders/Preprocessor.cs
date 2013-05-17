@@ -74,7 +74,7 @@ namespace Triton.Graphics.Shaders
 				var type = (AttribType)Enum.Parse(typeof(AttribType), match.Groups[4].Value, true);
 				Attribs.Add(new Attrib
 				{
-					Name = match.Groups[2].Value,
+					Name = match.Groups[3].Value,
 					Type = type
 				});
 
