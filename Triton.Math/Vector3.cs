@@ -41,6 +41,11 @@ namespace Triton
 			return res;
 		}
 
+		public static Vector3 Normalize(Vector3 v)
+		{
+			return v.Normalize();
+		}
+
 		public static void Normalize(ref Vector3 v, out Vector3 res)
 		{
 			var l = v.Length;
