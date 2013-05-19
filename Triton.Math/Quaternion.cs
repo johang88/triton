@@ -10,10 +10,10 @@ namespace Triton
 	[StructLayout(LayoutKind.Sequential)]
 	public struct Quaternion
 	{
-		public readonly float X;
-		public readonly float Y;
-		public readonly float Z;
-		public readonly float W;
+		public float X;
+		public float Y;
+		public float Z;
+		public float W;
 
 		public static readonly Quaternion Identity = new Quaternion(0, 0, 0, 1);
 
