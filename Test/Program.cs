@@ -39,20 +39,24 @@ namespace Test
 				Thread.Sleep(1);
 			}
 
-			var world = Matrix4.CreateTranslation(0, 0, -2.0f);
-			var projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(70.0f), 1280.0f / 720.0f, 0.001f, 1000.0f);
-
-			Matrix4 mvp;
-			Matrix4.Mult(ref world, ref projection, out mvp);
-
 			int mvpHandle = 0;
 			int samplerHandle = 0;
 
 			mvpHandle = shader.GetUniform("modelViewProjection");
 			samplerHandle = shader.GetUniform("samplerDiffuse");
 
+			var angle = 0.0f;
+			var cameraPos = new Vector3(0, 1.8f, 2);
+
 			while (WaitHandle.WaitAny(new WaitHandle[] { RendererShuttingDown, MainLoopReady }) == 1)
 			{
+				angle += 0.001f;
+				var world = Matrix4.CreateRotationY(angle) * Matrix4.CreateTranslation(0, 0, 0.0f);
+				var view = Matrix4.LookAt(cameraPos, Vector3.Zero, Vector3.UnitY);
+				var projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(70.0f), 1280.0f / 720.0f, 0.001f, 1000.0f);
+
+				Matrix4 mvp = world * view * projection;
+
 				backend.BeginScene();
 				backend.BeginPass(new OpenTK.Vector4(0.25f, 0.5f, 0.75f, 1.0f));
 				backend.BeginInstance(shader.Handle, new int[] { texture.Handle });
