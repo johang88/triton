@@ -74,5 +74,33 @@ namespace Triton
 		{
 			res = new Vector4(a.X / scalar, a.Y / scalar, a.Z / scalar, a.W / scalar);
 		}
+
+		public static Vector4 operator +(Vector4 a, Vector4 b)
+		{
+			Vector4 res;
+			Vector4.Add(ref a, ref b, out res);
+			return res;
+		}
+
+		public static Vector4 operator -(Vector4 a, Vector4 b)
+		{
+			Vector4 res;
+			Vector4.Subtract(ref a, ref b, out res);
+			return res;
+		}
+
+		public static Vector4 operator *(Vector4 a, float b)
+		{
+			Vector4 res;
+			Vector4.Multiply(ref a, b, out res);
+			return res;
+		}
+
+		public static Vector4 operator /(Vector4 a, float b)
+		{
+			Vector4 res;
+			Vector4.Divide(ref a, b, out res);
+			return res;
+		}
 	}
 }

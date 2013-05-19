@@ -68,5 +68,33 @@ namespace Triton
 		{
 			res = new Vector2(a.X / scalar, a.Y / scalar);
 		}
+
+		public static Vector2 operator +(Vector2 a, Vector2 b)
+		{
+			Vector2 res;
+			Vector2.Add(ref a, ref b, out res);
+			return res;
+		}
+
+		public static Vector2 operator -(Vector2 a, Vector2 b)
+		{
+			Vector2 res;
+			Vector2.Subtract(ref a, ref b, out res);
+			return res;
+		}
+
+		public static Vector2 operator *(Vector2 a, float b)
+		{
+			Vector2 res;
+			Vector2.Multiply(ref a, b, out res);
+			return res;
+		}
+
+		public static Vector2 operator /(Vector2 a, float b)
+		{
+			Vector2 res;
+			Vector2.Divide(ref a, b, out res);
+			return res;
+		}
     }
 }
