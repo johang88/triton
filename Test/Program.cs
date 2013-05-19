@@ -21,7 +21,7 @@ namespace Test
 			var fileSystem = new Triton.Common.IO.FileSystem();
 			var resourceManager = new Triton.Common.ResourceManager(workThread.AddItem);
 
-			fileSystem.AddPackage("FileSystem", "../../../data");
+			fileSystem.AddPackage("FileSystem", "../data");
 
 			var backend = new Triton.Graphics.Backend(1280, 720, "Awesome Test Application", false, () => RendererReady.Set());
 			backend.OnShuttingDown += () => RendererShuttingDown.Set();
