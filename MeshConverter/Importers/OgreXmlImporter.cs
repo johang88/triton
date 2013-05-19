@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OpenTK;
 using System.Xml;
 using System.Globalization;
 using System.IO;
-using OpenTK.Graphics.OpenGL;
 using Triton.Common;
 
 namespace MeshConverter.Importers
@@ -108,14 +106,14 @@ namespace MeshConverter.Importers
 			return float.Parse(value, CultureInfo.InvariantCulture);
 		}
 
-		Vector3 ReadVector3(XmlReader reader)
+		Triton.Vector3 ReadVector3(XmlReader reader)
 		{
-			return new Vector3(ParseFloat(reader.GetAttribute("x")), ParseFloat(reader.GetAttribute("y")), ParseFloat(reader.GetAttribute("z")));
+			return new Triton.Vector3(ParseFloat(reader.GetAttribute("x")), ParseFloat(reader.GetAttribute("y")), ParseFloat(reader.GetAttribute("z")));
 		}
 
-		Vector2 ReadUV(XmlReader reader)
+		Triton.Vector2 ReadUV(XmlReader reader)
 		{
-			return new Vector2(ParseFloat(reader.GetAttribute("u")), ParseFloat(reader.GetAttribute("v")));
+			return new Triton.Vector2(ParseFloat(reader.GetAttribute("u")), ParseFloat(reader.GetAttribute("v")));
 		}
 	}
 }

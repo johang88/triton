@@ -32,10 +32,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="OpenTK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\johan\Desktop\tinyrocket\Build\OpenTK.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -58,6 +54,10 @@
     <ProjectReference Include="..\Triton.Common\Triton.Common.csproj">
       <Project>{354b215a-cc57-408b-900d-e7e1f95c04c2}</Project>
       <Name>Triton.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">
+      <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>
+      <Name>Triton.Math</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
