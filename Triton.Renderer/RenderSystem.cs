@@ -218,22 +218,22 @@ namespace Triton.Renderer
 			GL.Uniform1(handle, value);
 		}
 
-		public void SetUniform(int handle, ref OpenTK.Vector2 value)
+		public void SetUniform(int handle, ref Vector2 value)
 		{
-			GL.Uniform2(handle, ref value);
+			GL.Uniform2(handle, 1, ref value.X);
 		}
 
-		public void SetUniform(int handle, ref OpenTK.Vector3 value)
+		public void SetUniform(int handle, ref Vector3 value)
 		{
-			GL.Uniform3(handle, ref value);
+			GL.Uniform3(handle, 1, ref value.X);
 		}
 
-		public void SetUniform(int handle, ref OpenTK.Vector4 value)
+		public void SetUniform(int handle, ref Vector4 value)
 		{
-			GL.Uniform4(handle, ref value);
+			GL.Uniform4(handle, 1, ref value.X);
 		}
 
-		public void SetUniform(int handle, ref Triton.Matrix4 value)
+		public void SetUniform(int handle, ref Matrix4 value)
 		{
 			GL.UniformMatrix4(handle, 1, false, ref value.Row0.X);
 		}
