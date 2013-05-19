@@ -10,10 +10,10 @@ namespace Triton
 	[StructLayout(LayoutKind.Sequential)]
 	public struct Matrix4
 	{
-		public readonly Vector4 Row0;
-		public readonly Vector4 Row1;
-		public readonly Vector4 Row2;
-		public readonly Vector4 Row3;
+		public Vector4 Row0;
+		public Vector4 Row1;
+		public Vector4 Row2;
+		public Vector4 Row3;
 
 		public static readonly Matrix4 Identity = new Matrix4(Vector4.UnitX, Vector4.UnitY, Vector4.UnitZ, Vector4.UnitW);
 

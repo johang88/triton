@@ -10,8 +10,8 @@ namespace Triton
 	[StructLayout(LayoutKind.Sequential)]
     public struct Vector2
     {
-		public readonly float X;
-		public readonly float Y;
+		public float X;
+		public float Y;
 
 		public static readonly Vector2 Zero = new Vector2(0, 0);
 		public static readonly Vector2 UnitX = new Vector2(1, 0);
