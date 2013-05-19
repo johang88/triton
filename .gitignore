@@ -10,3 +10,4 @@ Build/Logs
 OpenTK.GLControl.xml
 Newtonsoft.Json.xml
 Rymdspelet.cfg
+Build/*
