@@ -48,8 +48,8 @@ namespace Test
 			int mvpHandle = 0;
 			int samplerHandle = 0;
 
-			backend.AddCommandToWorkQueue(() => mvpHandle = shader.GetUniform("modelViewProjection"));
-			backend.AddCommandToWorkQueue(() => samplerHandle = shader.GetUniform("samplerDiffuse"));
+			mvpHandle = shader.GetUniform("modelViewProjection");
+			samplerHandle = shader.GetUniform("samplerDiffuse");
 
 			while (WaitHandle.WaitAny(new WaitHandle[] { RendererShuttingDown, MainLoopReady }) == 1)
 			{

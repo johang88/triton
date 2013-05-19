@@ -92,6 +92,15 @@ namespace Triton.Graphics.Resources
 
 			Renderer.RenderSystem.OnLoadedCallback onResourceLoaded = (handle, success, errors) =>
 			{
+				if (success)
+				{
+					// Cache uniform locations
+					for (var i = 0; i < uniforms.Length; i++)
+					{
+						shader.GetUniform(uniforms[i].Name.Trim());
+					}
+				}
+
 				Console.WriteLine(errors);
 				resource.IsLoaded = true;
 

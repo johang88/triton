@@ -94,6 +94,12 @@ namespace Triton.Graphics.Shaders
 			}
 			else if (verb == "sampler")
 			{
+				Uniforms.Add(new Uniform
+				{
+					Name = match.Groups[3].Value,
+					BindName = match.Groups[4].Value
+				});
+
 				return string.Format("uniform sampler{0} {1};", match.Groups[2].Value, match.Groups[3].Value);
 			}
 			else if (verb == "out")
