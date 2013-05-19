@@ -16,6 +16,7 @@ namespace Test
 		{
 			var thread = new Thread(Worker);
 			thread.IsBackground = true;
+			thread.Name = "Background Worker Thread";
 			thread.Start();
 		}
 
