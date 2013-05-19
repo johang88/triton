@@ -11,6 +11,10 @@ namespace Triton.Math
 		public readonly float X;
 		public readonly float Y;
 
+		public static readonly Vector2 Zero = new Vector2(0, 0);
+		public static readonly Vector2 UnitX = new Vector2(1, 0);
+		public static readonly Vector2 UnitY = new Vector2(0, 1);
+
 		public Vector2(float x, float y)
 		{
 			X = x;

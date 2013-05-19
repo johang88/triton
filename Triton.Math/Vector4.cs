@@ -13,6 +13,12 @@ namespace Triton.Math
 		public readonly float Z;
 		public readonly float W;
 
+		public static readonly Vector4 Zero = new Vector4(0, 0, 0, 0);
+		public static readonly Vector4 UnitX = new Vector4(1, 0, 0, 0);
+		public static readonly Vector4 UnitY = new Vector4(0, 1, 0, 0);
+		public static readonly Vector4 UnitZ = new Vector4(0, 0, 1, 0);
+		public static readonly Vector4 UnitW = new Vector4(0, 0, 0, 1);
+
 		public Vector4(float x, float y, float z, float w)
 		{
 			X = x;
