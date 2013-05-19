@@ -19,7 +19,7 @@ in vec2 texCoord;
 
 out(vec4, oColor, 0);
 
-sampler(2D, samplerDiffuse, diffuse);
+sampler(2D, samplerDiffuse, DiffuseTexture);
 
 void main()
 {

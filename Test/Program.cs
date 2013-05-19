@@ -42,8 +42,8 @@ namespace Test
 			int mvpHandle = 0;
 			int samplerHandle = 0;
 
-			mvpHandle = shader.GetUniform("modelViewProjection");
-			samplerHandle = shader.GetUniform("samplerDiffuse");
+			mvpHandle = shader.GetAliasedUniform("ModelViewProjection");
+			samplerHandle = shader.GetAliasedUniform("DiffuseTexture");
 
 			var angle = 0.0f;
 			var cameraPos = new Vector3(0, 1.8f, 2);
