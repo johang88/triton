@@ -106,5 +106,10 @@ namespace Triton
 		{
 			return new Vector2(-v.X, -v.Y);
 		}
+
+		public override string ToString()
+		{
+			return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}, {1}", X, Y);
+		}
     }
 }
