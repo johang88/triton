@@ -134,6 +134,8 @@ namespace Triton.Renderer.Textures
 			GL.BindTexture(TextureTarget.Texture2D, Handles[index].OpenGLHandle);
 			GL.TexImage2D(TextureTarget.Texture2D, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
 			GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 			GL.Finish();
 
 			// The texture can now be used
@@ -155,6 +157,8 @@ namespace Triton.Renderer.Textures
 			GL.BindTexture(TextureTarget.Texture2D, Handles[index].OpenGLHandle);
 			GL.TexImage2D(TextureTarget.Texture2D, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
 			GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 			GL.Finish();
 
 			// The texture can now be used
