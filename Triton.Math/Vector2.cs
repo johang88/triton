@@ -101,5 +101,10 @@ namespace Triton
 			Vector2.Divide(ref a, b, out res);
 			return res;
 		}
+
+		public static Vector2 operator -(Vector2 v)
+		{
+			return new Vector2(-v.X, -v.Y);
+		}
     }
 }

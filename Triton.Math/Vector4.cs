@@ -107,5 +107,10 @@ namespace Triton
 			Vector4.Divide(ref a, b, out res);
 			return res;
 		}
+
+		public static Vector4 operator -(Vector4 v)
+		{
+			return new Vector4(-v.X, -v.Y, -v.Z, -v.W);
+		}
 	}
 }

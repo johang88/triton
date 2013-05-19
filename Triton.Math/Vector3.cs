@@ -119,5 +119,10 @@ namespace Triton
 			Vector3.Divide(ref a, b, out res);
 			return res;
 		}
+
+		public static Vector3 operator -(Vector3 v)
+		{
+			return new Vector3(-v.X, -v.Y, -v.Z);
+		}
 	}
 }
