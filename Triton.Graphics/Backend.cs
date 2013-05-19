@@ -184,10 +184,29 @@ namespace Triton.Graphics
 					case OpCode.BindShaderVariableInt:
 						{
 							var uniformHandle = reader.ReadInt32();
-
 							var v = reader.ReadInt32();
-
 							RenderSystem.SetUniform(uniformHandle, v);
+						}
+						break;
+					case OpCode.BindShaderVariableVector4:
+						{
+							var uniformHandle = reader.ReadInt32();
+							var v = reader.ReadVector4();
+							RenderSystem.SetUniform(uniformHandle, ref v);
+						}
+						break;
+					case OpCode.BindShaderVariableVector3:
+						{
+							var uniformHandle = reader.ReadInt32();
+							var v = reader.ReadVector4();
+							RenderSystem.SetUniform(uniformHandle, ref v);
+						}
+						break;
+					case OpCode.BindShaderVariableVector2:
+						{
+							var uniformHandle = reader.ReadInt32();
+							var v = reader.ReadVector4();
+							RenderSystem.SetUniform(uniformHandle, ref v);
 						}
 						break;
 					case OpCode.DrawMesh:
@@ -288,6 +307,27 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write(value);
 		}
 
+		public void BindShaderVariable(int uniformHandle, ref Vector4 value)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableVector4);
+			PrimaryBuffer.Writer.Write(uniformHandle);
+			PrimaryBuffer.Writer.Write(value);
+		}
+
+		public void BindShaderVariable(int uniformHandle, ref Vector3 value)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableVector3);
+			PrimaryBuffer.Writer.Write(uniformHandle);
+			PrimaryBuffer.Writer.Write(value);
+		}
+
+		public void BindShaderVariable(int uniformHandle, ref Vector2 value)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableVector2);
+			PrimaryBuffer.Writer.Write(uniformHandle);
+			PrimaryBuffer.Writer.Write(value);
+		}
+
 		public void DrawMesh(int handle)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.DrawMesh);
@@ -302,6 +342,9 @@ namespace Triton.Graphics
 			EndInstance,
 			BindShaderVariableMatrix4,
 			BindShaderVariableInt,
+			BindShaderVariableVector2,
+			BindShaderVariableVector3,
+			BindShaderVariableVector4,
 			DrawMesh
 		}
 
