@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Triton.Math
+namespace Triton
 {
 	public struct Vector4
 	{
