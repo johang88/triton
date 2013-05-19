@@ -135,8 +135,8 @@ namespace Triton
 			result = new Matrix4(
 				Vector4.UnitX,
 				Vector4.UnitY,
-				new Vector4(x, y, z, 1),
-				Vector4.UnitW);
+				Vector4.UnitZ,
+				new Vector4(x, y, z, 1));
 		}
 
 		public static void CreateTranslation(ref Vector3 vector, out Matrix4 result)
