@@ -27,6 +27,20 @@ namespace Triton.Math
 			W = w;
 		}
 
+		public float Length
+		{
+			get
+			{
+				return (float)System.Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
+			}
+		}
+
+		public static void Normalize(ref Vector4 v, out Vector4 res)
+		{
+			var l = v.Length;
+			res = new Vector4(v.X / l, v.Y / l, v.Z / l, v.W / l);
+		}
+
 		public static float Dot(ref Vector4 a, ref Vector4 b)
 		{
 			return a.X * b.X + a.Y * b.Y + a.Z * b.Z + a.W * b.W;
