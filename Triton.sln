@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Triton.Common", "Triton.Com
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeshConverter", "MeshConverter\MeshConverter.csproj", "{E263877C-C31C-4954-A88C-4425E8C34B7B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Triton.Math", "Triton.Math\Triton.Math.csproj", "{F49A11CD-2FCE-4247-9205-68F5E6B470B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +60,12 @@ Global
 		{E263877C-C31C-4954-A88C-4425E8C34B7B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E263877C-C31C-4954-A88C-4425E8C34B7B}.Release|x86.ActiveCfg = Release|Any CPU
 		{E263877C-C31C-4954-A88C-4425E8C34B7B}.Release|x86.Build.0 = Release|Any CPU
+		{F49A11CD-2FCE-4247-9205-68F5E6B470B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F49A11CD-2FCE-4247-9205-68F5E6B470B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F49A11CD-2FCE-4247-9205-68F5E6B470B3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F49A11CD-2FCE-4247-9205-68F5E6B470B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F49A11CD-2FCE-4247-9205-68F5E6B470B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F49A11CD-2FCE-4247-9205-68F5E6B470B3}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
