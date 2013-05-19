@@ -45,5 +45,25 @@ namespace Triton.Math
 		{
 			return a.X * b.X + a.Y * b.Y + a.Z * b.Z + a.W * b.W;
 		}
+
+		public static void Add(ref Vector4 a, ref Vector4 b, out Vector4 res)
+		{
+			res = new Vector4(a.X + b.X, a.Y + b.Y, a.Z + b.Z, a.W + b.W);
+		}
+
+		public static void Subtract(ref Vector4 a, ref Vector4 b, out Vector4 res)
+		{
+			res = new Vector4(a.X - b.X, a.Y - b.Y, a.Z - b.Z, a.W - b.W);
+		}
+
+		public static void Multiply(ref Vector4 a, float scalar, out Vector4 res)
+		{
+			res = new Vector4(a.X * scalar, a.Y * scalar, a.Z * scalar, a.W * scalar);
+		}
+
+		public static void Divide(ref Vector4 a, float scalar, out Vector4 res)
+		{
+			res = new Vector4(a.X / scalar, a.Y / scalar, a.Z / scalar, a.W / scalar);
+		}
 	}
 }
