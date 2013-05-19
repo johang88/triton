@@ -122,48 +122,47 @@ namespace Triton.Renderer.Meshes
 
 			if (!Handles[index].Initialized)
 			{
+				GL.GenVertexArrays(1, out Handles[index].VertexArrayObjectID);
+				GL.BindVertexArray(Handles[index].VertexArrayObjectID);
+
 				GL.GenBuffers(1, out Handles[index].VertexBufferID);
 				GL.GenBuffers(1, out Handles[index].IndexBufferID);
-				GL.GenVertexArrays(1, out Handles[index].VertexArrayObjectID);
 
-				GL.BindVertexArray(Handles[index].VertexArrayObjectID);
-				GL.BindBuffer(BufferTarget.ArrayBuffer, Handles[index].VertexBufferID);
-				GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handles[index].IndexBufferID);
-
-				// Vertex format
-				var stride = 3 * sizeof(float) + 3 * sizeof(float) + 3 * sizeof(float) + 2 * sizeof(float);
-
-				// Position
-				GL.EnableVertexAttribArray(0);
-				GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
-
-				// Normal
-				GL.EnableVertexAttribArray(1);
-				GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, stride, sizeof(float) * 3);
-
-				// Tangent
-				GL.EnableVertexAttribArray(2);
-				GL.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, stride, sizeof(float) * 6);
-
-				// Texcoord
-				GL.EnableVertexAttribArray(3);
-				GL.VertexAttribPointer(3, 2, VertexAttribPointerType.Float, false, stride, sizeof(float) * 9);
-
-				GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-				GL.BindVertexArray(0);
+				Handles[index].Initialized = true;
 			}
 
+			// Load vertex data
 			GL.BindBuffer(BufferTarget.ArrayBuffer, Handles[index].VertexBufferID);
 			GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(vertexData.Length), vertexData, BufferUsageHint.StaticDraw);
-			GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 
+			// Vertex format
+			var stride = 3 * sizeof(float) + 3 * sizeof(float) + 3 * sizeof(float) + 2 * sizeof(float);
+
+			// Position
+			GL.EnableVertexAttribArray(0);
+			GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
+
+			// Normal
+			GL.EnableVertexAttribArray(1);
+			GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, stride, sizeof(float) * 3);
+
+			// Tangent
+			GL.EnableVertexAttribArray(2);
+			GL.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, stride, sizeof(float) * 6);
+
+			// Texcoord
+			GL.EnableVertexAttribArray(3);
+			GL.VertexAttribPointer(3, 2, VertexAttribPointerType.Float, false, stride, sizeof(float) * 9);
+
+			// Load index data
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handles[index].IndexBufferID);
 			GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(indexData.Length), indexData, BufferUsageHint.StaticDraw);
+
+			GL.BindVertexArray(0);
+			GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 
 			Handles[index].TriangleCount = triangleCount;
-
-			Handles[index].Initialized = true;
 		}
 
 		public void GetMeshData(int handle, out int triangleCount, out int vertexArrayObjectId, out int indexBufferId)

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using OpenTK;
 
 namespace Test
 {
@@ -33,13 +34,38 @@ namespace Test
 			var mesh = resourceManager.Load<Triton.Graphics.Resources.Mesh>("models/box");
 			var texture = resourceManager.Load<Triton.Graphics.Resources.Texture>("textures/test");
 
+			while (!resourceManager.AllResourcesLoaded())
+			{
+				Thread.Sleep(1);
+			}
+
+			var world = Matrix4.CreateTranslation(0, 0, -2.0f);
+			var projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(70.0f), 1280.0f / 720.0f, 0.001f, 1000.0f);
+
+			Matrix4 mvp;
+			Matrix4.Mult(ref world, ref projection, out mvp);
+
+			int mvpHandle = 0;
+			int samplerHandle = 0;
+
+			backend.AddCommandToWorkQueue(() => mvpHandle = shader.GetUniform("modelViewProjection"));
+			backend.AddCommandToWorkQueue(() => samplerHandle = shader.GetUniform("samplerDiffuse"));
+
 			while (WaitHandle.WaitAny(new WaitHandle[] { RendererShuttingDown, MainLoopReady }) == 1)
 			{
 				backend.BeginScene();
 				backend.BeginPass(new OpenTK.Vector4(0.25f, 0.5f, 0.75f, 1.0f));
+				backend.BeginInstance(shader.Handle, new int[] { texture.Handle });
+				backend.BindShaderVariable(mvpHandle, ref mvp);
+				backend.BindShaderVariable(samplerHandle, 0);
+				foreach (var handle in mesh.Handles)
+				{
+					backend.DrawMesh(handle);
+				}
 				backend.EndPass();
 				backend.EndScene();
 
+				Thread.Sleep(1);
 				MainLoopReady.Set();
 			}
 		}

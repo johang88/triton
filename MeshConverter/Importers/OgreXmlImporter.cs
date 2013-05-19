@@ -69,7 +69,7 @@ namespace MeshConverter.Importers
 					if (!tangents)
 						throw new ArgumentException("invalid mesh, no tangents");
 
-					using (var memStream = new MemoryStream(vertexCount * 3 * sizeof(float) + 3 * sizeof(float) + 3 * sizeof(float) + 2 * sizeof(float)))
+					using (var memStream = new MemoryStream(vertexCount * (3 * sizeof(float) + 3 * sizeof(float) + 3 * sizeof(float) + 2 * sizeof(float))))
 					{
 						using (var writer = new BinaryWriter(memStream))
 						{

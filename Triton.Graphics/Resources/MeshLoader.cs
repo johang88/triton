@@ -78,7 +78,6 @@ namespace Triton.Graphics.Resources
 				}
 
 				resource.Parameters = parameters;
-				resource.IsLoaded = true;
 			}
 		}
 

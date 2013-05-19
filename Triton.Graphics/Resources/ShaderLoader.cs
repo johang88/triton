@@ -71,7 +71,7 @@ namespace Triton.Graphics.Resources
 			for (var i = 0; i < shaderAttribs.Length; i++)
 			{
 				var attrib = shaderAttribs[i];
-				attribs[(int)attrib.Type] = attrib.Name;
+				attribs[(int)attrib.Type] = attrib.Name.Trim();
 			}
 
 			// Convert frag data locations to the correct format
@@ -79,13 +79,13 @@ namespace Triton.Graphics.Resources
 			for (var i = 0; i < shaderFragDataLocations.Length; i++)
 			{
 				var fragDataLocation = shaderFragDataLocations[i];
-				fragDataLocations[fragDataLocation.Index] = fragDataLocation.Name;
+				fragDataLocations[fragDataLocation.Index] = fragDataLocation.Name.Trim();
 			}
 
 			// Setup uniforms, the bind locations wont be resolved until they are used
 			for (var i = 0; i < uniforms.Length; i++)
 			{
-				shader.AddUniform(uniforms[i].BindName, uniforms[i].Name);
+				shader.AddUniform(uniforms[i].BindName, uniforms[i].Name.Trim());
 			}
 
 			resource.Parameters = parameters;

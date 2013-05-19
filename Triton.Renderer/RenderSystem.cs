@@ -56,6 +56,9 @@ namespace Triton.Renderer
 			TextureManager = new Textures.TextureManager();
 			MeshManager = new Meshes.MeshManager();
 			ShaderManager = new Shaders.ShaderManager();
+
+			GL.Enable(EnableCap.DepthTest);
+			GL.DepthMask(true);
 		}
 
 		public void Dispose()
@@ -162,8 +165,12 @@ namespace Triton.Renderer
 				return;
 
 			GL.BindVertexArray(vertexArrayObjectId);
-			GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexBufferId);
 			GL.DrawElements(BeginMode.Triangles, triangleCount * 3, DrawElementsType.UnsignedInt, IntPtr.Zero);
+		}
+
+		public void BeginScene(int width, int height)
+		{
+			GL.Viewport(0, 0, width, height);
 		}
 
 		public void SwapBuffers()

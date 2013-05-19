@@ -74,6 +74,7 @@ namespace Triton.Graphics
 
 				RenderLoop();
 			});
+			RenderThread.Name = "Render Thread";
 			RenderThread.Start();
 		}
 
@@ -116,6 +117,7 @@ namespace Triton.Graphics
 				}
 
 				watch.Restart();
+				Thread.Sleep(1);
 			}
 
 			RenderSystem.Dispose();
@@ -142,6 +144,8 @@ namespace Triton.Graphics
 				{
 					case OpCode.BeginPass:
 						{
+							RenderSystem.BeginScene(Window.Width, Window.Height);
+
 							var color = reader.ReadVector4();
 							RenderSystem.Clear(color, true);
 						}
@@ -175,6 +179,15 @@ namespace Triton.Graphics
 								);
 
 							RenderSystem.SetUniform(uniformHandle, ref m);
+						}
+						break;
+					case OpCode.BindShaderVariableInt:
+						{
+							var uniformHandle = reader.ReadInt32();
+
+							var v = reader.ReadInt32();
+
+							RenderSystem.SetUniform(uniformHandle, v);
 						}
 						break;
 					case OpCode.DrawMesh:
@@ -268,6 +281,13 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write(value.M44);
 		}
 
+		public void BindShaderVariable(int uniformHandle, int value)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableInt);
+			PrimaryBuffer.Writer.Write(uniformHandle);
+			PrimaryBuffer.Writer.Write(value);
+		}
+
 		public void DrawMesh(int handle)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.DrawMesh);
@@ -281,6 +301,7 @@ namespace Triton.Graphics
 			BeginInstance,
 			EndInstance,
 			BindShaderVariableMatrix4,
+			BindShaderVariableInt,
 			DrawMesh
 		}
 

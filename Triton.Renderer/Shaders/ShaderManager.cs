@@ -69,7 +69,7 @@ namespace Triton.Renderer.Shaders
 			GL.AttachShader(DefaultProgramHandle, DefaultFragmentHandle);
 
 			GL.BindAttribLocation(DefaultProgramHandle, 0, "iPosition");
-			GL.BindAttribLocation(DefaultProgramHandle, 1, "iNormal");
+			GL.BindAttribLocation(DefaultProgramHandle, 3, "iTexCoord");
 
 			GL.LinkProgram(DefaultProgramHandle);
 		}

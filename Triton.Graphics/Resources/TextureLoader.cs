@@ -89,7 +89,6 @@ namespace Triton.Graphics.Resources
 					Backend.RenderSystem.SetTextureData(texture.Handle, bitmap.Width, bitmap.Height, data.Scan0, pf, pif, pt, onLoaded);
 
 				resource.Parameters = parameters;
-				resource.IsLoaded = true;
 			}
 		}
 
