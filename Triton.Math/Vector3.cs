@@ -34,10 +34,17 @@ namespace Triton
 			}
 		}
 
-		public static void Normalize(ref Vector2 v, out Vector2 res)
+		public Vector3 Normalize()
+		{
+			Vector3 res;
+			Normalize(ref this, out res);
+			return res;
+		}
+
+		public static void Normalize(ref Vector3 v, out Vector3 res)
 		{
 			var l = v.Length;
-			res = new Vector2(v.X / l, v.Y / l);
+			res = new Vector3(v.X / l, v.Y / l, v.Z / l);
 		}
 
 		public static float Dot(ref Vector3 a, ref Vector3 b)
