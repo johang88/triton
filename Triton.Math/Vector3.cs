@@ -23,5 +23,10 @@ namespace Triton.Math
 			Y = y;
 			Z = z;
 		}
+
+		public static float Dot(ref Vector3 a, ref Vector3 b)
+		{
+			return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
+		}
 	}
 }
