@@ -77,6 +77,21 @@ namespace Triton
 			res = new Vector3(a.X / scalar, a.Y / scalar, a.Z / scalar);
 		}
 
+		public static Vector3 Cross(Vector3 a, Vector3 b)
+		{
+			Vector3 res;
+			Cross(ref a, ref b, out res);
+			return res;
+		}
+
+		public static void Cross(ref Vector3 a, ref Vector3 b, out Vector3 res)
+		{
+			res = new Vector3(
+				a.Y * b.Z - a.Z * b.Y,
+				a.Z * b.X - a.X * b.Z,
+				a.X * b.Y - a.Y * b.X);
+		}
+
 		public static Vector3 operator +(Vector3 a, Vector3 b)
 		{
 			Vector3 res;
