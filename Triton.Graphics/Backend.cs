@@ -61,7 +61,7 @@ namespace Triton.Graphics
 		{
 			RenderThread = new Thread(() =>
 			{
-				var graphicsMode = new GraphicsMode(new ColorFormat(32), 214, 0, 0);
+				var graphicsMode = new GraphicsMode(new ColorFormat(32), 24, 0, 0);
 
 				Window = new NativeWindow(width, height, title, fullscreen ? GameWindowFlags.Fullscreen : GameWindowFlags.Default, graphicsMode, DisplayDevice.Default);
 				Window.Visible = true;
