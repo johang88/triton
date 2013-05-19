@@ -35,7 +35,7 @@ namespace Triton.Graphics.Resources
 			return new ShaderProgram(name, parameters, Backend);
 		}
 
-		public void Load(Common.Resource resource, string parameters)
+		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
 		{
 			if (resource.IsLoaded && resource.Parameters == parameters)
 				return;
@@ -90,16 +90,19 @@ namespace Triton.Graphics.Resources
 
 			resource.Parameters = parameters;
 
-			Renderer.RenderSystem.OnLoadedCallback onLoaded = (handle, success, errors) =>
+			Renderer.RenderSystem.OnLoadedCallback onResourceLoaded = (handle, success, errors) =>
 			{
 				Console.WriteLine(errors);
 				resource.IsLoaded = true;
+
+				if (onLoaded != null)
+					onLoaded(resource);
 			};
 
 			if (shader.Handle == -1)
-				shader.Handle = Backend.RenderSystem.CreateShader(vertexShaderSource, fragmentShaderSource, attribs, fragDataLocations, onLoaded);
+				shader.Handle = Backend.RenderSystem.CreateShader(vertexShaderSource, fragmentShaderSource, attribs, fragDataLocations, onResourceLoaded);
 			else
-				Backend.RenderSystem.SetShaderData(shader.Handle, vertexShaderSource, fragmentShaderSource, attribs, fragDataLocations, onLoaded);
+				Backend.RenderSystem.SetShaderData(shader.Handle, vertexShaderSource, fragmentShaderSource, attribs, fragDataLocations, onResourceLoaded);
 		}
 
 		public void Unload(Common.Resource resource)

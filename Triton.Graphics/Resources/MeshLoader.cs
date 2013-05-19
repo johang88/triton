@@ -30,7 +30,7 @@ namespace Triton.Graphics.Resources
 			return new Mesh(name, parameters);
 		}
 
-		public void Load(Common.Resource resource, string parameters)
+		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
 		{
 			if (resource.IsLoaded && resource.Parameters == parameters)
 				return;
@@ -59,10 +59,19 @@ namespace Triton.Graphics.Resources
 				var meshCount = reader.ReadInt32();
 				mesh.Handles = new int[meshCount];
 
-				Renderer.RenderSystem.OnLoadedCallback onLoaded = (handle, success, errors) =>
+				var resourcesToLoad = meshCount;
+				Renderer.RenderSystem.OnLoadedCallback onResourceLoaded = (handle, success, errors) =>
 				{
+					resourcesToLoad--;
 					Console.WriteLine(errors);
-					resource.IsLoaded = true;
+
+					if (resourcesToLoad == 0)
+					{
+						resource.IsLoaded = true;
+
+						if (onLoaded != null)
+							onLoaded(resource);
+					}
 				};
 
 				for (var i = 0; i < meshCount; i++)
@@ -74,7 +83,7 @@ namespace Triton.Graphics.Resources
 					var vertices = reader.ReadBytes(vertexCount);
 					var indices = reader.ReadBytes(indexCount);
 
-					mesh.Handles[i] = Backend.RenderSystem.CreateMesh(triangleCount, vertices, indices, onLoaded);
+					mesh.Handles[i] = Backend.RenderSystem.CreateMesh(triangleCount, vertices, indices, onResourceLoaded);
 				}
 
 				resource.Parameters = parameters;

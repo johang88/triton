@@ -30,7 +30,7 @@ namespace Triton.Graphics.Resources
 			return new Texture(name, parameters);
 		}
 
-		public void Load(Common.Resource resource, string parameters)
+		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
 		{
 			if (resource.IsLoaded && resource.Parameters == parameters)
 				return;
@@ -77,16 +77,19 @@ namespace Triton.Graphics.Resources
 
 				var data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
 
-				Renderer.RenderSystem.OnLoadedCallback onLoaded = (handle, success, errors) =>
+				Renderer.RenderSystem.OnLoadedCallback onResourceLoaded = (handle, success, errors) =>
 				{
 					Console.WriteLine(errors);
 					resource.IsLoaded = true;
+
+					if (onLoaded != null)
+						onLoaded(resource);
 				};
 
 				if (texture.Handle == -1)
-					texture.Handle = Backend.RenderSystem.CreateTexture(bitmap.Width, bitmap.Height, data.Scan0, pf, pif, pt, onLoaded);
+					texture.Handle = Backend.RenderSystem.CreateTexture(bitmap.Width, bitmap.Height, data.Scan0, pf, pif, pt, onResourceLoaded);
 				else
-					Backend.RenderSystem.SetTextureData(texture.Handle, bitmap.Width, bitmap.Height, data.Scan0, pf, pif, pt, onLoaded);
+					Backend.RenderSystem.SetTextureData(texture.Handle, bitmap.Width, bitmap.Height, data.Scan0, pf, pif, pt, onResourceLoaded);
 
 				resource.Parameters = parameters;
 			}

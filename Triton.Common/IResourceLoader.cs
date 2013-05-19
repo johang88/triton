@@ -9,7 +9,7 @@ namespace Triton.Common
 	public interface IResourceLoader
 	{
 		Resource Create(string name, string parameters);
-		void Load(Resource resource, string parameters);
+		void Load(Resource resource, string parameters, Action<Resource> onLoaded);
 		void Unload(Resource resource);
 	}
 

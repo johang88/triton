@@ -59,7 +59,7 @@ namespace Triton.Common
 			Disposed = true;
 		}
 
-		public TResource Load<TResource>(string name, string parameters = "{}") where TResource : Resource
+		public TResource Load<TResource>(string name, string parameters = "", Action<Resource> onLoaded = null) where TResource : Resource
 		{
 			if (!ResourceLoaders.ContainsKey(typeof(TResource)))
 				throw new InvalidOperationException("no resource loader for the specified type");
@@ -81,7 +81,7 @@ namespace Triton.Common
 			// for any number of other reasons. File might have changed on disk etc.
 			AddItemToWorkQueue(() =>
 			{
-				loader.Load(resource, parameters);
+				loader.Load(resource, parameters, onLoaded);
 			});
 
 			return (TResource)resource;
