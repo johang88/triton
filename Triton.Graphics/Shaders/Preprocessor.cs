@@ -77,7 +77,7 @@ namespace Triton.Graphics.Shaders
 				var type = (AttribType)Enum.Parse(typeof(AttribType), match.Groups[4].Value, true);
 				Attribs.Add(new Attrib
 				{
-					Name = match.Groups[3].Value,
+					Name = match.Groups[3].Value.Trim(),
 					Type = type
 				});
 
@@ -87,8 +87,8 @@ namespace Triton.Graphics.Shaders
 			{
 				Uniforms.Add(new Uniform
 				{
-					Name = match.Groups[3].Value,
-					BindName = match.Groups[4].Value
+					Name = match.Groups[3].Value.Trim(),
+					BindName = match.Groups[4].Value.Trim()
 				});
 				return string.Format("uniform {0} {1};", match.Groups[2].Value, match.Groups[3].Value);
 			}
@@ -96,8 +96,8 @@ namespace Triton.Graphics.Shaders
 			{
 				Uniforms.Add(new Uniform
 				{
-					Name = match.Groups[3].Value,
-					BindName = match.Groups[4].Value
+					Name = match.Groups[3].Value.Trim(),
+					BindName = match.Groups[4].Value.Trim()
 				});
 
 				return string.Format("uniform sampler{0} {1};", match.Groups[2].Value, match.Groups[3].Value);
@@ -107,7 +107,7 @@ namespace Triton.Graphics.Shaders
 				var type = (AttribType)Enum.Parse(typeof(AttribType), match.Groups[4].Value, true);
 				FragDataLocations.Add(new FragDataLocation
 				{
-					Name = match.Groups[3].Value,
+					Name = match.Groups[3].Value.Trim(),
 					Index = Common.StringConverter.Parse<int>(match.Groups[4].Value)
 				});
 
