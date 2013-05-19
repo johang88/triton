@@ -68,7 +68,12 @@
     <Compile Include="Shaders\ShaderManager.cs" />
     <Compile Include="Textures\TextureManager.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">
+      <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>
+      <Name>Triton.Math</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

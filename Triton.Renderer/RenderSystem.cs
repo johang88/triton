@@ -233,12 +233,12 @@ namespace Triton.Renderer
 			GL.Uniform4(handle, ref value);
 		}
 
-		public void SetUniform(int handle, ref OpenTK.Matrix4 value)
+		public void SetUniform(int handle, ref Triton.Matrix4 value)
 		{
-			GL.UniformMatrix4(handle, false, ref value);
+			GL.UniformMatrix4(handle, 1, false, ref value.Row0.X);
 		}
 
-		public void Clear(OpenTK.Vector4 clearColor, bool depth)
+		public void Clear(Triton.Vector4 clearColor, bool depth)
 		{
 			GL.ClearColor(clearColor.X, clearColor.Y, clearColor.Z, clearColor.W);
 			var mask = ClearBufferMask.ColorBufferBit;

@@ -34,22 +34,22 @@ namespace Triton.Common
 				type = type.BaseType;
 			}
 
-			if (targetType == typeof(OpenTK.Vector2))
+			if (targetType == typeof(Vector2))
 			{
 				return ParseVector2(stringValue);
 			}
 
-			if (targetType == typeof(OpenTK.Vector3))
+			if (targetType == typeof(Vector3))
 			{
 				return ParseVector3(stringValue);
 			}
 
-			if (targetType == typeof(OpenTK.Vector4))
+			if (targetType == typeof(Vector4))
 			{
 				return ParseVector4(stringValue);
 			}
 
-			if (targetType == typeof(OpenTK.Quaternion))
+			if (targetType == typeof(Quaternion))
 			{
 				return ParseQuaternion(stringValue);
 			}
@@ -158,21 +158,21 @@ namespace Triton.Common
 				return (string)o;
 			}
 
-			if (o is OpenTK.Vector3)
+			if (o is Vector3)
 			{
-				var v = (OpenTK.Vector3)o;
+				var v = (Vector3)o;
 				return ToString(v.X) + " " + ToString(v.Y) + " " + ToString(v.Z);
 			}
 
-			if (o is OpenTK.Vector4)
+			if (o is Vector4)
 			{
-				var v = (OpenTK.Vector4)o;
+				var v = (Vector4)o;
 				return ToString(v.X) + " " + ToString(v.Y) + " " + ToString(v.Z) + " " + v.W;
 			}
 
-			if (o is OpenTK.Quaternion)
+			if (o is Quaternion)
 			{
-				var v = (OpenTK.Quaternion)o;
+				var v = (Quaternion)o;
 				return ToString(v.X) + " " + ToString(v.Y) + " " + ToString(v.Z) + " " + v.W;
 			}
 
@@ -201,7 +201,7 @@ namespace Triton.Common
 			return o.ToString();
 		}
 
-		public static OpenTK.Vector2 ParseVector2(string s)
+		public static Vector2 ParseVector2(string s)
 		{
 			string[] split = s.Split(' ');
 			if (split.Length == 2)
@@ -209,15 +209,15 @@ namespace Triton.Common
 				float x = float.Parse(split[0], CultureInfo.InvariantCulture);
 				float y = float.Parse(split[1], CultureInfo.InvariantCulture);
 
-				return new OpenTK.Vector2(x, y);
+				return new Vector2(x, y);
 			}
 			else
 			{
-				return OpenTK.Vector2.Zero;
+				return Vector2.Zero;
 			}
 		}
 
-		public static OpenTK.Vector3 ParseVector3(string s)
+		public static Vector3 ParseVector3(string s)
 		{
 			string[] split = s.Split(' ');
 			if (split.Length == 3)
@@ -226,15 +226,15 @@ namespace Triton.Common
 				float y = float.Parse(split[1], CultureInfo.InvariantCulture);
 				float z = float.Parse(split[2], CultureInfo.InvariantCulture);
 
-				return new OpenTK.Vector3(x, y, z);
+				return new Vector3(x, y, z);
 			}
 			else
 			{
-				return OpenTK.Vector3.Zero;
+				return Vector3.Zero;
 			}
 		}
 
-		public static OpenTK.Vector4 ParseVector4(string s)
+		public static Vector4 ParseVector4(string s)
 		{
 			string[] split = s.Split(' ');
 			if (split.Length == 4)
@@ -244,38 +244,29 @@ namespace Triton.Common
 				float z = float.Parse(split[2], CultureInfo.InvariantCulture);
 				float w = float.Parse(split[3], CultureInfo.InvariantCulture);
 
-				return new OpenTK.Vector4(x, y, z, w);
+				return new Vector4(x, y, z, w);
 			}
 			else
 			{
-				return OpenTK.Vector4.Zero;
+				return Vector4.Zero;
 			}
 		}
 
-		public static OpenTK.Quaternion ParseQuaternion(string s)
+		public static Quaternion ParseQuaternion(string s)
 		{
 			string[] split = s.Split(' ');
-			if (split.Length == 3)
-			{
-				// Parse quaternion as angles
-				var x = OpenTK.Quaternion.FromAxisAngle(OpenTK.Vector3.UnitX, OpenTK.MathHelper.DegreesToRadians(Parse<float>(split[0])));
-				var y = OpenTK.Quaternion.FromAxisAngle(OpenTK.Vector3.UnitX, OpenTK.MathHelper.DegreesToRadians(Parse<float>(split[1])));
-				var z = OpenTK.Quaternion.FromAxisAngle(OpenTK.Vector3.UnitX, OpenTK.MathHelper.DegreesToRadians(Parse<float>(split[2])));
-
-				return x * y * z;
-			}
-			else if (split.Length == 4)
+			if (split.Length == 4)
 			{
 				float x = float.Parse(split[0], CultureInfo.InvariantCulture);
 				float y = float.Parse(split[1], CultureInfo.InvariantCulture);
 				float z = float.Parse(split[2], CultureInfo.InvariantCulture);
 				float w = float.Parse(split[3], CultureInfo.InvariantCulture);
 
-				return new OpenTK.Quaternion(x, y, z, w);
+				return new Quaternion(x, y, z, w);
 			}
 			else
 			{
-				return OpenTK.Quaternion.Identity;
+				return Quaternion.Identity;
 			}
 		}
 

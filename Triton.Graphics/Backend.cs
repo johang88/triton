@@ -226,7 +226,7 @@ namespace Triton.Graphics
 			DoubleBufferSynchronizer.Release();
 		}
 
-		public void BeginPass(OpenTK.Vector4 clearColor)
+		public void BeginPass(Vector4 clearColor)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BeginPass);
 			PrimaryBuffer.Writer.Write(clearColor);
@@ -260,25 +260,25 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableMatrix4);
 			PrimaryBuffer.Writer.Write(uniformHandle);
 
-			PrimaryBuffer.Writer.Write(value.M11);
-			PrimaryBuffer.Writer.Write(value.M12);
-			PrimaryBuffer.Writer.Write(value.M13);
-			PrimaryBuffer.Writer.Write(value.M14);
+			PrimaryBuffer.Writer.Write(value.Row0.X);
+			PrimaryBuffer.Writer.Write(value.Row0.Y);
+			PrimaryBuffer.Writer.Write(value.Row0.Z);
+			PrimaryBuffer.Writer.Write(value.Row0.W);
 
-			PrimaryBuffer.Writer.Write(value.M21);
-			PrimaryBuffer.Writer.Write(value.M22);
-			PrimaryBuffer.Writer.Write(value.M23);
-			PrimaryBuffer.Writer.Write(value.M24);
+			PrimaryBuffer.Writer.Write(value.Row1.X);
+			PrimaryBuffer.Writer.Write(value.Row1.Y);
+			PrimaryBuffer.Writer.Write(value.Row1.Z);
+			PrimaryBuffer.Writer.Write(value.Row1.W);
 
-			PrimaryBuffer.Writer.Write(value.M31);
-			PrimaryBuffer.Writer.Write(value.M32);
-			PrimaryBuffer.Writer.Write(value.M33);
-			PrimaryBuffer.Writer.Write(value.M34);
+			PrimaryBuffer.Writer.Write(value.Row2.X);
+			PrimaryBuffer.Writer.Write(value.Row2.Y);
+			PrimaryBuffer.Writer.Write(value.Row2.Z);
+			PrimaryBuffer.Writer.Write(value.Row2.W);
 
-			PrimaryBuffer.Writer.Write(value.M41);
-			PrimaryBuffer.Writer.Write(value.M42);
-			PrimaryBuffer.Writer.Write(value.M43);
-			PrimaryBuffer.Writer.Write(value.M44);
+			PrimaryBuffer.Writer.Write(value.Row3.X);
+			PrimaryBuffer.Writer.Write(value.Row3.Y);
+			PrimaryBuffer.Writer.Write(value.Row3.Z);
+			PrimaryBuffer.Writer.Write(value.Row3.W);
 		}
 
 		public void BindShaderVariable(int uniformHandle, int value)

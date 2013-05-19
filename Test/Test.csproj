@@ -52,10 +52,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="OpenTK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\johan\Desktop\tinyrocket\Build\OpenTK.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -80,6 +76,10 @@
     <ProjectReference Include="..\Triton.Graphics\Triton.Graphics.csproj">
       <Project>{6a7e740c-692d-4e66-bc84-e79d6bf0b025}</Project>
       <Name>Triton.Graphics</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">
+      <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>
+      <Name>Triton.Math</Name>
     </ProjectReference>
     <ProjectReference Include="..\Triton.Renderer\Triton.Renderer.csproj">
       <Project>{d8da8b59-a4b9-4de1-920e-5d056375c71e}</Project>

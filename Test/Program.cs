@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
-using OpenTK;
+using Triton;
 
 namespace Test
 {
@@ -53,12 +53,12 @@ namespace Test
 				angle += 0.001f;
 				var world = Matrix4.CreateRotationY(angle) * Matrix4.CreateTranslation(0, 0, 0.0f);
 				var view = Matrix4.LookAt(cameraPos, Vector3.Zero, Vector3.UnitY);
-				var projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(70.0f), 1280.0f / 720.0f, 0.001f, 1000.0f);
+				var projection = Matrix4.CreatePerspectiveFieldOfView(1.22173f, 1280.0f / 720.0f, 0.001f, 1000.0f);
 
 				Matrix4 mvp = world * view * projection;
 
 				backend.BeginScene();
-				backend.BeginPass(new OpenTK.Vector4(0.25f, 0.5f, 0.75f, 1.0f));
+				backend.BeginPass(new Vector4(0.25f, 0.5f, 0.75f, 1.0f));
 				backend.BeginInstance(shader.Handle, new int[] { texture.Handle });
 				backend.BindShaderVariable(mvpHandle, ref mvp);
 				backend.BindShaderVariable(samplerHandle, 0);
