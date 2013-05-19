@@ -55,7 +55,9 @@ namespace MeshConverter
 			var importer = ImporterFactory.Create(extension);
 			var mesh = importer.Import(File.OpenRead(filename));
 
-			string outputPath = Path.ChangeExtension(filename.Replace(".mesh.xml", ".xml"), "mesh");
+			var outputPath = GetParameterString("out=");
+			if (string.IsNullOrWhiteSpace(outputPath))
+				outputPath = Path.ChangeExtension(filename.Replace(".mesh.xml", ".xml"), "mesh");
 
 			using (var stream = File.Open(outputPath, FileMode.Create))
 			using (var writer = new BinaryWriter(stream))
