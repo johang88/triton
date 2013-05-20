@@ -38,13 +38,12 @@ namespace Triton.Graphics
 	///			EndPass
 	///		EndScene
 	/// </summary>
-	public class Backend
+	public class Backend : IDisposable
 	{
 		const long MaxTimeForMiscProcessing = 32;
 		public INativeWindow Window { get; private set; }
 
 		public Triton.Renderer.RenderSystem RenderSystem { get; private set; }
-		private readonly Thread RenderThread;
 
 		private CommandBuffer PrimaryBuffer = new CommandBuffer();
 		private CommandBuffer SecondaryBuffer = new CommandBuffer();
@@ -53,29 +52,37 @@ namespace Triton.Graphics
 
 		private readonly ConcurrentQueue<Action> ProcessQueue = new ConcurrentQueue<Action>();
 
-		public Action OnShuttingDown = null;
-
 		private bool IsExiting = false;
+		public bool Disposed { get; private set; }
+		private System.Diagnostics.Stopwatch Watch;
 
-		public Backend(int width, int height, string title, bool fullscreen, Action onReady = null)
+		public Backend(int width, int height, string title, bool fullscreen)
 		{
-			RenderThread = new Thread(() =>
-			{
-				var graphicsMode = new GraphicsMode(new ColorFormat(32), 24, 0, 0);
+			var graphicsMode = new GraphicsMode(new ColorFormat(32), 24, 0, 0);
 
-				Window = new NativeWindow(width, height, title, fullscreen ? GameWindowFlags.Fullscreen : GameWindowFlags.Default, graphicsMode, DisplayDevice.Default);
-				Window.Visible = true;
-				Window.Closing += Window_Closing;
+			Window = new NativeWindow(width, height, title, fullscreen ? GameWindowFlags.Fullscreen : GameWindowFlags.Default, graphicsMode, DisplayDevice.Default);
+			Window.Visible = true;
+			Window.Closing += Window_Closing;
 
-				RenderSystem = new Renderer.RenderSystem(Window.WindowInfo, ProcessQueue.Enqueue);
+			RenderSystem = new Renderer.RenderSystem(Window.WindowInfo, ProcessQueue.Enqueue);
+			Watch = new System.Diagnostics.Stopwatch();
+		}
 
-				if (onReady != null)
-					onReady();
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
-				RenderLoop();
-			});
-			RenderThread.Name = "Render Thread";
-			RenderThread.Start();
+		protected virtual void Dispose(bool isDisposing)
+		{
+			if (!isDisposing || Disposed)
+				return;
+
+			RenderSystem.Dispose();
+			Window.Dispose();
+
+			Disposed = true;
 		}
 
 		void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -83,48 +90,47 @@ namespace Triton.Graphics
 			IsExiting = true;
 		}
 
-		void RenderLoop()
+		public bool Process()
 		{
-			var watch = new System.Diagnostics.Stopwatch();
-			watch.Start();
+			Watch.Start();
 
-			while (Window.Exists && !IsExiting)
+			// The renderer can be disposed manually so we check here first, just in case
+			if (!Window.Exists || IsExiting)
+				return false;
+
+			Window.ProcessEvents();
+
+			// Check again in case the window got closed in the processing
+			if (!Window.Exists || IsExiting)
+				return false;
+
+			if (SecondaryBuffer.Stream.Position != 0)
 			{
-				Window.ProcessEvents();
+				DoubleBufferSynchronizer.WaitOne();
 
-				if (!Window.Exists || IsExiting)
-					break;
+				ExecuteCommandStream();
 
-				if (SecondaryBuffer.Stream.Position != 0)
-				{
-					DoubleBufferSynchronizer.WaitOne();
+				RenderSystem.SwapBuffers();
 
-					ExecuteCommandStream();
-
-					RenderSystem.SwapBuffers();
-
-					SecondaryBuffer.Stream.Position = 0;
-					DoubleBufferSynchronizer.Release();
-				}
-
-				// Do some misc processing, ie usually resource loading etc
-				var miscProccessingStart = watch.ElapsedMilliseconds;
-				while (!ProcessQueue.IsEmpty && watch.ElapsedMilliseconds - miscProccessingStart < MaxTimeForMiscProcessing)
-				{
-					Action workItem;
-					if (ProcessQueue.TryDequeue(out workItem))
-						workItem();
-				}
-
-				watch.Restart();
-				Thread.Sleep(1);
+				SecondaryBuffer.Stream.Position = 0;
+				DoubleBufferSynchronizer.Release();
 			}
 
-			RenderSystem.Dispose();
-			Window.Dispose();
+			// Do some misc processing, ie usually resource loading etc
+			var miscProccessingStart = Watch.ElapsedMilliseconds;
+			while (!ProcessQueue.IsEmpty && Watch.ElapsedMilliseconds - miscProccessingStart < MaxTimeForMiscProcessing)
+			{
+				Action workItem;
+				if (ProcessQueue.TryDequeue(out workItem))
+					workItem();
+			}
 
-			if (OnShuttingDown != null)
-				OnShuttingDown();
+			Watch.Restart();
+			return true;
+		}
+
+		public void BackgroundLoad()
+		{
 		}
 
 		void ExecuteCommandStream()

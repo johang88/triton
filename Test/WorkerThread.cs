@@ -11,6 +11,8 @@ namespace Test
 	class WorkerThread
 	{
 		private ConcurrentQueue<Action> Queue = new ConcurrentQueue<Action>();
+		private ManualResetEvent ShuttingDownEvent = new ManualResetEvent(false);
+		private ManualResetEvent LoopEvent = new ManualResetEvent(true);
 
 		public WorkerThread()
 		{
@@ -22,7 +24,7 @@ namespace Test
 
 		private void Worker()
 		{
-			while (true)
+			while (WaitHandle.WaitAny(new WaitHandle[]{ShuttingDownEvent, LoopEvent}) != 0)
 			{
 				while (!Queue.IsEmpty)
 				{
@@ -34,7 +36,13 @@ namespace Test
 				}
 
 				Thread.Sleep(1);
+				LoopEvent.Set();
 			}
+		}
+
+		public void Stop()
+		{
+			ShuttingDownEvent.Set();
 		}
 
 		public void AddItem(Action workItem)

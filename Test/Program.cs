@@ -8,33 +8,66 @@ using Triton;
 
 namespace Test
 {
-	class Program
+	class Program : IDisposable
 	{
-		ManualResetEvent RendererReady = new ManualResetEvent(false);
-		ManualResetEvent RendererShuttingDown = new ManualResetEvent(false);
-		ManualResetEvent MainLoopReady = new ManualResetEvent(true);
+		private ManualResetEvent RendererReady = new ManualResetEvent(false);
+		private ManualResetEvent RendererShuttingDown = new ManualResetEvent(false);
+		private ManualResetEvent MainLoopReady = new ManualResetEvent(true);
 
-		void Run()
+		private Triton.Graphics.Backend Backend;
+		private Triton.Common.IO.FileSystem FileSystem;
+		private Triton.Common.ResourceManager ResourceManager;
+		private WorkerThread WorkerThread;
+		private Thread UpdateThread;
+
+		public Program()
 		{
-			var workThread = new WorkerThread();
+			WorkerThread = new WorkerThread();
 
-			var fileSystem = new Triton.Common.IO.FileSystem();
-			var resourceManager = new Triton.Common.ResourceManager(workThread.AddItem);
+			FileSystem = new Triton.Common.IO.FileSystem();
+			ResourceManager = new Triton.Common.ResourceManager(WorkerThread.AddItem);
 
-			fileSystem.AddPackage("FileSystem", "../data");
+			FileSystem.AddPackage("FileSystem", "../data");
+		}
 
-			var backend = new Triton.Graphics.Backend(1280, 720, "Awesome Test Application", false, () => RendererReady.Set());
-			backend.OnShuttingDown += () => RendererShuttingDown.Set();
+		public void Dispose()
+		{
+			WorkerThread.Stop();
+		}
 
+		public void Run()
+		{
+			UpdateThread = new Thread(UpdateLoop);
+			UpdateThread.Name = "Update Thread";
+			UpdateThread.Start();
+
+			RenderLoop(); // The renderer runs on the main thread
+		}
+
+		void RenderLoop()
+		{
+			Backend = new Triton.Graphics.Backend(1280, 720, "Awesome Test Application", false);
+			Triton.Graphics.Resources.ResourceLoaders.Init(ResourceManager, Backend, FileSystem);
+
+			RendererReady.Set();
+
+			while (Backend.Process())
+			{
+				Thread.Sleep(1);
+			}
+
+			RendererShuttingDown.Set();
+		}
+
+		void UpdateLoop()
+		{
 			WaitHandle.WaitAll(new WaitHandle[] { RendererReady });
 
-			Triton.Graphics.Resources.ResourceLoaders.Init(resourceManager, backend, fileSystem);
+			var shader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/generic");
+			var mesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/box");
+			var texture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/test");
 
-			var shader = resourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/generic");
-			var mesh = resourceManager.Load<Triton.Graphics.Resources.Mesh>("models/box");
-			var texture = resourceManager.Load<Triton.Graphics.Resources.Texture>("textures/test");
-
-			while (!resourceManager.AllResourcesLoaded())
+			while (!ResourceManager.AllResourcesLoaded())
 			{
 				Thread.Sleep(1);
 			}
@@ -57,17 +90,17 @@ namespace Test
 
 				Matrix4 mvp = world * view * projection;
 
-				backend.BeginScene();
-				backend.BeginPass(new Vector4(0.25f, 0.5f, 0.75f, 1.0f));
-				backend.BeginInstance(shader.Handle, new int[] { texture.Handle });
-				backend.BindShaderVariable(mvpHandle, ref mvp);
-				backend.BindShaderVariable(samplerHandle, 0);
+				Backend.BeginScene();
+				Backend.BeginPass(new Vector4(0.25f, 0.5f, 0.75f, 1.0f));
+				Backend.BeginInstance(shader.Handle, new int[] { texture.Handle });
+				Backend.BindShaderVariable(mvpHandle, ref mvp);
+				Backend.BindShaderVariable(samplerHandle, 0);
 				foreach (var handle in mesh.Handles)
 				{
-					backend.DrawMesh(handle);
+					Backend.DrawMesh(handle);
 				}
-				backend.EndPass();
-				backend.EndScene();
+				Backend.EndPass();
+				Backend.EndScene();
 
 				Thread.Sleep(1);
 				MainLoopReady.Set();
@@ -76,8 +109,10 @@ namespace Test
 
 		static void Main(string[] args)
 		{
-			var app = new Program();
-			app.Run();
+			using (var app = new Program())
+			{
+				app.Run();
+			}
 		}
 	}
 }
