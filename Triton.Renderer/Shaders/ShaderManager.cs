@@ -8,25 +8,6 @@ using System.Threading.Tasks;
 
 namespace Triton.Renderer.Shaders
 {
-	/** 
-	 * TODO:
-	 * Seperate handling of shaders and programs so that we can link a program with multiple shaders 
-	 * and so that a single shader can be used in multiple programs.
-	 * 
-	 * This will result in lower memory usage on the gpu and shaders can also include other shaders without using
-	 * an ugly copy and paste operation into the shader.
-	 * 
-	 * This requires that we move program handling to a seperate class.
-	 * The ProgramManager class might want a reference to the ShaderManager class in order to be able to detect 
-	 * shader changes, something like ShaderManager.GetModifiedShaders() should be sufficent, the modified shader list is 
-	 * then cleared on each call.
-	 * 
-	 * The ProgramManager upload interface would be something like ProgramManager.SetProgramData(int handle, int[] shaderHandles, string[] attribs, out string linkErrors)
-	 * 
-	 * It will also be possible to send invalid or failed compilation shader handle to the ProgramManager as ShaderManager.GetOpenGLHandle(int handle) will return
-	 * the default handle if the shader has not been properly initilaized.
-	 * 
-	 */
 	class ShaderManager : IDisposable
 	{
 		const int MaxHandles = 4096;
