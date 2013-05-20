@@ -46,17 +46,19 @@ namespace Test
 
 		void RenderLoop()
 		{
-			Backend = new Triton.Graphics.Backend(1280, 720, "Awesome Test Application", false);
-			Triton.Graphics.Resources.ResourceLoaders.Init(ResourceManager, Backend, FileSystem);
-
-			RendererReady.Set();
-
-			while (Backend.Process())
+			using (Backend = new Triton.Graphics.Backend(1280, 720, "Awesome Test Application", false))
 			{
-				Thread.Sleep(1);
-			}
+				Triton.Graphics.Resources.ResourceLoaders.Init(ResourceManager, Backend, FileSystem);
 
-			RendererShuttingDown.Set();
+				RendererReady.Set();
+
+				while (Backend.Process())
+				{
+					Thread.Sleep(1);
+				}
+
+				RendererShuttingDown.Set();
+			}
 		}
 
 		void UpdateLoop()
