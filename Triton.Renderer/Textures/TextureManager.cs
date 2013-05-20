@@ -13,7 +13,7 @@ namespace Triton.Renderer.Textures
 		const int MaxHandles = 4096;
 		private readonly TextureData[] Handles = new TextureData[MaxHandles];
 		private short NextFree = 0;
-		private readonly int DefaultOpenGLHandle = 0; // TODO
+		private readonly int DefaultOpenGLHandle = 0;
 		private bool Disposed = false;
 		private readonly object Lock = new object();
 
