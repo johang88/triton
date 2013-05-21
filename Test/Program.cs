@@ -11,14 +11,13 @@ namespace Test
 	class Program : IDisposable
 	{
 		private ManualResetEvent RendererReady = new ManualResetEvent(false);
-		private ManualResetEvent RendererShuttingDown = new ManualResetEvent(false);
-		private ManualResetEvent MainLoopReady = new ManualResetEvent(true);
 
 		private Triton.Graphics.Backend Backend;
 		private Triton.Common.IO.FileSystem FileSystem;
 		private Triton.Common.ResourceManager ResourceManager;
 		private WorkerThread WorkerThread;
 		private Thread UpdateThread;
+		private bool Running;
 
 		public Program()
 		{
@@ -37,6 +36,8 @@ namespace Test
 
 		public void Run()
 		{
+			Running = true;
+
 			UpdateThread = new Thread(UpdateLoop);
 			UpdateThread.Name = "Update Thread";
 			UpdateThread.Start();
@@ -57,7 +58,7 @@ namespace Test
 					Thread.Sleep(1);
 				}
 
-				RendererShuttingDown.Set();
+				Running = false;
 			}
 		}
 
@@ -83,7 +84,7 @@ namespace Test
 			var angle = 0.0f;
 			var cameraPos = new Vector3(0, 1.8f, 2);
 
-			while (WaitHandle.WaitAny(new WaitHandle[] { RendererShuttingDown, MainLoopReady }) == 1)
+			while (Running)
 			{
 				angle += 0.001f;
 				var world = Matrix4.CreateRotationY(angle) * Matrix4.CreateTranslation(0, 0, 0.0f);
@@ -105,7 +106,6 @@ namespace Test
 				Backend.EndScene();
 
 				Thread.Sleep(1);
-				MainLoopReady.Set();
 			}
 		}
 
