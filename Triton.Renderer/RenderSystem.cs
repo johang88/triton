@@ -31,6 +31,7 @@ namespace Triton.Renderer
 		private readonly Textures.TextureManager TextureManager;
 		private readonly Meshes.MeshManager MeshManager;
 		private readonly Shaders.ShaderManager ShaderManager;
+		private readonly RenderTargets.RenderTargetManager RenderTargetManager;
 
 		private bool Disposed = false;
 		private readonly Action<Action> AddToWorkQueue;
@@ -56,6 +57,7 @@ namespace Triton.Renderer
 			TextureManager = new Textures.TextureManager();
 			MeshManager = new Meshes.MeshManager();
 			ShaderManager = new Shaders.ShaderManager();
+			RenderTargetManager = new RenderTargets.RenderTargetManager();
 
 			GL.Enable(EnableCap.DepthTest);
 			GL.DepthMask(true);
@@ -75,6 +77,7 @@ namespace Triton.Renderer
 			TextureManager.Dispose();
 			MeshManager.Dispose();
 			ShaderManager.Dispose();
+			RenderTargetManager.Dispose();
 
 			Context.Dispose();
 
@@ -246,6 +249,52 @@ namespace Triton.Renderer
 				mask |= ClearBufferMask.DepthBufferBit;
 
 			GL.Clear(mask);
+		}
+
+		public void SetViewport(int x, int y, int width, int height)
+		{
+			GL.Viewport(x, y, width, height);
+		}
+
+		public int CreateRenderTarget(int width, int height, Renderer.PixelInternalFormat pixelFormat, int numTargets, bool createDepthBuffer, out int[] textureHandles, OnLoadedCallback loadedCallback)
+		{
+			textureHandles = new int[numTargets];
+			for (var i = 0; i < textureHandles.Length; i++)
+			{
+				textureHandles[i] = TextureManager.Create();
+			}
+
+			var textureHandlesCopy = textureHandles;
+			var renderTargetHandle = RenderTargetManager.Create();
+
+			AddToWorkQueue(() =>
+			{
+				// Init texture handles with default data
+				for (var i = 0; i < textureHandlesCopy.Length; i++)
+				{
+					TextureManager.SetPixelData(textureHandlesCopy[i], width, height, null, PixelFormat.Rgba, pixelFormat, PixelType.UnsignedByte);
+				}
+
+				var internalTextureHandles = textureHandlesCopy.Select(t => TextureManager.GetOpenGLHande(t)).ToArray();
+
+				// Init render target
+				RenderTargetManager.Init(renderTargetHandle, width, height, internalTextureHandles, createDepthBuffer);
+
+				loadedCallback(renderTargetHandle, true, "");
+			});
+
+			return renderTargetHandle;
+		}
+
+		public void DestroyRenderTarget(int handle)
+		{
+			RenderTargetManager.Destroy(handle);
+		}
+
+		public void BindRenderTarget(int handle)
+		{
+			var openGLHandle = RenderTargetManager.GetOpenGLHande(handle);
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, openGLHandle);
 		}
 	}
 }

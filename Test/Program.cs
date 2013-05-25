@@ -47,7 +47,7 @@ namespace Test
 
 		void RenderLoop()
 		{
-			using (Backend = new Triton.Graphics.Backend(1280, 720, "Awesome Test Application", false))
+			using (Backend = new Triton.Graphics.Backend(ResourceManager, 1280, 720, "Awesome Test Application", false))
 			{
 				Triton.Graphics.Resources.ResourceLoaders.Init(ResourceManager, Backend, FileSystem);
 

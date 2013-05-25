@@ -52,12 +52,19 @@ namespace Triton.Graphics
 
 		private readonly ConcurrentQueue<Action> ProcessQueue = new ConcurrentQueue<Action>();
 
+		private readonly ResourceManager ResourceManager;
+
 		private bool IsExiting = false;
 		public bool Disposed { get; private set; }
 		private System.Diagnostics.Stopwatch Watch;
 
-		public Backend(int width, int height, string title, bool fullscreen)
+		public Backend(ResourceManager resourceManager, int width, int height, string title, bool fullscreen)
 		{
+			if (resourceManager == null)
+				throw new ArgumentNullException("resourceManager");
+
+			ResourceManager = resourceManager;
+
 			var graphicsMode = new GraphicsMode(new ColorFormat(32), 24, 0, 0);
 
 			Window = new NativeWindow(width, height, title, fullscreen ? GameWindowFlags.Fullscreen : GameWindowFlags.Default, graphicsMode, DisplayDevice.Default);
@@ -338,6 +345,29 @@ namespace Triton.Graphics
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.DrawMesh);
 			PrimaryBuffer.Writer.Write(handle);
+		}
+
+		public RenderTarget CreateRenderTarget(string name, int width, int height, Renderer.PixelInternalFormat pixelFormat, int numTargets, bool createDepthBuffer)
+		{
+			int[] textureHandles;
+
+			var renderTargetHandle = RenderSystem.CreateRenderTarget(width, height, pixelFormat, numTargets, createDepthBuffer, out textureHandles, (handle, success, errors) =>
+			{
+			});
+
+
+			var textures = new Resources.Texture[textureHandles.Length];
+			for (var i = 0; i < textureHandles.Length; i++)
+			{
+				var texture = new Resources.Texture("_sys/render_targets/" + name + "_" + StringConverter.ToString(i) + ".texture", "");
+				texture.IsLoaded = true;
+				texture.Handle = textureHandles[i];
+				ResourceManager.Manage(texture);
+
+				textures[i] = texture;
+			}
+	
+			return new RenderTarget(renderTargetHandle, width, height, textures);
 		}
 
 		enum OpCode : byte
