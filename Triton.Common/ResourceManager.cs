@@ -105,6 +105,15 @@ namespace Triton.Common
 				unloadAction();
 		}
 
+		public void Manage(Resource resource)
+		{
+			if (resource == null)
+				throw new ArgumentNullException("resource");
+
+			Resources.Add(resource.Name, resource);
+			resource.ReferenceCount += 1;
+		}
+
 		public void Release(Resource resource)
 		{
 			if (resource.ReferenceCount > 0)
