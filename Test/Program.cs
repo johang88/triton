@@ -94,7 +94,7 @@ namespace Test
 				Matrix4 mvp = world * view * projection;
 
 				Backend.BeginScene();
-				Backend.BeginPass(new Vector4(0.25f, 0.5f, 0.75f, 1.0f));
+				Backend.BeginPass(null, new Vector4(0.25f, 0.5f, 0.75f, 1.0f));
 				Backend.BeginInstance(shader.Handle, new int[] { texture.Handle });
 				Backend.BindShaderVariable(mvpHandle, ref mvp);
 				Backend.BindShaderVariable(samplerHandle, 0);

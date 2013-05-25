@@ -157,7 +157,9 @@ namespace Triton.Graphics
 				{
 					case OpCode.BeginPass:
 						{
-							RenderSystem.BeginScene(Window.Width, Window.Height);
+							var renderTargetHandle = reader.ReadInt32();
+
+							RenderSystem.BeginScene(renderTargetHandle, Window.Width, Window.Height);
 
 							var color = reader.ReadVector4();
 							RenderSystem.Clear(color, true);
@@ -258,9 +260,14 @@ namespace Triton.Graphics
 			DoubleBufferSynchronizer.Release();
 		}
 
-		public void BeginPass(Vector4 clearColor)
+		public void BeginPass(RenderTarget renderTarget, Vector4 clearColor)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BeginPass);
+			if (renderTarget == null)
+				PrimaryBuffer.Writer.Write(0);
+			else
+				PrimaryBuffer.Writer.Write(renderTarget.Handle);
+
 			PrimaryBuffer.Writer.Write(clearColor);
 		}
 
