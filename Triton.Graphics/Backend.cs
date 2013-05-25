@@ -355,7 +355,6 @@ namespace Triton.Graphics
 			{
 			});
 
-
 			var textures = new Resources.Texture[textureHandles.Length];
 			for (var i = 0; i < textureHandles.Length; i++)
 			{

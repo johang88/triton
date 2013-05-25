@@ -171,8 +171,11 @@ namespace Triton.Renderer
 			GL.DrawElements(BeginMode.Triangles, triangleCount * 3, DrawElementsType.UnsignedInt, IntPtr.Zero);
 		}
 
-		public void BeginScene(int width, int height)
+		public void BeginScene(int renderTargetHandle, int width, int height)
 		{
+			var openGLHandle = RenderTargetManager.GetOpenGLHande(renderTargetHandle);
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, openGLHandle);
+
 			GL.Viewport(0, 0, width, height);
 		}
 
@@ -249,11 +252,6 @@ namespace Triton.Renderer
 				mask |= ClearBufferMask.DepthBufferBit;
 
 			GL.Clear(mask);
-		}
-
-		public void SetViewport(int x, int y, int width, int height)
-		{
-			GL.Viewport(x, y, width, height);
 		}
 
 		public int CreateRenderTarget(int width, int height, Renderer.PixelInternalFormat pixelFormat, int numTargets, bool createDepthBuffer, out int[] textureHandles, OnLoadedCallback loadedCallback)
