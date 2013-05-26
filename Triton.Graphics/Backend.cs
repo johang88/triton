@@ -43,7 +43,7 @@ namespace Triton.Graphics
 		const long MaxTimeForMiscProcessing = 32;
 		public INativeWindow Window { get; private set; }
 
-		public Triton.Renderer.RenderSystem RenderSystem { get; private set; }
+		internal Triton.Renderer.RenderSystem RenderSystem { get; private set; }
 
 		private CommandBuffer PrimaryBuffer = new CommandBuffer();
 		private CommandBuffer SecondaryBuffer = new CommandBuffer();
