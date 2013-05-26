@@ -119,7 +119,7 @@ namespace Triton.Renderer.Textures
 			Handles[index].Initialized = false;
 		}
 
-		public void SetPixelData(int handle, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type)
+		public void SetPixelData(int handle, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap = true)
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
@@ -133,7 +133,8 @@ namespace Triton.Renderer.Textures
 			// Upload texture data to OpenGL
 			GL.BindTexture(TextureTarget.Texture2D, Handles[index].OpenGLHandle);
 			GL.TexImage2D(TextureTarget.Texture2D, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
-			GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+			if (mipmap)
+				GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 			GL.Finish();

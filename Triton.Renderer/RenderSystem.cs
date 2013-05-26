@@ -270,7 +270,7 @@ namespace Triton.Renderer
 				// Init texture handles with default data
 				for (var i = 0; i < textureHandlesCopy.Length; i++)
 				{
-					TextureManager.SetPixelData(textureHandlesCopy[i], width, height, null, PixelFormat.Rgba, pixelFormat, PixelType.UnsignedByte);
+					TextureManager.SetPixelData(textureHandlesCopy[i], width, height, null, PixelFormat.Rgba, pixelFormat, PixelType.UnsignedByte, false);
 				}
 
 				var internalTextureHandles = textureHandlesCopy.Select(t => TextureManager.GetOpenGLHande(t)).ToArray();

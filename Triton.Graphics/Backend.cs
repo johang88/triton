@@ -159,7 +159,7 @@ namespace Triton.Graphics
 						{
 							var renderTargetHandle = reader.ReadInt32();
 
-							RenderSystem.BeginScene(renderTargetHandle, Window.Width, Window.Height);
+							RenderSystem.BeginScene(renderTargetHandle, reader.ReadInt32(), reader.ReadInt32());
 
 							var color = reader.ReadVector4();
 							RenderSystem.Clear(color, true);
@@ -264,9 +264,17 @@ namespace Triton.Graphics
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BeginPass);
 			if (renderTarget == null)
+			{
 				PrimaryBuffer.Writer.Write(0);
+				PrimaryBuffer.Writer.Write(Window.Width);
+				PrimaryBuffer.Writer.Write(Window.Height);
+			}
 			else
+			{
 				PrimaryBuffer.Writer.Write(renderTarget.Handle);
+				PrimaryBuffer.Writer.Write(renderTarget.Width);
+				PrimaryBuffer.Writer.Write(renderTarget.Height);
+			}
 
 			PrimaryBuffer.Writer.Write(clearColor);
 		}
@@ -358,8 +366,11 @@ namespace Triton.Graphics
 		{
 			int[] textureHandles;
 
-			var renderTargetHandle = RenderSystem.CreateRenderTarget(width, height, pixelFormat, numTargets, createDepthBuffer, out textureHandles, (handle, success, errors) =>
+			var renderTarget = new RenderTarget(width, height);
+
+			renderTarget.Handle = RenderSystem.CreateRenderTarget(width, height, pixelFormat, numTargets, createDepthBuffer, out textureHandles, (handle, success, errors) =>
 			{
+				renderTarget.IsReady = true;
 			});
 
 			var textures = new Resources.Texture[textureHandles.Length];
@@ -372,8 +383,10 @@ namespace Triton.Graphics
 
 				textures[i] = texture;
 			}
-	
-			return new RenderTarget(renderTargetHandle, width, height, textures);
+
+			renderTarget.Textures = textures;
+
+			return renderTarget;
 		}
 
 		enum OpCode : byte

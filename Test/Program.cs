@@ -70,7 +70,9 @@ namespace Test
 			var mesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/box");
 			var texture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/test");
 
-			while (!ResourceManager.AllResourcesLoaded())
+			var renderTarget = Backend.CreateRenderTarget("test", 512, 512, Triton.Renderer.PixelInternalFormat.Rgb8, 1, true);
+
+			while (!ResourceManager.AllResourcesLoaded() || !renderTarget.IsReady)
 			{
 				Thread.Sleep(1);
 			}
@@ -89,12 +91,13 @@ namespace Test
 				angle += 0.001f;
 				var world = Matrix4.CreateRotationY(angle) * Matrix4.CreateTranslation(0, 0, 0.0f);
 				var view = Matrix4.LookAt(cameraPos, Vector3.Zero, Vector3.UnitY);
-				var projection = Matrix4.CreatePerspectiveFieldOfView(1.22173f, 1280.0f / 720.0f, 0.001f, 1000.0f);
+				var projection = Matrix4.CreatePerspectiveFieldOfView(1.22173f, 1.0f, 0.001f, 1000.0f);
 
 				Matrix4 mvp = world * view * projection;
 
 				Backend.BeginScene();
-				Backend.BeginPass(null, new Vector4(0.25f, 0.5f, 0.75f, 1.0f));
+
+				Backend.BeginPass(renderTarget, new Vector4(0.7f, 0.55f, 0.25f, 1.0f));
 				Backend.BeginInstance(shader.Handle, new int[] { texture.Handle });
 				Backend.BindShaderVariable(mvpHandle, ref mvp);
 				Backend.BindShaderVariable(samplerHandle, 0);
@@ -103,6 +106,20 @@ namespace Test
 					Backend.DrawMesh(handle);
 				}
 				Backend.EndPass();
+
+				projection = Matrix4.CreatePerspectiveFieldOfView(1.22173f, 1280.0f / 720.0f, 0.001f, 1000.0f);
+				mvp = world * view * projection;
+
+				Backend.BeginPass(null, new Vector4(0.25f, 0.5f, 0.75f, 1.0f));
+				Backend.BeginInstance(shader.Handle, new int[] { renderTarget.Textures[0].Handle });
+				Backend.BindShaderVariable(mvpHandle, ref mvp);
+				Backend.BindShaderVariable(samplerHandle, 0);
+				foreach (var handle in mesh.Handles)
+				{
+					Backend.DrawMesh(handle);
+				}
+				Backend.EndPass();
+
 				Backend.EndScene();
 
 				Thread.Sleep(1);

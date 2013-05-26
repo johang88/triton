@@ -11,14 +11,15 @@ namespace Triton.Graphics
 		internal int Handle;
 		internal readonly int Width;
 		internal readonly int Height;
-		internal readonly Resources.Texture[] Textures;
+		public Resources.Texture[] Textures { get; internal set; }
 
-		public RenderTarget(int handle, int width, int height, Resources.Texture[] textures)
+		public bool IsReady { get; internal set; }
+
+		public RenderTarget(int width, int height)
 		{
-			Handle = handle;
+			Handle = -1;
 			Width = width;
 			Height = height;
-			Textures = textures;
 		}
 
 		public Resources.Texture GetTexture(int i)
