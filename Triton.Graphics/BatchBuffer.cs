@@ -17,8 +17,6 @@ namespace Triton.Graphics
 		private int DataCount;
 		private Renderer.RenderSystem RenderSystem;
 
-		internal bool IsDirty { get; private set; }
-
 		public Resources.Mesh Mesh { get; private set; }
 
 		internal BatchBuffer(Renderer.RenderSystem renderSystem, int initialTriangleCount = 128)
@@ -71,13 +69,7 @@ namespace Triton.Graphics
 
 		public void End()
 		{
-			IsDirty = true;
-		}
-
-		internal void UploadData()
-		{
 			RenderSystem.SetMeshData(Mesh.Handles[0], TriangleCount, VertexData, IndexData, true, null);
-			IsDirty = false;
 		}
 
 		public void AddVector2(float x, float y)
