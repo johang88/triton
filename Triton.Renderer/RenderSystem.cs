@@ -165,6 +165,17 @@ namespace Triton.Renderer
 			});
 		}
 
+		public void SetMeshData(int handle, int triangleCount, float[] vertexData, int[] indexData, bool stream, OnLoadedCallback loadedCallback)
+		{
+			AddToWorkQueue(() =>
+			{
+				MeshManager.SetData(handle, triangleCount, vertexData, indexData, stream);
+
+				if (loadedCallback != null)
+					loadedCallback(handle, true, "");
+			});
+		}
+
 		public void RenderMesh(int handle)
 		{
 			int triangleCount, vertexArrayObjectId, indexBufferId;
