@@ -83,7 +83,7 @@ namespace Triton.Graphics.Resources
 					var vertices = reader.ReadBytes(vertexCount);
 					var indices = reader.ReadBytes(indexCount);
 
-					mesh.Handles[i] = Backend.RenderSystem.CreateMesh(triangleCount, vertices, indices, onResourceLoaded);
+					mesh.Handles[i] = Backend.RenderSystem.CreateMesh(triangleCount, vertices, indices, false, onResourceLoaded);
 				}
 
 				resource.Parameters = parameters;

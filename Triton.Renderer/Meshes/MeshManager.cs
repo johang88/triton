@@ -112,7 +112,7 @@ namespace Triton.Renderer.Meshes
 			Handles[index].Initialized = false;
 		}
 
-		public void SetData(int handle, int triangleCount, byte[] vertexData, byte[] indexData)
+		public void SetData(int handle, int triangleCount, byte[] vertexData, byte[] indexData, bool stream)
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
@@ -133,7 +133,7 @@ namespace Triton.Renderer.Meshes
 
 			// Load vertex data
 			GL.BindBuffer(BufferTarget.ArrayBuffer, Handles[index].VertexBufferID);
-			GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(vertexData.Length), vertexData, BufferUsageHint.StaticDraw);
+			GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(vertexData.Length), vertexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
 
 			// Vertex format
 			var stride = 3 * sizeof(float) + 3 * sizeof(float) + 3 * sizeof(float) + 2 * sizeof(float);

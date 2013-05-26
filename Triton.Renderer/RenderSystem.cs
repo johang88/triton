@@ -137,10 +137,10 @@ namespace Triton.Renderer
 			GL.BindTexture(TextureTarget.Texture2D, 0);
 		}
 
-		public int CreateMesh(int triangleCount, byte[] vertexData, byte[] indexData, OnLoadedCallback loadedCallback)
+		public int CreateMesh(int triangleCount, byte[] vertexData, byte[] indexData, bool stream, OnLoadedCallback loadedCallback)
 		{
 			var handle = MeshManager.Create();
-			SetMeshData(handle, triangleCount, vertexData, indexData, loadedCallback);
+			SetMeshData(handle, triangleCount, vertexData, indexData, stream, loadedCallback);
 
 			return handle;
 		}
@@ -150,11 +150,11 @@ namespace Triton.Renderer
 			MeshManager.Destroy(handle);
 		}
 
-		public void SetMeshData(int handle, int triangleCount, byte[] vertexData, byte[] indexData, OnLoadedCallback loadedCallback)
+		public void SetMeshData(int handle, int triangleCount, byte[] vertexData, byte[] indexData, bool stream, OnLoadedCallback loadedCallback)
 		{
 			AddToWorkQueue(() =>
 			{
-				MeshManager.SetData(handle, triangleCount, vertexData, indexData);
+				MeshManager.SetData(handle, triangleCount, vertexData, indexData, stream);
 				loadedCallback(handle, true, "");
 			});
 		}
