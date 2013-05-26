@@ -58,6 +58,8 @@ namespace Triton.Graphics
 		public bool Disposed { get; private set; }
 		private System.Diagnostics.Stopwatch Watch;
 
+		private List<BatchBuffer> BatchBuffers { get; set; }
+
 		public Backend(ResourceManager resourceManager, int width, int height, string title, bool fullscreen)
 		{
 			if (resourceManager == null)
@@ -73,6 +75,8 @@ namespace Triton.Graphics
 
 			RenderSystem = new Renderer.RenderSystem(Window.WindowInfo, ProcessQueue.Enqueue);
 			Watch = new System.Diagnostics.Stopwatch();
+
+			BatchBuffers = new List<BatchBuffer>();
 		}
 
 		public void Dispose()
@@ -111,6 +115,17 @@ namespace Triton.Graphics
 			if (!Window.Exists || IsExiting)
 				return false;
 
+			// Check for dirt batch buffers and upload their modifed vertex data to the gpu
+			foreach (var buffer in BatchBuffers)
+			{
+				if (buffer.IsDirty)
+				{
+					buffer.UploadData();
+				}
+			}
+
+			// Process the rendering stream, do not swap buffers if no rendering commands have been sent, ie if the stream is still at position 0
+			// We do not allow the buffers to be swapped while the stream is being processed
 			if (SecondaryBuffer.Stream.Position != 0)
 			{
 				DoubleBufferSynchronizer.WaitOne();
@@ -387,6 +402,24 @@ namespace Triton.Graphics
 			renderTarget.Textures = textures;
 
 			return renderTarget;
+		}
+
+		public BatchBuffer CreateBatchBuffer(int initialCount = 128)
+		{
+			var buffer = new BatchBuffer(RenderSystem, initialCount);
+			BatchBuffers.Add(buffer);
+			return buffer;
+		}
+
+		public void DestroyBatchBuffer(BatchBuffer buffer)
+		{
+			if (buffer == null)
+				throw new ArgumentNullException("buffer");
+
+			BatchBuffers.Remove(buffer);
+
+			// Always dispose, it does nothing if we dispose several times
+			buffer.Dispose();
 		}
 
 		enum OpCode : byte

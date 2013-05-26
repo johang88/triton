@@ -71,6 +71,11 @@ namespace Test
 			var texture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/test");
 
 			var renderTarget = Backend.CreateRenderTarget("test", 512, 512, Triton.Renderer.PixelInternalFormat.Rgb8, 1, true);
+			var batchBuffer = Backend.CreateBatchBuffer();
+
+			batchBuffer.Begin();
+			batchBuffer.AddQuad(new Vector2(-1, -1), new Vector2(1, 1), Vector2.Zero, new Vector2(1, 1));
+			batchBuffer.End();
 
 			while (!ResourceManager.AllResourcesLoaded() || !renderTarget.IsReady)
 			{
@@ -114,10 +119,7 @@ namespace Test
 				Backend.BeginInstance(shader.Handle, new int[] { renderTarget.Textures[0].Handle });
 				Backend.BindShaderVariable(mvpHandle, ref mvp);
 				Backend.BindShaderVariable(samplerHandle, 0);
-				foreach (var handle in mesh.Handles)
-				{
-					Backend.DrawMesh(handle);
-				}
+				Backend.DrawMesh(batchBuffer.Mesh.Handles[0]);
 				Backend.EndPass();
 
 				Backend.EndScene();

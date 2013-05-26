@@ -124,13 +124,15 @@ namespace Triton.Renderer.Meshes
 
 			// Load vertex data
 			GL.BindBuffer(BufferTarget.ArrayBuffer, Handles[index].VertexBufferID);
-			GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(vertexData.Length), vertexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
+			if (vertexData != null)
+				GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(vertexData.Length), vertexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
 
 			SetVertexFormat();
 
 			// Load index data
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handles[index].IndexBufferID);
-			GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(indexData.Length), indexData, BufferUsageHint.StaticDraw);
+			if (indexData != null)
+				GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(indexData.Length), indexData, BufferUsageHint.StaticDraw);
 
 			ClearBindings();
 
@@ -149,13 +151,15 @@ namespace Triton.Renderer.Meshes
 
 			// Load vertex data
 			GL.BindBuffer(BufferTarget.ArrayBuffer, Handles[index].VertexBufferID);
-			GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(vertexData.Length), vertexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
+			if (vertexData != null)
+				GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(vertexData.Length), vertexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
 
 			SetVertexFormat();
 
 			// Load index data
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handles[index].IndexBufferID);
-			GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(indexData.Length), indexData, BufferUsageHint.StaticDraw);
+			if (indexData != null)
+				GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(indexData.Length), indexData, BufferUsageHint.StaticDraw);
 
 			ClearBindings();
 
@@ -210,7 +214,7 @@ namespace Triton.Renderer.Meshes
 			int index, id;
 			ExtractHandle(handle, out index, out id);
 
-			if (id == -1 || Handles[index].Id != id|| !Handles[index].Initialized)
+			if (id == -1 || Handles[index].Id != id || !Handles[index].Initialized)
 			{
 				triangleCount = vertexArrayObjectId = indexBufferId = -1;
 				return;
