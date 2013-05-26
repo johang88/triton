@@ -110,7 +110,9 @@ namespace Triton.Renderer
 			AddToWorkQueue(() =>
 			{
 				TextureManager.SetPixelData(handle, width, height, data, format, internalFormat, type);
-				loadedCallback(handle, true, "");
+
+				if (loadedCallback != null)
+					loadedCallback(handle, true, "");
 			});
 		}
 
@@ -119,7 +121,9 @@ namespace Triton.Renderer
 			AddToWorkQueue(() =>
 			{
 				TextureManager.SetPixelData(handle, width, height, data, format, internalFormat, type);
-				loadedCallback(handle, true, "");
+
+				if (loadedCallback != null)
+					loadedCallback(handle, true, "");
 			});
 		}
 
@@ -155,7 +159,9 @@ namespace Triton.Renderer
 			AddToWorkQueue(() =>
 			{
 				MeshManager.SetData(handle, triangleCount, vertexData, indexData, stream);
-				loadedCallback(handle, true, "");
+
+				if (loadedCallback != null)
+					loadedCallback(handle, true, "");
 			});
 		}
 
@@ -203,7 +209,9 @@ namespace Triton.Renderer
 			{
 				string errors;
 				bool success = ShaderManager.SetShaderData(handle, vertexShaderSource, fragmentShaderSource, attribs, fragDataLocations, out errors);
-				loadedCallback(handle, success, errors);
+
+				if (loadedCallback != null)
+					loadedCallback(handle, success, errors);
 			});
 		}
 
@@ -278,7 +286,8 @@ namespace Triton.Renderer
 				// Init render target
 				RenderTargetManager.Init(renderTargetHandle, width, height, internalTextureHandles, createDepthBuffer);
 
-				loadedCallback(renderTargetHandle, true, "");
+				if (loadedCallback != null)
+					loadedCallback(renderTargetHandle, true, "");
 			});
 
 			return renderTargetHandle;
