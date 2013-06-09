@@ -9,7 +9,11 @@ namespace Triton.Common
 	public class CommandLineParser
 	{
 		private readonly Dictionary<string, string> Parameters;
+
 		private readonly string[] FalseValues = new string[] { "false", "no", "0" };
+		private readonly char[] ParameterNamePrefixes = new char[] { '-', '+' };
+
+		const char ParameterAssignValueToken = '=';
 
 		public CommandLineParser(string[] parameters)
 		{
@@ -27,14 +31,14 @@ namespace Triton.Common
 				if (parameterName.Length == 0)
 					continue;
 
-				// strip initial from param name '-'
-				if (parameterName[0] == '-')
+				// Strip any allowed prefixes, ie parameters can be set like -param, +param or param
+				if (ParameterNamePrefixes.Contains(parameterName[0]))
 					parameterName = parameterName.Substring(1);
 
 				// Check if a value is assigned to the parameter
-				if (parameterName.Contains('='))
+				if (parameterName.Contains(ParameterAssignValueToken))
 				{
-					var split = parameterName.Split('=');
+					var split = parameterName.Split(ParameterAssignValueToken);
 					if (split.Length != 2)
 						continue;
 
