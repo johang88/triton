@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="BinaryReaderExtensions.cs" />
     <Compile Include="BinaryWriterExtensions.cs" />
+    <Compile Include="CommandLineApplication.cs" />
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="ConfigSection.cs" />
