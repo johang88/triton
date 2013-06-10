@@ -13,12 +13,17 @@ namespace Triton.Common
 	/// </summary>
 	public class CommandLineApplication
 	{
-		public readonly CommandLineParser CommandLine;
+		private readonly CommandLineParser CommandLine;
 		private List<Command> Commands = new List<Command>();
+		private readonly string Usage;
 
-		public CommandLineApplication(string[] parameters)
+		public CommandLineApplication(string[] parameters, string usage)
 		{
+			if (string.IsNullOrWhiteSpace(usage))
+				throw new ArgumentNullException("usage");
+
 			CommandLine = new CommandLineParser(parameters);
+			Usage = usage;
 		}
 
 		public CommandLineApplication AddCommand<TValue>(string name, string description, bool required, TValue defaultValue, Action<TValue> setCommand)
@@ -37,7 +42,17 @@ namespace Triton.Common
 
 		public bool IsValid()
 		{
-			return Commands.All(c => c.IsValid);
+			return !CommandLine.IsSet("help") && Commands.All(c => c.IsValid);
+		}
+
+		public void PrintUsage()
+		{
+			Console.WriteLine(Usage);
+			Console.WriteLine("Available commands");
+			foreach (var command in Commands)
+			{
+				Console.WriteLine("\t{0}: {1}", command.Name, command.Decription);
+			}
 		}
 
 		class Command
