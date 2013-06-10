@@ -10,26 +10,28 @@ namespace ContentProcessor
 {
 	class Program
 	{
-		const string CacheFilename = "___cache.dat";
-		const string MeshConverterPath = "MeshConverter.exe";
-		readonly string[] Parameters;
-		Dictionary<string, long> Cache = new Dictionary<string, long>();
-		ManualResetEvent MeshProcessDone = new ManualResetEvent(false);
+		private const string CacheFilename = "___cache.dat";
+		private const string MeshConverterPath = "MeshConverter.exe";
+
+		private readonly Dictionary<string, long> Cache = new Dictionary<string, long>();
+		private readonly ManualResetEvent MeshProcessDone = new ManualResetEvent(false);
+
+		private readonly Triton.Common.CommandLineParser CommandLine;
 
 		public Program(string[] parameters)
 		{
-			Parameters = parameters;
+			CommandLine = new Triton.Common.CommandLineParser(parameters);
 
-			var inputDir = GetParameterString("in=");
-			var outputDir = GetParameterString("out=");
+			var inputDir = CommandLine.Get<string>("in");
+			var outputDir = CommandLine.Get<string>("out");
 
-			if (GetParameter("help"))
+			if (CommandLine.IsSet("help"))
 			{
 				PrintUsage();
 				return;
 			}
 
-			if (parameters.Length == 0 || string.IsNullOrWhiteSpace(inputDir) || string.IsNullOrWhiteSpace(outputDir))
+			if (string.IsNullOrWhiteSpace(inputDir) || string.IsNullOrWhiteSpace(outputDir))
 			{
 				PrintUsage();
 				return;
@@ -47,12 +49,12 @@ namespace ContentProcessor
 				Directory.CreateDirectory(outputDir);
 			}
 
-			if (!GetParameter("nocache"))
+			if (!CommandLine.IsSet("nocache"))
 			{
 				LoadCache();
 			}
 
-			var searchPattern = GetParameterString("pattern=", "*");
+			var searchPattern = CommandLine.Get<string>("pattern", "*");
 
 			foreach (var file in Directory.GetFiles(inputDir, searchPattern, SearchOption.AllDirectories))
 			{
@@ -148,29 +150,6 @@ namespace ContentProcessor
 			Console.WriteLine("\thelp: show this text");
 			Console.WriteLine("\tpattern=<*>: only files matching this pattern will be included");
 			Console.WriteLine("\tnocache: process all files even if it is not neccecary");
-		}
-
-		bool GetParameter(string param)
-		{
-			foreach (var arg in Parameters)
-			{
-				if (arg == param)
-					return true;
-			}
-
-			return false;
-		}
-
-		string GetParameterString(string param, string defaultValue = "")
-		{
-			foreach (var arg in Parameters)
-			{
-				if (arg.StartsWith(param))
-				{
-					return arg.Substring(param.Length);
-				}
-			}
-			return defaultValue;
 		}
 
 		static void Main(string[] args)
