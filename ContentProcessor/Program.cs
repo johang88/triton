@@ -16,24 +16,23 @@ namespace ContentProcessor
 		private readonly Dictionary<string, long> Cache = new Dictionary<string, long>();
 		private readonly ManualResetEvent MeshProcessDone = new ManualResetEvent(false);
 
-		private readonly Triton.Common.CommandLineParser CommandLine;
+		private readonly Triton.Common.CommandLineApplication Application;
 
 		public Program(string[] parameters)
 		{
-			CommandLine = new Triton.Common.CommandLineParser(parameters);
+			Application = new Triton.Common.CommandLineApplication(parameters, "ContentProcessor in=<input_dir> out=<output_dir>");
 
-			var inputDir = CommandLine.Get<string>("in");
-			var outputDir = CommandLine.Get<string>("out");
+			string inputDir = "", outputDir = "", searchPattern = "";
+			bool noCache = false;
 
-			if (CommandLine.IsSet("help"))
+			Application.AddCommand("in", "Input dir path", true, "", v => inputDir = v)
+			           .AddCommand("out", "Output dir path", true, "", v => outputDir = v)
+			           .AddCommand("nocache", "Force recompilation of all resources", false, false, v => noCache = v)
+					   .AddCommand("pattern", "Only files matching this pattern will be included", false, "*", v => searchPattern = v);
+
+			if (!Application.IsValid())
 			{
-				PrintUsage();
-				return;
-			}
-
-			if (string.IsNullOrWhiteSpace(inputDir) || string.IsNullOrWhiteSpace(outputDir))
-			{
-				PrintUsage();
+				Application.PrintUsage();
 				return;
 			}
 
@@ -49,12 +48,10 @@ namespace ContentProcessor
 				Directory.CreateDirectory(outputDir);
 			}
 
-			if (!CommandLine.IsSet("nocache"))
+			if (!noCache)
 			{
 				LoadCache();
 			}
-
-			var searchPattern = CommandLine.Get<string>("pattern", "*");
 
 			foreach (var file in Directory.GetFiles(inputDir, searchPattern, SearchOption.AllDirectories))
 			{
@@ -91,7 +88,7 @@ namespace ContentProcessor
 			fileOutputPath = Path.ChangeExtension(fileOutputPath, "mesh");
 			var process = new System.Diagnostics.Process();
 			process.StartInfo.FileName = MeshConverterPath;
-			process.StartInfo.Arguments =  string.Format("{0} out={1}", inputFile, fileOutputPath);
+			process.StartInfo.Arguments = string.Format("{0} out={1}", inputFile, fileOutputPath);
 			process.StartInfo.UseShellExecute = false;
 			process.EnableRaisingEvents = true;
 			process.Exited += (s, e) =>
@@ -141,15 +138,6 @@ namespace ContentProcessor
 					writer.WriteLine("{0}|{1}", entry.Key, entry.Value);
 				}
 			}
-		}
-
-		void PrintUsage()
-		{
-			Console.WriteLine("Usage: ContentProcessor in=<input_dir> out=<output_dir>");
-			Console.WriteLine("Available commands");
-			Console.WriteLine("\thelp: show this text");
-			Console.WriteLine("\tpattern=<*>: only files matching this pattern will be included");
-			Console.WriteLine("\tnocache: process all files even if it is not neccecary");
 		}
 
 		static void Main(string[] args)
