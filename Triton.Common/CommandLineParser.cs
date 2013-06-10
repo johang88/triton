@@ -71,5 +71,13 @@ namespace Triton.Common
 
 			return StringConverter.Parse<TValue>(Parameters[name]);
 		}
+
+		public TValue Get<TValue>(string name, TValue defaultValue)
+		{
+			if (!IsSet(name))
+				return defaultValue;
+
+			return StringConverter.Parse<TValue>(Parameters[name]);
+		}
 	}
 }
