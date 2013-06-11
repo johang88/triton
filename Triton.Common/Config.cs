@@ -9,6 +9,8 @@ namespace Triton.Common
 {
 	/// <summary>
 	/// A config file is a collection of sections that in turn stores a collection of key-value pairs.
+	/// 
+	/// The ConfigFile class provides methods for parsing and serializing config files.
 	/// </summary>
 	public class ConfigFile
 	{

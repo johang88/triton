@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics
 {
+	/// <summary>
+	/// A render target is used to render to offscreen textures.
+	/// It contains references to one or more textures that can be used for rendering.
+	/// </summary>
 	public class RenderTarget
 	{
 		internal int Handle;

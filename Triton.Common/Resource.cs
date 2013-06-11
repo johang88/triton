@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Triton.Common
 {
+	/// <summary>
+	/// Resource reference
+	/// Has to be implemented together with a resource loader in order to be useful.
+	/// </summary>
 	public abstract class Resource
 	{
 		public readonly string Name;

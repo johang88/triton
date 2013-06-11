@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics
 {
+	/// <summary>
+	/// Efficent implementation of a dynamic vertex buffer
+	/// </summary>
 	public class BatchBuffer : IDisposable
 	{
 		private static int BatchBufferCount = 0;

@@ -97,6 +97,13 @@ namespace Triton.Graphics
 			IsExiting = true;
 		}
 
+		/// <summary>
+		/// Process and render a single frame
+		/// The command buffer has to be written and swapped before anything is rendered.
+		/// 
+		/// This function will also process any tasks that has to execute on the render thread.
+		/// </summary>
+		/// <returns>True if the render window is still open, false otherwise</returns>
 		public bool Process()
 		{
 			Watch.Start();

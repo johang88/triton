@@ -9,6 +9,9 @@ using System.Globalization;
 
 namespace Triton.Common
 {
+	/// <summary>
+	/// Utility class for parsing strings and serializing values in a culture invariant format
+	/// </summary>
 	public static class StringConverter
 	{
 		public static TValue Parse<TValue>(string stringValue)

@@ -6,6 +6,18 @@ using System.Threading.Tasks;
 
 namespace Triton.Common
 {
+	/// <summary>
+	/// Utility class for parsing command line parameters.
+	/// The paremeters can be entered in any of the following formats:
+	///		-param=value
+	///		+param=value
+	///		param=value
+	///		-param
+	///		+param
+	///		param
+	///		
+	/// Boolean values are parsed such as anything that is not in the following list is considered to be true (false, no, 0)
+	/// </summary>
 	public class CommandLineParser
 	{
 		private readonly Dictionary<string, string> Parameters;
