@@ -10,6 +10,12 @@ namespace Triton.Common
 	/// A base command line application class
 	/// Provides support for settings to bet set through the command line, with both required and non required values
 	/// A help text of supported commands is printed if not all required commands are set
+	/// 
+	/// Usage
+	///  * Add commands
+	///  * Validate
+	///  * Print usage if not valid
+	///  * Run application if valid
 	/// </summary>
 	public class CommandLineApplication
 	{
@@ -26,6 +32,16 @@ namespace Triton.Common
 			Usage = usage;
 		}
 
+		/// <summary>
+		/// Add a command to the command table
+		/// </summary>
+		/// <typeparam name="TValue">Type of the command</typeparam>
+		/// <param name="name">Name of the command</param>
+		/// <param name="description">A description that is shown when printing the command usage</param>
+		/// <param name="required">Set to true if this command is required to be set, IsValid will fail if any required commands are not set</param>
+		/// <param name="defaultValue"></param>
+		/// <param name="setCommand">Callback function that is used to set the value of the command</param>
+		/// <returns></returns>
 		public CommandLineApplication AddCommand<TValue>(string name, string description, bool required, TValue defaultValue, Action<TValue> setCommand)
 		{
 			Commands.Add(new Command
@@ -40,11 +56,18 @@ namespace Triton.Common
 			return this;
 		}
 
+		/// <summary>
+		/// Check if the application is ready to run
+		/// </summary>
+		/// <returns>Returns true if all required commands are set</returns>
 		public bool IsValid()
 		{
 			return !CommandLine.IsSet("help") && Commands.All(c => c.IsValid);
 		}
 
+		/// <summary>
+		/// Print application usage information to standard output
+		/// </summary>
 		public void PrintUsage()
 		{
 			Console.WriteLine(Usage);
