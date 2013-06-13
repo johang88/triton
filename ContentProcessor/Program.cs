@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
+using Triton.Common;
 
 namespace ContentProcessor
 {
@@ -20,6 +21,9 @@ namespace ContentProcessor
 
 		public Program(string[] parameters)
 		{
+			Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
+			Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File("Logs/ContentProcessor.txt"));
+
 			Application = new Triton.Common.CommandLineApplication(parameters, "ContentProcessor in=<input_dir> out=<output_dir>");
 
 			string inputDir = "", outputDir = "", searchPattern = "";
@@ -38,13 +42,13 @@ namespace ContentProcessor
 
 			if (!Directory.Exists(inputDir))
 			{
-				Console.WriteLine("ERROR: Input dir does not exist");
+				Log.WriteLine("ERROR: Input dir does not exist");
 				return;
 			}
 
 			if (!Directory.Exists(outputDir))
 			{
-				Console.WriteLine("Output dir does not exist, creating");
+				Log.WriteLine("Output dir does not exist, creating");
 				Directory.CreateDirectory(outputDir);
 			}
 
@@ -77,6 +81,8 @@ namespace ContentProcessor
 						ProcessTexture(file, fileOutputPath);
 						break;
 				}
+
+				Log.WriteLine("Processed {0}", file);
 			}
 
 			WriteCache();
@@ -125,7 +131,7 @@ namespace ContentProcessor
 				}
 			}
 
-			Console.WriteLine("Cache loaded");
+			Log.WriteLine("Cache loaded");
 		}
 
 		void WriteCache()
