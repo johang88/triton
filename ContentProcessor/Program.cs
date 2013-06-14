@@ -19,10 +19,19 @@ namespace ContentProcessor
 
 		private readonly Triton.Common.CommandLineApplication Application;
 
+		private readonly Factory<string, Triton.Content.ICompiler> Compilers = new Factory<string, Triton.Content.ICompiler>();
+
 		public Program(string[] parameters)
 		{
 			Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
 			Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File("Logs/ContentProcessor.txt"));
+
+			Compilers.Add(".mesh", () => new Triton.Content.Compilers.MeshCompiler());
+			Compilers.Add(".mesh.xml", () => new Triton.Content.Compilers.MeshCompiler());
+			Compilers.Add(".png", () => new Triton.Content.Compilers.TextureCompiler());
+			Compilers.Add(".tga", () => new Triton.Content.Compilers.TextureCompiler());
+			Compilers.Add(".bmp", () => new Triton.Content.Compilers.TextureCompiler());
+			Compilers.Add(".jpg", () => new Triton.Content.Compilers.TextureCompiler());
 
 			Application = new Triton.Common.CommandLineApplication(parameters, "ContentProcessor in=<input_dir> out=<output_dir>");
 
@@ -69,48 +78,17 @@ namespace ContentProcessor
 
 				var fileOutputPath = Path.Combine(outputDir, file.Replace(inputDir, "").Substring(1));
 
-				switch (Path.GetExtension(file).ToLowerInvariant())
-				{
-					case ".xml":
-						if (file.EndsWith(".mesh.xml"))
-						{
-							ProcessMesh(file, fileOutputPath);
-						}
-						break;
-					case ".png":
-						ProcessTexture(file, fileOutputPath);
-						break;
-				}
+				var extension = Path.GetExtension(file).ToLowerInvariant();
+				if (extension == ".xml") // Get sub extension
+					extension = Path.GetExtension(Path.GetFileNameWithoutExtension(file)) + ".xml";
+
+				var compiler = Compilers.Create(extension);
+				compiler.Compile(file, fileOutputPath);
 
 				Log.WriteLine("Processed {0}", file);
 			}
 
 			WriteCache();
-		}
-
-		void ProcessMesh(string inputFile, string fileOutputPath)
-		{
-			fileOutputPath = fileOutputPath.Replace(".mesh.xml", ".xml");
-			fileOutputPath = Path.ChangeExtension(fileOutputPath, "mesh");
-			var process = new System.Diagnostics.Process();
-			process.StartInfo.FileName = MeshConverterPath;
-			process.StartInfo.Arguments = string.Format("{0} out={1}", inputFile, fileOutputPath);
-			process.StartInfo.UseShellExecute = false;
-			process.EnableRaisingEvents = true;
-			process.Exited += (s, e) =>
-			{
-				MeshProcessDone.Set();
-			};
-			process.Start();
-
-			WaitHandle.WaitAll(new WaitHandle[] { MeshProcessDone });
-		}
-
-
-		void ProcessTexture(string inputFile, string fileOutputPath)
-		{
-			fileOutputPath = Path.ChangeExtension(fileOutputPath, "texture");
-			File.Copy(inputFile, fileOutputPath, true);
 		}
 
 		void LoadCache()
