@@ -23,9 +23,6 @@ namespace Triton.Common
 
 		public static void WriteLine(string message, LogLevel level)
 		{
-			if (string.IsNullOrWhiteSpace(message))
-				throw new ArgumentNullException("message");
-
 			lock (Lock)
 			{
 				foreach (ILogOutputHandler handler in OutputHandlers)
