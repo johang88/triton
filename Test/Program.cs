@@ -74,13 +74,16 @@ namespace Test
 			var shader2 = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/test");
 			var mesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/box");
 
-			var texture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/test_d");
+			var texture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/test_d", "srgb");
 			var normalMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/test_n");
 
-			var lightDir = new Vector3(3.95f, -0.64f, 0.5f);
+			var lightDir = new Vector3(3.95f, -0.94f, 0.5f);
 			lightDir = lightDir.Normalize();
-			var lightColor = new Vector3(1.2f, 1.1f, 1.15f);
+			var lightColor = new Vector3(0.8f, 0.3f, 0.35f);
 			var ambientColor = new Vector3(0.35f, 0.35f, 0.4f);
+			var finalLightColor = lightColor;
+
+			var lightIntensity = 1.0f;
 
 			var renderTarget = Backend.CreateRenderTarget("test", 1280, 720, Triton.Renderer.PixelInternalFormat.Rgba16f, 1, true);
 			var batchBuffer = Backend.CreateBatchBuffer();
@@ -118,14 +121,36 @@ namespace Test
 			var angle = 0.0f;
 			var cameraPos = new Vector3(0, 1.8f, 2);
 
+			var lightIntensityDir = 1.0f;
+
+			var stopWatch = new System.Diagnostics.Stopwatch();
+			stopWatch.Start();
+
 			while (Running)
 			{
+				var deltaTime = (float)stopWatch.Elapsed.TotalSeconds;
+				stopWatch.Restart();
+
 				angle += 0.001f;
+
 				var world = Matrix4.CreateRotationY(angle) * Matrix4.CreateTranslation(0, 0, 0.0f);
 				var view = Matrix4.LookAt(cameraPos, Vector3.Zero, Vector3.UnitY);
 				var projection = Matrix4.CreatePerspectiveFieldOfView(1.22173f, 1280.0f / 720.0f, 0.001f, 1000.0f);
 
 				Matrix4 mvp = world * view * projection;
+
+				var targetIntensity = lightIntensityDir > 0.0f ? 2.0f : 0.2f;
+				if (lightIntensityDir > 0.0f && lightIntensity >= 1.9f)
+				{
+					lightIntensityDir = -1.0f;
+				}
+				else if (lightIntensityDir < 0.0f && lightIntensity <= 0.55f)
+				{
+					lightIntensityDir = 1.0f;
+				}
+
+				lightIntensity = lightIntensity + 2.0f * deltaTime * (targetIntensity - lightIntensity);
+				finalLightColor = lightColor * lightIntensity;
 
 				Backend.BeginScene();
 
@@ -137,7 +162,7 @@ namespace Test
 				Backend.BindShaderVariable(genericParams.HandleCameraPosition, ref cameraPos);
 
 				Backend.BindShaderVariable(genericParams.HandleLightDir, ref lightDir);
-				Backend.BindShaderVariable(genericParams.HandleLightColor, ref lightColor);
+				Backend.BindShaderVariable(genericParams.HandleLightColor, ref finalLightColor);
 				Backend.BindShaderVariable(genericParams.HandleAmbientColor, ref ambientColor);
 
 				Backend.BindShaderVariable(genericParams.HandleDiffuseTexture, 0);
