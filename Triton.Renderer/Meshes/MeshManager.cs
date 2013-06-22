@@ -132,7 +132,7 @@ namespace Triton.Renderer.Meshes
 			// Load index data
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handles[index].IndexBufferID);
 			if (indexData != null)
-				GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(indexData.Length), indexData, BufferUsageHint.StaticDraw);
+				GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(indexData.Length), indexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
 
 			ClearBindings();
 
@@ -159,7 +159,7 @@ namespace Triton.Renderer.Meshes
 			// Load index data
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handles[index].IndexBufferID);
 			if (indexData != null)
-				GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(indexData.Length), indexData, BufferUsageHint.StaticDraw);
+				GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(indexData.Length), indexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
 
 			ClearBindings();
 
