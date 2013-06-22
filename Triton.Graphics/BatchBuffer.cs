@@ -7,7 +7,12 @@ using System.Threading.Tasks;
 namespace Triton.Graphics
 {
 	/// <summary>
-	/// Efficent implementation of a dynamic vertex buffer
+	/// Efficent implementation of a dynamic vertex buffer. 
+	/// Allows you to add any number of vertices. 
+	/// 
+	/// Indexed rendering is mandatory. Use AddTriangle to add indicies to the index buffer.
+	/// 
+	/// The vertex format is fixed currently so the usability of this class is limited.
 	/// </summary>
 	public class BatchBuffer : IDisposable
 	{
@@ -35,7 +40,7 @@ namespace Triton.Graphics
 			VertexData = new float[dataCount];
 			IndexData = new int[initialTriangleCount];
 
-			Mesh = new Resources.Mesh("__sys/batch_buffer_/" + Common.StringConverter.ToString(++BatchBufferCount) + ".mesh", "");
+			Mesh = new Resources.Mesh("_sys/batch_buffer_/" + Common.StringConverter.ToString(++BatchBufferCount) + ".mesh", "");
 			Mesh.Handles = new int[] { renderSystem.CreateMesh(0, null, null, true, null) };
 		}
 
@@ -141,6 +146,14 @@ namespace Triton.Graphics
 			IndexData[TriangleCount++] = v3;
 		}
 
+		/// <summary>
+		/// Utility method to add a single 2d quad (2 triangles) to the buffer.
+		/// Indexes will be setup automatically so there is no need to call AddTriangle manually.
+		/// </summary>
+		/// <param name="position">Position of the quad</param>
+		/// <param name="size">Size of the quad, relative to the position</param>
+		/// <param name="uvPositon">UV Position of the quad</param>
+		/// <param name="uvSize">UV Size of the quad, relative to the UV position</param>
 		public void AddQuad(Vector2 position, Vector2 size, Vector2 uvPositon, Vector2 uvSize)
 		{
 			var firstIndex = DataCount / (3 + 3 + 3 + 2);

@@ -253,11 +253,18 @@ namespace Triton.Graphics
 			ProcessQueue.Enqueue(workItem);
 		}
 
+		/// <summary>
+		/// Begin a new scene, this will reset the primary commnad buffer
+		/// </summary>
 		public void BeginScene()
 		{
 			PrimaryBuffer.Stream.Position = 0;
 		}
 
+		/// <summary>
+		/// Render all currently queued commands. This swaps the commands buffers 
+		/// and you can start to render a new frame directly after calling this method.
+		/// </summary>
 		public void EndScene()
 		{
 			DoubleBufferSynchronizer.WaitOne();
@@ -269,6 +276,11 @@ namespace Triton.Graphics
 			DoubleBufferSynchronizer.Release();
 		}
 
+		/// <summary>
+		/// Begin to render a new pass to the specified render target
+		/// </summary>
+		/// <param name="renderTarget"></param>
+		/// <param name="clearColor"></param>
 		public void BeginPass(RenderTarget renderTarget, Vector4 clearColor)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BeginPass);
@@ -288,11 +300,19 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write(clearColor);
 		}
 
+		/// <summary>
+		/// End rendering of the current render target
+		/// </summary>
 		public void EndPass()
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.EndPass);
 		}
 
+		/// <summary>
+		/// Begin a new instance, use this to batch meshes with the same textures, shaders and materials
+		/// </summary>
+		/// <param name="shaderHandle"></param>
+		/// <param name="textures"></param>
 		public void BeginInstance(int shaderHandle, int[] textures)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BeginInstance);
@@ -311,6 +331,11 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write((byte)OpCode.EndInstance);
 		}
 
+		/// <summary>
+		/// Bind a Matrix4 value to the current shader
+		/// </summary>
+		/// <param name="uniformHandle"></param>
+		/// <param name="value"></param>
 		public void BindShaderVariable(int uniformHandle, ref Matrix4 value)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableMatrix4);
@@ -337,6 +362,11 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write(value.Row3.W);
 		}
 
+		/// <summary>
+		/// Bind an int value to the current shader
+		/// </summary>
+		/// <param name="uniformHandle"></param>
+		/// <param name="value"></param>
 		public void BindShaderVariable(int uniformHandle, int value)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableInt);
@@ -344,6 +374,11 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write(value);
 		}
 
+		/// <summary>
+		/// Bind a Vector4 value to the current shader
+		/// </summary>
+		/// <param name="uniformHandle"></param>
+		/// <param name="value"></param>
 		public void BindShaderVariable(int uniformHandle, ref Vector4 value)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableVector4);
@@ -351,6 +386,11 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write(value);
 		}
 
+		/// <summary>
+		/// Bind a Vector3 value to the current shader
+		/// </summary>
+		/// <param name="uniformHandle"></param>
+		/// <param name="value"></param>
 		public void BindShaderVariable(int uniformHandle, ref Vector3 value)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableVector3);
@@ -358,19 +398,39 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write(value);
 		}
 
+		/// <summary>
+		/// Bind a Vector2 value to the current shader
+		/// </summary>
+		/// <param name="uniformHandle"></param>
+		/// <param name="value"></param>
 		public void BindShaderVariable(int uniformHandle, ref Vector2 value)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableVector2);
 			PrimaryBuffer.Writer.Write(uniformHandle);
 			PrimaryBuffer.Writer.Write(value);
 		}
-
+		
+		/// <summary>
+		/// Draw a single mesh instance.
+		/// BeginInstance has to be called before calling this and all shader variables should be bound
+		/// </summary>
+		/// <param name="handle"></param>
 		public void DrawMesh(int handle)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.DrawMesh);
 			PrimaryBuffer.Writer.Write(handle);
 		}
 
+		/// <summary>
+		/// Create a new render target
+		/// </summary>
+		/// <param name="name">Name of the render target, the texture name will be derived from this in the form '_sys/render_targets/{name}_{texture_number}</param>
+		/// <param name="width">Width of the render target</param>
+		/// <param name="height">Height of the render target</param>
+		/// <param name="pixelFormat">Desired pixel format of the render target</param>
+		/// <param name="numTargets">Numver of targets to create, useful for MRT rendering.</param>
+		/// <param name="createDepthBuffer">Set to true if a depth buffer is to be created</param>
+		/// <returns></returns>
 		public RenderTarget CreateRenderTarget(string name, int width, int height, Renderer.PixelInternalFormat pixelFormat, int numTargets, bool createDepthBuffer)
 		{
 			int[] textureHandles;
@@ -385,7 +445,7 @@ namespace Triton.Graphics
 			var textures = new Resources.Texture[textureHandles.Length];
 			for (var i = 0; i < textureHandles.Length; i++)
 			{
-				var texture = new Resources.Texture("_sys/render_targets/" + name + "_" + StringConverter.ToString(i) + ".texture", "");
+				var texture = new Resources.Texture("_sys/render_targets/" + name + "_" + StringConverter.ToString(i), "");
 				texture.Handle = textureHandles[i];
 				ResourceManager.Manage(texture);
 
