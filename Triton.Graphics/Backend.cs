@@ -37,6 +37,10 @@ namespace Triton.Graphics
 	///			BeginPass renderTarget
 	///			EndPass
 	///		EndScene
+	///		
+	/// Internally commands are encoded using a custom opcode format with variable instruction length.
+	/// The instructions are encoded in byte buffers and double buffering is used to so that it is possible to
+	/// write and read to the buffers at the same time.
 	/// </summary>
 	public class Backend : IDisposable
 	{
@@ -473,6 +477,10 @@ namespace Triton.Graphics
 			return new BatchBuffer(RenderSystem, initialCount);
 		}
 
+		/// <summary>
+		/// Op codes used in the rendering instructions
+		/// All opcodes have a variable amount of parameters
+		/// </summary>
 		enum OpCode : byte
 		{
 			BeginPass,
@@ -487,6 +495,10 @@ namespace Triton.Graphics
 			DrawMesh
 		}
 
+		/// <summary>
+		/// Buffer class used to encode the instruction stream.
+		/// Provides access to readers / writers on the byte buffer.
+		/// </summary>
 		class CommandBuffer
 		{
 			public readonly MemoryStream Stream;
