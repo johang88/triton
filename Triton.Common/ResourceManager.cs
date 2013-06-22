@@ -116,6 +116,7 @@ namespace Triton.Common
 					{
 						loader.Unload(resource);
 						resource.State = ResourceLoadingState.Unloaded;
+						Log.WriteLine("Unloaded {0}", resource.Name);
 					};
 
 					if (async)
