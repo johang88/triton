@@ -218,6 +218,13 @@ namespace Triton.Graphics
 							RenderSystem.SetUniform(uniformHandle, v);
 						}
 						break;
+					case OpCode.BindShaderVariableFloat:
+						{
+							var uniformHandle = reader.ReadInt32();
+							var v = reader.ReadSingle();
+							RenderSystem.SetUniform(uniformHandle, v);
+						}
+						break;
 					case OpCode.BindShaderVariableVector4:
 						{
 							var uniformHandle = reader.ReadInt32();
@@ -381,6 +388,18 @@ namespace Triton.Graphics
 		}
 
 		/// <summary>
+		/// Bind a float value to the current shader
+		/// </summary>
+		/// <param name="uniformHandle"></param>
+		/// <param name="value"></param>
+		public void BindShaderVariable(int uniformHandle, float value)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableFloat);
+			PrimaryBuffer.Writer.Write(uniformHandle);
+			PrimaryBuffer.Writer.Write(value);
+		}
+
+		/// <summary>
 		/// Bind a Vector4 value to the current shader
 		/// </summary>
 		/// <param name="uniformHandle"></param>
@@ -489,6 +508,7 @@ namespace Triton.Graphics
 			EndInstance,
 			BindShaderVariableMatrix4,
 			BindShaderVariableInt,
+			BindShaderVariableFloat,
 			BindShaderVariableVector2,
 			BindShaderVariableVector3,
 			BindShaderVariableVector4,
