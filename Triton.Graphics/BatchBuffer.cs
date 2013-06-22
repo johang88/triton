@@ -36,7 +36,6 @@ namespace Triton.Graphics
 			IndexData = new int[initialTriangleCount];
 
 			Mesh = new Resources.Mesh("__sys/batch_buffer_/" + Common.StringConverter.ToString(++BatchBufferCount) + ".mesh", "");
-			Mesh.IsLoaded = true;
 			Mesh.Handles = new int[] { renderSystem.CreateMesh(0, null, null, true, null) };
 		}
 

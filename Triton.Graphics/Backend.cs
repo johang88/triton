@@ -386,7 +386,6 @@ namespace Triton.Graphics
 			for (var i = 0; i < textureHandles.Length; i++)
 			{
 				var texture = new Resources.Texture("_sys/render_targets/" + name + "_" + StringConverter.ToString(i) + ".texture", "");
-				texture.IsLoaded = true;
 				texture.Handle = textureHandles[i];
 				ResourceManager.Manage(texture);
 

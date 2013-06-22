@@ -34,6 +34,7 @@ namespace Triton.Common
 		private readonly Dictionary<Type, IResourceLoader> ResourceLoaders = new Dictionary<Type, IResourceLoader>();
 		private bool Disposed = false;
 		private readonly Action<Action> AddItemToWorkQueue;
+		private object LoadingLock = new object();
 
 		public ResourceManager(Action<Action> addItemToWorkQueue)
 		{
@@ -64,33 +65,39 @@ namespace Triton.Common
 			if (!ResourceLoaders.ContainsKey(typeof(TResource)))
 				throw new InvalidOperationException("no resource loader for the specified type");
 
-			var loader = ResourceLoaders[typeof(TResource)];
-
-			Resource resource = null;
-			if (!Resources.TryGetValue(name, out resource))
+			lock (LoadingLock)
 			{
-				resource = loader.Create(name, parameters);
-				Resources.Add(name, resource);
-			}
+				var loader = ResourceLoaders[typeof(TResource)];
 
-			resource.ReferenceCount += 1;
-
-			// Put the resource on the loading queue
-			// If the resource was already loaded then the IResourceLoader implementation will determine if 
-			// the resource has to be reloaded. Usually if the parameters are different, but it can also be reloaded
-			// for any number of other reasons. File might have changed on disk etc.
-			AddItemToWorkQueue(() =>
-			{
-				loader.Load(resource, parameters, (r) =>
+				Resource resource = null;
+				if (!Resources.TryGetValue(name, out resource))
 				{
-					Log.WriteLine("Loaded {0}", name);
+					resource = loader.Create(name, parameters);
+					Resources.Add(name, resource);
+				}
 
-					if (onLoaded != null)
-						onLoaded(r);
-				});
-			});
+				resource.ReferenceCount += 1;
 
-			return (TResource)resource;
+				if (resource.State == ResourceLoadingState.Unloaded)
+				{
+					resource.State = ResourceLoadingState.Loading;
+
+					AddItemToWorkQueue(() =>
+					{
+						loader.Load(resource, parameters, (r) =>
+						{
+							resource.State = ResourceLoadingState.Loaded;
+
+							Log.WriteLine("Loaded {0}", name);
+
+							if (onLoaded != null)
+								onLoaded(r);
+						});
+					});
+				}
+
+				return (TResource)resource;
+			}
 		}
 
 		public void Unload(Resource resource, bool async = true)
@@ -98,17 +105,25 @@ namespace Triton.Common
 			if (!ResourceLoaders.ContainsKey(resource.GetType()))
 				throw new InvalidOperationException("no resource loader for the specified type");
 
-			var loader = ResourceLoaders[resource.GetType()];
-
-			Action unloadAction = () =>
+			lock (LoadingLock)
 			{
-				loader.Unload(resource);
-			};
+				if (resource.State == ResourceLoadingState.Loaded)
+				{
+					resource.State = ResourceLoadingState.Unloading;
+					var loader = ResourceLoaders[resource.GetType()];
 
-			if (async)
-				AddItemToWorkQueue(unloadAction);
-			else
-				unloadAction();
+					Action unloadAction = () =>
+					{
+						loader.Unload(resource);
+						resource.State = ResourceLoadingState.Unloaded;
+					};
+
+					if (async)
+						AddItemToWorkQueue(unloadAction);
+					else
+						unloadAction();
+				}
+			}
 		}
 
 		public void Manage(Resource resource)
@@ -116,8 +131,12 @@ namespace Triton.Common
 			if (resource == null)
 				throw new ArgumentNullException("resource");
 
-			Resources.Add(resource.Name, resource);
-			resource.ReferenceCount += 1;
+			lock (LoadingLock)
+			{
+				Resources.Add(resource.Name, resource);
+				resource.State = ResourceLoadingState.Loaded;
+				resource.ReferenceCount += 1;
+			}
 		}
 
 		public void Release(Resource resource)
@@ -136,13 +155,7 @@ namespace Triton.Common
 
 		public bool AllResourcesLoaded()
 		{
-			foreach (var resource in Resources)
-			{
-				if (!resource.Value.IsLoaded)
-					return false;
-			}
-
-			return true;
+			return Resources.All(r => r.Value.State == ResourceLoadingState.Loaded);
 		}
 	}
 }

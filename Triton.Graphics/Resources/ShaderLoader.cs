@@ -37,14 +37,6 @@ namespace Triton.Graphics.Resources
 
 		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
 		{
-			if (resource.IsLoaded && resource.Parameters == parameters)
-			{
-				if (onLoaded != null)
-					onLoaded(resource);
-
-				return;
-			}
-
 			var shader = (ShaderProgram)resource;
 
 			// This will reset some cache data like uniform locations
@@ -107,8 +99,7 @@ namespace Triton.Graphics.Resources
 				}
 
 				Common.Log.WriteLine(errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
-				resource.IsLoaded = true;
-
+				
 				if (onLoaded != null)
 					onLoaded(resource);
 			};
@@ -121,7 +112,6 @@ namespace Triton.Graphics.Resources
 
 		public void Unload(Common.Resource resource)
 		{
-			resource.IsLoaded = false;
 			var shader = (ShaderProgram)resource;
 			Backend.RenderSystem.DestroyShader(shader.Handle);
 			shader.Handle = -1;

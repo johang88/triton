@@ -8,7 +8,7 @@ namespace Triton.Graphics.Resources
 {
 	class MeshLoader : Triton.Common.IResourceLoader<Mesh>
 	{
-		static readonly char[] Magic = new char[] { 'M', 'E', 'S', 'H'  };
+		static readonly char[] Magic = new char[] { 'M', 'E', 'S', 'H' };
 		const int Version = 0x0100;
 
 		private readonly Backend Backend;
@@ -32,14 +32,6 @@ namespace Triton.Graphics.Resources
 
 		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
 		{
-			if (resource.IsLoaded && resource.Parameters == parameters)
-			{
-				if (onLoaded != null)
-					onLoaded(resource);
-
-				return;
-			}
-
 			// Destroy any existing mesh handles
 			Unload(resource);
 
@@ -70,13 +62,11 @@ namespace Triton.Graphics.Resources
 					resourcesToLoad--;
 					Common.Log.WriteLine(errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
 
-					if (resourcesToLoad == 0)
-					{
-						resource.IsLoaded = true;
+					if (resourcesToLoad > 0)
+						return;
 
-						if (onLoaded != null)
-							onLoaded(resource);
-					}
+					if (onLoaded != null)
+						onLoaded(resource);
 				};
 
 				for (var i = 0; i < meshCount; i++)
@@ -97,9 +87,6 @@ namespace Triton.Graphics.Resources
 
 		public void Unload(Common.Resource resource)
 		{
-			if (!resource.IsLoaded)
-				return;
-
 			var mesh = (Mesh)resource;
 			foreach (var handle in mesh.Handles)
 			{
