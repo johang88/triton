@@ -28,6 +28,8 @@ namespace ContentProcessor
 
 			Compilers.Add(".mesh", () => new Triton.Content.Compilers.MeshCompiler());
 			Compilers.Add(".mesh.xml", () => new Triton.Content.Compilers.MeshCompiler());
+			Compilers.Add(".skeleton", () => new Triton.Content.Compilers.SkeletonCompiler());
+			Compilers.Add(".skeleton.xml", () => new Triton.Content.Compilers.SkeletonCompiler());
 			Compilers.Add(".png", () => new Triton.Content.Compilers.TextureCompiler());
 			Compilers.Add(".tga", () => new Triton.Content.Compilers.TextureCompiler());
 			Compilers.Add(".bmp", () => new Triton.Content.Compilers.TextureCompiler());
