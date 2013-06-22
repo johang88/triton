@@ -21,6 +21,9 @@ namespace Test
 
 		public Program()
 		{
+			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
+			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File("Logs/Test.txt"));
+
 			WorkerThread = new WorkerThread();
 
 			FileSystem = new Triton.Common.IO.FileSystem();
