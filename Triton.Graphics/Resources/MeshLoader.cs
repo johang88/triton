@@ -6,10 +6,33 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.Resources
 {
+	/// <summary>
+	/// File format specification:
+	/// 
+	/// char[] Magic = "MESH"
+	/// int Version = 0x0110
+	/// int MeshCount
+	/// 
+	/// Mesh[MeshCount] Meshes
+	///		int TriangleCount
+	///		int VertexCount // Vertex data size in bytes
+	///		int IndexCount // Index data size in bytes
+	///		int VertexFormatElementsCount
+	/// 
+	///		VertexFormatElement[VertexFormatElementsCount] VertexFormatELements
+	///			byte Semantic
+	///			int Type
+	///			byte Count
+	///			short Offset
+	/// 
+	///		byte[VertexCount] VertexData
+	///		byte[IndexCount] IndexData
+	/// </summary>
 	class MeshLoader : Triton.Common.IResourceLoader<Mesh>
 	{
 		static readonly char[] Magic = new char[] { 'M', 'E', 'S', 'H' };
-		const int Version = 0x0100;
+		const int Version_1 = 0x0100;
+		const int Version_1_1 = 0x0110;
 
 		private readonly Backend Backend;
 		private readonly Triton.Common.IO.FileSystem FileSystem;
@@ -50,7 +73,10 @@ namespace Triton.Graphics.Resources
 				}
 
 				var version = reader.ReadInt32();
-				if (version != Version)
+
+				var validVersions = new int[] { Version_1, Version_1_1 };
+
+				if (!validVersions.Contains(version))
 					throw new ArgumentException("invalid mesh, unknown version");
 
 				var meshCount = reader.ReadInt32();
@@ -75,16 +101,37 @@ namespace Triton.Graphics.Resources
 					var vertexCount = reader.ReadInt32();
 					var indexCount = reader.ReadInt32();
 
-					var vertices = reader.ReadBytes(vertexCount);
-					var indices = reader.ReadBytes(indexCount);
-
-					var vertexFormat = new Renderer.VertexFormat(new Renderer.VertexFormatElement[]
+					Renderer.VertexFormat vertexFormat;
+					if (version >= Version_1_1)
 					{
-						new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Position, Renderer.VertexPointerType.Float, 3, 0),
-						new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Normal, Renderer.VertexPointerType.Float, 3, sizeof(float) * 3),
-						new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Tangent, Renderer.VertexPointerType.Float, 3, sizeof(float) * 6),
-						new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.TexCoord, Renderer.VertexPointerType.Float, 2, sizeof(float) * 9),
-					});
+						var vertexFormatElementCount = reader.ReadInt32();
+
+						var vertexFormatElements = new List<Renderer.VertexFormatElement>();
+						for (var j = 0; j < vertexFormatElementCount; j++)
+						{
+							vertexFormatElements.Add(new Renderer.VertexFormatElement(
+								(Renderer.VertexFormatSemantic)reader.ReadByte(),
+								(Renderer.VertexPointerType)reader.ReadInt32(),
+								reader.ReadByte(),
+								reader.ReadInt16()
+							));
+						}
+
+						vertexFormat = new Renderer.VertexFormat(vertexFormatElements.ToArray());
+					}
+					else
+					{
+						vertexFormat = new Renderer.VertexFormat(new Renderer.VertexFormatElement[]
+						{
+							new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Position, Renderer.VertexPointerType.Float, 3, 0),
+							new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Normal, Renderer.VertexPointerType.Float, 3, sizeof(float) * 3),
+							new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Tangent, Renderer.VertexPointerType.Float, 3, sizeof(float) * 6),
+							new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.TexCoord, Renderer.VertexPointerType.Float, 2, sizeof(float) * 9),
+						});
+					}
+
+					var vertices = reader.ReadBytes(vertexCount);
+						var indices = reader.ReadBytes(indexCount);
 
 					mesh.Handles[i] = Backend.RenderSystem.CreateMesh(triangleCount, vertexFormat, vertices, indices, false, onResourceLoaded);
 				}

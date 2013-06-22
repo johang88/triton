@@ -68,6 +68,14 @@ namespace Triton.Content.Meshes.Converters
 					if (!tangents)
 						throw new ArgumentException("invalid mesh, no tangents");
 
+					subMesh.VertexFormat = new Renderer.VertexFormat(new Renderer.VertexFormatElement[]
+						{
+							new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Position, Renderer.VertexPointerType.Float, 3, 0),
+							new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Normal, Renderer.VertexPointerType.Float, 3, sizeof(float) * 3),
+							new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Tangent, Renderer.VertexPointerType.Float, 3, sizeof(float) * 6),
+							new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.TexCoord, Renderer.VertexPointerType.Float, 2, sizeof(float) * 9),
+						});
+
 					using (var memStream = new MemoryStream(vertexCount * (3 * sizeof(float) + 3 * sizeof(float) + 3 * sizeof(float) + 2 * sizeof(float))))
 					{
 						using (var writer = new BinaryWriter(memStream))

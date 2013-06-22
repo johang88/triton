@@ -14,6 +14,8 @@ namespace Triton.Content.Compilers
 	{
 		private Factory<string, IMeshImporter> ImporterFactory;
 
+		const int Version = 0x0110;
+
 		public MeshCompiler()
 		{
 			ImporterFactory = new Factory<string, IMeshImporter>();
@@ -40,7 +42,7 @@ namespace Triton.Content.Compilers
 				writer.Write('H');
 
 				// Version
-				writer.Write(0x0100);
+				writer.Write(Version);
 
 				// Sub mesh count
 				writer.Write(mesh.SubMeshes.Count);
@@ -56,6 +58,16 @@ namespace Triton.Content.Compilers
 
 					// Index count
 					writer.Write(subMesh.Indices.Length);
+
+					// Vertex format
+					writer.Write(subMesh.VertexFormat.Elements.Length);
+					foreach (var element in subMesh.VertexFormat.Elements)
+					{
+						writer.Write((byte)element.Semantic);
+						writer.Write((int)element.Type);
+						writer.Write(element.Count);
+						writer.Write(element.Offset);
+					}
 
 					// Vertices
 					writer.Write(subMesh.Vertices);

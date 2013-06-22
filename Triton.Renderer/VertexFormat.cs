@@ -9,7 +9,7 @@ namespace Triton.Renderer
 	public class VertexFormat
 	{
 		public readonly int Size;
-		internal readonly VertexFormatElement[] Elements;
+		public readonly VertexFormatElement[] Elements;
 
 		public VertexFormat(VertexFormatElement[] elements)
 		{

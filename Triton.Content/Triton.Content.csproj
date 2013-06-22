@@ -57,6 +57,10 @@
       <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>
       <Name>Triton.Math</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Triton.Renderer\Triton.Renderer.csproj">
+      <Project>{d8da8b59-a4b9-4de1-920e-5d056375c71e}</Project>
+      <Name>Triton.Renderer</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
