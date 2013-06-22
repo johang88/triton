@@ -34,6 +34,7 @@ namespace Triton.Graphics.Resources
 		{
 			var texture = (Texture)resource;
 			var filename = resource.Name + ".texture";
+			bool srgb = parameters.Contains("srgb");
 
 			using (var stream = FileSystem.OpenRead(filename))
 			{
@@ -57,14 +58,14 @@ namespace Triton.Graphics.Resources
 						pt = Renderer.PixelType.UnsignedShort5551Ext;
 						break;
 					case System.Drawing.Imaging.PixelFormat.Format24bppRgb:
-						pif = Renderer.PixelInternalFormat.Rgb8;
+						pif = srgb ? Renderer.PixelInternalFormat.Srgb8 : Renderer.PixelInternalFormat.Rgb8;
 						pf = Renderer.PixelFormat.Bgr;
 						pt = Renderer.PixelType.UnsignedByte;
 						break;
 					case System.Drawing.Imaging.PixelFormat.Format32bppRgb:
 					case System.Drawing.Imaging.PixelFormat.Canonical:
 					case System.Drawing.Imaging.PixelFormat.Format32bppArgb:
-						pif = Renderer.PixelInternalFormat.Rgba;
+						pif = srgb ? Renderer.PixelInternalFormat.SrgbAlpha : Renderer.PixelInternalFormat.Rgba;
 						pf = Renderer.PixelFormat.Bgra;
 						pt = Renderer.PixelType.UnsignedByte;
 						break;
