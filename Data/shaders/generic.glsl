@@ -59,13 +59,16 @@ void main()
 	
 	vec3 reflectionVector = reflect(normalize(-cameraDirection), N2);
 	vec4 diffuse = texture2D(samplerDiffuse, texCoord);
-
+	
+	diffuse = pow(diffuse, (2.2f).xxxx);
+	
 	vec3 ambient = mix(ambientColor * 0.5f, ambientColor, saturate(N2.z * 0.5f + 0.5f));
 
 	vec2 ls = cook_torrance(N2, normalize(cameraDirection), normalize(-lightDir), 0.6f, 0.6f);
 	
 	vec3 c = (ambientColor + ls.x) * (lightColor * ls.y + diffuse.xyz);
 
+	c = pow(c, (1.0f / 2.2f).xxx);
 	oColor = vec4(c, 1.0f);
 }
 #endif

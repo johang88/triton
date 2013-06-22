@@ -74,7 +74,7 @@ namespace Test
 			var shader2 = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/test");
 			var mesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/box");
 
-			var texture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/test_d", "srgb");
+			var texture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/test_d");
 			var normalMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/test_n");
 
 			var lightDir = new Vector3(3.95f, -0.94f, 0.5f);
