@@ -38,8 +38,6 @@ void main()
 {
 	vec3 sceneColor = texture2D(samplerDiffuse, texCoord).xyz;
 	
-	sceneColor *= 16.0f;
-	
 	float exposureBias = 2.0f;
 	vec3 toneMappedScene = tonemap(sceneColor * exposureBias);
 	
