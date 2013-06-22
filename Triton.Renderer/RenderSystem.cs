@@ -243,6 +243,11 @@ namespace Triton.Renderer
 			GL.Uniform1(handle, value);
 		}
 
+		public void SetUniform(int handle, int value)
+		{
+			GL.Uniform1(handle, value);
+		}
+
 		public void SetUniform(int handle, ref Vector2 value)
 		{
 			GL.Uniform2(handle, 1, ref value.X);
