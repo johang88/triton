@@ -11,3 +11,6 @@ OpenTK.GLControl.xml
 Newtonsoft.Json.xml
 Rymdspelet.cfg
 Build/*
+Data/textures/*
+Data/models/*
+Media/*

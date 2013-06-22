@@ -20,6 +20,7 @@ in vec2 texCoord;
 out(vec4, oColor, 0);
 
 sampler(2D, samplerDiffuse, DiffuseTexture);
+sampler(2D, samplerBlur, BlurTexture);
 
 uniform(float, A, A);
 uniform(float, B, B);
@@ -39,13 +40,16 @@ void main()
 	vec3 sceneColor = texture2D(samplerDiffuse, texCoord).xyz;
 	sceneColor = pow(sceneColor, (2.2f).xxx);
 	
+	vec3 blurColor = texture2D(samplerBlur, texCoord).xyz;
+	blurColor = pow(blurColor, (2.2f).xxx);
+	
 	float exposureBias = 2.0f;
 	vec3 toneMappedScene = tonemap(sceneColor * exposureBias);
 	
 	vec3 whiteScale = 1.0f / tonemap(W.xxx);
 	toneMappedScene *= whiteScale;
 	
-	vec3 retColor = pow(toneMappedScene, (1.0f / 2.2f).xxx);
+	vec3 retColor = pow(toneMappedScene + blurColor, (1.0f / 2.2f).xxx);
 	
 	oColor = vec4(retColor.xyz, 1.0f);
 }

@@ -49,6 +49,7 @@ uniform(vec3, ambientColor, AmbientColor);
 
 sampler(2D, samplerDiffuse, DiffuseTexture);
 sampler(2D, samplerNormal, NormalMap);
+sampler(2D, samplerSpecular, SpecularMap);
 
 void main()
 {
@@ -63,10 +64,12 @@ void main()
 	diffuse = pow(diffuse, (2.2f).xxxx);
 	
 	vec3 ambient = mix(ambientColor * 0.5f, ambientColor, saturate(N2.z * 0.5f + 0.5f));
-
-	vec2 ls = cook_torrance(N2, normalize(cameraDirection), normalize(-lightDir), 0.6f, 0.6f);
 	
-	vec3 c = (ambientColor + ls.x) * (lightColor * ls.y + diffuse.xyz);
+	vec3 specular = texture2D(samplerSpecular, texCoord).xyz;
+
+	vec2 ls = cook_torrance(N2, normalize(cameraDirection), normalize(-lightDir), specular.x, 0.23f);
+	
+	vec3 c = (ambientColor + ls.x) * (lightColor * ls.y * specular.xyz + diffuse.xyz);
 
 	c = pow(c, (1.0f / 2.2f).xxx);
 	oColor = vec4(c, 1.0f);

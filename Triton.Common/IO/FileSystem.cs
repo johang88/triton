@@ -37,6 +37,7 @@ namespace Triton.Common.IO
 
 		internal void OnFileChanged(string path)
 		{
+			System.Threading.Thread.Sleep(1000);
 			FileChangedListeners.ForEach(l => l(path));
 		}
 

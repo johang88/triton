@@ -118,7 +118,7 @@ namespace Triton.Graphics.Resources
 					}
 				}
 
-				Common.Log.WriteLine(errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
+				Common.Log.WriteLine(shader.Name + ": " + errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
 
 				if (!Shaders.ContainsKey(shader.Name))
 					Shaders.Add(shader.Name, shader);
