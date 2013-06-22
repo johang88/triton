@@ -14,13 +14,7 @@ namespace Triton.Renderer
 		TexCoord,
 		TexCoord2,
 		Color,
-		BoneIndex1,
-		BoneIndex2,
-		BoneIndex3,
-		BoneIndex4,
-		BoneWeight1,
-		BoneWeight2,
-		BoneWeight3,
-		BoneWeight4,
+		BoneIndex,
+		BoneWeight,
 	}
 }
