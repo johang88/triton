@@ -81,7 +81,13 @@ namespace Triton.Common
 			// for any number of other reasons. File might have changed on disk etc.
 			AddItemToWorkQueue(() =>
 			{
-				loader.Load(resource, parameters, onLoaded);
+				loader.Load(resource, parameters, (r) =>
+				{
+					Log.WriteLine("Loaded {0}", name);
+
+					if (onLoaded != null)
+						onLoaded(r);
+				});
 			});
 
 			return (TResource)resource;
