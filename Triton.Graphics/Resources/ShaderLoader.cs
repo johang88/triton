@@ -18,6 +18,8 @@ namespace Triton.Graphics.Resources
 	{
 		private readonly Backend Backend;
 		private readonly Triton.Common.IO.FileSystem FileSystem;
+		private readonly Dictionary<string, ShaderProgram> Shaders = new Dictionary<string, ShaderProgram>();
+		private object ReloadLock = new object();
 
 		public ShaderLoader(Backend backend, Triton.Common.IO.FileSystem fileSystem)
 		{
@@ -28,6 +30,24 @@ namespace Triton.Graphics.Resources
 
 			Backend = backend;
 			FileSystem = fileSystem;
+			FileSystem.AddFileChangedListener(OnFileChanged);
+		}
+
+		private void OnFileChanged(string path)
+		{
+			if (!path.EndsWith(".glsl"))
+				return;
+
+			path = path.Replace(".glsl", "");
+
+			lock (ReloadLock)
+			{
+				ShaderProgram shader;
+				if (Shaders.TryGetValue(path, out shader) && shader.State == Common.ResourceLoadingState.Loaded)
+				{
+					Load(shader, "", null);
+				}
+			}
 		}
 
 		public Common.Resource Create(string name, string parameters)
@@ -99,7 +119,10 @@ namespace Triton.Graphics.Resources
 				}
 
 				Common.Log.WriteLine(errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
-				
+
+				if (!Shaders.ContainsKey(shader.Name))
+					Shaders.Add(shader.Name, shader);
+
 				if (onLoaded != null)
 					onLoaded(resource);
 			};
