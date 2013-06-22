@@ -67,10 +67,12 @@ namespace Triton.Graphics
 
 			var graphicsMode = new GraphicsMode(new ColorFormat(32), 24, 0, 0);
 
+			// Create the main rendering window
 			Window = new NativeWindow(width, height, title, fullscreen ? GameWindowFlags.Fullscreen : GameWindowFlags.Default, graphicsMode, DisplayDevice.Default);
 			Window.Visible = true;
 			Window.Closing += Window_Closing;
 
+			// Setup the render system
 			RenderSystem = new Renderer.RenderSystem(Window.WindowInfo, ProcessQueue.Enqueue);
 			Watch = new System.Diagnostics.Stopwatch();
 		}
@@ -428,11 +430,20 @@ namespace Triton.Graphics
 		/// <param name="width">Width of the render target</param>
 		/// <param name="height">Height of the render target</param>
 		/// <param name="pixelFormat">Desired pixel format of the render target</param>
-		/// <param name="numTargets">Numver of targets to create, useful for MRT rendering.</param>
+		/// <param name="numTargets">Numver of targets to create, useful for MRT rendering. Has to be >= 1</param>
 		/// <param name="createDepthBuffer">Set to true if a depth buffer is to be created</param>
 		/// <returns></returns>
 		public RenderTarget CreateRenderTarget(string name, int width, int height, Renderer.PixelInternalFormat pixelFormat, int numTargets, bool createDepthBuffer)
 		{
+			if (string.IsNullOrWhiteSpace(name))
+				throw new ArgumentNullException("name");
+			if (width <= 0)
+				throw new ArgumentException("width <= 0");
+			if (height <= 0)
+				throw new ArgumentException("height <= 0");
+			if (numTargets <= 0)
+				throw new ArgumentException("numTargets <= 0");
+
 			int[] textureHandles;
 
 			var renderTarget = new RenderTarget(width, height);

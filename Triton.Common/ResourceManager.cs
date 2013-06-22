@@ -69,6 +69,7 @@ namespace Triton.Common
 			{
 				var loader = ResourceLoaders[typeof(TResource)];
 
+				// Get or create the resource
 				Resource resource = null;
 				if (!Resources.TryGetValue(name, out resource))
 				{
@@ -78,6 +79,7 @@ namespace Triton.Common
 
 				resource.ReferenceCount += 1;
 
+				// Load the resource if neccecary
 				if (resource.State == ResourceLoadingState.Unloaded)
 				{
 					resource.State = ResourceLoadingState.Loading;
@@ -152,6 +154,14 @@ namespace Triton.Common
 				throw new ArgumentNullException("loader");
 
 			ResourceLoaders.Add(typeof(TResource), loader);
+		}
+
+		public void UnloadUnusedResources()
+		{
+			foreach (var resource in Resources.Where(r => r.Value.ReferenceCount == 0 && r.Value.State == ResourceLoadingState.Loaded))
+			{
+				Unload(resource.Value);
+			}
 		}
 
 		public bool AllResourcesLoaded()
