@@ -35,7 +35,7 @@ namespace Triton.Content.Meshes.Converters
 						// Read faces
 						if (subReader.Name == "faces")
 						{
-							int faceCount = int.Parse(subReader.GetAttribute("count"), CultureInfo.InvariantCulture);
+							int faceCount = StringConverter.Parse<int>(subReader.GetAttribute("count"));
 							subMesh.TriangleCount = faceCount;
 
 							using (var memStream = new MemoryStream(faceCount * sizeof(int) * 3))
@@ -46,9 +46,9 @@ namespace Triton.Content.Meshes.Converters
 									{
 										subReader.ReadToFollowing("face");
 
-										writer.Write(int.Parse(subReader.GetAttribute("v1"), CultureInfo.InvariantCulture));
-										writer.Write(int.Parse(subReader.GetAttribute("v2"), CultureInfo.InvariantCulture));
-										writer.Write(int.Parse(subReader.GetAttribute("v3"), CultureInfo.InvariantCulture));
+										writer.Write(StringConverter.Parse<int>(subReader.GetAttribute("v1")));
+										writer.Write(StringConverter.Parse<int>(subReader.GetAttribute("v2")));
+										writer.Write(StringConverter.Parse<int>(subReader.GetAttribute("v3")));
 									}
 
 									subMesh.Indices = memStream.GetBuffer();
@@ -60,7 +60,7 @@ namespace Triton.Content.Meshes.Converters
 						{
 							if (vertexCount == 0)
 							{
-								vertexCount = int.Parse(subReader.GetAttribute("vertexcount"), CultureInfo.InvariantCulture);
+								vertexCount = StringConverter.Parse<int>(subReader.GetAttribute("vertexcount"));
 								vertices = new Vertex[vertexCount];
 							}
 
@@ -112,11 +112,11 @@ namespace Triton.Content.Meshes.Converters
 								if (bonesReader.NodeType != XmlNodeType.Element || bonesReader.Name != "vertexboneassignment")
 									continue;
 
-								var index = int.Parse(bonesReader.GetAttribute("vertexindex"), CultureInfo.InvariantCulture);
+								var index = StringConverter.Parse<int>(bonesReader.GetAttribute("vertexindex"));
 								var vertex = vertices[index];
 
-								var boneIndex = float.Parse(bonesReader.GetAttribute("boneindex"), CultureInfo.InvariantCulture);
-								var boneWeight = float.Parse(bonesReader.GetAttribute("weight"), CultureInfo.InvariantCulture);
+								var boneIndex = StringConverter.Parse<float>(bonesReader.GetAttribute("boneindex"));
+								var boneWeight = StringConverter.Parse<float>(bonesReader.GetAttribute("weight"));
 
 								if (vertex.BoneCount == 0)
 								{
@@ -200,7 +200,7 @@ namespace Triton.Content.Meshes.Converters
 
 		float ParseFloat(string value)
 		{
-			return float.Parse(value, CultureInfo.InvariantCulture);
+			return StringConverter.Parse<float>(value);
 		}
 
 		Triton.Vector3 ReadVector3(XmlReader reader)
