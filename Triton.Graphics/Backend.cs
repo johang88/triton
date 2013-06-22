@@ -235,14 +235,14 @@ namespace Triton.Graphics
 					case OpCode.BindShaderVariableVector3:
 						{
 							var uniformHandle = reader.ReadInt32();
-							var v = reader.ReadVector4();
+							var v = reader.ReadVector3();
 							RenderSystem.SetUniform(uniformHandle, ref v);
 						}
 						break;
 					case OpCode.BindShaderVariableVector2:
 						{
 							var uniformHandle = reader.ReadInt32();
-							var v = reader.ReadVector4();
+							var v = reader.ReadVector2();
 							RenderSystem.SetUniform(uniformHandle, ref v);
 						}
 						break;
