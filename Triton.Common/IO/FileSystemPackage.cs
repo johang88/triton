@@ -11,8 +11,16 @@ namespace Triton.Common.IO
 		private readonly string Path;
 		public bool Writeable { get { return true; } }
 
-		public FileSystemPackage(string path)
+		private readonly FileSystem FileSystem;
+		private readonly FileSystemWatcher Watcher;
+
+		public FileSystemPackage(string path, FileSystem fileSystem)
 		{
+			if (fileSystem == null)
+				throw new ArgumentNullException("fileSystem");
+
+			FileSystem = fileSystem;
+
 			if (!path.EndsWith("\\"))
 			{
 				path = path + "\\";
@@ -24,6 +32,22 @@ namespace Triton.Common.IO
 			}
 
 			Path = path;
+
+			Watcher = new FileSystemWatcher(path);
+			Watcher.IncludeSubdirectories = true;
+			Watcher.NotifyFilter = NotifyFilters.LastWrite;
+			Watcher.Changed += Watcher_Changed;
+			Watcher.EnableRaisingEvents = true;
+		}
+
+		private void Watcher_Changed(object sender, FileSystemEventArgs e)
+		{
+			if (e.ChangeType != WatcherChangeTypes.Changed)
+				return;
+
+			var path = e.Name.Replace("\\", "/");
+
+			FileSystem.OnFileChanged(path);
 		}
 
 		public Stream OpenFile(string filename)

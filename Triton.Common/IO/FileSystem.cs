@@ -7,6 +7,8 @@ using System.IO;
 
 namespace Triton.Common.IO
 {
+	public delegate void FileChanged(string path);
+
 	/// <summary>
 	/// Abstract access to the file system by giving the ability to mount packages.
 	/// These packages can be locations in the location file system, zip files or even remote locations.
@@ -18,9 +20,24 @@ namespace Triton.Common.IO
 
 		public delegate IPackage PackageCreator(string path);
 
+		private readonly List<FileChanged> FileChangedListeners = new List<FileChanged>();
+
 		public FileSystem()
 		{
-			RegisterPackageType("FileSystem", p => new FileSystemPackage(p));
+			RegisterPackageType("FileSystem", p => new FileSystemPackage(p, this));
+		}
+
+		public void AddFileChangedListener(FileChanged callback)
+		{
+			if (callback == null)
+				throw new ArgumentNullException("callback");
+
+			FileChangedListeners.Add(callback);
+		}
+
+		internal void OnFileChanged(string path)
+		{
+			FileChangedListeners.ForEach(l => l(path));
 		}
 
 		public bool FileExists(string filename)
