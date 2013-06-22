@@ -79,7 +79,7 @@ namespace Triton.Graphics.Resources
 
 				Renderer.RenderSystem.OnLoadedCallback onResourceLoaded = (handle, success, errors) =>
 				{
-					Console.WriteLine(errors);
+					Common.Log.WriteLine(errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
 					resource.IsLoaded = true;
 
 					if (onLoaded != null)

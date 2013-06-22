@@ -101,7 +101,7 @@ namespace Triton.Graphics.Resources
 					}
 				}
 
-				Console.WriteLine(errors);
+				Common.Log.WriteLine(errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
 				resource.IsLoaded = true;
 
 				if (onLoaded != null)
