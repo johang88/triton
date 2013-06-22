@@ -35,6 +35,7 @@ namespace Test
 		public void Dispose()
 		{
 			WorkerThread.Stop();
+			ResourceManager.Dispose();
 		}
 
 		public void Run()

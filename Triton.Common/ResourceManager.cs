@@ -88,7 +88,7 @@ namespace Triton.Common
 						{
 							resource.State = ResourceLoadingState.Loaded;
 
-							Log.WriteLine("Loaded {0}", name);
+							Log.WriteLine("Loaded {0} of type {1}", name, typeof(TResource));
 
 							if (onLoaded != null)
 								onLoaded(r);
@@ -116,7 +116,7 @@ namespace Triton.Common
 					{
 						loader.Unload(resource);
 						resource.State = ResourceLoadingState.Unloaded;
-						Log.WriteLine("Unloaded {0}", resource.Name);
+						Log.WriteLine("Unloaded {0} of type {1}", resource.Name, resource.GetType());
 					};
 
 					if (async)
