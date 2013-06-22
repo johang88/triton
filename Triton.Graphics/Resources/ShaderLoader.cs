@@ -38,7 +38,12 @@ namespace Triton.Graphics.Resources
 		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
 		{
 			if (resource.IsLoaded && resource.Parameters == parameters)
+			{
+				if (onLoaded != null)
+					onLoaded(resource);
+
 				return;
+			}
 
 			var shader = (ShaderProgram)resource;
 
