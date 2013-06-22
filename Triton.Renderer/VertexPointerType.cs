@@ -4,13 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Triton.Graphics.Shaders
+namespace Triton.Renderer
 {
-	enum AttribType
+	public enum VertexPointerType : int
 	{
-		Position = 0,
-		Normal = 1,
-		Tangent = 2,
-		TexCoord = 3
+		Short = 5122,
+		Int = 5124,
+		Float = 5126,
 	}
 }

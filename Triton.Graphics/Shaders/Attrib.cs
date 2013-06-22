@@ -8,7 +8,7 @@ namespace Triton.Graphics.Shaders
 {
 	struct Attrib
 	{
-		public AttribType Type;
+		public Renderer.VertexFormatSemantic Type;
 		public string Name;
 	}
 }

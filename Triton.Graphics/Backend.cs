@@ -491,9 +491,9 @@ namespace Triton.Graphics
 			return renderTarget;
 		}
 
-		public BatchBuffer CreateBatchBuffer(int initialCount = 128)
+		public BatchBuffer CreateBatchBuffer(Renderer.VertexFormat vertexFormat = null, int initialCount = 128)
 		{
-			return new BatchBuffer(RenderSystem, initialCount);
+			return new BatchBuffer(RenderSystem, vertexFormat, initialCount);
 		}
 
 		/// <summary>

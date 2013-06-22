@@ -112,7 +112,7 @@ namespace Triton.Renderer.Meshes
 			Handles[index].Initialized = false;
 		}
 
-		public void SetData(int handle, int triangleCount, byte[] vertexData, byte[] indexData, bool stream)
+		public void SetData(int handle, VertexFormat vertexFormat, int triangleCount, byte[] vertexData, byte[] indexData, bool stream)
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
@@ -120,14 +120,12 @@ namespace Triton.Renderer.Meshes
 			if (id == -1 || Handles[index].Id != id)
 				return;
 
-			InitBuffers(index);
+			InitBuffers(index, vertexFormat);
 
 			// Load vertex data
 			GL.BindBuffer(BufferTarget.ArrayBuffer, Handles[index].VertexBufferID);
 			if (vertexData != null)
 				GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(vertexData.Length), vertexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
-
-			SetVertexFormat();
 
 			// Load index data
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handles[index].IndexBufferID);
@@ -139,7 +137,7 @@ namespace Triton.Renderer.Meshes
 			Handles[index].TriangleCount = triangleCount;
 		}
 
-		public void SetData(int handle, int triangleCount, float[] vertexData, int[] indexData, bool stream)
+		public void SetData(int handle, VertexFormat vertexFormat, int triangleCount, float[] vertexData, int[] indexData, bool stream)
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
@@ -147,14 +145,12 @@ namespace Triton.Renderer.Meshes
 			if (id == -1 || Handles[index].Id != id)
 				return;
 
-			InitBuffers(index);
+			InitBuffers(index, vertexFormat);
 
 			// Load vertex data
 			GL.BindBuffer(BufferTarget.ArrayBuffer, Handles[index].VertexBufferID);
 			if (vertexData != null)
 				GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(vertexData.Length), vertexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
-
-			SetVertexFormat();
 
 			// Load index data
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handles[index].IndexBufferID);
@@ -173,7 +169,7 @@ namespace Triton.Renderer.Meshes
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 		}
 
-		private void InitBuffers(int index)
+		private void InitBuffers(int index, VertexFormat vertexFormat)
 		{
 			if (!Handles[index].Initialized)
 			{
@@ -183,30 +179,23 @@ namespace Triton.Renderer.Meshes
 				GL.GenBuffers(1, out Handles[index].VertexBufferID);
 				GL.GenBuffers(1, out Handles[index].IndexBufferID);
 
+				GL.BindBuffer(BufferTarget.ArrayBuffer, Handles[index].VertexBufferID);
+				SetVertexFormat(vertexFormat);
+
 				Handles[index].Initialized = true;
 			}
 		}
 
-		private void SetVertexFormat()
+		private void SetVertexFormat(VertexFormat vertexFormat)
 		{
-			// Vertex format
-			var stride = 3 * sizeof(float) + 3 * sizeof(float) + 3 * sizeof(float) + 2 * sizeof(float);
+			for (var i = 0; i < vertexFormat.Elements.Length; i++)
+			{
+				var element = vertexFormat.Elements[i];
+				var index = (int)element.Semantic;
 
-			// Position
-			GL.EnableVertexAttribArray(0);
-			GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
-
-			// Normal
-			GL.EnableVertexAttribArray(1);
-			GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, stride, sizeof(float) * 3);
-
-			// Tangent
-			GL.EnableVertexAttribArray(2);
-			GL.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, stride, sizeof(float) * 6);
-
-			// Texcoord
-			GL.EnableVertexAttribArray(3);
-			GL.VertexAttribPointer(3, 2, VertexAttribPointerType.Float, false, stride, sizeof(float) * 9);
+				GL.EnableVertexAttribArray(index);
+				GL.VertexAttribPointer(index, element.Count, (VertexAttribPointerType)(int)element.Type, false, vertexFormat.Size, element.Offset);
+			}
 		}
 
 		public void GetMeshData(int handle, out int triangleCount, out int vertexArrayObjectId, out int indexBufferId)

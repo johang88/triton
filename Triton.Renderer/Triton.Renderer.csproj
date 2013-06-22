@@ -68,6 +68,10 @@
     <Compile Include="RenderTargets\RenderTargetManager.cs" />
     <Compile Include="Shaders\ShaderManager.cs" />
     <Compile Include="Textures\TextureManager.cs" />
+    <Compile Include="VertexPointerType.cs" />
+    <Compile Include="VertexFormat.cs" />
+    <Compile Include="VertexFormatElement.cs" />
+    <Compile Include="VertexFormatSemantic.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">

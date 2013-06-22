@@ -27,7 +27,9 @@ namespace Triton.Graphics
 
 		public Resources.Mesh Mesh { get; private set; }
 
-		internal BatchBuffer(Renderer.RenderSystem renderSystem, int initialTriangleCount = 128)
+		private readonly Renderer.VertexFormat VertexFormat;
+
+		internal BatchBuffer(Renderer.RenderSystem renderSystem, Renderer.VertexFormat vertexFormat = null, int initialTriangleCount = 128)
 		{
 			if (renderSystem == null)
 				throw new ArgumentNullException("renderSystem");
@@ -41,7 +43,21 @@ namespace Triton.Graphics
 			IndexData = new int[initialTriangleCount];
 
 			Mesh = new Resources.Mesh("_sys/batch_buffer_/" + Common.StringConverter.ToString(++BatchBufferCount) + ".mesh", "");
-			Mesh.Handles = new int[] { renderSystem.CreateMesh(0, null, null, true, null) };
+
+			if (vertexFormat != null)
+			{
+				VertexFormat = vertexFormat;
+			}
+			else
+			{
+				VertexFormat = new Renderer.VertexFormat(new Renderer.VertexFormatElement[]
+				{
+					new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Position, Renderer.VertexPointerType.Float, 3, 0),
+					new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.TexCoord, Renderer.VertexPointerType.Float, 2, sizeof(float) * 3),
+				});
+			}
+
+			Mesh.Handles = new int[] { renderSystem.CreateMesh(0, VertexFormat, null, null, true, null) };
 		}
 
 		public void Dispose()
@@ -76,7 +92,7 @@ namespace Triton.Graphics
 
 		public void End()
 		{
-			RenderSystem.SetMeshData(Mesh.Handles[0], TriangleCount, VertexData, IndexData, true, null);
+			RenderSystem.SetMeshData(Mesh.Handles[0], VertexFormat, TriangleCount, VertexData, IndexData, true, null);
 		}
 
 		public void AddVector2(float x, float y)
@@ -159,23 +175,15 @@ namespace Triton.Graphics
 			var firstIndex = DataCount / (3 + 3 + 3 + 2);
 
 			AddVector3(position.X, position.Y, 0);
-			AddVector3(0, 0, 0); // normal
-			AddVector3(0, 0, 0); // tangent
 			AddVector2(ref uvPositon);
 
 			AddVector3(position.X, position.Y + size.Y, 0);
-			AddVector3(0, 0, 0); // normal
-			AddVector3(0, 0, 0); // tangent
 			AddVector2(uvPositon.X, uvPositon.Y + uvSize.Y);
 
 			AddVector3(position.X + size.X, position.Y + size.Y, 0);
-			AddVector3(0, 0, 0); // normal
-			AddVector3(0, 0, 0); // tangent
 			AddVector2(uvPositon.X + uvSize.X, uvPositon.Y + uvSize.Y);
 
 			AddVector3(position.X + size.X, position.Y, 0);
-			AddVector3(0, 0, 0); // normal
-			AddVector3(0, 0, 0); // tangent
 			AddVector2(uvPositon.X + uvSize.X, uvPositon.Y);
 
 			AddTriangle(firstIndex, firstIndex + 1, firstIndex + 2);

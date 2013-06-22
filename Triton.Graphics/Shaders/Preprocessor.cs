@@ -74,7 +74,7 @@ namespace Triton.Graphics.Shaders
 
 			if (verb == "attrib")
 			{
-				var type = (AttribType)Enum.Parse(typeof(AttribType), match.Groups[4].Value, true);
+				var type = (Renderer.VertexFormatSemantic)Enum.Parse(typeof(Renderer.VertexFormatSemantic), match.Groups[4].Value, true);
 				Attribs.Add(new Attrib
 				{
 					Name = match.Groups[3].Value.Trim(),
@@ -104,7 +104,7 @@ namespace Triton.Graphics.Shaders
 			}
 			else if (verb == "out")
 			{
-				var type = (AttribType)Enum.Parse(typeof(AttribType), match.Groups[4].Value, true);
+				var type = (Renderer.VertexFormatSemantic)Enum.Parse(typeof(Renderer.VertexFormatSemantic), match.Groups[4].Value, true);
 				FragDataLocations.Add(new FragDataLocation
 				{
 					Name = match.Groups[3].Value.Trim(),
