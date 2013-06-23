@@ -16,5 +16,6 @@ namespace Triton.Renderer
 		Color,
 		BoneIndex,
 		BoneWeight,
+		Last
 	}
 }

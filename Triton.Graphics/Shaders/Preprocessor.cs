@@ -27,7 +27,7 @@ namespace Triton.Graphics.Shaders
 	class Preprocessor
 	{
 		private readonly Triton.Common.IO.FileSystem FileSystem;
-		private static Regex PreprocessorRegex = new Regex(@"^(attrib|uniform|sampler|out)\(([ \t\w]*),([ \t\w]*),([ \t\w]*)\);", RegexOptions.Multiline);
+		private static Regex PreprocessorRegex = new Regex(@"^(attrib|uniform|sampler|out)\(([ \t\w\[\]]*),([ \t\w]*),([ \t\w]*)\);", RegexOptions.Multiline);
 		private static Regex PreprocessorImportRegex = new Regex(@"^import\(([ \t\w /]+)\);", RegexOptions.Multiline);
 
 		private List<Attrib> Attribs;
@@ -85,12 +85,26 @@ namespace Triton.Graphics.Shaders
 			}
 			else if (verb == "uniform")
 			{
+				var type = match.Groups[2].Value;
+
 				Uniforms.Add(new Uniform
 				{
 					Name = match.Groups[3].Value.Trim(),
 					BindName = match.Groups[4].Value.Trim()
 				});
-				return string.Format("uniform {0} {1};", match.Groups[2].Value, match.Groups[3].Value);
+
+				if (type.Contains('['))
+				{
+					var index = type.IndexOf('[');
+					var size = type.Substring(index).Replace("[", "").Replace("]", "");
+					type = type.Substring(0, index);
+
+					return string.Format("uniform {0} {1}[{2}];", type, match.Groups[3].Value, size);
+				}
+				else
+				{
+					return string.Format("uniform {0} {1};", match.Groups[2].Value, match.Groups[3].Value);
+				}
 			}
 			else if (verb == "sampler")
 			{

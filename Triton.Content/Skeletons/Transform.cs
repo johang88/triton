@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Triton.Content.Skeletons
 {
-	class KeyFrame
+	struct Transform
 	{
-		public float Time;
-		public Transform Transform;
+		public Vector3 Position;
+		public Quaternion Orientation;
 	}
 }

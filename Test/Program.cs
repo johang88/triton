@@ -70,7 +70,7 @@ namespace Test
 		{
 			WaitHandle.WaitAll(new WaitHandle[] { RendererReady });
 
-			var shader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/generic");
+			var shader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/generic_skinned");
 			var tonemapShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/tonemap");
 			var highpassShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/highpass");
 			var blur1Shader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/blur1");
@@ -78,7 +78,9 @@ namespace Test
 
 			var mesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/strike_trooper_armor");
 			var mesh2 = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/strike_trooper_clothing");
-			var mesh3 = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/strike_trooper_visor");
+
+			var skeleton = ResourceManager.Load<Triton.Graphics.SkeletalAnimation.Skeleton>("skeletons/strike_trooper_armor");
+			var skeleton2 = ResourceManager.Load<Triton.Graphics.SkeletalAnimation.Skeleton>("skeletons/strike_trooper_clothing");
 
 			var texture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/strike_trooper_d");
 			var normalMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/strike_trooper_n");
@@ -111,6 +113,12 @@ namespace Test
 				Thread.Sleep(1);
 			}
 
+			var skeletonInstance = new Triton.Graphics.SkeletalAnimation.SkeletonInstance(skeleton);
+			var skeletonInstance2 = new Triton.Graphics.SkeletalAnimation.SkeletonInstance(skeleton2);
+
+			skeletonInstance.Play("idle");
+			skeletonInstance2.Play("idle");
+
 			var genericParams = new GenericParams();
 			genericParams.HandleMVP = shader.GetAliasedUniform("ModelViewProjection");
 			genericParams.HandleWorld = shader.GetAliasedUniform("World");
@@ -121,6 +129,7 @@ namespace Test
 			genericParams.HandleDiffuseTexture = shader.GetAliasedUniform("DiffuseTexture");
 			genericParams.HandleNormalMap = shader.GetAliasedUniform("NormalMap");
 			genericParams.HandleSpecularMap = shader.GetAliasedUniform("SpecularMap");
+			genericParams.HandleBones = shader.GetAliasedUniform("Bones");
 
 			var toneMapParams = new ToneMapParams();
 			toneMapParams.HandleMVP = tonemapShader.GetAliasedUniform("ModelViewProjection"); ;
@@ -161,6 +170,9 @@ namespace Test
 				var deltaTime = (float)stopWatch.Elapsed.TotalSeconds;
 				stopWatch.Restart();
 
+				skeletonInstance.Update(deltaTime);
+				skeletonInstance2.Update(deltaTime);
+
 				angle += 1.4f * deltaTime;
 
 				var world = Matrix4.CreateRotationX((float)(Math.PI / 2.0f)) * Matrix4.CreateRotationY(angle) * Matrix4.CreateTranslation(0, -100, 0.0f);
@@ -200,17 +212,14 @@ namespace Test
 				Backend.BindShaderVariable(genericParams.HandleNormalMap, 1);
 				Backend.BindShaderVariable(genericParams.HandleSpecularMap, 2);
 
+				Backend.BindShaderVariable(genericParams.HandleBones, ref skeletonInstance.FinalBoneTransforms);
 				foreach (var handle in mesh.Handles)
 				{
 					Backend.DrawMesh(handle);
 				}
 
+				Backend.BindShaderVariable(genericParams.HandleBones, ref skeletonInstance2.FinalBoneTransforms);
 				foreach (var handle in mesh2.Handles)
-				{
-					Backend.DrawMesh(handle);
-				}
-
-				foreach (var handle in mesh3.Handles)
 				{
 					Backend.DrawMesh(handle);
 				}
@@ -221,7 +230,7 @@ namespace Test
 
 				// Render high pass
 				Backend.BeginPass(blur1RenderTarget, new Vector4(0.25f, 0.5f, 0.75f, 1.0f));
-				Backend.BeginInstance(highpassShader.Handle, new int[] { fullSceneRenderTarget	.Textures[0].Handle });
+				Backend.BeginInstance(highpassShader.Handle, new int[] { fullSceneRenderTarget.Textures[0].Handle });
 				Backend.BindShaderVariable(highPassParams.HandleMVP, ref mvp);
 				Backend.BindShaderVariable(highPassParams.HandleDiffuseTexture, 0);
 
@@ -250,7 +259,7 @@ namespace Test
 
 				// Render tone mapped scene
 				Backend.BeginPass(null, new Vector4(0.25f, 0.5f, 0.75f, 1.0f));
-				Backend.BeginInstance(tonemapShader.Handle, new int[] { fullSceneRenderTarget.Textures[0].Handle, blur1RenderTarget .Textures[0].Handle});
+				Backend.BeginInstance(tonemapShader.Handle, new int[] { fullSceneRenderTarget.Textures[0].Handle, blur1RenderTarget.Textures[0].Handle });
 				Backend.BindShaderVariable(toneMapParams.HandleMVP, ref mvp);
 				Backend.BindShaderVariable(toneMapParams.HandleDiffuse, 0);
 				Backend.BindShaderVariable(toneMapParams.HandleBlur, 1);
@@ -313,6 +322,7 @@ namespace Test
 			public int HandleDiffuseTexture;
 			public int HandleNormalMap;
 			public int HandleSpecularMap;
+			public int HandleBones;
 		}
 
 		class HighPassParams

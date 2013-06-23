@@ -145,7 +145,6 @@ namespace Triton.Content.Meshes.Converters
 						}
 					}
 
-
 					if (hasBones)
 					{
 						subMesh.VertexFormat = new Renderer.VertexFormat(new Renderer.VertexFormatElement[]
@@ -154,8 +153,8 @@ namespace Triton.Content.Meshes.Converters
 							new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Normal, Renderer.VertexPointerType.Float, 3, sizeof(float) * 3),
 							new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Tangent, Renderer.VertexPointerType.Float, 3, sizeof(float) * 6),
 							new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.TexCoord, Renderer.VertexPointerType.Float, 2, sizeof(float) * 9),
-							new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.BoneIndex, Renderer.VertexPointerType.Float, 4, sizeof(float) * 12),
-							new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.BoneWeight, Renderer.VertexPointerType.Float, 4, sizeof(float) * 12 + sizeof(int) * 3 + sizeof(float) * 0),
+							new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.BoneIndex, Renderer.VertexPointerType.Float, 4, sizeof(float) * 11),
+							new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.BoneWeight, Renderer.VertexPointerType.Float, 4, sizeof(float) * 15),
 						});
 					}
 					else
@@ -169,7 +168,7 @@ namespace Triton.Content.Meshes.Converters
 						});
 					}
 
-					using (var memStream = new MemoryStream(vertexCount * (3 * sizeof(float) + 3 * sizeof(float) + 3 * sizeof(float) + 2 * sizeof(float))))
+					using (var memStream = new MemoryStream(vertexCount * subMesh.VertexFormat.Size))
 					{
 						using (var writer = new BinaryWriter(memStream))
 						{

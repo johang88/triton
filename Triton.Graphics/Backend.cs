@@ -201,13 +201,18 @@ namespace Triton.Graphics
 						{
 							var uniformHandle = reader.ReadInt32();
 
-							var m = new Matrix4(
-								reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
-								reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
-								reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
-								reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()
-								);
+							var m = reader.ReadMatrix4();
+							RenderSystem.SetUniform(uniformHandle, ref m);
+						}
+						break;
+					case OpCode.BindShaderVariableMatrix4Array:
+						{
+							var uniformHandle = reader.ReadInt32();
 
+							var count = reader.ReadInt32();
+							var m = new Matrix4[count];
+							for (var i = 0; i < count; i++)
+								m[i] = reader.ReadMatrix4();
 							RenderSystem.SetUniform(uniformHandle, ref m);
 						}
 						break;
@@ -354,25 +359,17 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableMatrix4);
 			PrimaryBuffer.Writer.Write(uniformHandle);
 
-			PrimaryBuffer.Writer.Write(value.Row0.X);
-			PrimaryBuffer.Writer.Write(value.Row0.Y);
-			PrimaryBuffer.Writer.Write(value.Row0.Z);
-			PrimaryBuffer.Writer.Write(value.Row0.W);
+			PrimaryBuffer.Writer.Write(ref value);
+		}
 
-			PrimaryBuffer.Writer.Write(value.Row1.X);
-			PrimaryBuffer.Writer.Write(value.Row1.Y);
-			PrimaryBuffer.Writer.Write(value.Row1.Z);
-			PrimaryBuffer.Writer.Write(value.Row1.W);
+		public void BindShaderVariable(int uniformHandle, ref Matrix4[] value)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableMatrix4Array);
+			PrimaryBuffer.Writer.Write(uniformHandle);
 
-			PrimaryBuffer.Writer.Write(value.Row2.X);
-			PrimaryBuffer.Writer.Write(value.Row2.Y);
-			PrimaryBuffer.Writer.Write(value.Row2.Z);
-			PrimaryBuffer.Writer.Write(value.Row2.W);
-
-			PrimaryBuffer.Writer.Write(value.Row3.X);
-			PrimaryBuffer.Writer.Write(value.Row3.Y);
-			PrimaryBuffer.Writer.Write(value.Row3.Z);
-			PrimaryBuffer.Writer.Write(value.Row3.W);
+			PrimaryBuffer.Writer.Write(value.Length);
+			for (var i = 0; i < value.Length; i++)
+				PrimaryBuffer.Writer.Write(ref value[i]);
 		}
 
 		/// <summary>
@@ -434,7 +431,7 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write(uniformHandle);
 			PrimaryBuffer.Writer.Write(value);
 		}
-		
+
 		/// <summary>
 		/// Draw a single mesh instance.
 		/// BeginInstance has to be called before calling this and all shader variables should be bound
@@ -507,6 +504,7 @@ namespace Triton.Graphics
 			BeginInstance,
 			EndInstance,
 			BindShaderVariableMatrix4,
+			BindShaderVariableMatrix4Array,
 			BindShaderVariableInt,
 			BindShaderVariableFloat,
 			BindShaderVariableVector2,

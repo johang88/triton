@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Triton.Content.Skeletons
+namespace Triton.Graphics.SkeletalAnimation
 {
-	class KeyFrame
+	struct KeyFrame
 	{
 		public float Time;
 		public Transform Transform;

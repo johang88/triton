@@ -54,6 +54,7 @@
     <Compile Include="Skeletons\KeyFrame.cs" />
     <Compile Include="Skeletons\Skeleton.cs" />
     <Compile Include="Skeletons\Track.cs" />
+    <Compile Include="Skeletons\Transform.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Triton.Common\Triton.Common.csproj">

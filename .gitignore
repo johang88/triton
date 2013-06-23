@@ -13,4 +13,5 @@ Rymdspelet.cfg
 Build/*
 Data/textures/*
 Data/models/*
+Data/skeletons/*
 Media/*

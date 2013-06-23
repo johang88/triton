@@ -40,7 +40,7 @@ namespace Triton.Content.Skeletons.Converters
 							nameToId.Add(name, index);
 
 							Vector3 position = Vector3.Zero;
-							Matrix4 transform = Matrix4.Identity;
+							Quaternion orientation = Quaternion.Identity;
 
 							var boneReader = bonesReader.ReadSubtree();
 							while (boneReader.Read())
@@ -58,13 +58,34 @@ namespace Triton.Content.Skeletons.Converters
 									boneReader.ReadToFollowing("axis");
 									var axis = ReadVector3(boneReader);
 
-									transform = Matrix4.CreateFromAxisAngle(axis, angle);
+									orientation = Quaternion.FromAxisAngle(axis, angle);
 								}
 							}
 
-							transform = transform * Matrix4.CreateTranslation(position);
+							skeleton.Bones.Insert(index, new Transform
+							{
+								Position = position,
+								Orientation = orientation
+							});
+						}
+					}
+					// Read hierarchy
+					else if (reader.Name == "bonehierarchy")
+					{
+						var boneReader = reader.ReadSubtree();
 
-							skeleton.Bones.Insert(index, transform);
+						while (boneReader.Read())
+						{
+							if (boneReader.NodeType != XmlNodeType.Element || boneReader.Name != "boneparent")
+								continue;
+
+							var index = nameToId[boneReader.GetAttribute("bone")];
+							var parentId = nameToId[boneReader.GetAttribute("parent")];
+
+							while (index >= skeleton.BoneParents.Count)
+								skeleton.BoneParents.Add(-1);
+
+							skeleton.BoneParents.Insert(index, parentId);
 						}
 					}
 					// Read animations
@@ -106,28 +127,31 @@ namespace Triton.Content.Skeletons.Converters
 
 									keyFrame.Time = StringConverter.Parse<float>(trackReader.GetAttribute("time"));
 
-									Vector3 position = Vector3.Zero;
-									Matrix4 transform = Matrix4.Identity;
+									var position = Vector3.Zero;
+									var orientation = Quaternion.Identity;
 
 									var keyframeReader = trackReader.ReadSubtree();
 									while (keyframeReader.Read())
 									{
-										if (keyframeReader.Name == "position")
+										if (keyframeReader.NodeType != XmlNodeType.Element)
+											continue;
+
+										if (keyframeReader.Name == "translate")
 										{
 											position = ReadVector3(keyframeReader);
 										}
-										else if (keyframeReader.Name == "rotation")
+										else if (keyframeReader.Name == "rotate")
 										{
 											var angle = StringConverter.Parse<float>(keyframeReader.GetAttribute("angle"));
 											keyframeReader.ReadToFollowing("axis");
 											var axis = ReadVector3(keyframeReader);
 
-											transform = Matrix4.CreateFromAxisAngle(axis, angle);
+											orientation = Quaternion.FromAxisAngle(axis, angle);
 										}
 									}
 
-									transform = transform * Matrix4.CreateTranslation(position);
-									keyFrame.Transform = transform;
+									keyFrame.Transform.Position = position;
+									keyFrame.Transform.Orientation = orientation;
 								}
 							}
 						}

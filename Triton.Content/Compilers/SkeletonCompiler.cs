@@ -50,7 +50,15 @@ namespace Triton.Content.Compilers
 				// Bones
 				foreach (var bone in skeleton.Bones)
 				{
-					writer.Write(bone);
+					writer.Write(bone.Position);
+					writer.Write(bone.Orientation);
+				}
+
+				// Parent count
+				writer.Write(skeleton.BoneParents.Count);
+				foreach (var parent in skeleton.BoneParents)
+				{
+					writer.Write(parent);
 				}
 
 				// Animation count
@@ -77,7 +85,8 @@ namespace Triton.Content.Compilers
 						foreach (var keyFrame in track.KeyFrames)
 						{
 							writer.Write(keyFrame.Time);
-							writer.Write(keyFrame.Transform);
+							writer.Write(keyFrame.Transform.Position);
+							writer.Write(keyFrame.Transform.Orientation);
 						}
 					}
 				}

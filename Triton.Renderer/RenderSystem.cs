@@ -268,6 +268,11 @@ namespace Triton.Renderer
 			GL.UniformMatrix4(handle, 1, false, ref value.Row0.X);
 		}
 
+		public void SetUniform(int handle, ref Matrix4[] value)
+		{
+			GL.UniformMatrix4(handle, value.Length, false, ref value[0].Row0.X);
+		}
+
 		public void Clear(Triton.Vector4 clearColor, bool depth)
 		{
 			GL.ClearColor(clearColor.X, clearColor.Y, clearColor.Z, clearColor.W);

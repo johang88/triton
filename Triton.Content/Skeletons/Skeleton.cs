@@ -8,7 +8,8 @@ namespace Triton.Content.Skeletons
 {
 	class Skeleton
 	{
-		public List<Matrix4> Bones = new List<Matrix4>();
+		public List<Transform> Bones = new List<Transform>();
+		public List<int> BoneParents = new List<int>();
 		public List<Animation> Animations = new List<Animation>();
 	}
 }
