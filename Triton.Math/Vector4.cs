@@ -29,12 +29,23 @@ namespace Triton
 			W = w;
 		}
 
+		public Vector4(Vector3 v, float w)
+			: this(v.X, v.Y, v.Z, w)
+		{
+		}
+
 		public float Length
 		{
 			get
 			{
 				return (float)System.Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
 			}
+		}
+
+		public Vector3 Xyz
+		{
+			get { return new Vector3(X, Y, Z); }
+			set { X = value.X; Y = value.Y; Z = value.Z; }
 		}
 
 		public Vector4 Normalize()
@@ -116,6 +127,59 @@ namespace Triton
 		public override string ToString()
 		{
 			return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}, {1}, {2}, {3}", X, Y, Z, W);
+		}
+
+		/// <summary>Transform a Vector by the given Matrix</summary>
+		/// <param name="vec">The vector to transform</param>
+		/// <param name="mat">The desired transformation</param>
+		/// <returns>The transformed vector</returns>
+		public static Vector4 Transform(Vector4 vec, Matrix4 mat)
+		{
+			Vector4 result;
+			Transform(ref vec, ref mat, out result);
+			return result;
+		}
+
+		/// <summary>Transform a Vector by the given Matrix</summary>
+		/// <param name="vec">The vector to transform</param>
+		/// <param name="mat">The desired transformation</param>
+		/// <param name="result">The transformed vector</param>
+		public static void Transform(ref Vector4 vec, ref Matrix4 mat, out Vector4 result)
+		{
+			result = new Vector4(
+				vec.X * mat.Row0.X + vec.Y * mat.Row1.X + vec.Z * mat.Row2.X + vec.W * mat.Row3.X,
+				vec.X * mat.Row0.Y + vec.Y * mat.Row1.Y + vec.Z * mat.Row2.Y + vec.W * mat.Row3.Y,
+				vec.X * mat.Row0.Z + vec.Y * mat.Row1.Z + vec.Z * mat.Row2.Z + vec.W * mat.Row3.Z,
+				vec.X * mat.Row0.W + vec.Y * mat.Row1.W + vec.Z * mat.Row2.W + vec.W * mat.Row3.W);
+		}
+
+		/// <summary>
+		/// Transforms a vector by a quaternion rotation.
+		/// </summary>
+		/// <param name="vec">The vector to transform.</param>
+		/// <param name="quat">The quaternion to rotate the vector by.</param>
+		/// <returns>The result of the operation.</returns>
+		public static Vector4 Transform(Vector4 vec, Quaternion quat)
+		{
+			Vector4 result;
+			Transform(ref vec, ref quat, out result);
+			return result;
+		}
+
+		/// <summary>
+		/// Transforms a vector by a quaternion rotation.
+		/// </summary>
+		/// <param name="vec">The vector to transform.</param>
+		/// <param name="quat">The quaternion to rotate the vector by.</param>
+		/// <param name="result">The result of the operation.</param>
+		public static void Transform(ref Vector4 vec, ref Quaternion quat, out Vector4 result)
+		{
+			Quaternion v = new Quaternion(vec.X, vec.Y, vec.Z, vec.W), i, t;
+			Quaternion.Invert(ref quat, out i);
+			Quaternion.Multiply(ref quat, ref v, out t);
+			Quaternion.Multiply(ref t, ref i, out v);
+
+			result = new Vector4(v.X, v.Y, v.Z, v.W);
 		}
 	}
 }

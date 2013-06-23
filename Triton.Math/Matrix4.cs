@@ -327,9 +327,150 @@ namespace Triton
 			return Matrix4.Mult(left, right);
 		}
 
+		public void Invert()
+		{
+			this = Matrix4.Invert(this);
+		}
+
+		public static Matrix4 Invert(Matrix4 mat)
+		{
+			int[] colIdx = { 0, 0, 0, 0 };
+			int[] rowIdx = { 0, 0, 0, 0 };
+			int[] pivotIdx = { -1, -1, -1, -1 };
+
+			// convert the matrix to an array for easy looping
+			float[,] inverse = {{mat.Row0.X, mat.Row0.Y, mat.Row0.Z, mat.Row0.W}, 
+                                {mat.Row1.X, mat.Row1.Y, mat.Row1.Z, mat.Row1.W}, 
+                                {mat.Row2.X, mat.Row2.Y, mat.Row2.Z, mat.Row2.W}, 
+                                {mat.Row3.X, mat.Row3.Y, mat.Row3.Z, mat.Row3.W} };
+			int icol = 0;
+			int irow = 0;
+			for (int i = 0; i < 4; i++)
+			{
+				// Find the largest pivot value
+				float maxPivot = 0.0f;
+				for (int j = 0; j < 4; j++)
+				{
+					if (pivotIdx[j] != 0)
+					{
+						for (int k = 0; k < 4; ++k)
+						{
+							if (pivotIdx[k] == -1)
+							{
+								float absVal = System.Math.Abs(inverse[j, k]);
+								if (absVal > maxPivot)
+								{
+									maxPivot = absVal;
+									irow = j;
+									icol = k;
+								}
+							}
+							else if (pivotIdx[k] > 0)
+							{
+								return mat;
+							}
+						}
+					}
+				}
+
+				++(pivotIdx[icol]);
+
+				// Swap rows over so pivot is on diagonal
+				if (irow != icol)
+				{
+					for (int k = 0; k < 4; ++k)
+					{
+						float f = inverse[irow, k];
+						inverse[irow, k] = inverse[icol, k];
+						inverse[icol, k] = f;
+					}
+				}
+
+				rowIdx[i] = irow;
+				colIdx[i] = icol;
+
+				float pivot = inverse[icol, icol];
+				// check for singular matrix
+				if (pivot == 0.0f)
+				{
+					throw new InvalidOperationException("Matrix is singular and cannot be inverted.");
+					//return mat;
+				}
+
+				// Scale row so it has a unit diagonal
+				float oneOverPivot = 1.0f / pivot;
+				inverse[icol, icol] = 1.0f;
+				for (int k = 0; k < 4; ++k)
+					inverse[icol, k] *= oneOverPivot;
+
+				// Do elimination of non-diagonal elements
+				for (int j = 0; j < 4; ++j)
+				{
+					// check this isn't on the diagonal
+					if (icol != j)
+					{
+						float f = inverse[j, icol];
+						inverse[j, icol] = 0.0f;
+						for (int k = 0; k < 4; ++k)
+							inverse[j, k] -= inverse[icol, k] * f;
+					}
+				}
+			}
+
+			for (int j = 3; j >= 0; --j)
+			{
+				int ir = rowIdx[j];
+				int ic = colIdx[j];
+				for (int k = 0; k < 4; ++k)
+				{
+					float f = inverse[k, ir];
+					inverse[k, ir] = inverse[k, ic];
+					inverse[k, ic] = f;
+				}
+			}
+
+			mat.Row0 = new Vector4(inverse[0, 0], inverse[0, 1], inverse[0, 2], inverse[0, 3]);
+			mat.Row1 = new Vector4(inverse[1, 0], inverse[1, 1], inverse[1, 2], inverse[1, 3]);
+			mat.Row2 = new Vector4(inverse[2, 0], inverse[2, 1], inverse[2, 2], inverse[2, 3]);
+			mat.Row3 = new Vector4(inverse[3, 0], inverse[3, 1], inverse[3, 2], inverse[3, 3]);
+			return mat;
+		}
+
 		public override string ToString()
 		{
 			return String.Format("{0}\n{1}\n{2}\n{3}", Row0, Row1, Row2, Row3);
+		}
+
+		/// <summary>
+		/// The first column of this matrix
+		/// </summary>
+		public Vector4 Column0
+		{
+			get { return new Vector4(Row0.X, Row1.X, Row2.X, Row3.X); }
+		}
+
+		/// <summary>
+		/// The second column of this matrix
+		/// </summary>
+		public Vector4 Column1
+		{
+			get { return new Vector4(Row0.Y, Row1.Y, Row2.Y, Row3.Y); }
+		}
+
+		/// <summary>
+		/// The third column of this matrix
+		/// </summary>
+		public Vector4 Column2
+		{
+			get { return new Vector4(Row0.Z, Row1.Z, Row2.Z, Row3.Z); }
+		}
+
+		/// <summary>
+		/// The fourth column of this matrix
+		/// </summary>
+		public Vector4 Column3
+		{
+			get { return new Vector4(Row0.W, Row1.W, Row2.W, Row3.W); }
 		}
 	}
 }
