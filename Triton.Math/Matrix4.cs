@@ -472,5 +472,18 @@ namespace Triton
 		{
 			get { return new Vector4(Row0.W, Row1.W, Row2.W, Row3.W); }
 		}
+
+		/// <summary>
+		/// Build a rotation matrix from a quaternion
+		/// </summary>
+		/// <param name="q">the quaternion</param>
+		/// <returns>A rotation matrix</returns>
+		public static Matrix4 Rotate(Quaternion q)
+		{
+			Vector3 axis;
+			float angle;
+			q.ToAxisAngle(out axis, out angle);
+			return CreateFromAxisAngle(axis, angle);
+		}
 	}
 }
