@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using Triton;
+using System.Collections.Concurrent;
 
 namespace Test
 {
@@ -15,26 +16,23 @@ namespace Test
 		private Triton.Graphics.Backend Backend;
 		private Triton.Common.IO.FileSystem FileSystem;
 		private Triton.Common.ResourceManager ResourceManager;
-		private WorkerThread WorkerThread;
 		private Thread UpdateThread;
 		private bool Running;
+		private ConcurrentQueue<Action> WorkQueue = new ConcurrentQueue<Action>();
 
 		public Program()
 		{
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File("Logs/Test.txt"));
 
-			WorkerThread = new WorkerThread();
-
 			FileSystem = new Triton.Common.IO.FileSystem();
-			ResourceManager = new Triton.Common.ResourceManager(WorkerThread.AddItem);
+			ResourceManager = new Triton.Common.ResourceManager(a => WorkQueue.Enqueue(a));
 
 			FileSystem.AddPackage("FileSystem", "../data");
 		}
 
 		public void Dispose()
 		{
-			WorkerThread.Stop();
 			ResourceManager.Dispose();
 		}
 
@@ -59,6 +57,15 @@ namespace Test
 
 				while (Backend.Process())
 				{
+					while (!WorkQueue.IsEmpty)
+					{
+						Action work;
+						if (WorkQueue.TryDequeue(out work))
+						{
+							work();
+						}
+					}
+
 					Thread.Sleep(1);
 				}
 
@@ -70,7 +77,8 @@ namespace Test
 		{
 			WaitHandle.WaitAll(new WaitHandle[] { RendererReady });
 
-			var shader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/generic_skinned");
+			var shaderSkinned = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/generic_skinned");
+			var shader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/generic");
 			var tonemapShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/tonemap");
 			var highpassShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/highpass");
 			var blur1Shader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/blur1");
@@ -78,13 +86,29 @@ namespace Test
 
 			var mesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/strike_trooper_armor");
 			var mesh2 = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/strike_trooper_clothing");
+			var mesh3 = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/assault_gun");
+			var mesh4 = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/strike_trooper_visor");
+
+			var wallsMesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/walls");
+			var floorMesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/floor");
+			var ceilingMesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/ceiling");
 
 			var skeleton = ResourceManager.Load<Triton.Graphics.SkeletalAnimation.Skeleton>("skeletons/strike_trooper_armor");
 			var skeleton2 = ResourceManager.Load<Triton.Graphics.SkeletalAnimation.Skeleton>("skeletons/strike_trooper_clothing");
+			var skeleton3 = ResourceManager.Load<Triton.Graphics.SkeletalAnimation.Skeleton>("skeletons/assault_gun");
+			var skeleton4 = ResourceManager.Load<Triton.Graphics.SkeletalAnimation.Skeleton>("skeletons/strike_trooper_visor");
 
 			var texture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/strike_trooper_d");
 			var normalMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/strike_trooper_n");
 			var specularMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/strike_trooper_s");
+
+			var wallDiffuse = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/wall_d");
+			var wallNormalMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/wall_n");
+			var wallSpecularMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/wall_s");
+
+			var floorDiffuse = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/floor_d");
+			var floorNormalMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/floor_n");
+			var floorSpecularMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/floor_s");
 
 			var lightDir = new Vector3(3.95f, -0.94f, 0.5f);
 			lightDir = lightDir.Normalize();
@@ -115,21 +139,36 @@ namespace Test
 
 			var skeletonInstance = new Triton.Graphics.SkeletalAnimation.SkeletonInstance(skeleton);
 			var skeletonInstance2 = new Triton.Graphics.SkeletalAnimation.SkeletonInstance(skeleton2);
+			var skeletonInstance3 = new Triton.Graphics.SkeletalAnimation.SkeletonInstance(skeleton3);
+			var skeletonInstance4 = new Triton.Graphics.SkeletalAnimation.SkeletonInstance(skeleton4);
 
-			skeletonInstance.Play("idle");
-			skeletonInstance2.Play("idle");
+			skeletonInstance.Play("run");
+			skeletonInstance2.Play("run");
+			skeletonInstance3.Play("run");
+			skeletonInstance4.Play("run");
 
 			var genericParams = new GenericParams();
-			genericParams.HandleMVP = shader.GetAliasedUniform("ModelViewProjection");
-			genericParams.HandleWorld = shader.GetAliasedUniform("World");
-			genericParams.HandleCameraPosition = shader.GetAliasedUniform("CameraPosition");
-			genericParams.HandleLightDir = shader.GetAliasedUniform("LightDir");
-			genericParams.HandleLightColor = shader.GetAliasedUniform("LightColor");
-			genericParams.HandleAmbientColor = shader.GetAliasedUniform("AmbientColor");
-			genericParams.HandleDiffuseTexture = shader.GetAliasedUniform("DiffuseTexture");
-			genericParams.HandleNormalMap = shader.GetAliasedUniform("NormalMap");
-			genericParams.HandleSpecularMap = shader.GetAliasedUniform("SpecularMap");
-			genericParams.HandleBones = shader.GetAliasedUniform("Bones");
+			genericParams.HandleMVP = shaderSkinned.GetAliasedUniform("ModelViewProjection");
+			genericParams.HandleWorld = shaderSkinned.GetAliasedUniform("World");
+			genericParams.HandleCameraPosition = shaderSkinned.GetAliasedUniform("CameraPosition");
+			genericParams.HandleLightDir = shaderSkinned.GetAliasedUniform("LightDir");
+			genericParams.HandleLightColor = shaderSkinned.GetAliasedUniform("LightColor");
+			genericParams.HandleAmbientColor = shaderSkinned.GetAliasedUniform("AmbientColor");
+			genericParams.HandleDiffuseTexture = shaderSkinned.GetAliasedUniform("DiffuseTexture");
+			genericParams.HandleNormalMap = shaderSkinned.GetAliasedUniform("NormalMap");
+			genericParams.HandleSpecularMap = shaderSkinned.GetAliasedUniform("SpecularMap");
+			genericParams.HandleBones = shaderSkinned.GetAliasedUniform("Bones");
+
+			var genericParams2 = new GenericParams();
+			genericParams2.HandleMVP = shader.GetAliasedUniform("ModelViewProjection");
+			genericParams2.HandleWorld = shader.GetAliasedUniform("World");
+			genericParams2.HandleCameraPosition = shader.GetAliasedUniform("CameraPosition");
+			genericParams2.HandleLightDir = shader.GetAliasedUniform("LightDir");
+			genericParams2.HandleLightColor = shader.GetAliasedUniform("LightColor");
+			genericParams2.HandleAmbientColor = shader.GetAliasedUniform("AmbientColor");
+			genericParams2.HandleDiffuseTexture = shader.GetAliasedUniform("DiffuseTexture");
+			genericParams2.HandleNormalMap = shader.GetAliasedUniform("NormalMap");
+			genericParams2.HandleSpecularMap = shader.GetAliasedUniform("SpecularMap");
 
 			var toneMapParams = new ToneMapParams();
 			toneMapParams.HandleMVP = tonemapShader.GetAliasedUniform("ModelViewProjection"); ;
@@ -158,7 +197,7 @@ namespace Test
 			blur2Params.TexelSize = blur2Shader.GetAliasedUniform("TexelSize");
 
 			var angle = 0.0f;
-			var cameraPos = new Vector3(0, 1.8f, 200);
+			var cameraPos = new Vector3(0, 1.8f, -2.5f);
 
 			var lightIntensityDir = 1.0f;
 
@@ -174,12 +213,6 @@ namespace Test
 				skeletonInstance2.Update(deltaTime);
 
 				angle += 1.4f * deltaTime;
-
-				var world = Matrix4.CreateRotationX((float)(Math.PI / 2.0f)) * Matrix4.CreateRotationY(angle) * Matrix4.CreateTranslation(0, -100, 0.0f);
-				var view = Matrix4.LookAt(cameraPos, Vector3.Zero, Vector3.UnitY);
-				var projection = Matrix4.CreatePerspectiveFieldOfView(1.22173f, 1280.0f / 720.0f, 0.001f, 1000.0f);
-
-				Matrix4 mvp = world * view * projection;
 
 				var targetIntensity = lightIntensityDir > 0.0f ? 2.0f : 0.2f;
 				if (lightIntensityDir > 0.0f && lightIntensity >= 1.9f)
@@ -197,8 +230,54 @@ namespace Test
 				Backend.BeginScene();
 
 				// Render main scene
+				var world = Matrix4.CreateFromAxisAngle(Vector3.UnitY, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 0, 0);
+				var view = Matrix4.LookAt(cameraPos, cameraPos + Vector3.UnitZ, Vector3.UnitY);
+				var projection = Matrix4.CreatePerspectiveFieldOfView(1.22173f, 1280.0f / 720.0f, 0.001f, 1000.0f);
+
+				Matrix4 mvp = world * view * projection;
+
 				Backend.BeginPass(fullSceneRenderTarget, new Vector4(0.5f, 0.5f, 0.6f, 1.0f));
-				Backend.BeginInstance(shader.Handle, new int[] { texture.Handle, normalMap.Handle, specularMap.Handle });
+
+				// Render corridor
+				Backend.BeginInstance(shader.Handle, new int[] { wallDiffuse.Handle, wallNormalMap.Handle, wallSpecularMap.Handle });
+
+				Backend.BindShaderVariable(genericParams2.HandleMVP, ref mvp);
+				Backend.BindShaderVariable(genericParams2.HandleWorld, ref world);
+				Backend.BindShaderVariable(genericParams2.HandleCameraPosition, ref cameraPos);
+
+				Backend.BindShaderVariable(genericParams2.HandleLightDir, ref lightDir);
+				Backend.BindShaderVariable(genericParams2.HandleLightColor, ref finalLightColor);
+				Backend.BindShaderVariable(genericParams2.HandleAmbientColor, ref ambientColor);
+
+				Backend.BindShaderVariable(genericParams2.HandleDiffuseTexture, 0);
+				Backend.BindShaderVariable(genericParams2.HandleNormalMap, 1);
+				Backend.BindShaderVariable(genericParams2.HandleSpecularMap, 2);
+
+				foreach (var handle in wallsMesh.Handles)
+				{
+					Backend.DrawMesh(handle);
+				}
+
+				Backend.BeginInstance(shader.Handle, new int[] { floorDiffuse.Handle, floorNormalMap.Handle, floorSpecularMap.Handle });
+
+				foreach (var handle in ceilingMesh.Handles)
+				{
+					Backend.DrawMesh(handle);
+				}
+
+				foreach (var handle in floorMesh.Handles)
+				{
+					Backend.DrawMesh(handle);
+				}
+
+				Backend.EndInstance();
+
+				// Render soldier
+				world = Matrix4.CreateRotationY(angle) * Matrix4.CreateTranslation(0, 0, 0);
+
+				mvp = world * view * projection;
+
+				Backend.BeginInstance(shaderSkinned.Handle, new int[] { texture.Handle, normalMap.Handle, specularMap.Handle });
 
 				Backend.BindShaderVariable(genericParams.HandleMVP, ref mvp);
 				Backend.BindShaderVariable(genericParams.HandleWorld, ref world);
@@ -223,6 +302,8 @@ namespace Test
 				{
 					Backend.DrawMesh(handle);
 				}
+
+				Backend.EndInstance();
 
 				Backend.EndPass();
 

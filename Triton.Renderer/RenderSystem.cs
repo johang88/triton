@@ -107,24 +107,34 @@ namespace Triton.Renderer
 
 		public void SetTextureData(int handle, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, OnLoadedCallback loadedCallback)
 		{
-			AddToWorkQueue(() =>
+			Action loadAction = () =>
 			{
 				TextureManager.SetPixelData(handle, width, height, data, format, internalFormat, type);
 
 				if (loadedCallback != null)
 					loadedCallback(handle, true, "");
-			});
+			};
+
+			if (Context.IsCurrent)
+				loadAction();
+			else
+				AddToWorkQueue(loadAction);
 		}
 
 		public void SetTextureData(int handle, int width, int height, IntPtr data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, OnLoadedCallback loadedCallback)
 		{
-			AddToWorkQueue(() =>
+			Action loadAction = () =>
 			{
 				TextureManager.SetPixelData(handle, width, height, data, format, internalFormat, type);
 
 				if (loadedCallback != null)
 					loadedCallback(handle, true, "");
-			});
+			};
+
+			if (Context.IsCurrent)
+				loadAction();
+			else
+				AddToWorkQueue(loadAction);
 		}
 
 		public void BindTexture(int handle, int textureUnit)

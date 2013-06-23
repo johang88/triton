@@ -32,9 +32,6 @@ namespace Triton.Graphics.SkeletalAnimation
 			for (var i = 1; i < InverseTransforms.Length; i++)
 			{
 				var parentIndex = Skeleton.BoneParents[i];
-				if (parentIndex == -1)
-					continue;
-
 				InverseTransforms[i].Orientation = InverseTransforms[parentIndex].Orientation * InverseTransforms[i].Orientation;
 				InverseTransforms[i].Position = Vector3.Transform(InverseTransforms[i].Position, InverseTransforms[parentIndex].Orientation) + InverseTransforms[parentIndex].Position;
 			}
@@ -97,6 +94,7 @@ namespace Triton.Graphics.SkeletalAnimation
 				var keyFrame = CurrentAnimation.Tracks[t].KeyFrames[keyFrameIndex];
 				var transform = keyFrame.Transform;
 
+				// Interpolate between key frames if neccecary<
 				if (keyFrameIndex < CurrentAnimation.Tracks[t].KeyFrames.Length - 1)
 				{
 					var keyFrame2 = CurrentAnimation.Tracks[t].KeyFrames[keyFrameIndex + 1];

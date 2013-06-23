@@ -74,7 +74,6 @@ namespace Triton.Graphics.Resources
 				}
 
 				var data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-
 				Renderer.RenderSystem.OnLoadedCallback onResourceLoaded = (handle, success, errors) =>
 				{
 					Common.Log.WriteLine(errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
