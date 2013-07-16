@@ -10,10 +10,12 @@ out vec3 tangent;
 out vec3 bitangent;
 out vec2 texCoord;
 out vec3 cameraDirection;
+out vec3 lightDir;
 
 uniform(mat4x4, modelViewProjection, ModelViewProjection);
 uniform(mat4x4, world, World);
 uniform(vec3, cameraPosition, CameraPosition);
+uniform(vec3, lightPosition, LightDir);
 
 void main()
 {
@@ -26,6 +28,8 @@ void main()
 	vec3 worldPosition = (world * vec4(iPosition, 1)).xyz;
 	
 	cameraDirection = normalize(cameraPosition - worldPosition);
+	
+	lightDir = lightPosition.xyz - worldPosition.xyz;
 	
 	gl_Position = modelViewProjection * vec4(iPosition, 1);
 }
@@ -40,10 +44,10 @@ in vec3 tangent;
 in vec3 bitangent;
 in vec2 texCoord;
 in vec3 cameraDirection;
+in vec3 lightDir;
 
 out(vec4, oColor, 0);
 
-uniform(vec3, lightDir, LightDir);
 uniform(vec3, lightColor, LightColor);
 uniform(vec3, ambientColor, AmbientColor);
 
@@ -67,9 +71,14 @@ void main()
 	
 	vec3 specular = texture2D(samplerSpecular, texCoord).xyz;
 
-	vec2 ls = cook_torrance(N2, normalize(cameraDirection), normalize(-lightDir), specular.x, 0.23f);
+	vec3 l = normalize(lightDir);
+	vec2 ls = cook_torrance(N2, normalize(cameraDirection), l, specular.x, 0.23f);
 	
-	vec3 c = (ambientColor + ls.x) * (lightColor * ls.y * specular.xyz + diffuse.xyz);
+	float attenuation = length(lightDir) / 5.0f;
+	attenuation = saturate(1.0f - (attenuation * attenuation));
+	ls = ls * attenuation.xx;
+	
+	vec3 c = (ambient + ls.x) * (lightColor * ls.y * specular.xyz + diffuse.xyz);
 
 	c = pow(c, (1.0f / 2.2f).xxx);
 	oColor = vec4(c, 1.0f);

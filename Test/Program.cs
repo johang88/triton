@@ -11,22 +11,26 @@ namespace Test
 {
 	class Program : IDisposable
 	{
+		const int Width = 1280;
+		const int Height = 720;
 		private ManualResetEvent RendererReady = new ManualResetEvent(false);
 
 		private Triton.Graphics.Backend Backend;
 		private Triton.Common.IO.FileSystem FileSystem;
 		private Triton.Common.ResourceManager ResourceManager;
+		private WorkerThread Worker = new WorkerThread();
 		private Thread UpdateThread;
 		private bool Running;
-		private ConcurrentQueue<Action> WorkQueue = new ConcurrentQueue<Action>();
 
 		public Program()
 		{
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File("Logs/Test.txt"));
 
+			Worker = new WorkerThread();
+
 			FileSystem = new Triton.Common.IO.FileSystem();
-			ResourceManager = new Triton.Common.ResourceManager(a => WorkQueue.Enqueue(a));
+			ResourceManager = new Triton.Common.ResourceManager(Worker.AddItem);
 
 			FileSystem.AddPackage("FileSystem", "../data");
 		}
@@ -49,7 +53,7 @@ namespace Test
 
 		void RenderLoop()
 		{
-			using (Backend = new Triton.Graphics.Backend(ResourceManager, 1280, 720, "Awesome Test Application", false))
+			using (Backend = new Triton.Graphics.Backend(ResourceManager, Width, Height, "Awesome Test Application", false))
 			{
 				Triton.Graphics.Resources.ResourceLoaders.Init(ResourceManager, Backend, FileSystem);
 
@@ -57,15 +61,6 @@ namespace Test
 
 				while (Backend.Process())
 				{
-					while (!WorkQueue.IsEmpty)
-					{
-						Action work;
-						if (WorkQueue.TryDequeue(out work))
-						{
-							work();
-						}
-					}
-
 					Thread.Sleep(1);
 				}
 
@@ -110,19 +105,20 @@ namespace Test
 			var floorNormalMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/floor_n");
 			var floorSpecularMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/floor_s");
 
-			var lightDir = new Vector3(3.95f, -0.94f, 0.5f);
-			lightDir = lightDir.Normalize();
-			var lightColor = new Vector3(1.2f, 1.12f, 1.15f);
-			var ambientColor = new Vector3(0.75f, 0.75f, 0.75f);
-			var finalLightColor = lightColor;
+			var lightDir = new Vector3(0.0f, 2.0f, 0.0f);
+			var lightColor = new Vector3(1.6f, 1.12f, 1.15f) * 2.0f;
+			var ambientColor = new Vector3(0.2f, 0.2f, 0.3f);
 
-			var lightIntensity = 1.0f;
+			var lightStartPos = lightDir;
+			var lightEndPos = lightDir + new Vector3(0, 0, 9.0f);
+			var lightAlpha = 0.0f;
+			var lightAlphaDir = 1.0f;
 
-			var fullSceneRenderTarget = Backend.CreateRenderTarget("full_scene", 1280, 720, Triton.Renderer.PixelInternalFormat.Rgba16f, 1, true);
+			var fullSceneRenderTarget = Backend.CreateRenderTarget("full_scene", Width, Height, Triton.Renderer.PixelInternalFormat.Rgba16f, 1, true);
 
-			var blurRenderTargetSize = new Vector2(1280 / 4.0f, 720 / 4.0f);
-			var blur1RenderTarget = Backend.CreateRenderTarget("blur1", 1280 / 4, 720 / 4, Triton.Renderer.PixelInternalFormat.Rgba16f, 1, true);
-			var blur2RenderTarget = Backend.CreateRenderTarget("blur2", 1280 / 4, 720 / 4, Triton.Renderer.PixelInternalFormat.Rgba16f, 1, true);
+			var blurRenderTargetSize = new Vector2(Width / 4.0f, Height / 4.0f);
+			var blur1RenderTarget = Backend.CreateRenderTarget("blur1", Width / 4, Height/ 4, Triton.Renderer.PixelInternalFormat.Rgba16f, 1, true);
+			var blur2RenderTarget = Backend.CreateRenderTarget("blur2", Width / 4, Height / 4, Triton.Renderer.PixelInternalFormat.Rgba16f, 1, true);
 
 			var renderTargets = new Triton.Graphics.RenderTarget[] { fullSceneRenderTarget, blur1RenderTarget, blur2RenderTarget };
 
@@ -199,8 +195,6 @@ namespace Test
 			var angle = 0.0f;
 			var cameraPos = new Vector3(0, 1.8f, -2.5f);
 
-			var lightIntensityDir = 1.0f;
-
 			var stopWatch = new System.Diagnostics.Stopwatch();
 			stopWatch.Start();
 
@@ -214,68 +208,31 @@ namespace Test
 
 				angle += 1.4f * deltaTime;
 
-				var targetIntensity = lightIntensityDir > 0.0f ? 2.0f : 0.2f;
-				if (lightIntensityDir > 0.0f && lightIntensity >= 1.9f)
-				{
-					lightIntensityDir = -1.0f;
-				}
-				else if (lightIntensityDir < 0.0f && lightIntensity <= 0.55f)
-				{
-					lightIntensityDir = 1.0f;
-				}
+				lightAlpha += deltaTime * 0.4f * lightAlphaDir;
+				if (lightAlpha >= 1.0f)
+					lightAlphaDir = -1.0f;
+				else if (lightAlpha <= 0.0f)
+					lightAlphaDir = 1.0f;
 
-				lightIntensity = lightIntensity + 2.0f * deltaTime * (targetIntensity - lightIntensity);
-				finalLightColor = lightColor * lightIntensity * 2;
+				lightDir = Vector3.Lerp(lightStartPos, lightEndPos, lightAlpha);
 
 				Backend.BeginScene();
 
 				// Render main scene
-				var world = Matrix4.CreateFromAxisAngle(Vector3.UnitY, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 0, 0);
+				
 				var view = Matrix4.LookAt(cameraPos, cameraPos + Vector3.UnitZ, Vector3.UnitY);
-				var projection = Matrix4.CreatePerspectiveFieldOfView(1.22173f, 1280.0f / 720.0f, 0.001f, 1000.0f);
+				var projection = Matrix4.CreatePerspectiveFieldOfView(1.22173f, Width / (float)Height, 0.001f, 1000.0f);
 
-				Matrix4 mvp = world * view * projection;
 
-				Backend.BeginPass(fullSceneRenderTarget, new Vector4(0.5f, 0.5f, 0.6f, 1.0f));
+				Backend.BeginPass(fullSceneRenderTarget, new Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 
-				// Render corridor
-				Backend.BeginInstance(shader.Handle, new int[] { wallDiffuse.Handle, wallNormalMap.Handle, wallSpecularMap.Handle });
-
-				Backend.BindShaderVariable(genericParams2.HandleMVP, ref mvp);
-				Backend.BindShaderVariable(genericParams2.HandleWorld, ref world);
-				Backend.BindShaderVariable(genericParams2.HandleCameraPosition, ref cameraPos);
-
-				Backend.BindShaderVariable(genericParams2.HandleLightDir, ref lightDir);
-				Backend.BindShaderVariable(genericParams2.HandleLightColor, ref finalLightColor);
-				Backend.BindShaderVariable(genericParams2.HandleAmbientColor, ref ambientColor);
-
-				Backend.BindShaderVariable(genericParams2.HandleDiffuseTexture, 0);
-				Backend.BindShaderVariable(genericParams2.HandleNormalMap, 1);
-				Backend.BindShaderVariable(genericParams2.HandleSpecularMap, 2);
-
-				foreach (var handle in wallsMesh.Handles)
-				{
-					Backend.DrawMesh(handle);
-				}
-
-				Backend.BeginInstance(shader.Handle, new int[] { floorDiffuse.Handle, floorNormalMap.Handle, floorSpecularMap.Handle });
-
-				foreach (var handle in ceilingMesh.Handles)
-				{
-					Backend.DrawMesh(handle);
-				}
-
-				foreach (var handle in floorMesh.Handles)
-				{
-					Backend.DrawMesh(handle);
-				}
-
-				Backend.EndInstance();
+				var world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 12.0f);
+				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallDiffuse, wallNormalMap, wallSpecularMap, floorDiffuse, floorNormalMap, floorSpecularMap, ref lightDir, ref ambientColor, ref lightColor, genericParams2, ref cameraPos, ref world, ref view, ref projection);
 
 				// Render soldier
-				world = Matrix4.CreateRotationY(angle) * Matrix4.CreateTranslation(0, 0, 0);
+				world = Matrix4.CreateFromAxisAngle(Vector3.UnitY, (float)(Math.PI * (lightAlphaDir > 0.0f ? 2.0f : 1.0f))) * Matrix4.CreateTranslation(0, 0, lightDir.Z);
 
-				mvp = world * view * projection;
+				var mvp = world * view * projection;
 
 				Backend.BeginInstance(shaderSkinned.Handle, new int[] { texture.Handle, normalMap.Handle, specularMap.Handle });
 
@@ -284,7 +241,7 @@ namespace Test
 				Backend.BindShaderVariable(genericParams.HandleCameraPosition, ref cameraPos);
 
 				Backend.BindShaderVariable(genericParams.HandleLightDir, ref lightDir);
-				Backend.BindShaderVariable(genericParams.HandleLightColor, ref finalLightColor);
+				Backend.BindShaderVariable(genericParams.HandleLightColor, ref lightColor);
 				Backend.BindShaderVariable(genericParams.HandleAmbientColor, ref ambientColor);
 
 				Backend.BindShaderVariable(genericParams.HandleDiffuseTexture, 0);
@@ -360,6 +317,45 @@ namespace Test
 
 				Thread.Sleep(1);
 			}
+		}
+
+		private void RenderCorridor(Triton.Graphics.Resources.ShaderProgram shader, Triton.Graphics.Resources.Mesh wallsMesh, Triton.Graphics.Resources.Mesh floorMesh, Triton.Graphics.Resources.Mesh ceilingMesh, Triton.Graphics.Resources.Texture wallDiffuse, Triton.Graphics.Resources.Texture wallNormalMap, Triton.Graphics.Resources.Texture wallSpecularMap, Triton.Graphics.Resources.Texture floorDiffuse, Triton.Graphics.Resources.Texture floorNormalMap, Triton.Graphics.Resources.Texture floorSpecularMap, ref Vector3 lightDir, ref Vector3 ambientColor, ref Vector3 finalLightColor, GenericParams genericParams2, ref Vector3 cameraPos, ref Matrix4 world, ref Matrix4 view, ref Matrix4 projection)
+		{
+			// Render corridor
+			Matrix4 mvp = world * view * projection;
+			Backend.BeginInstance(shader.Handle, new int[] { wallDiffuse.Handle, wallNormalMap.Handle, wallSpecularMap.Handle });
+
+			Backend.BindShaderVariable(genericParams2.HandleMVP, ref mvp);
+			Backend.BindShaderVariable(genericParams2.HandleWorld, ref world);
+			Backend.BindShaderVariable(genericParams2.HandleCameraPosition, ref cameraPos);
+
+			Backend.BindShaderVariable(genericParams2.HandleLightDir, ref lightDir);
+			Backend.BindShaderVariable(genericParams2.HandleLightColor, ref finalLightColor);
+			Backend.BindShaderVariable(genericParams2.HandleAmbientColor, ref ambientColor);
+
+			Backend.BindShaderVariable(genericParams2.HandleDiffuseTexture, 0);
+			Backend.BindShaderVariable(genericParams2.HandleNormalMap, 1);
+			Backend.BindShaderVariable(genericParams2.HandleSpecularMap, 2);
+
+			foreach (var handle in wallsMesh.Handles)
+			{
+				Backend.DrawMesh(handle);
+			}
+
+			Backend.EndInstance();
+			Backend.BeginInstance(shader.Handle, new int[] { floorDiffuse.Handle, floorNormalMap.Handle, floorSpecularMap.Handle });
+
+			foreach (var handle in ceilingMesh.Handles)
+			{
+				Backend.DrawMesh(handle);
+			}
+
+			foreach (var handle in floorMesh.Handles)
+			{
+				Backend.DrawMesh(handle);
+			}
+
+			Backend.EndInstance();
 		}
 
 		static void Main(string[] args)

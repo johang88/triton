@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 
 namespace Triton.Graphics.Resources
@@ -74,6 +75,13 @@ namespace Triton.Graphics.Resources
 				}
 
 				var data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
+
+				var length = data.Stride * data.Height;
+				var bytes = new byte[length];
+
+				Marshal.Copy(data.Scan0, bytes, 0, length);
+				bitmap.UnlockBits(data);
+
 				Renderer.RenderSystem.OnLoadedCallback onResourceLoaded = (handle, success, errors) =>
 				{
 					Common.Log.WriteLine(errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
@@ -83,9 +91,9 @@ namespace Triton.Graphics.Resources
 				};
 
 				if (texture.Handle == -1)
-					texture.Handle = Backend.RenderSystem.CreateTexture(bitmap.Width, bitmap.Height, data.Scan0, pf, pif, pt, onResourceLoaded);
+					texture.Handle = Backend.RenderSystem.CreateTexture(bitmap.Width, bitmap.Height, bytes, pf, pif, pt, onResourceLoaded);
 				else
-					Backend.RenderSystem.SetTextureData(texture.Handle, bitmap.Width, bitmap.Height, data.Scan0, pf, pif, pt, onResourceLoaded);
+					Backend.RenderSystem.SetTextureData(texture.Handle, bitmap.Width, bitmap.Height, bytes, pf, pif, pt, onResourceLoaded);
 
 				resource.Parameters = parameters;
 			}

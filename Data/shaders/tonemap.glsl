@@ -43,7 +43,7 @@ void main()
 	vec3 blurColor = texture2D(samplerBlur, texCoord).xyz;
 	blurColor = pow(blurColor, (2.2f).xxx);
 	
-	float exposureBias = 2.0f;
+	float exposureBias = 4.0f;
 	vec3 toneMappedScene = tonemap(sceneColor * exposureBias);
 	
 	vec3 whiteScale = 1.0f / tonemap(W.xxx);
