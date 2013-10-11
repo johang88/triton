@@ -72,19 +72,13 @@ namespace Test
 		{
 			WaitHandle.WaitAll(new WaitHandle[] { RendererReady });
 
-			var shaderSkinned = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/generic_skinned");
 			var shader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/generic");
 			var deferredShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred");
-
-			var mesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/strike_trooper_armor");
-			var mesh2 = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/strike_trooper_clothing");
+			var finalPassShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/final");
 
 			var wallsMesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/walls");
 			var floorMesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/floor");
 			var ceilingMesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/ceiling");
-
-			var skeleton = ResourceManager.Load<Triton.Graphics.SkeletalAnimation.Skeleton>("skeletons/strike_trooper_armor");
-			var skeleton2 = ResourceManager.Load<Triton.Graphics.SkeletalAnimation.Skeleton>("skeletons/strike_trooper_clothing");
 
 			var texture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/strike_trooper_d");
 			var normalMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/strike_trooper_n");
@@ -104,7 +98,8 @@ namespace Test
 			var lightAlpha = 0.0f;
 			var lightAlphaDir = 1.0f;
 
-			var fullSceneRenderTarget = Backend.CreateRenderTarget("full_scene", Width, Height, Triton.Renderer.PixelInternalFormat.Rgba16f, 3, true);
+			var fullSceneRenderTarget = Backend.CreateRenderTarget("full_scene", Width, Height, Triton.Renderer.PixelInternalFormat.Rgba32f, 3, true);
+			var lightAccumulationRenderTarget = Backend.CreateRenderTarget("light_accumulation", Width, Height, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, true);
 
 			var batchBuffer = Backend.CreateBatchBuffer();
 
@@ -117,19 +112,6 @@ namespace Test
 				Thread.Sleep(1);
 			}
 
-			var skeletonInstance = new Triton.Graphics.SkeletalAnimation.SkeletonInstance(skeleton);
-			var skeletonInstance2 = new Triton.Graphics.SkeletalAnimation.SkeletonInstance(skeleton2);
-
-			skeletonInstance.Play("run");
-			skeletonInstance2.Play("run");
-
-			var genericParams = new GenericParams();
-			genericParams.HandleMVP = shaderSkinned.GetAliasedUniform("ModelViewProjection");
-			genericParams.HandleWorld = shaderSkinned.GetAliasedUniform("World");
-			genericParams.HandleDiffuseTexture = shaderSkinned.GetAliasedUniform("DiffuseTexture");
-			genericParams.HandleNormalMap = shaderSkinned.GetAliasedUniform("NormalMap");
-			genericParams.HandleBones = shaderSkinned.GetAliasedUniform("Bones");
-
 			var genericParams2 = new GenericParams();
 			genericParams2.HandleMVP = shader.GetAliasedUniform("ModelViewProjection");
 			genericParams2.HandleWorld = shader.GetAliasedUniform("World");
@@ -138,9 +120,16 @@ namespace Test
 
 			var deferredParams = new DeferredParams();
 			deferredParams.HandleMVP = deferredShader.GetAliasedUniform("ModelViewProjection"); ;
-			deferredParams.HandleDiffuse = deferredShader.GetAliasedUniform("DiffuseTexture");
 			deferredParams.HandleNormal = deferredShader.GetAliasedUniform("NormalTexture");
 			deferredParams.HandlePosition = deferredShader.GetAliasedUniform("PositionTexture");
+			deferredParams.HandleLightPositon = deferredShader.GetAliasedUniform("LightPosition");
+			deferredParams.HandleLightColor = deferredShader.GetAliasedUniform("LightColor");
+			deferredParams.HandleLightRange = deferredShader.GetAliasedUniform("LightRange");
+
+			var finalParams = new FinalPassParams();
+			finalParams.HandleMVP = finalPassShader.GetAliasedUniform("ModelViewProjection"); ;
+			finalParams.HandleDiffuse = finalPassShader.GetAliasedUniform("DiffuseTexture");
+			finalParams.HandleLight = finalPassShader.GetAliasedUniform("LightTexture");
 
 			var angle = 0.0f;
 			var cameraPos = new Vector3(0, 1.8f, -2.5f);
@@ -148,13 +137,29 @@ namespace Test
 			var stopWatch = new System.Diagnostics.Stopwatch();
 			stopWatch.Start();
 
+			var lights = new List<Light>();
+			var rng =new Random();
+
+			for (var i = 0; i < 10; i++)
+			{
+				var color = new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble());
+				var range = 2.0f;
+				var offset = 1.5f;
+
+				lights.Add(new Light(new Vector3(-0.5f, 0.5f, 1.0f + i * offset), color, range));
+				lights.Add(new Light(new Vector3(0.5f, 0.5f, 1.0f + i * offset), color, range));
+
+				lights.Add(new Light(new Vector3(-0.5f, 1.5f, 1.0f + i * offset), color, range));
+				lights.Add(new Light(new Vector3(0.5f, 1.5f, 1.0f + i * offset), color, range));
+
+				lights.Add(new Light(new Vector3(-0.5f, 2.5f, 1.0f + i * offset), color, range));
+				lights.Add(new Light(new Vector3(0.5f, 2.5f, 1.0f + i * offset), color, range));
+			}
+
 			while (Running)
 			{
 				var deltaTime = (float)stopWatch.Elapsed.TotalSeconds;
 				stopWatch.Restart();
-
-				skeletonInstance.Update(deltaTime);
-				skeletonInstance2.Update(deltaTime);
 
 				angle += 1.4f * deltaTime;
 
@@ -173,48 +178,41 @@ namespace Test
 				var view = Matrix4.LookAt(cameraPos, cameraPos + Vector3.UnitZ, Vector3.UnitY);
 				var projection = Matrix4.CreatePerspectiveFieldOfView(1.22173f, Width / (float)Height, 0.001f, 1000.0f);
 
-				Backend.BeginPass(fullSceneRenderTarget, new Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+				Backend.BeginPass(fullSceneRenderTarget, new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
 
 				var world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 12.0f);
 				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallDiffuse, wallNormalMap, floorDiffuse, floorNormalMap, genericParams2, ref world, ref view, ref projection);
-
-				// Render soldier
-				world = Matrix4.CreateFromAxisAngle(Vector3.UnitY, (float)(Math.PI * (lightAlphaDir > 0.0f ? 2.0f : 1.0f))) * Matrix4.CreateTranslation(0, 0, lightDir.Z);
-
-				var mvp = world * view * projection;
-
-				Backend.BeginInstance(shaderSkinned.Handle, new int[] { texture.Handle, normalMap.Handle });
-
-				Backend.BindShaderVariable(genericParams.HandleMVP, ref mvp);
-				Backend.BindShaderVariable(genericParams.HandleWorld, ref world);
-				Backend.BindShaderVariable(genericParams.HandleDiffuseTexture, 0);
-				Backend.BindShaderVariable(genericParams.HandleNormalMap, 1);
-
-				Backend.BindShaderVariable(genericParams.HandleBones, ref skeletonInstance.FinalBoneTransforms);
-				foreach (var handle in mesh.Handles)
-				{
-					Backend.DrawMesh(handle);
-				}
-
-				Backend.BindShaderVariable(genericParams.HandleBones, ref skeletonInstance2.FinalBoneTransforms);
-				foreach (var handle in mesh2.Handles)
-				{
-					Backend.DrawMesh(handle);
-				}
 
 				Backend.EndInstance();
 
 				Backend.EndPass();
 
-				mvp = Matrix4.Identity;
+				var mvp = Matrix4.Identity;
 
-				// Render tone mapped scene		
-				Backend.BeginPass(null, new Vector4(0.25f, 0.5f, 0.75f, 1.0f));
-				Backend.BeginInstance(deferredShader.Handle, new int[] { fullSceneRenderTarget.Textures[0].Handle, fullSceneRenderTarget.Textures[1].Handle, fullSceneRenderTarget.Textures[2].Handle });
+				// Render lights
+				Backend.BeginPass(lightAccumulationRenderTarget, Vector4.Zero);
+				Backend.BeginInstance(deferredShader.Handle, new int[] { fullSceneRenderTarget.Textures[1].Handle, fullSceneRenderTarget.Textures[2].Handle }, true, true, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
 				Backend.BindShaderVariable(deferredParams.HandleMVP, ref mvp);
-				Backend.BindShaderVariable(deferredParams.HandleDiffuse, 0);
-				Backend.BindShaderVariable(deferredParams.HandleNormal, 1);
-				Backend.BindShaderVariable(deferredParams.HandlePosition, 2);
+				Backend.BindShaderVariable(deferredParams.HandleNormal, 0);
+				Backend.BindShaderVariable(deferredParams.HandlePosition, 1);
+
+				foreach (var light in lights)
+				{
+					Backend.BindShaderVariable(deferredParams.HandleLightPositon, ref light.Position);
+					Backend.BindShaderVariable(deferredParams.HandleLightColor, ref light.Color);
+					Backend.BindShaderVariable(deferredParams.HandleLightRange, light.Range);
+
+					Backend.DrawMesh(batchBuffer.Mesh.Handles[0]);
+				}
+
+				Backend.EndPass();
+
+				// Render final scene	
+				Backend.BeginPass(null, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+				Backend.BeginInstance(finalPassShader.Handle, new int[] { fullSceneRenderTarget.Textures[0].Handle, lightAccumulationRenderTarget.Textures[0].Handle });
+				Backend.BindShaderVariable(finalParams.HandleMVP, ref mvp);
+				Backend.BindShaderVariable(finalParams.HandleDiffuse, 0);
+				Backend.BindShaderVariable(finalParams.HandleLight, 1);
 
 				Backend.DrawMesh(batchBuffer.Mesh.Handles[0]);
 				Backend.EndPass();
@@ -268,9 +266,19 @@ namespace Test
 		class DeferredParams
 		{
 			public int HandleMVP;
-			public int HandleDiffuse;
 			public int HandleNormal;
 			public int HandlePosition;
+
+			public int HandleLightPositon;
+			public int HandleLightColor;
+			public int HandleLightRange;
+		}
+
+		class FinalPassParams
+		{
+			public int HandleMVP;
+			public int HandleDiffuse;
+			public int HandleLight;
 		}
 
 		class GenericParams
@@ -280,6 +288,20 @@ namespace Test
 			public int HandleDiffuseTexture;
 			public int HandleNormalMap;
 			public int HandleBones;
+		}
+
+		class Light
+		{
+			public Light(Vector3 position, Vector3 color, float range)
+			{
+				Position = position;
+				Color = color;
+				Range = range;
+			}
+
+			public Vector3 Position;
+			public Vector3 Color;
+			public float Range;
 		}
 	}
 }

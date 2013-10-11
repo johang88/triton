@@ -61,6 +61,10 @@ namespace Triton.Renderer
 
 			GL.Enable(EnableCap.DepthTest);
 			GL.DepthMask(true);
+
+			GL.ClampColor(ClampColorTarget.ClampReadColor, ClampColorMode.False);
+			GL.ClampColor(ClampColorTarget.ClampVertexColor, ClampColorMode.False);
+			GL.ClampColor(ClampColorTarget.ClampFragmentColor, ClampColorMode.False);
 		}
 
 		public void Dispose()
@@ -292,6 +296,23 @@ namespace Triton.Renderer
 			GL.Clear(mask);
 		}
 
+		public void SetRenderStates(bool enableAlphaBlend, bool enableDepthWrite, bool enableDepthTest, BlendingFactorSrc src, BlendingFactorDest dest)
+		{
+			if (enableAlphaBlend)
+				GL.Enable(EnableCap.Blend);
+			else
+				GL.Disable(EnableCap.Blend);
+
+			if (enableDepthTest)
+				GL.Enable(EnableCap.DepthTest);
+			else
+				GL.Disable(EnableCap.DepthTest);
+
+			GL.DepthMask(enableDepthWrite);
+
+			GL.BlendFunc((OpenTK.Graphics.OpenGL.BlendingFactorSrc)(int)src, (OpenTK.Graphics.OpenGL.BlendingFactorDest)(int)dest);
+		}
+
 		public int CreateRenderTarget(int width, int height, Renderer.PixelInternalFormat pixelFormat, int numTargets, bool createDepthBuffer, out int[] textureHandles, OnLoadedCallback loadedCallback)
 		{
 			textureHandles = new int[numTargets];
@@ -308,7 +329,7 @@ namespace Triton.Renderer
 				// Init texture handles with default data
 				for (var i = 0; i < textureHandlesCopy.Length; i++)
 				{
-					TextureManager.SetPixelData(textureHandlesCopy[i], width, height, null, PixelFormat.Rgba, pixelFormat, PixelType.UnsignedByte, false);
+					TextureManager.SetPixelData(textureHandlesCopy[i], width, height, null, PixelFormat.Rgba, pixelFormat, PixelType.Float, false);
 				}
 
 				var internalTextureHandles = textureHandlesCopy.Select(t => TextureManager.GetOpenGLHande(t)).ToArray();

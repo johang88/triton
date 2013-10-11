@@ -61,6 +61,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BlendingFactorDest.cs" />
+    <Compile Include="BlendingFactorSrc.cs" />
     <Compile Include="Meshes\MeshManager.cs" />
     <Compile Include="RenderSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

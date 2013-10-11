@@ -139,6 +139,8 @@ namespace Triton.Renderer.Textures
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 			GL.Finish();
 
+			var error = GL.GetError();
+
 			// The texture can now be used
 			Handles[index].Initialized = true;
 		}
