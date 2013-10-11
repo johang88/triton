@@ -91,14 +91,8 @@ namespace Test
 			var floorMesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/floor");
 			var ceilingMesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/ceiling");
 
-			var texture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/strike_trooper_d");
-			var normalMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/strike_trooper_n");
-
-			var wallDiffuse = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/wall_d");
-			var wallNormalMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/wall_n");
-
-			var floorDiffuse = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/floor_d");
-			var floorNormalMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/floor_n");
+			var wallMaterial = ResourceManager.Load<Triton.Graphics.Resources.Material>("materials/wall");
+			var floorMaterial = ResourceManager.Load<Triton.Graphics.Resources.Material>("materials/floor");
 
 			var lightDir = new Vector3(0.0f, 2.0f, 0.0f);
 			var lightColor = new Vector3(1.6f, 1.12f, 1.15f) * 2.0f;
@@ -251,13 +245,13 @@ namespace Test
 				Backend.BeginPass(fullSceneRenderTarget, new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
 
 				var world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 12.0f);
-				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallDiffuse, wallNormalMap, floorDiffuse, floorNormalMap, genericParams2, ref world, ref view, ref projection);
+				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallMaterial.Diffuse, wallMaterial.Normal, floorMaterial.Diffuse, floorMaterial.Normal, genericParams2, ref world, ref view, ref projection);
 
 				world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 32.0f);
-				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallDiffuse, wallNormalMap, floorDiffuse, floorNormalMap, genericParams2, ref world, ref view, ref projection);
+				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallMaterial.Diffuse, wallMaterial.Normal, floorMaterial.Diffuse, floorMaterial.Normal, genericParams2, ref world, ref view, ref projection);
 
 				world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 52.0f);
-				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallDiffuse, wallNormalMap, floorDiffuse, floorNormalMap, genericParams2, ref world, ref view, ref projection);
+				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallMaterial.Diffuse, wallMaterial.Normal, floorMaterial.Diffuse, floorMaterial.Normal, genericParams2, ref world, ref view, ref projection);
 
 				Backend.EndInstance();
 
