@@ -200,9 +200,8 @@ namespace Triton.Renderer
 
 		public void BeginScene(int renderTargetHandle, int width, int height)
 		{
-			var openGLHandle = RenderTargetManager.GetOpenGLHande(renderTargetHandle);
-			GL.BindFramebuffer(FramebufferTarget.Framebuffer, openGLHandle);
-
+			BindRenderTarget(renderTargetHandle);
+			
 			GL.Viewport(0, 0, width, height);
 		}
 
@@ -331,8 +330,14 @@ namespace Triton.Renderer
 
 		public void BindRenderTarget(int handle)
 		{
-			var openGLHandle = RenderTargetManager.GetOpenGLHande(handle);
+			DrawBuffersEnum[] drawBuffers;
+			var openGLHandle = RenderTargetManager.GetOpenGLHande(handle, out drawBuffers);
+
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, openGLHandle);
+			if (drawBuffers == null)
+				GL.DrawBuffer(DrawBufferMode.ColorAttachment0);
+			else
+				GL.DrawBuffers(drawBuffers.Length, drawBuffers);
 		}
 	}
 }

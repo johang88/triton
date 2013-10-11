@@ -22,10 +22,6 @@ namespace Triton.Graphics
 	/// 
 	/// The BeginInstance method is used to batch meshes with the same material together and to keep state changes to a minimum.
 	/// 
-	/// It is also possible to queue work items on the render thread using the method AddCommandToWorkQueue.
-	/// The rendering thread is usually idle for some time so that's why we allow misc items to be processed, note however
-	/// that it is best if this is kept to loading resources for use in the renderer itself.
-	/// 
 	/// Example of rendering one frame
 	///		BeginScene
 	///			BeginPass renderTarget passSettings
@@ -44,7 +40,6 @@ namespace Triton.Graphics
 	/// </summary>
 	public class Backend : IDisposable
 	{
-		const long MaxTimeForMiscProcessing = 32;
 		public INativeWindow Window { get; private set; }
 
 		internal Triton.Renderer.RenderSystem RenderSystem { get; private set; }
@@ -124,6 +119,14 @@ namespace Triton.Graphics
 			if (!Window.Exists || IsExiting)
 				return false;
 
+			// We process any resources first so that they are always ready before rendering the next frame
+			while (!ProcessQueue.IsEmpty)
+			{
+				Action workItem;
+				if (ProcessQueue.TryDequeue(out workItem))
+					workItem();
+			}
+
 			// Process the rendering stream, do not swap buffers if no rendering commands have been sent, ie if the stream is still at position 0
 			// We do not allow the buffers to be swapped while the stream is being processed
 			if (SecondaryBuffer.Stream.Position != 0)
@@ -136,15 +139,6 @@ namespace Triton.Graphics
 
 				SecondaryBuffer.Stream.Position = 0;
 				DoubleBufferSynchronizer.Release();
-			}
-
-			// Do some misc processing, ie usually resource loading etc
-			var miscProccessingStart = Watch.ElapsedMilliseconds;
-			while (!ProcessQueue.IsEmpty && Watch.ElapsedMilliseconds - miscProccessingStart < MaxTimeForMiscProcessing)
-			{
-				Action workItem;
-				if (ProcessQueue.TryDequeue(out workItem))
-					workItem();
 			}
 
 			Watch.Restart();

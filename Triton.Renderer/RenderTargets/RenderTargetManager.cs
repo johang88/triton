@@ -93,8 +93,11 @@ namespace Triton.Renderer.RenderTargets
 			GL.GenFramebuffers(1, out Handles[index].FrameBufferObject);
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, Handles[index].FrameBufferObject);
 
+			Handles[index].DrawBuffers = new DrawBuffersEnum[textureHandles.Length];
+
 			for (var i = 0; i < textureHandles.Length; i++)
 			{
+				Handles[index].DrawBuffers[i] = DrawBuffersEnum.ColorAttachment0 + i;
 				GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0 + i, TextureTarget.Texture2D, textureHandles[i], 0);
 			}
 
@@ -172,14 +175,18 @@ namespace Triton.Renderer.RenderTargets
 			Handles[index].Initialized = true;
 		}
 
-		public int GetOpenGLHande(int handle)
+		public int GetOpenGLHande(int handle, out DrawBuffersEnum[] drawBuffer)
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
 
 			if (id == -1 || Handles[index].Id != id || !Handles[index].Initialized)
+			{
+				drawBuffer = null;
 				return 0;
+			}
 
+			drawBuffer = Handles[index].DrawBuffers;
 			return Handles[index].FrameBufferObject;
 		}
 
@@ -190,6 +197,7 @@ namespace Triton.Renderer.RenderTargets
 
 			public int FrameBufferObject;
 			public int DepthBufferObject;
+			public DrawBuffersEnum[] DrawBuffers;
 		}
 	}
 }
