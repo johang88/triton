@@ -194,8 +194,9 @@ namespace Triton.Graphics
 							var enableDepthTest = reader.ReadBoolean();
 							var src = (BlendingFactorSrc)reader.ReadInt32();
 							var dest = (BlendingFactorDest)reader.ReadInt32();
+							var cullFaceMode = (CullFaceMode)reader.ReadInt32();
 
-							RenderSystem.SetRenderStates(enableAlphaBlend, enableDepthWrite, enableDepthTest, src, dest);
+							RenderSystem.SetRenderStates(enableAlphaBlend, enableDepthWrite, enableDepthTest, src, dest, cullFaceMode);
 						}
 						break;
 					case OpCode.EndInstance:
@@ -334,7 +335,7 @@ namespace Triton.Graphics
 		/// </summary>
 		/// <param name="shaderHandle"></param>
 		/// <param name="textures"></param>
-		public void BeginInstance(int shaderHandle, int[] textures, bool enableAlphaBlend = false, bool enableDepthWrite = true, bool enableDepthTest = true, BlendingFactorSrc src = BlendingFactorSrc.Zero, BlendingFactorDest dest = BlendingFactorDest.One)
+		public void BeginInstance(int shaderHandle, int[] textures, bool enableAlphaBlend = false, bool enableDepthWrite = true, bool enableDepthTest = true, BlendingFactorSrc src = BlendingFactorSrc.Zero, BlendingFactorDest dest = BlendingFactorDest.One, CullFaceMode cullFaceMode = CullFaceMode.Back)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BeginInstance);
 
@@ -351,6 +352,7 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write(enableDepthTest);
 			PrimaryBuffer.Writer.Write((int)src);
 			PrimaryBuffer.Writer.Write((int)dest);
+			PrimaryBuffer.Writer.Write((int)cullFaceMode);
 		}
 
 		public void EndInstance()

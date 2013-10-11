@@ -29,6 +29,6 @@ void main()
 	vec3 diffuse = texture2D(samplerDiffuse, texCoord).xyz;
 	vec3 lights = texture2D(samplerLights, texCoord).xyz;
 
-	oColor = vec4(diffuse * lights, 1.0f);
+	oColor = vec4(lights, 1.0f);
 }
 #endif

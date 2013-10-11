@@ -296,7 +296,7 @@ namespace Triton.Renderer
 			GL.Clear(mask);
 		}
 
-		public void SetRenderStates(bool enableAlphaBlend, bool enableDepthWrite, bool enableDepthTest, BlendingFactorSrc src, BlendingFactorDest dest)
+		public void SetRenderStates(bool enableAlphaBlend, bool enableDepthWrite, bool enableDepthTest, BlendingFactorSrc src, BlendingFactorDest dest, CullFaceMode cullFaceMode)
 		{
 			if (enableAlphaBlend)
 				GL.Enable(EnableCap.Blend);
@@ -311,6 +311,7 @@ namespace Triton.Renderer
 			GL.DepthMask(enableDepthWrite);
 
 			GL.BlendFunc((OpenTK.Graphics.OpenGL.BlendingFactorSrc)(int)src, (OpenTK.Graphics.OpenGL.BlendingFactorDest)(int)dest);
+			GL.CullFace((OpenTK.Graphics.OpenGL.CullFaceMode)(int)cullFaceMode);
 		}
 
 		public int CreateRenderTarget(int width, int height, Renderer.PixelInternalFormat pixelFormat, int numTargets, bool createDepthBuffer, out int[] textureHandles, OnLoadedCallback loadedCallback)

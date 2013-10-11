@@ -76,19 +76,21 @@ namespace Test
 			var deferredShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred");
 			var finalPassShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/final");
 
+			var unitSphere = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/unit_sphere");
+
 			var wallsMesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/walls");
 			var floorMesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/floor");
 			var ceilingMesh = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/ceiling");
 
 			var texture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/strike_trooper_d");
 			var normalMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/strike_trooper_n");
-			
+
 			var wallDiffuse = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/wall_d");
 			var wallNormalMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/wall_n");
-			
+
 			var floorDiffuse = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/floor_d");
 			var floorNormalMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/floor_n");
-			
+
 			var lightDir = new Vector3(0.0f, 2.0f, 0.0f);
 			var lightColor = new Vector3(1.6f, 1.12f, 1.15f) * 2.0f;
 			var ambientColor = new Vector3(0.2f, 0.2f, 0.3f);
@@ -123,8 +125,10 @@ namespace Test
 			deferredParams.HandleNormal = deferredShader.GetAliasedUniform("NormalTexture");
 			deferredParams.HandlePosition = deferredShader.GetAliasedUniform("PositionTexture");
 			deferredParams.HandleLightPositon = deferredShader.GetAliasedUniform("LightPosition");
+			deferredParams.HandleCameraPosition = deferredShader.GetAliasedUniform("CameraPosition");
 			deferredParams.HandleLightColor = deferredShader.GetAliasedUniform("LightColor");
 			deferredParams.HandleLightRange = deferredShader.GetAliasedUniform("LightRange");
+			deferredParams.HandleScreenSize = deferredShader.GetAliasedUniform("ScreenSize");
 
 			var finalParams = new FinalPassParams();
 			finalParams.HandleMVP = finalPassShader.GetAliasedUniform("ModelViewProjection"); ;
@@ -137,14 +141,16 @@ namespace Test
 			var stopWatch = new System.Diagnostics.Stopwatch();
 			stopWatch.Start();
 
-			var lights = new List<Light>();
-			var rng =new Random();
+			var screenSize = new Vector2((float)Width, (float)Height);
 
-			for (var i = 0; i < 10; i++)
+			var lights = new List<Light>();
+			var rng = new Random();
+
+			for (var i = 0; i < 100; i++)
 			{
 				var color = new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble());
-				var range = 2.0f;
-				var offset = 1.5f;
+				var range = 1.0f;
+				var offset = 0.5f;
 
 				lights.Add(new Light(new Vector3(-0.5f, 0.5f, 1.0f + i * offset), color, range));
 				lights.Add(new Light(new Vector3(0.5f, 0.5f, 1.0f + i * offset), color, range));
@@ -171,10 +177,15 @@ namespace Test
 
 				lightDir = Vector3.Lerp(lightStartPos, lightEndPos, lightAlpha);
 
+				foreach (var light in lights)
+				{
+					light.Position = Vector3.Lerp(light.StartPos, light.EndPos, lightAlpha);
+				}
+
 				Backend.BeginScene();
 
 				// Render main scene
-				
+
 				var view = Matrix4.LookAt(cameraPos, cameraPos + Vector3.UnitZ, Vector3.UnitY);
 				var projection = Matrix4.CreatePerspectiveFieldOfView(1.22173f, Width / (float)Height, 0.001f, 1000.0f);
 
@@ -183,29 +194,52 @@ namespace Test
 				var world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 12.0f);
 				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallDiffuse, wallNormalMap, floorDiffuse, floorNormalMap, genericParams2, ref world, ref view, ref projection);
 
+				world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 22.0f);
+				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallDiffuse, wallNormalMap, floorDiffuse, floorNormalMap, genericParams2, ref world, ref view, ref projection);
+
+				world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 44.0f);
+				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallDiffuse, wallNormalMap, floorDiffuse, floorNormalMap, genericParams2, ref world, ref view, ref projection);
+
 				Backend.EndInstance();
 
 				Backend.EndPass();
 
-				var mvp = Matrix4.Identity;
-
 				// Render lights
-				Backend.BeginPass(lightAccumulationRenderTarget, Vector4.Zero);
-				Backend.BeginInstance(deferredShader.Handle, new int[] { fullSceneRenderTarget.Textures[1].Handle, fullSceneRenderTarget.Textures[2].Handle }, true, true, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
-				Backend.BindShaderVariable(deferredParams.HandleMVP, ref mvp);
-				Backend.BindShaderVariable(deferredParams.HandleNormal, 0);
-				Backend.BindShaderVariable(deferredParams.HandlePosition, 1);
+				Backend.BeginPass(lightAccumulationRenderTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+
+				var mvp = Matrix4.Identity;
 
 				foreach (var light in lights)
 				{
+					var radius = light.Range;
+
+					var cullFaceMode = Triton.Renderer.CullFaceMode.Back;
+					var delta = light.Position - cameraPos;
+					if (Math.Sqrt(delta.X * delta.X + delta.Y * delta.Y + delta.Z * delta.Z) <= radius * radius)
+					{
+						cullFaceMode = Triton.Renderer.CullFaceMode.Front;
+					}
+
+					world = Matrix4.Scale(radius) * Matrix4.CreateTranslation(light.Position);
+					mvp = world * view * projection;
+
+					Backend.BeginInstance(deferredShader.Handle, new int[] { fullSceneRenderTarget.Textures[1].Handle, fullSceneRenderTarget.Textures[2].Handle }, true, true, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode);
+					Backend.BindShaderVariable(deferredParams.HandleNormal, 0);
+					Backend.BindShaderVariable(deferredParams.HandlePosition, 1);
+					Backend.BindShaderVariable(deferredParams.HandleScreenSize, ref screenSize);
+
+					Backend.BindShaderVariable(deferredParams.HandleMVP, ref mvp);
 					Backend.BindShaderVariable(deferredParams.HandleLightPositon, ref light.Position);
 					Backend.BindShaderVariable(deferredParams.HandleLightColor, ref light.Color);
 					Backend.BindShaderVariable(deferredParams.HandleLightRange, light.Range);
+					Backend.BindShaderVariable(deferredParams.HandleCameraPosition, ref cameraPos);
 
-					Backend.DrawMesh(batchBuffer.Mesh.Handles[0]);
+					Backend.DrawMesh(unitSphere.Handles[0]);
 				}
 
 				Backend.EndPass();
+
+				mvp = Matrix4.Identity;
 
 				// Render final scene	
 				Backend.BeginPass(null, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -269,9 +303,12 @@ namespace Test
 			public int HandleNormal;
 			public int HandlePosition;
 
+			public int HandleCameraPosition;
+
 			public int HandleLightPositon;
 			public int HandleLightColor;
 			public int HandleLightRange;
+			public int HandleScreenSize;
 		}
 
 		class FinalPassParams
@@ -287,17 +324,30 @@ namespace Test
 			public int HandleWorld;
 			public int HandleDiffuseTexture;
 			public int HandleNormalMap;
-			public int HandleBones;
 		}
 
 		class Light
 		{
+			static Random RNG = new Random();
+
 			public Light(Vector3 position, Vector3 color, float range)
 			{
-				Position = position;
+				EndPos = StartPos = Position = position;
+
+				StartPos.X += 5.0f - (float)RNG.NextDouble() * 10.0f;
+				StartPos.Y += 5.0f - (float)RNG.NextDouble() * 10.0f;
+				StartPos.Z += 5.0f - (float)RNG.NextDouble() * 10.0f;
+
+				EndPos.X += 5.0f - (float)RNG.NextDouble() * 10.0f;
+				EndPos.Y += 5.0f - (float)RNG.NextDouble() * 10.0f;
+				EndPos.Z += 5.0f - (float)RNG.NextDouble() * 10.0f;
+
 				Color = color;
 				Range = range;
 			}
+
+			public Vector3 StartPos;
+			public Vector3 EndPos;
 
 			public Vector3 Position;
 			public Vector3 Color;
