@@ -73,7 +73,7 @@ namespace Test
 			WaitHandle.WaitAll(new WaitHandle[] { RendererReady });
 
 			var shader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/generic");
-			var deferredShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred");
+			var pointLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/point_light");
 			var finalPassShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/final");
 
 			var unitSphere = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/unit_sphere");
@@ -120,15 +120,15 @@ namespace Test
 			genericParams2.HandleDiffuseTexture = shader.GetAliasedUniform("DiffuseTexture");
 			genericParams2.HandleNormalMap = shader.GetAliasedUniform("NormalMap");
 
-			var deferredParams = new DeferredParams();
-			deferredParams.HandleMVP = deferredShader.GetAliasedUniform("ModelViewProjection"); ;
-			deferredParams.HandleNormal = deferredShader.GetAliasedUniform("NormalTexture");
-			deferredParams.HandlePosition = deferredShader.GetAliasedUniform("PositionTexture");
-			deferredParams.HandleLightPositon = deferredShader.GetAliasedUniform("LightPosition");
-			deferredParams.HandleCameraPosition = deferredShader.GetAliasedUniform("CameraPosition");
-			deferredParams.HandleLightColor = deferredShader.GetAliasedUniform("LightColor");
-			deferredParams.HandleLightRange = deferredShader.GetAliasedUniform("LightRange");
-			deferredParams.HandleScreenSize = deferredShader.GetAliasedUniform("ScreenSize");
+			var pointLightParams = new PointLightParams();
+			pointLightParams.HandleMVP = pointLightShader.GetAliasedUniform("ModelViewProjection"); ;
+			pointLightParams.HandleNormal = pointLightShader.GetAliasedUniform("NormalTexture");
+			pointLightParams.HandlePosition = pointLightShader.GetAliasedUniform("PositionTexture");
+			pointLightParams.HandleLightPositon = pointLightShader.GetAliasedUniform("LightPosition");
+			pointLightParams.HandleCameraPosition = pointLightShader.GetAliasedUniform("CameraPosition");
+			pointLightParams.HandleLightColor = pointLightShader.GetAliasedUniform("LightColor");
+			pointLightParams.HandleLightRange = pointLightShader.GetAliasedUniform("LightRange");
+			pointLightParams.HandleScreenSize = pointLightShader.GetAliasedUniform("ScreenSize");
 
 			var finalParams = new FinalPassParams();
 			finalParams.HandleMVP = finalPassShader.GetAliasedUniform("ModelViewProjection"); ;
@@ -143,23 +143,17 @@ namespace Test
 
 			var screenSize = new Vector2((float)Width, (float)Height);
 
-			var lights = new List<Light>();
+			var lights = new List<PointLight>();
 			var rng = new Random();
 
-			for (var i = 0; i < 100; i++)
+			for (var i = 0; i < 10; i++)
 			{
 				var color = new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble());
-				var range = 1.0f;
-				var offset = 0.5f;
+				var range = 2.0f;
+				var offset = 2.0f;
 
-				lights.Add(new Light(new Vector3(-0.5f, 0.5f, 1.0f + i * offset), color, range));
-				lights.Add(new Light(new Vector3(0.5f, 0.5f, 1.0f + i * offset), color, range));
-
-				lights.Add(new Light(new Vector3(-0.5f, 1.5f, 1.0f + i * offset), color, range));
-				lights.Add(new Light(new Vector3(0.5f, 1.5f, 1.0f + i * offset), color, range));
-
-				lights.Add(new Light(new Vector3(-0.5f, 2.5f, 1.0f + i * offset), color, range));
-				lights.Add(new Light(new Vector3(0.5f, 2.5f, 1.0f + i * offset), color, range));
+				lights.Add(new PointLight(new Vector3(-0.5f, 1.5f, 1.0f + i * offset), color, range));
+				lights.Add(new PointLight(new Vector3(0.5f, 1.5f, 1.0f + i * offset), color, range));
 			}
 
 			while (Running)
@@ -176,11 +170,6 @@ namespace Test
 					lightAlphaDir = 1.0f;
 
 				lightDir = Vector3.Lerp(lightStartPos, lightEndPos, lightAlpha);
-
-				foreach (var light in lights)
-				{
-					light.Position = Vector3.Lerp(light.StartPos, light.EndPos, lightAlpha);
-				}
 
 				Backend.BeginScene();
 
@@ -223,16 +212,16 @@ namespace Test
 					world = Matrix4.Scale(radius) * Matrix4.CreateTranslation(light.Position);
 					mvp = world * view * projection;
 
-					Backend.BeginInstance(deferredShader.Handle, new int[] { fullSceneRenderTarget.Textures[1].Handle, fullSceneRenderTarget.Textures[2].Handle }, true, true, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode);
-					Backend.BindShaderVariable(deferredParams.HandleNormal, 0);
-					Backend.BindShaderVariable(deferredParams.HandlePosition, 1);
-					Backend.BindShaderVariable(deferredParams.HandleScreenSize, ref screenSize);
+					Backend.BeginInstance(pointLightShader.Handle, new int[] { fullSceneRenderTarget.Textures[1].Handle, fullSceneRenderTarget.Textures[2].Handle }, true, true, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode);
+					Backend.BindShaderVariable(pointLightParams.HandleNormal, 0);
+					Backend.BindShaderVariable(pointLightParams.HandlePosition, 1);
+					Backend.BindShaderVariable(pointLightParams.HandleScreenSize, ref screenSize);
 
-					Backend.BindShaderVariable(deferredParams.HandleMVP, ref mvp);
-					Backend.BindShaderVariable(deferredParams.HandleLightPositon, ref light.Position);
-					Backend.BindShaderVariable(deferredParams.HandleLightColor, ref light.Color);
-					Backend.BindShaderVariable(deferredParams.HandleLightRange, light.Range);
-					Backend.BindShaderVariable(deferredParams.HandleCameraPosition, ref cameraPos);
+					Backend.BindShaderVariable(pointLightParams.HandleMVP, ref mvp);
+					Backend.BindShaderVariable(pointLightParams.HandleLightPositon, ref light.Position);
+					Backend.BindShaderVariable(pointLightParams.HandleLightColor, ref light.Color);
+					Backend.BindShaderVariable(pointLightParams.HandleLightRange, light.Range);
+					Backend.BindShaderVariable(pointLightParams.HandleCameraPosition, ref cameraPos);
 
 					Backend.DrawMesh(unitSphere.Handles[0]);
 				}
@@ -297,7 +286,7 @@ namespace Test
 			}
 		}
 
-		class DeferredParams
+		class PointLightParams
 		{
 			public int HandleMVP;
 			public int HandleNormal;
@@ -326,32 +315,22 @@ namespace Test
 			public int HandleNormalMap;
 		}
 
-		class Light
+		class PointLight
 		{
-			static Random RNG = new Random();
-
-			public Light(Vector3 position, Vector3 color, float range)
+			public PointLight(Vector3 position, Vector3 color, float range)
 			{
-				EndPos = StartPos = Position = position;
-
-				StartPos.X += 5.0f - (float)RNG.NextDouble() * 10.0f;
-				StartPos.Y += 5.0f - (float)RNG.NextDouble() * 10.0f;
-				StartPos.Z += 5.0f - (float)RNG.NextDouble() * 10.0f;
-
-				EndPos.X += 5.0f - (float)RNG.NextDouble() * 10.0f;
-				EndPos.Y += 5.0f - (float)RNG.NextDouble() * 10.0f;
-				EndPos.Z += 5.0f - (float)RNG.NextDouble() * 10.0f;
-
+				Position = position;
 				Color = color;
 				Range = range;
 			}
 
-			public Vector3 StartPos;
-			public Vector3 EndPos;
-
 			public Vector3 Position;
 			public Vector3 Color;
 			public float Range;
+		}
+
+		class SpotLight
+		{
 		}
 	}
 }
