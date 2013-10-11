@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContentProcessor", "Content
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Triton.Content", "Triton.Content\Triton.Content.csproj", "{05E298CB-DB9F-4389-BC94-A27793673CAF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Triton.Input", "Triton.Input\Triton.Input.csproj", "{F938F3EE-AFA4-400A-B475-2D4DD79B6D73}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,12 @@ Global
 		{05E298CB-DB9F-4389-BC94-A27793673CAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05E298CB-DB9F-4389-BC94-A27793673CAF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{05E298CB-DB9F-4389-BC94-A27793673CAF}.Release|x86.ActiveCfg = Release|Any CPU
+		{F938F3EE-AFA4-400A-B475-2D4DD79B6D73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F938F3EE-AFA4-400A-B475-2D4DD79B6D73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F938F3EE-AFA4-400A-B475-2D4DD79B6D73}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F938F3EE-AFA4-400A-B475-2D4DD79B6D73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F938F3EE-AFA4-400A-B475-2D4DD79B6D73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F938F3EE-AFA4-400A-B475-2D4DD79B6D73}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

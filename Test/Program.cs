@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Triton;
 using System.Collections.Concurrent;
+using Triton.Input;
 
 namespace Test
 {
@@ -13,6 +14,10 @@ namespace Test
 	{
 		const int Width = 1280;
 		const int Height = 720;
+
+		const float MovementSpeed = 6.0f;
+		const float MouseSensitivity = 0.0025f;
+
 		private ManualResetEvent RendererReady = new ManualResetEvent(false);
 
 		private Triton.Graphics.Backend Backend;
@@ -59,7 +64,7 @@ namespace Test
 
 				RendererReady.Set();
 
-				while (Backend.Process())
+				while (Backend.Process() && Running)
 				{
 					Thread.Sleep(1);
 				}
@@ -71,6 +76,8 @@ namespace Test
 		void UpdateLoop()
 		{
 			WaitHandle.WaitAll(new WaitHandle[] { RendererReady });
+
+			var inputManager = new InputManager(Backend.WindowBounds);
 
 			var shader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/generic");
 			var pointLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/point_light");
@@ -156,7 +163,9 @@ namespace Test
 			finalParams.HandleLight = finalPassShader.GetAliasedUniform("LightTexture");
 
 			var angle = 0.0f;
-			var cameraPos = new Vector3(0, 1.8f, -2.5f);
+			var camera = new Camera(new Vector2(Width, Height));
+			camera.Position.Y = 2.0f;
+			float cameraYaw = 0.0f, cameraPitch = 0.0f;
 
 			var stopWatch = new System.Diagnostics.Stopwatch();
 			stopWatch.Start();
@@ -188,6 +197,34 @@ namespace Test
 				var deltaTime = (float)stopWatch.Elapsed.TotalSeconds;
 				stopWatch.Restart();
 
+				inputManager.Update();
+
+				if (inputManager.IsKeyDown(Key.Escape))
+					Running = false;
+
+				var movement = Vector3.Zero;
+				if (inputManager.IsKeyDown(Key.W))
+					movement.Z = 1.0f;
+				else if (inputManager.IsKeyDown(Key.S))
+					movement.Z = -1.0f;
+
+				if (inputManager.IsKeyDown(Key.A))
+					movement.X = 1.0f;
+				else if (inputManager.IsKeyDown(Key.D))
+					movement.X = -1.0f;
+
+				cameraYaw += -inputManager.MouseDelta.X * MouseSensitivity;
+				cameraPitch += inputManager.MouseDelta.Y * MouseSensitivity;
+
+				camera.Orientation = Quaternion.Identity;
+				camera.Yaw(cameraYaw);
+				camera.Pitch(cameraPitch);
+
+				var movementDir = Quaternion.FromAxisAngle(Vector3.UnitY, cameraYaw);
+
+				movement = Vector3.Transform(movement * deltaTime * MovementSpeed, movementDir);
+				camera.Move(ref movement);
+				
 				angle += 1.4f * deltaTime;
 
 				lightAlpha += deltaTime * 0.4f * lightAlphaDir;
@@ -206,19 +243,19 @@ namespace Test
 				Backend.BeginScene();
 
 				// Render main scene
-
-				var view = Matrix4.LookAt(cameraPos, cameraPos + Vector3.UnitZ, Vector3.UnitY);
-				var projection = Matrix4.CreatePerspectiveFieldOfView(1.22173f, Width / (float)Height, 0.001f, 1000.0f);
+				Matrix4 view, projection;
+				camera.GetViewMatrix(out view);
+				camera.GetProjectionMatrix(out projection);
 
 				Backend.BeginPass(fullSceneRenderTarget, new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
 
 				var world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 12.0f);
 				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallDiffuse, wallNormalMap, floorDiffuse, floorNormalMap, genericParams2, ref world, ref view, ref projection);
 
-				world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 22.0f);
+				world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 32.0f);
 				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallDiffuse, wallNormalMap, floorDiffuse, floorNormalMap, genericParams2, ref world, ref view, ref projection);
 
-				world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 44.0f);
+				world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 52.0f);
 				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallDiffuse, wallNormalMap, floorDiffuse, floorNormalMap, genericParams2, ref world, ref view, ref projection);
 
 				Backend.EndInstance();
@@ -233,7 +270,6 @@ namespace Test
 				// Ambient light
 				Backend.BeginInstance(ambientLightShader.Handle, new int[] { fullSceneRenderTarget.Textures[1].Handle }, true, true, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
 				Backend.BindShaderVariable(ambientLightParams.HandleNormal, 0);
-				Backend.BindShaderVariable(ambientLightParams.HandleScreenSize, ref screenSize);
 				Backend.BindShaderVariable(ambientLightParams.HandleMVP, ref mvp);
 				Backend.BindShaderVariable(ambientLightParams.HandleAmbientColor, ref ambientColor);
 
@@ -245,7 +281,7 @@ namespace Test
 					var radius = light.Range;
 
 					var cullFaceMode = Triton.Renderer.CullFaceMode.Back;
-					var delta = light.Position - cameraPos;
+					var delta = light.Position - camera.Position;
 					if (Math.Sqrt(delta.X * delta.X + delta.Y * delta.Y + delta.Z * delta.Z) <= radius * radius)
 					{
 						cullFaceMode = Triton.Renderer.CullFaceMode.Front;
@@ -263,7 +299,7 @@ namespace Test
 					Backend.BindShaderVariable(pointLightParams.HandleLightPositon, ref light.Position);
 					Backend.BindShaderVariable(pointLightParams.HandleLightColor, ref light.Color);
 					Backend.BindShaderVariable(pointLightParams.HandleLightRange, light.Range);
-					Backend.BindShaderVariable(pointLightParams.HandleCameraPosition, ref cameraPos);
+					Backend.BindShaderVariable(pointLightParams.HandleCameraPosition, ref camera.Position);
 
 					Backend.DrawMesh(unitSphere.Handles[0]);
 				}
@@ -291,7 +327,7 @@ namespace Test
 					
 					var spotParams = new Vector2((float)Math.Cos(light.InnerAngle / 2.0f), (float)Math.Cos(light.OuterAngle / 2.0f));
 					Backend.BindShaderVariable(spotLightParams.HandleSpotLightParams, ref spotParams);
-					Backend.BindShaderVariable(spotLightParams.HandleCameraPosition, ref cameraPos);
+					Backend.BindShaderVariable(spotLightParams.HandleCameraPosition, ref camera.Position);
 
 					Backend.DrawMesh(unitSphere.Handles[0]);
 				}
@@ -362,7 +398,6 @@ namespace Test
 			public int HandleNormal;
 
 			public int HandleAmbientColor;
-			public int HandleScreenSize;
 		}
 
 		class PointLightParams

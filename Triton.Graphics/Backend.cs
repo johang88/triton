@@ -58,6 +58,8 @@ namespace Triton.Graphics
 		public bool Disposed { get; private set; }
 		private System.Diagnostics.Stopwatch Watch;
 
+		public System.Drawing.Rectangle WindowBounds { get { return Window.Bounds; } }
+
 		public Backend(ResourceManager resourceManager, int width, int height, string title, bool fullscreen)
 		{
 			if (resourceManager == null)
