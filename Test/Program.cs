@@ -161,6 +161,7 @@ namespace Test
 			finalParams.HandleMVP = finalPassShader.GetAliasedUniform("ModelViewProjection"); ;
 			finalParams.HandleDiffuse = finalPassShader.GetAliasedUniform("DiffuseTexture");
 			finalParams.HandleLight = finalPassShader.GetAliasedUniform("LightTexture");
+			finalParams.HandlePosition = finalPassShader.GetAliasedUniform("PositionTexture");
 
 			var angle = 0.0f;
 			var camera = new Camera(new Vector2(Width, Height));
@@ -224,7 +225,7 @@ namespace Test
 
 				movement = Vector3.Transform(movement * deltaTime * MovementSpeed, movementDir);
 				camera.Move(ref movement);
-				
+
 				angle += 1.4f * deltaTime;
 
 				lightAlpha += deltaTime * 0.4f * lightAlphaDir;
@@ -324,7 +325,7 @@ namespace Test
 					Backend.BindShaderVariable(spotLightParams.HandleLightColor, ref light.Color);
 					Backend.BindShaderVariable(spotLightParams.HandleLightRange, light.Range);
 					Backend.BindShaderVariable(spotLightParams.HandleDirection, ref light.Direction);
-					
+
 					var spotParams = new Vector2((float)Math.Cos(light.InnerAngle / 2.0f), (float)Math.Cos(light.OuterAngle / 2.0f));
 					Backend.BindShaderVariable(spotLightParams.HandleSpotLightParams, ref spotParams);
 					Backend.BindShaderVariable(spotLightParams.HandleCameraPosition, ref camera.Position);
@@ -338,10 +339,11 @@ namespace Test
 
 				// Render final scene	
 				Backend.BeginPass(null, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-				Backend.BeginInstance(finalPassShader.Handle, new int[] { fullSceneRenderTarget.Textures[0].Handle, lightAccumulationRenderTarget.Textures[0].Handle });
+				Backend.BeginInstance(finalPassShader.Handle, new int[] { fullSceneRenderTarget.Textures[0].Handle, lightAccumulationRenderTarget.Textures[0].Handle, fullSceneRenderTarget.Textures[2].Handle });
 				Backend.BindShaderVariable(finalParams.HandleMVP, ref mvp);
 				Backend.BindShaderVariable(finalParams.HandleDiffuse, 0);
 				Backend.BindShaderVariable(finalParams.HandleLight, 1);
+				Backend.BindShaderVariable(finalParams.HandlePosition, 2);
 
 				Backend.DrawMesh(batchBuffer.Mesh.Handles[0]);
 				Backend.EndPass();
@@ -435,6 +437,7 @@ namespace Test
 			public int HandleMVP;
 			public int HandleDiffuse;
 			public int HandleLight;
+			public int HandlePosition;
 		}
 
 		class GenericParams
