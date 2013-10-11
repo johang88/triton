@@ -10,6 +10,7 @@ uniform(mat4x4, modelViewProjection, ModelViewProjection);
 void main()
 {
 	texCoord = iTexCoord;
+	
 	gl_Position = modelViewProjection * vec4(iPosition, 1);
 }
 
@@ -21,14 +22,17 @@ in vec2 texCoord;
 
 out(vec4, oColor, 0);
 
-sampler(2D, samplerDiffuse, DiffuseTexture);
-sampler(2D, samplerLights, LightTexture);
+sampler(2D, samplerNormal, NormalTexture);
+
+uniform(vec3, ambientColor, AmbientColor);
+uniform(vec2, screenSize, ScreenSize);
 
 void main()
 {
-	vec3 diffuse = texture2D(samplerDiffuse, texCoord).xyz;
-	vec3 lights = texture2D(samplerLights, texCoord).xyz;
-
-	oColor = vec4(diffuse * lights, 1.0f);
+	vec2 project = gl_FragCoord.xy / screenSize.xy;
+	
+	vec3 normal = normalize(texture2D(samplerNormal, texCoord).xyz);
+	
+	oColor = vec4(mix(ambientColor * 0.5f, ambientColor, 1.0f - saturate(normal.z * 0.5f + 0.5f)), 1.0f);
 }
 #endif

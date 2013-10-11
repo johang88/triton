@@ -27,9 +27,11 @@ sampler(2D, samplerPosition, PositionTexture);
 
 uniform(vec3, lightPosition, LightPosition);
 uniform(vec3, lightColor, LightColor);
+uniform(vec2, spotParams, SpotLightParams);
 uniform(float, lightRange, LightRange);
 uniform(vec2, screenSize, ScreenSize);
 uniform(vec3, cameraPosition, CameraPosition);
+uniform(vec3, lightDirection, LightDirection);
 
 void main()
 {
@@ -42,7 +44,7 @@ void main()
 	float dist = length(lightDir);
 	lightDir = lightDir / dist;
 	
-	float nDotL = saturate(dot(normal, lightDir));
+	float nDotL = dot(normal, lightDir);
 	
 	vec3 eyeDir = cameraPosition - position;
 	vec3 H = normalize(eyeDir + lightDir);
@@ -53,6 +55,9 @@ void main()
 	float attenuation = dist / lightRange;
 	attenuation = saturate(1.0f - (attenuation * attenuation));
 	
-	oColor = vec4((lightColor * (nDotL + specular.xxx)) * attenuation, 1.0f);
+	float spotLightAngle = saturate(dot(-lightDirection, lightDir));
+	float spotFallof = 1.0f - saturate((spotLightAngle - spotParams.x) / (spotParams.y - spotParams.x));
+	
+	oColor = vec4((lightColor * (nDotL + specular.xxx)) * (spotFallof * attenuation).xxx, 1.0f);
 }
 #endif
