@@ -189,6 +189,9 @@ namespace Triton.Graphics.Deferred
 
 			foreach (var light in lights)
 			{
+				if (!light.Enabled)
+					continue;
+
 				var radius = light.Range;
 
 				var cullFaceMode = Triton.Renderer.CullFaceMode.Back;

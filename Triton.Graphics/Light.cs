@@ -26,5 +26,7 @@ namespace Triton.Graphics
 
 		public float InnerAngle;
 		public float OuterAngle;
+
+		public bool Enabled = true;
 	}
 }
