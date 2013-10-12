@@ -60,6 +60,9 @@ namespace Triton.Graphics
 
 		public System.Drawing.Rectangle WindowBounds { get { return Window.Bounds; } }
 
+		public bool HasFocus { get { return Window.Focused; } }
+		public bool CursorVisible { get { return Window.CursorVisible; } set { Window.CursorVisible = value; } }
+
 		public Backend(ResourceManager resourceManager, int width, int height, string title, bool fullscreen)
 		{
 			if (resourceManager == null)
