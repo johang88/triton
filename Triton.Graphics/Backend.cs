@@ -61,7 +61,7 @@ namespace Triton.Graphics
 		public System.Drawing.Rectangle WindowBounds { get { return Window.Bounds; } }
 
 		public bool HasFocus { get { return Window.Focused; } }
-		public bool CursorVisible { get { return Window.CursorVisible; } set { Window.CursorVisible = value; } }
+		public bool CursorVisible { get; set; }
 
 		public Backend(ResourceManager resourceManager, int width, int height, string title, bool fullscreen)
 		{
@@ -114,6 +114,8 @@ namespace Triton.Graphics
 		public bool Process()
 		{
 			Watch.Start();
+
+			Window.CursorVisible = CursorVisible;
 
 			// The renderer can be disposed manually so we check here first, just in case
 			if (!Window.Exists || IsExiting)

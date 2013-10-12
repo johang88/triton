@@ -114,6 +114,8 @@ namespace Test
 			var flashlight = stage.CreateSpotLight(camera.Position, Vector3.UnitZ, 0.2f, 1.0f, 8.0f, new Vector3(1.2f, 1.1f, 0.8f) * 3.0f);
 			flashlight.Enabled = false;
 
+			Backend.CursorVisible = false;
+
 			while (Running)
 			{
 				var deltaTime = (float)stopWatch.Elapsed.TotalSeconds;
