@@ -186,8 +186,8 @@ namespace Triton.Graphics
 			AddVector3(position.X + size.X, position.Y, 0);
 			AddVector2(uvPositon.X + uvSize.X, uvPositon.Y);
 
-			AddTriangle(firstIndex, firstIndex + 1, firstIndex + 2);
-			AddTriangle(firstIndex, firstIndex + 2, firstIndex + 3);
+			AddTriangle(firstIndex, firstIndex + 2, firstIndex + 1);
+			AddTriangle(firstIndex, firstIndex + 3, firstIndex + 2);
 		}
 	}
 }
