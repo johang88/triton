@@ -86,6 +86,12 @@ namespace Test
 			var floor = stage.AddMesh("models/floor", "materials/floor");
 			var ceiling = stage.AddMesh("models/ceiling", "materials/ceiling");
 
+			for (var i = 0; i < 4; i++)
+			{
+				var crate = stage.AddMesh("models/crate", "materials/crate");
+				crate.Position = new Vector3(5.0f + i * 2.0f, 0.5f, 3.5f);
+			}
+
 			stage.AmbientColor = new Vector3(0.2f, 0.2f, 0.3f);
 
 			while (!ResourceManager.AllResourcesLoaded())
@@ -107,8 +113,6 @@ namespace Test
 
 			var flashlight = stage.CreateSpotLight(camera.Position, Vector3.UnitZ, 0.2f, 1.0f, 8.0f, new Vector3(1.2f, 1.1f, 0.8f) * 3.0f);
 			flashlight.Enabled = false;
-
-			Backend.CursorVisible = false;
 
 			while (Running)
 			{
