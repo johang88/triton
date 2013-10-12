@@ -93,6 +93,7 @@ namespace Test
 
 			var wallMaterial = ResourceManager.Load<Triton.Graphics.Resources.Material>("materials/wall");
 			var floorMaterial = ResourceManager.Load<Triton.Graphics.Resources.Material>("materials/floor");
+			var ceilingMaterial = ResourceManager.Load<Triton.Graphics.Resources.Material>("materials/ceiling");
 
 			var lightDir = new Vector3(0.0f, 2.0f, 0.0f);
 			var lightColor = new Vector3(1.6f, 1.12f, 1.15f) * 2.0f;
@@ -103,8 +104,8 @@ namespace Test
 			var lightAlpha = 0.0f;
 			var lightAlphaDir = 1.0f;
 
-			var fullSceneRenderTarget = Backend.CreateRenderTarget("full_scene", Width, Height, Triton.Renderer.PixelInternalFormat.Rgba32f, 3, true);
-			var lightAccumulationRenderTarget = Backend.CreateRenderTarget("light_accumulation", Width, Height, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, true);
+			var fullSceneRenderTarget = Backend.CreateRenderTarget("full_scene", Width, Height, Triton.Renderer.PixelInternalFormat.Rgba32f, 4, true);
+			var lightAccumulationRenderTarget = Backend.CreateRenderTarget("light_accumulation", Width, Height, Triton.Renderer.PixelInternalFormat.Rgba32f, 2, true);
 
 			var batchBuffer = Backend.CreateBatchBuffer();
 
@@ -122,6 +123,7 @@ namespace Test
 			genericParams2.HandleWorld = shader.GetAliasedUniform("World");
 			genericParams2.HandleDiffuseTexture = shader.GetAliasedUniform("DiffuseTexture");
 			genericParams2.HandleNormalMap = shader.GetAliasedUniform("NormalMap");
+			genericParams2.HandleSpecularMap = shader.GetAliasedUniform("SpecularMap");
 
 			var pointLightParams = new PointLightParams();
 			pointLightParams.HandleMVP = pointLightShader.GetAliasedUniform("ModelViewProjection"); ;
@@ -132,6 +134,7 @@ namespace Test
 			pointLightParams.HandleLightColor = pointLightShader.GetAliasedUniform("LightColor");
 			pointLightParams.HandleLightRange = pointLightShader.GetAliasedUniform("LightRange");
 			pointLightParams.HandleScreenSize = pointLightShader.GetAliasedUniform("ScreenSize");
+			pointLightParams.HandleSpecular = pointLightShader.GetAliasedUniform("SpecularTexture");
 
 			var spotLightParams = new SpotLightParams();
 			spotLightParams.HandleMVP = spotLightShader.GetAliasedUniform("ModelViewProjection"); ;
@@ -144,22 +147,24 @@ namespace Test
 			spotLightParams.HandleScreenSize = spotLightShader.GetAliasedUniform("ScreenSize");
 			spotLightParams.HandleSpotLightParams = spotLightShader.GetAliasedUniform("SpotLightParams");
 			spotLightParams.HandleDirection = spotLightShader.GetAliasedUniform("LightDirection");
+			spotLightParams.HandleSpecular = spotLightShader.GetAliasedUniform("SpecularTexture");
 
 			var ambientLightParams = new AmbientLightParams();
 			ambientLightParams.HandleMVP = ambientLightShader.GetAliasedUniform("ModelViewProjection"); ;
 			ambientLightParams.HandleNormal = ambientLightShader.GetAliasedUniform("NormalTexture");
 			ambientLightParams.HandleAmbientColor = ambientLightShader.GetAliasedUniform("AmbientColor");
-			spotLightParams.HandleScreenSize = ambientLightShader.GetAliasedUniform("ScreenSize");
 
 			var finalParams = new FinalPassParams();
 			finalParams.HandleMVP = finalPassShader.GetAliasedUniform("ModelViewProjection"); ;
 			finalParams.HandleDiffuse = finalPassShader.GetAliasedUniform("DiffuseTexture");
 			finalParams.HandleLight = finalPassShader.GetAliasedUniform("LightTexture");
-			finalParams.HandlePosition = finalPassShader.GetAliasedUniform("PositionTexture");
+			finalParams.HandleSpecular = finalPassShader.GetAliasedUniform("SpecularTexture");
 
 			var angle = 0.0f;
 			var camera = new Camera(new Vector2(Width, Height));
-			camera.Position.Y = 2.0f;
+			camera.Position.X = 5.0f;
+			camera.Position.Z = 3.0f;
+			camera.Position.Y = 1.5f;
 			float cameraYaw = 0.0f, cameraPitch = 0.0f;
 
 			var stopWatch = new System.Diagnostics.Stopwatch();
@@ -170,6 +175,9 @@ namespace Test
 			var pointLights = new List<PointLight>();
 			var spotLights = new List<SpotLight>();
 			var rng = new Random();
+
+			var spotLight = new SpotLight(camera.Position, Vector3.UnitZ, new Vector3(1, 1, 1), 0.6f, 1.0f, 10.0f);
+			spotLights.Add(spotLight);
 
 			for (var i = 0; i < 100; i++)
 			{
@@ -220,6 +228,9 @@ namespace Test
 				movement = Vector3.Transform(movement * deltaTime * MovementSpeed, movementDir);
 				camera.Move(ref movement);
 
+				spotLight.Position = camera.Position;
+				spotLight.Direction = Vector3.Transform(Vector3.UnitZ, camera.Orientation);
+
 				angle += 1.4f * deltaTime;
 
 				lightAlpha += deltaTime * 0.4f * lightAlphaDir;
@@ -244,14 +255,8 @@ namespace Test
 
 				Backend.BeginPass(fullSceneRenderTarget, new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
 
-				var world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 12.0f);
-				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallMaterial.Diffuse, wallMaterial.Normal, floorMaterial.Diffuse, floorMaterial.Normal, genericParams2, ref world, ref view, ref projection);
-
-				world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 32.0f);
-				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallMaterial.Diffuse, wallMaterial.Normal, floorMaterial.Diffuse, floorMaterial.Normal, genericParams2, ref world, ref view, ref projection);
-
-				world = Matrix4.CreateFromAxisAngle(Vector3.UnitX, (float)(Math.PI / 2.0)) * Matrix4.CreateTranslation(0, 5f, 52.0f);
-				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallMaterial.Diffuse, wallMaterial.Normal, floorMaterial.Diffuse, floorMaterial.Normal, genericParams2, ref world, ref view, ref projection);
+				var world = Matrix4.Identity;
+				RenderCorridor(shader, wallsMesh, floorMesh, ceilingMesh, wallMaterial, floorMaterial, ceilingMaterial, genericParams2, ref world, ref view, ref projection);
 
 				Backend.EndInstance();
 
@@ -285,9 +290,10 @@ namespace Test
 					world = Matrix4.Scale(radius) * Matrix4.CreateTranslation(light.Position);
 					mvp = world * view * projection;
 
-					Backend.BeginInstance(pointLightShader.Handle, new int[] { fullSceneRenderTarget.Textures[1].Handle, fullSceneRenderTarget.Textures[2].Handle }, true, true, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode);
+					Backend.BeginInstance(pointLightShader.Handle, new int[] { fullSceneRenderTarget.Textures[1].Handle, fullSceneRenderTarget.Textures[2].Handle, fullSceneRenderTarget.Textures[3].Handle }, true, true, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode);
 					Backend.BindShaderVariable(pointLightParams.HandleNormal, 0);
 					Backend.BindShaderVariable(pointLightParams.HandlePosition, 1);
+					Backend.BindShaderVariable(pointLightParams.HandleSpecular, 2);
 					Backend.BindShaderVariable(pointLightParams.HandleScreenSize, ref screenSize);
 
 					Backend.BindShaderVariable(pointLightParams.HandleMVP, ref mvp);
@@ -304,14 +310,25 @@ namespace Test
 				{
 					var radius = light.Range;
 
+					//var cullFaceMode = Triton.Renderer.CullFaceMode.Back;
+					//if (light.Intersects(camera))
+					//{
+					//	cullFaceMode = Triton.Renderer.CullFaceMode.Front;
+					//}
 					var cullFaceMode = Triton.Renderer.CullFaceMode.Back;
+					var delta = light.Position - camera.Position;
+					if (Math.Sqrt(delta.X * delta.X + delta.Y * delta.Y + delta.Z * delta.Z) <= radius * radius)
+					{
+						cullFaceMode = Triton.Renderer.CullFaceMode.Front;
+					}
 
 					world = Matrix4.Scale(radius) * Matrix4.CreateTranslation(light.Position);
 					mvp = world * view * projection;
 
-					Backend.BeginInstance(spotLightShader.Handle, new int[] { fullSceneRenderTarget.Textures[1].Handle, fullSceneRenderTarget.Textures[2].Handle }, true, true, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode);
+					Backend.BeginInstance(spotLightShader.Handle, new int[] { fullSceneRenderTarget.Textures[1].Handle, fullSceneRenderTarget.Textures[2].Handle, fullSceneRenderTarget.Textures[3].Handle }, true, true, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode);
 					Backend.BindShaderVariable(spotLightParams.HandleNormal, 0);
 					Backend.BindShaderVariable(spotLightParams.HandlePosition, 1);
+					Backend.BindShaderVariable(spotLightParams.HandleSpecular, 2);
 					Backend.BindShaderVariable(spotLightParams.HandleScreenSize, ref screenSize);
 
 					Backend.BindShaderVariable(spotLightParams.HandleMVP, ref mvp);
@@ -333,11 +350,11 @@ namespace Test
 
 				// Render final scene	
 				Backend.BeginPass(null, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-				Backend.BeginInstance(finalPassShader.Handle, new int[] { fullSceneRenderTarget.Textures[0].Handle, lightAccumulationRenderTarget.Textures[0].Handle, fullSceneRenderTarget.Textures[2].Handle });
+				Backend.BeginInstance(finalPassShader.Handle, new int[] { fullSceneRenderTarget.Textures[0].Handle, lightAccumulationRenderTarget.Textures[0].Handle, lightAccumulationRenderTarget.Textures[1].Handle });
 				Backend.BindShaderVariable(finalParams.HandleMVP, ref mvp);
 				Backend.BindShaderVariable(finalParams.HandleDiffuse, 0);
 				Backend.BindShaderVariable(finalParams.HandleLight, 1);
-				Backend.BindShaderVariable(finalParams.HandlePosition, 2);
+				Backend.BindShaderVariable(finalParams.HandleSpecular, 2);
 
 				Backend.DrawMesh(batchBuffer.Mesh.Handles[0]);
 				Backend.EndPass();
@@ -348,16 +365,17 @@ namespace Test
 			}
 		}
 
-		private void RenderCorridor(Triton.Graphics.Resources.ShaderProgram shader, Triton.Graphics.Resources.Mesh wallsMesh, Triton.Graphics.Resources.Mesh floorMesh, Triton.Graphics.Resources.Mesh ceilingMesh, Triton.Graphics.Resources.Texture wallDiffuse, Triton.Graphics.Resources.Texture wallNormalMap, Triton.Graphics.Resources.Texture floorDiffuse, Triton.Graphics.Resources.Texture floorNormalMap, GenericParams genericParams2, ref Matrix4 world, ref Matrix4 view, ref Matrix4 projection)
+		private void RenderCorridor(Triton.Graphics.Resources.ShaderProgram shader, Triton.Graphics.Resources.Mesh wallsMesh, Triton.Graphics.Resources.Mesh floorMesh, Triton.Graphics.Resources.Mesh ceilingMesh, Triton.Graphics.Resources.Material wallMaterial, Triton.Graphics.Resources.Material floorMaterial, Triton.Graphics.Resources.Material ceilingMaterial, GenericParams genericParams2, ref Matrix4 world, ref Matrix4 view, ref Matrix4 projection)
 		{
 			// Render corridor
 			Matrix4 mvp = world * view * projection;
-			Backend.BeginInstance(shader.Handle, new int[] { wallDiffuse.Handle, wallNormalMap.Handle });
+			Backend.BeginInstance(shader.Handle, new int[] { wallMaterial.Diffuse.Handle, wallMaterial.Normal.Handle, wallMaterial.Specular.Handle });
 
 			Backend.BindShaderVariable(genericParams2.HandleMVP, ref mvp);
 			Backend.BindShaderVariable(genericParams2.HandleWorld, ref world);
 			Backend.BindShaderVariable(genericParams2.HandleDiffuseTexture, 0);
 			Backend.BindShaderVariable(genericParams2.HandleNormalMap, 1);
+			Backend.BindShaderVariable(genericParams2.HandleSpecularMap, 2);
 
 			foreach (var handle in wallsMesh.Handles)
 			{
@@ -365,14 +383,17 @@ namespace Test
 			}
 
 			Backend.EndInstance();
-			Backend.BeginInstance(shader.Handle, new int[] { floorDiffuse.Handle, floorNormalMap.Handle });
 
-			foreach (var handle in ceilingMesh.Handles)
+			Backend.BeginInstance(shader.Handle, new int[] { floorMaterial.Diffuse.Handle, floorMaterial.Normal.Handle, floorMaterial.Specular.Handle });
+
+			foreach (var handle in floorMesh.Handles)
 			{
 				Backend.DrawMesh(handle);
 			}
+			Backend.EndInstance();
 
-			foreach (var handle in floorMesh.Handles)
+			Backend.BeginInstance(shader.Handle, new int[] { ceilingMaterial.Diffuse.Handle, ceilingMaterial.Normal.Handle, ceilingMaterial.Specular.Handle });
+			foreach (var handle in ceilingMesh.Handles)
 			{
 				Backend.DrawMesh(handle);
 			}
@@ -401,6 +422,7 @@ namespace Test
 			public int HandleMVP;
 			public int HandleNormal;
 			public int HandlePosition;
+			public int HandleSpecular;
 
 			public int HandleCameraPosition;
 
@@ -415,6 +437,8 @@ namespace Test
 			public int HandleMVP;
 			public int HandleNormal;
 			public int HandlePosition;
+			public int HandleSpecular;
+
 			public int HandleDirection;
 
 			public int HandleCameraPosition;
@@ -431,7 +455,7 @@ namespace Test
 			public int HandleMVP;
 			public int HandleDiffuse;
 			public int HandleLight;
-			public int HandlePosition;
+			public int HandleSpecular;
 		}
 
 		class GenericParams
@@ -440,6 +464,7 @@ namespace Test
 			public int HandleWorld;
 			public int HandleDiffuseTexture;
 			public int HandleNormalMap;
+			public int HandleSpecularMap;
 		}
 
 		class PointLight
@@ -490,6 +515,26 @@ namespace Test
 			public float OuterAngle;
 
 			public float Range;
+
+			public bool Intersects( Camera camera)
+			{
+				var lightPos = Position;
+				var lightDir = Direction;
+				var attAngle = OuterAngle;
+
+				Vector3 clipRangeFix = -lightDir * (camera.NearClipDistance / (float)System.Math.Tan(attAngle / 2.0f));
+				lightPos = lightPos + clipRangeFix;
+
+				Vector3 lightToCamDir = camera.Position - lightPos;
+				float distanceFromLight = lightToCamDir.Length;
+
+				lightToCamDir = lightToCamDir.Normalize();
+
+				var cosAngle = Vector3.Dot(lightToCamDir, lightDir);
+				float angle = (float)Math.Acos(cosAngle);
+
+				return (distanceFromLight <= (Range + clipRangeFix.Length)) && angle <= attAngle;
+			}
 		}
 	}
 }

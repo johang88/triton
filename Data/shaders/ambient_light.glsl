@@ -21,6 +21,7 @@ import(shaders/utility/utils);
 in vec2 texCoord;
 
 out(vec4, oColor, 0);
+out(vec4, oSpecular, 1);
 
 sampler(2D, samplerNormal, NormalTexture);
 
@@ -34,5 +35,6 @@ void main()
 	vec3 normal = normalize(texture2D(samplerNormal, texCoord).xyz);
 	
 	oColor = vec4(mix(ambientColor * 0.5f, ambientColor, 1.0f - saturate(normal.z * 0.5f + 0.5f)), 1.0f);
+	oSpecular = vec4(0, 0, 0, 0);
 }
 #endif

@@ -23,15 +23,15 @@ out(vec4, oColor, 0);
 
 sampler(2D, samplerDiffuse, DiffuseTexture);
 sampler(2D, samplerLights, LightTexture);
-sampler(2D, samplerPositions, PositionTexture);
+sampler(2D, samplerSpecular, SpecularTexture);
 
 void main()
 {
 	vec3 diffuse = texture2D(samplerDiffuse, texCoord).xyz;
-	vec3 lights = texture2D(samplerLights, texCoord).xyz;
-	vec3 position = texture2D(samplerPositions, texCoord).xyz;
+	vec3 light = texture2D(samplerLights, texCoord).xyz;
+	vec3 specular = texture2D(samplerSpecular, texCoord).xyz;
 
-	diffuse = diffuse * lights;
+	diffuse = diffuse * light + specular;
 	
 	oColor = vec4(diffuse, 1.0f);
 }

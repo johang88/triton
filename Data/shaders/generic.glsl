@@ -40,9 +40,11 @@ in vec4 position;
 out(vec4, oColor, 0);
 out(vec4, oNormal, 1);
 out(vec4, oPosition, 2);
+out(vec4, oSpecular, 3);
 
 sampler(2D, samplerDiffuse, DiffuseTexture);
 sampler(2D, samplerNormal, NormalMap);
+sampler(2D, samplerSpecular, SpecularMap);
 
 void main()
 {
@@ -52,9 +54,11 @@ void main()
 	vec3 N2 = normalize(rot * N);
 
 	vec4 diffuse = texture2D(samplerDiffuse, texCoord);
+	vec4 specular = texture2D(samplerSpecular, texCoord);
 	
 	oColor = vec4(diffuse.xyz, 1.0f);
 	oNormal = vec4(N2.xyz, 1.0f);
+	oSpecular = specular;
 	oPosition = position;
 }
 #endif

@@ -21,9 +21,11 @@ import(shaders/utility/utils);
 in vec2 texCoord;
 
 out(vec4, oColor, 0);
+out(vec4, oSpecular, 1);
 
 sampler(2D, samplerNormal, NormalTexture);
 sampler(2D, samplerPosition, PositionTexture);
+sampler(2D, samplerSpecular, SpecularTexture);
 
 uniform(vec3, lightPosition, LightPosition);
 uniform(vec3, lightColor, LightColor);
@@ -50,7 +52,10 @@ void main()
 	vec3 H = normalize(eyeDir + lightDir);
 	
 	float nDotH = saturate(dot(normal, H));
-	float specular = pow(nDotH, 16);
+	float specularPower = pow(nDotH, 32);
+	
+	vec4 specularColor = texture2D(samplerSpecular, project);
+	vec3 specular = specularColor.xyz * specularPower;
 	
 	float attenuation = dist / lightRange;
 	attenuation = saturate(1.0f - (attenuation * attenuation));
@@ -58,6 +63,7 @@ void main()
 	float spotLightAngle = saturate(dot(-lightDirection, lightDir));
 	float spotFallof = 1.0f - saturate((spotLightAngle - spotParams.x) / (spotParams.y - spotParams.x));
 	
-	oColor = vec4((lightColor * (nDotL + specular.xxx)) * (spotFallof * attenuation).xxx, 1.0f);
+	oColor = vec4((lightColor * nDotL) * (spotFallof * attenuation).xxx, 1.0f);
+	oSpecular = vec4(specular * (spotFallof * attenuation).xxx, 1.0f);
 }
 #endif
