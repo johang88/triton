@@ -319,7 +319,7 @@ namespace Triton.Renderer
 				GL.Disable(EnableCap.CullFace);
 
 			GL.BlendFunc((OpenTK.Graphics.OpenGL.BlendingFactorSrc)(int)src, (OpenTK.Graphics.OpenGL.BlendingFactorDest)(int)dest);
-			GL.CullFace((OpenTK.Graphics.OpenGL.CullFaceMode.Back));
+			GL.CullFace((OpenTK.Graphics.OpenGL.CullFaceMode)(int)cullFaceMode);
 		}
 
 		public int CreateRenderTarget(int width, int height, Renderer.PixelInternalFormat pixelFormat, int numTargets, bool createDepthBuffer, out int[] textureHandles, OnLoadedCallback loadedCallback)
