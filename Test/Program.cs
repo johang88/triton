@@ -103,6 +103,10 @@ namespace Test
 			stopWatch.Start();
 
 			var isCDown = false;
+			var isFDown = false;
+
+			var flashlight = stage.CreateSpotLight(camera.Position, Vector3.UnitZ, 0.2f, 1.0f, 8.0f, new Vector3(1.2f, 1.1f, 0.8f) * 3.0f);
+			flashlight.Enabled = false;
 
 			while (Running)
 			{
@@ -147,6 +151,20 @@ namespace Test
 
 					stage.CreatePointLight(camera.Position, 5.0f, new Vector3(1.0f, 0.98f, 0.85f));
 				}
+
+				if (inputManager.IsKeyDown(Key.F))
+				{
+					isFDown = true;
+				}
+				else if (isFDown)
+				{
+					isFDown = false;
+
+					flashlight.Enabled = !flashlight.Enabled;
+				}
+
+				flashlight.Position = camera.Position;
+				flashlight.Direction = Vector3.Transform(new Vector3(0, -0.2f, 1.0f), camera.Orientation);
 
 				Backend.BeginScene();
 				deferredRenderer.Render(stage, camera);
