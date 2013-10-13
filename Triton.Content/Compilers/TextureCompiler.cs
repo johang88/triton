@@ -18,17 +18,21 @@ namespace Triton.Content.Compilers
 			{
 				outputPath = Path.ChangeExtension(outputPath, "dds");
 
-				var filename = Path.GetFileName(inputPath);
+				var filename = Path.GetFileNameWithoutExtension(inputPath);
 
 				var isNormal = filename.EndsWith("_n");
 
 				var arguments = "";
 				if (isNormal)
+				{
 					arguments += "-normal ";
+					arguments += "-bc3 ";
+				}
 				else
-					arguments += "-color";
-
-				arguments += "-bc3 ";
+				{
+					arguments += "-color ";
+					arguments += "-bc3 ";
+				}
 
 				arguments += inputPath + " ";
 				arguments += outputPath;
