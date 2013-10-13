@@ -513,6 +513,32 @@ namespace Triton.Graphics
 			return new BatchBuffer(RenderSystem, vertexFormat, initialCount);
 		}
 
+		public Resources.Texture CreateTexture(string name, int width, int height, PixelFormat pixelFormat, PixelInternalFormat interalFormat, byte[] data)
+		{
+			var handle = RenderSystem.CreateTexture(width, height, data, pixelFormat, interalFormat, PixelType.UnsignedByte, null);
+
+			var texture = new Resources.Texture(name, "");
+			texture.Handle = handle;
+			texture.Width = width;
+			texture.Height = height;
+			texture.PixelInternalFormat = interalFormat;
+			texture.PixelFormat = pixelFormat;
+
+			ResourceManager.Manage(texture);
+
+			return texture;
+		}
+
+		public void UpdateTexture(Resources.Texture texture, IntPtr data)
+		{
+			RenderSystem.SetTextureData(texture.Handle, texture.Width, texture.Height, data, texture.PixelFormat, texture.PixelInternalFormat, PixelType.UnsignedByte, null);
+		}
+
+		public void UpdateTexture(Resources.Texture texture, byte[] data)
+		{
+			RenderSystem.SetTextureData(texture.Handle, texture.Width, texture.Height, data, texture.PixelFormat, texture.PixelInternalFormat, PixelType.UnsignedByte, null);
+		}
+
 		/// <summary>
 		/// Op codes used in the rendering instructions
 		/// All opcodes have a variable amount of parameters

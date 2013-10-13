@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-
+using FreeImageAPI;
 
 namespace Triton.Graphics.Resources
 {
@@ -35,11 +35,80 @@ namespace Triton.Graphics.Resources
 		{
 			var texture = (Texture)resource;
 			var filename = resource.Name + ".texture";
-			bool srgb = parameters.Contains("srgb");
+
+			if (!FreeImage.IsAvailable())
+			{
+				throw new InvalidOperationException("FreeImage.dll seems to be missing!");
+			}
 
 			using (var stream = FileSystem.OpenRead(filename))
 			{
-				var bitmap = (Bitmap)Bitmap.FromStream(stream);
+				FREE_IMAGE_FORMAT imageFormat = FREE_IMAGE_FORMAT.FIF_UNKNOWN;
+				var bitmap = FreeImage.LoadFromStream(stream, FREE_IMAGE_LOAD_FLAGS.DEFAULT, ref imageFormat);
+
+				if (bitmap.IsNull)
+				{
+					throw new Exception("Could not load texture");
+				}
+
+				try
+				{
+					FreeImage.FlipVertical(bitmap);
+
+					var pixelFormat = FreeImage.GetPixelFormat(bitmap);
+
+					Renderer.PixelInternalFormat pif;
+					Renderer.PixelFormat pf;
+					Renderer.PixelType pt;
+
+					switch (pixelFormat)
+					{
+						case PixelFormat.Format24bppRgb:
+							pif = Renderer.PixelInternalFormat.Rgb8;
+							pf = Renderer.PixelFormat.Bgr;
+							pt = Renderer.PixelType.UnsignedByte;
+							break;
+						case PixelFormat.Format32bppArgb:
+							pif = Renderer.PixelInternalFormat.Rgba8;
+							pf = Renderer.PixelFormat.Bgra;
+							pt = Renderer.PixelType.UnsignedByte;
+							break;
+						default:
+							throw new ArgumentException("Unsupported Pixel Format " + pixelFormat);
+					}
+
+					var width = (int)FreeImage.GetWidth(bitmap);
+					var height = (int)FreeImage.GetHeight(bitmap);
+
+					var bytesPerPixel = FreeImage.GetBPP(bitmap) / 8;
+					var length = width * height * bytesPerPixel;
+
+					var imageData = FreeImage.GetBits(bitmap);
+					var bytes = new byte[length];
+
+					Marshal.Copy(imageData, bytes, 0, (int)length);
+
+					Renderer.RenderSystem.OnLoadedCallback onResourceLoaded = (handle, success, errors) =>
+					{
+						Common.Log.WriteLine(errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
+
+						if (onLoaded != null)
+							onLoaded(resource);
+					};
+
+					if (texture.Handle == -1)
+						texture.Handle = Backend.RenderSystem.CreateTexture(width, height, bytes, pf, pif, pt, onResourceLoaded);
+					else
+						Backend.RenderSystem.SetTextureData(texture.Handle, width, height, bytes, pf, pif, pt, onResourceLoaded);
+
+					resource.Parameters = parameters;
+				}
+				finally
+				{
+					FreeImage.UnloadEx(ref bitmap);
+				}
+
+				/*var bitmap = (Bitmap)Bitmap.FromStream(stream);
 
 				Renderer.PixelInternalFormat pif;
 				Renderer.PixelFormat pf;
@@ -95,7 +164,7 @@ namespace Triton.Graphics.Resources
 				else
 					Backend.RenderSystem.SetTextureData(texture.Handle, bitmap.Width, bitmap.Height, bytes, pf, pif, pt, onResourceLoaded);
 
-				resource.Parameters = parameters;
+				resource.Parameters = parameters;*/
 			}
 		}
 

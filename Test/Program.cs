@@ -7,6 +7,7 @@ using System.Threading;
 using Triton;
 using System.Collections.Concurrent;
 using Triton.Input;
+using System.Globalization;
 
 namespace Test
 {
@@ -79,6 +80,8 @@ namespace Test
 
 			var inputManager = new InputManager(Backend.WindowBounds);
 
+			var spriteShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/sprite");
+
 			var deferredRenderer = new Triton.Graphics.Deferred.DeferredRenderer(ResourceManager, Backend, Width, Height);
 			var stage = new Triton.Graphics.Stage(ResourceManager);
 
@@ -99,6 +102,10 @@ namespace Test
 				Thread.Sleep(1);
 			}
 
+			var spriteHandles = new SpriteHandles();
+			spriteHandles.HandleMVP = spriteShader.GetAliasedUniform("ModelViewProjection");
+			spriteHandles.HandleDiffuse = spriteShader.GetAliasedUniform("DiffuseTexture");
+
 			var camera = new Triton.Graphics.Camera(new Vector2(Width, Height));
 			camera.Position.X = 5.0f;
 			camera.Position.Z = 3.0f;
@@ -115,6 +122,11 @@ namespace Test
 			flashlight.Enabled = false;
 
 			Backend.CursorVisible = false;
+
+			var quad = Backend.CreateBatchBuffer();
+			quad.Begin();
+			quad.AddQuad(new Vector2(-1, -1), new Vector2(0.5f, 0.5f), new Vector2(0, 1), new Vector2(1, -1));
+			quad.End();
 
 			while (Running)
 			{
@@ -177,6 +189,9 @@ namespace Test
 
 				Backend.BeginScene();
 				deferredRenderer.Render(stage, camera);
+
+				var modelViewProjection = Matrix4.Identity;
+
 				Backend.EndScene();
 
 				Thread.Sleep(1);
@@ -189,6 +204,12 @@ namespace Test
 			{
 				app.Run();
 			}
+		}
+
+		class SpriteHandles
+		{
+			public int HandleMVP;
+			public int HandleDiffuse;
 		}
 	}
 }

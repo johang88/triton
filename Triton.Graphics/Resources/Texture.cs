@@ -10,6 +10,11 @@ namespace Triton.Graphics.Resources
 	{
 		public int Handle { get; internal set; }
 
+		public int Width;
+		public int Height;
+		public Renderer.PixelInternalFormat PixelInternalFormat;
+		public Renderer.PixelFormat PixelFormat;
+
 		public Texture(string name, string parameters)
 			: base(name, parameters)
 		{
