@@ -74,6 +74,10 @@
     <Compile Include="Deferred\GBufferParams.cs" />
     <Compile Include="Deferred\PointLightParams.cs" />
     <Compile Include="Deferred\SpotLightParams.cs" />
+    <Compile Include="HDR\BlurParams.cs" />
+    <Compile Include="HDR\HighPassParams.cs" />
+    <Compile Include="HDR\HDRRenderer.cs" />
+    <Compile Include="HDR\TonemapParams.cs" />
     <Compile Include="Light.cs" />
     <Compile Include="MeshInstance.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

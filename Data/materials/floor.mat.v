@@ -1,5 +1,5 @@
 {
-	"diffuse": "textures/floor_d",
-	"normal": "textures/floor_n",
-	"specular": "textures/floor_s"
+	"diffuse": "textures/Ground_DirtClodGround_1k_d",
+	"normal": "textures/Ground_DirtClodGround_1k_n",
+	"specular": "textures/Ground_DirtClodGround_1k_s"
 }

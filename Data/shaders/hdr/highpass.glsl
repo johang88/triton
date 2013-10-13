@@ -21,18 +21,17 @@ in vec2 texCoord;
 
 out(vec4, oColor, 0);
 
-sampler(2D, samplerDiffuse, DiffuseTexture);
-sampler(2D, samplerLights, LightTexture);
-sampler(2D, samplerSpecular, SpecularTexture);
+sampler(2D, samplerScene, SceneTexture);
+
+uniform(vec3, whitePoint, WhitePoint);
+uniform(float, exposure, Exposure);
 
 void main()
 {
-	vec3 diffuse = texture2D(samplerDiffuse, texCoord).xyz;
-	vec3 light = texture2D(samplerLights, texCoord).xyz;
-	vec3 specular = texture2D(samplerSpecular, texCoord).xyz;
+	vec3 scene = texture2D(samplerScene, texCoord).xyz * exposure;
 
-	diffuse = diffuse * light + specular;
+	vec3 final = max(scene - whitePoint, vec3(0, 0, 0));
 	
-	oColor = vec4(diffuse, 1.0f);
+	oColor = vec4(final, 1.0f);
 }
 #endif

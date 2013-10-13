@@ -56,6 +56,10 @@ void main()
 	vec4 diffuse = texture2D(samplerDiffuse, texCoord);
 	vec4 specular = texture2D(samplerSpecular, texCoord);
 	
+	vec3 gamma = (2.2f).xxx;
+	diffuse.xyz = pow(diffuse.xyz, gamma);
+	specular.xyz = pow(specular.xyz, gamma);
+	
 	oColor = vec4(diffuse.xyz, 1.0f);
 	oNormal = vec4(N2.xyz, 1.0f);
 	oSpecular = specular;

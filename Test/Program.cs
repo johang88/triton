@@ -83,19 +83,16 @@ namespace Test
 			var spriteShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/sprite");
 
 			var deferredRenderer = new Triton.Graphics.Deferred.DeferredRenderer(ResourceManager, Backend, Width, Height);
+			var hdrRenderer = new Triton.Graphics.HDR.HDRRenderer(ResourceManager, Backend, Width, Height);
+
 			var stage = new Triton.Graphics.Stage(ResourceManager);
 
-			var walls = stage.AddMesh("models/walls", "materials/wall");
-			var floor = stage.AddMesh("models/floor", "materials/floor");
-			var ceiling = stage.AddMesh("models/ceiling", "materials/ceiling");
+			stage.AddMesh("models/walls", "materials/wall");
+			stage.AddMesh("models/floor", "materials/floor");
+			stage.AddMesh("models/ceiling", "materials/ceiling");
+			stage.AddMesh("models/pillars", "materials/pillars");
 
-			for (var i = 0; i < 4; i++)
-			{
-				var crate = stage.AddMesh("models/crate", "materials/crate");
-				crate.Position = new Vector3(5.0f + i * 2.0f, 0.5f, 3.5f);
-			}
-
-			stage.AmbientColor = new Vector3(0.2f, 0.2f, 0.3f);
+			stage.AmbientColor = new Vector3(0.1f, 0.1f, 0.1f);
 
 			while (!ResourceManager.AllResourcesLoaded())
 			{
@@ -107,8 +104,8 @@ namespace Test
 			spriteHandles.HandleDiffuse = spriteShader.GetAliasedUniform("DiffuseTexture");
 
 			var camera = new Triton.Graphics.Camera(new Vector2(Width, Height));
-			camera.Position.X = 5.0f;
-			camera.Position.Z = 3.0f;
+			camera.Position.X = 0.0f;
+			camera.Position.Z = 0.0f;
 			camera.Position.Y = 1.5f;
 			float cameraYaw = 0.0f, cameraPitch = 0.0f;
 
@@ -118,7 +115,7 @@ namespace Test
 			var isCDown = false;
 			var isFDown = false;
 
-			var flashlight = stage.CreateSpotLight(camera.Position, Vector3.UnitZ, 0.2f, 1.0f, 8.0f, new Vector3(1.2f, 1.1f, 0.8f) * 3.0f);
+			var flashlight = stage.CreateSpotLight(camera.Position, Vector3.UnitZ, 0.2f, 1.0f, 8.0f, new Vector3(1.2f, 1.1f, 0.8f) * 1.2f);
 			flashlight.Enabled = false;
 
 			Backend.CursorVisible = false;
@@ -127,8 +124,6 @@ namespace Test
 			quad.Begin();
 			quad.AddQuad(new Vector2(-1, -1), new Vector2(0.5f, 0.5f), new Vector2(0, 1), new Vector2(1, -1));
 			quad.End();
-
-			float exposure = 1.0f;
 
 			while (Running)
 			{
@@ -172,7 +167,7 @@ namespace Test
 				{
 					isCDown = false;
 
-					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 10.0f, new Vector3(1.4f, 0.98f, 0.85f));
+					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 10.0f, new Vector3(1.4f, 0.68f, 0.65f));
 				}
 
 				if (inputManager.IsKeyDown(Key.F))
@@ -187,15 +182,16 @@ namespace Test
 				}
 
 				if (inputManager.IsKeyDown(Key.K))
-					exposure -= 1.0f * deltaTime;
+					hdrRenderer.Exposure -= 1.0f * deltaTime;
 				if (inputManager.IsKeyDown(Key.L))
-					exposure += 1.0f * deltaTime;
+					hdrRenderer.Exposure += 1.0f * deltaTime;
 
 				flashlight.Position = camera.Position;
 				flashlight.Direction = Vector3.Transform(new Vector3(0, -0.2f, 1.0f), camera.Orientation);
 
 				Backend.BeginScene();
-				deferredRenderer.Render(stage, camera, exposure);
+				deferredRenderer.Render(hdrRenderer.SceneTarget, stage, camera);
+				hdrRenderer.Render(camera);
 
 				var modelViewProjection = Matrix4.Identity;
 

@@ -33,7 +33,7 @@ namespace Triton.Graphics.Deferred
 
 		private bool HandlesInitialized = false;
 
-		public DeferredRenderer(Common.ResourceManager resourceManager, Backend backend, int Width, int Height)
+		public DeferredRenderer(Common.ResourceManager resourceManager, Backend backend, int width, int height)
 		{
 			if (resourceManager == null)
 				throw new ArgumentNullException("resourceManager");
@@ -43,10 +43,10 @@ namespace Triton.Graphics.Deferred
 			ResourceManager = resourceManager;
 			Backend = backend;
 
-			ScreenSize = new Vector2(Width, Height);
+			ScreenSize = new Vector2(width, height);
 
-			GBuffer = Backend.CreateRenderTarget("full_scene", Width, Height, Triton.Renderer.PixelInternalFormat.Rgba32f, 4, true);
-			LightAccumulation = Backend.CreateRenderTarget("light_accumulation", Width, Height, Triton.Renderer.PixelInternalFormat.Rgba32f, 2, true);
+			GBuffer = Backend.CreateRenderTarget("gbuffer", width, height, Triton.Renderer.PixelInternalFormat.Rgba16f, 4, true);
+			LightAccumulation = Backend.CreateRenderTarget("light_accumulation", width, height, Triton.Renderer.PixelInternalFormat.Rgba16f, 2, true);
 
 			GBufferShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/gbuffer");
 			AmbientLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ambient");
@@ -100,10 +100,9 @@ namespace Triton.Graphics.Deferred
 			CombineParams.HandleDiffuse = CombineShader.GetAliasedUniform("DiffuseTexture");
 			CombineParams.HandleLight = CombineShader.GetAliasedUniform("LightTexture");
 			CombineParams.HandleSpecular = CombineShader.GetAliasedUniform("SpecularTexture");
-			CombineParams.HandleExposure = CombineShader.GetAliasedUniform("Exposure");
 		}
 
-		public void Render(Stage stage, Camera camera, float exposure)
+		public void Render(RenderTarget outputTarget, Stage stage, Camera camera)
 		{
 			if (!HandlesInitialized)
 			{
@@ -132,13 +131,12 @@ namespace Triton.Graphics.Deferred
 			// Combine light and diffuse color
 			var modelViewProjection = Matrix4.Identity;
 
-			Backend.BeginPass(null, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+			Backend.BeginPass(outputTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 			Backend.BeginInstance(CombineShader.Handle, new int[] { GBuffer.Textures[0].Handle, LightAccumulation.Textures[0].Handle, LightAccumulation.Textures[1].Handle });
 			Backend.BindShaderVariable(CombineParams.HandleMVP, ref modelViewProjection);
 			Backend.BindShaderVariable(CombineParams.HandleDiffuse, 0);
 			Backend.BindShaderVariable(CombineParams.HandleLight, 1);
 			Backend.BindShaderVariable(CombineParams.HandleSpecular, 2);
-			Backend.BindShaderVariable(CombineParams.HandleExposure, exposure);
 
 			Backend.DrawMesh(QuadMesh.Mesh.Handles[0]);
 			Backend.EndPass();

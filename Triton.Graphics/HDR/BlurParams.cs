@@ -4,13 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Triton.Graphics.Deferred
+namespace Triton.Graphics.HDR
 {
-	class CombineParams
+	class BlurParams
 	{
 		public int HandleMVP;
-		public int HandleDiffuse;
-		public int HandleLight;
-		public int HandleSpecular;
+		public int HandleScene;
+		public int HandleTexelSize;
 	}
 }

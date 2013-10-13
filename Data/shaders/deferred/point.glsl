@@ -54,12 +54,12 @@ void main()
 	float nDotH = saturate(dot(normal, H));
 	float specularPower = pow(nDotH, 16 * specularColor.w);
 	
-	vec3 specular = specularColor.xyz * specularPower;
+	vec3 specular = specularColor.xyz * lightColor.xyz * specularPower;
 	
 	float attenuation = dist / lightRange;
 	attenuation = saturate(1.0f - (attenuation * attenuation));
 	
-	oColor = vec4((lightColor * nDotL) * attenuation, 1.0f);
+	oColor = vec4((lightColor * 5 * nDotL) * attenuation, 1.0f);
 	oSpecular = vec4(specular * attenuation, 1.0f);
 }
 #endif
