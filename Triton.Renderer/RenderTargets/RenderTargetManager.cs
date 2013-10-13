@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK.Graphics.OpenGL;
+using OGL = OpenTK.Graphics.OpenGL;
 
 namespace Triton.Renderer.RenderTargets
 {
@@ -98,7 +99,7 @@ namespace Triton.Renderer.RenderTargets
 			for (var i = 0; i < textureHandles.Length; i++)
 			{
 				Handles[index].DrawBuffers[i] = DrawBuffersEnum.ColorAttachment0 + i;
-				GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0 + i, TextureTarget.Texture2D, textureHandles[i], 0);
+				GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0 + i, OGL.TextureTarget.Texture2D, textureHandles[i], 0);
 			}
 
 			Handles[index].DepthBufferObject = 0;

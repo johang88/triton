@@ -100,9 +100,10 @@ namespace Triton.Graphics.Deferred
 			CombineParams.HandleDiffuse = CombineShader.GetAliasedUniform("DiffuseTexture");
 			CombineParams.HandleLight = CombineShader.GetAliasedUniform("LightTexture");
 			CombineParams.HandleSpecular = CombineShader.GetAliasedUniform("SpecularTexture");
+			CombineParams.HandleExposure = CombineShader.GetAliasedUniform("Exposure");
 		}
 
-		public void Render(Stage stage, Camera camera)
+		public void Render(Stage stage, Camera camera, float exposure)
 		{
 			if (!HandlesInitialized)
 			{
@@ -137,6 +138,7 @@ namespace Triton.Graphics.Deferred
 			Backend.BindShaderVariable(CombineParams.HandleDiffuse, 0);
 			Backend.BindShaderVariable(CombineParams.HandleLight, 1);
 			Backend.BindShaderVariable(CombineParams.HandleSpecular, 2);
+			Backend.BindShaderVariable(CombineParams.HandleExposure, exposure);
 
 			Backend.DrawMesh(QuadMesh.Mesh.Handles[0]);
 			Backend.EndPass();

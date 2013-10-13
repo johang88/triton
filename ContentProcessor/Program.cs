@@ -34,6 +34,7 @@ namespace ContentProcessor
 			Compilers.Add(".tga", () => new Triton.Content.Compilers.TextureCompiler());
 			Compilers.Add(".bmp", () => new Triton.Content.Compilers.TextureCompiler());
 			Compilers.Add(".jpg", () => new Triton.Content.Compilers.TextureCompiler());
+			Compilers.Add(".dds", () => new Triton.Content.Compilers.TextureCompiler());
 
 			Application = new Triton.Common.CommandLineApplication(parameters, "ContentProcessor in=<input_dir> out=<output_dir>");
 

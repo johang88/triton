@@ -529,11 +529,6 @@ namespace Triton.Graphics
 			return texture;
 		}
 
-		public void UpdateTexture(Resources.Texture texture, IntPtr data)
-		{
-			RenderSystem.SetTextureData(texture.Handle, texture.Width, texture.Height, data, texture.PixelFormat, texture.PixelInternalFormat, PixelType.UnsignedByte, null);
-		}
-
 		public void UpdateTexture(Resources.Texture texture, byte[] data)
 		{
 			RenderSystem.SetTextureData(texture.Handle, texture.Width, texture.Height, data, texture.PixelFormat, texture.PixelInternalFormat, PixelType.UnsignedByte, null);

@@ -12,5 +12,6 @@ namespace Triton.Graphics.Deferred
 		public int HandleDiffuse;
 		public int HandleLight;
 		public int HandleSpecular;
+		public int HandleExposure;
 	}
 }

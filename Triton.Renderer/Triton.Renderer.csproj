@@ -64,6 +64,7 @@
     <Compile Include="BlendingFactorDest.cs" />
     <Compile Include="BlendingFactorSrc.cs" />
     <Compile Include="CullFaceMode.cs" />
+    <Compile Include="DDS\LoaderDDS.cs" />
     <Compile Include="Meshes\MeshManager.cs" />
     <Compile Include="RenderSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="RenderTargets\RenderTargetManager.cs" />
     <Compile Include="Shaders\ShaderManager.cs" />
     <Compile Include="Textures\TextureManager.cs" />
+    <Compile Include="TextureTarget.cs" />
     <Compile Include="VertexPointerType.cs" />
     <Compile Include="VertexFormat.cs" />
     <Compile Include="VertexFormatElement.cs" />

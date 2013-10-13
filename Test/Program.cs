@@ -128,6 +128,8 @@ namespace Test
 			quad.AddQuad(new Vector2(-1, -1), new Vector2(0.5f, 0.5f), new Vector2(0, 1), new Vector2(1, -1));
 			quad.End();
 
+			float exposure = 1.0f;
+
 			while (Running)
 			{
 				var deltaTime = (float)stopWatch.Elapsed.TotalSeconds;
@@ -170,7 +172,7 @@ namespace Test
 				{
 					isCDown = false;
 
-					stage.CreatePointLight(camera.Position, 5.0f, new Vector3(1.0f, 0.98f, 0.85f));
+					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 10.0f, new Vector3(1.4f, 0.98f, 0.85f));
 				}
 
 				if (inputManager.IsKeyDown(Key.F))
@@ -184,11 +186,16 @@ namespace Test
 					flashlight.Enabled = !flashlight.Enabled;
 				}
 
+				if (inputManager.IsKeyDown(Key.K))
+					exposure -= 1.0f * deltaTime;
+				if (inputManager.IsKeyDown(Key.L))
+					exposure += 1.0f * deltaTime;
+
 				flashlight.Position = camera.Position;
 				flashlight.Direction = Vector3.Transform(new Vector3(0, -0.2f, 1.0f), camera.Orientation);
 
 				Backend.BeginScene();
-				deferredRenderer.Render(stage, camera);
+				deferredRenderer.Render(stage, camera, exposure);
 
 				var modelViewProjection = Matrix4.Identity;
 

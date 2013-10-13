@@ -30,8 +30,8 @@ namespace Triton.Renderer.Textures
 			// Create default texture
 			GL.GenTextures(1, out DefaultOpenGLHandle);
 
-			GL.BindTexture(TextureTarget.Texture2D, DefaultOpenGLHandle);
-			GL.TexImage2D(TextureTarget.Texture2D, 0, OGL.PixelInternalFormat.Rgb8, 1, 1, 0, OGL.PixelFormat.Rgba, OGL.PixelType.Byte, new byte[] { 0, 255, 255 });
+			GL.BindTexture(OGL.TextureTarget.Texture2D, DefaultOpenGLHandle);
+			GL.TexImage2D(OGL.TextureTarget.Texture2D, 0, OGL.PixelInternalFormat.Rgb8, 1, 1, 0, OGL.PixelFormat.Rgba, OGL.PixelType.Byte, new byte[] { 0, 255, 255 });
 			GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 			GL.Finish();
 		}
@@ -119,7 +119,7 @@ namespace Triton.Renderer.Textures
 			Handles[index].Initialized = false;
 		}
 
-		public void SetPixelData(int handle, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap = true)
+		public void SetPixelData(int handle, TextureTarget target, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap = true)
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
@@ -130,14 +130,16 @@ namespace Triton.Renderer.Textures
 			if (!Handles[index].Initialized)
 				GL.GenTextures(1, out Handles[index].OpenGLHandle);
 
+			Handles[index].Target = target;
+
 			// Upload texture data to OpenGL
-			GL.BindTexture(TextureTarget.Texture2D, Handles[index].OpenGLHandle);
-			GL.TexImage2D(TextureTarget.Texture2D, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
+			GL.BindTexture((OGL.TextureTarget)(int)Handles[index].Target, Handles[index].OpenGLHandle);
+			GL.TexImage2D((OGL.TextureTarget)(int)Handles[index].Target, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
 			if (mipmap)
 				GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-			GL.TexParameter(TextureTarget.Texture2D, (TextureParameterName)ExtTextureFilterAnisotropic.TextureMaxAnisotropyExt, 4);
+			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, (TextureParameterName)ExtTextureFilterAnisotropic.TextureMaxAnisotropyExt, 4);
 			GL.Finish();
 
 			var error = GL.GetError();
@@ -146,7 +148,7 @@ namespace Triton.Renderer.Textures
 			Handles[index].Initialized = true;
 		}
 
-		public void SetPixelData(int handle, int width, int height, IntPtr data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type)
+		public void LoadDDS(int handle, byte[] data)
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
@@ -154,18 +156,15 @@ namespace Triton.Renderer.Textures
 			if (id == -1 || Handles[index].Id != id)
 				return;
 
-			if (!Handles[index].Initialized)
-				GL.GenTextures(1, out Handles[index].OpenGLHandle);
+			if (Handles[index].Initialized)
+				return; // TODO ?
 
-			// Upload texture data to OpenGL
-			GL.BindTexture(TextureTarget.Texture2D, Handles[index].OpenGLHandle);
-			GL.TexImage2D(TextureTarget.Texture2D, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
-			GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-			GL.Finish();
+			OGL.TextureTarget target;
+			int width, height;
+			DDS.LoaderDDS.LoadFromStream(data, out Handles[index].OpenGLHandle, out target, out width, out height);
 
-			// The texture can now be used
+			Handles[index].Target = (TextureTarget)(int)target;
+
 			Handles[index].Initialized = true;
 		}
 
@@ -180,11 +179,26 @@ namespace Triton.Renderer.Textures
 			return Handles[index].OpenGLHandle;
 		}
 
+		public int GetOpenGLHande(int handle, out TextureTarget target)
+		{
+			int index, id;
+			ExtractHandle(handle, out index, out id);
+
+			target = TextureTarget.Texture2D;
+
+			if (id == -1 || Handles[index].Id != id || !Handles[index].Initialized)
+				return DefaultOpenGLHandle;
+
+			target = Handles[index].Target;
+			return Handles[index].OpenGLHandle;
+		}
+
 		struct TextureData
 		{
 			public int OpenGLHandle;
 			public short Id;
 			public bool Initialized;
+			public TextureTarget Target;
 		}
 	}
 }

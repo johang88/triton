@@ -99,25 +99,19 @@ namespace Triton.Renderer
 			return handle;
 		}
 
-		public int CreateTexture(int width, int height, IntPtr data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, OnLoadedCallback loadedCallback)
-		{
-			var handle = TextureManager.Create();
-			SetTextureData(handle, width, height, data, format, internalFormat, type, loadedCallback);
-
-			return handle;
-		}
-
 		public void DestroyTexture(int handle)
 		{
 			TextureManager.Destroy(handle);
 		}
 
-		public void SetTextureData(int handle, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, OnLoadedCallback loadedCallback)
+		public int CreateFromDDS(byte[] data, OnLoadedCallback loadedCallback)
 		{
+			var handle = TextureManager.Create();
+
 			Action loadAction = () =>
 			{
-				TextureManager.SetPixelData(handle, width, height, data, format, internalFormat, type);
-
+				TextureManager.LoadDDS(handle, data);
+				
 				if (loadedCallback != null)
 					loadedCallback(handle, true, "");
 			};
@@ -126,13 +120,15 @@ namespace Triton.Renderer
 				loadAction();
 			else
 				AddToWorkQueue(loadAction);
+
+			return handle;
 		}
 
-		public void SetTextureData(int handle, int width, int height, IntPtr data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, OnLoadedCallback loadedCallback)
+		public void SetTextureData(int handle, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, OnLoadedCallback loadedCallback)
 		{
 			Action loadAction = () =>
 			{
-				TextureManager.SetPixelData(handle, width, height, data, format, internalFormat, type);
+				TextureManager.SetPixelData(handle, TextureTarget.Texture2D, width, height, data, format, internalFormat, type);
 
 				if (loadedCallback != null)
 					loadedCallback(handle, true, "");
@@ -146,16 +142,11 @@ namespace Triton.Renderer
 
 		public void BindTexture(int handle, int textureUnit)
 		{
-			var openGLHandle = TextureManager.GetOpenGLHande(handle);
+			TextureTarget target;
+			var openGLHandle = TextureManager.GetOpenGLHande(handle, out target);
 
 			GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
-			GL.BindTexture(TextureTarget.Texture2D, openGLHandle);
-		}
-
-		public void UnbindTexture(int textureUnit)
-		{
-			GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
-			GL.BindTexture(TextureTarget.Texture2D, 0);
+			GL.BindTexture((OpenTK.Graphics.OpenGL.TextureTarget)(int)target, openGLHandle);
 		}
 
 		public int CreateMesh(int triangleCount, VertexFormat vertexFormat, byte[] vertexData, byte[] indexData, bool stream, OnLoadedCallback loadedCallback)
@@ -338,7 +329,7 @@ namespace Triton.Renderer
 				// Init texture handles with default data
 				for (var i = 0; i < textureHandlesCopy.Length; i++)
 				{
-					TextureManager.SetPixelData(textureHandlesCopy[i], width, height, null, PixelFormat.Rgba, pixelFormat, PixelType.Float, false);
+					TextureManager.SetPixelData(textureHandlesCopy[i], TextureTarget.Texture2D, width, height, null, PixelFormat.Rgba, pixelFormat, PixelType.Float, false);
 				}
 
 				var internalTextureHandles = textureHandlesCopy.Select(t => TextureManager.GetOpenGLHande(t)).ToArray();

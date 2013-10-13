@@ -37,7 +37,7 @@ namespace Triton.Graphics.Resources
 				var materialDefinition = ServiceStack.Text.JsonSerializer.DeserializeFromStream<MaterialDefintion>(stream);
 
 				if (!string.IsNullOrWhiteSpace(materialDefinition.diffuse))
-					material.Diffuse = ResourceManager.Load<Texture>(materialDefinition.diffuse);
+					material.Diffuse = ResourceManager.Load<Texture>(materialDefinition.diffuse, "srgb");
 				if (!string.IsNullOrWhiteSpace(materialDefinition.normal))
 					material.Normal = ResourceManager.Load<Texture>(materialDefinition.normal);
 				if (!string.IsNullOrWhiteSpace(materialDefinition.gloss))

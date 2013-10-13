@@ -46,13 +46,14 @@ void main()
 	
 	float nDotL = saturate(dot(normal, lightDir));
 	
-	vec3 eyeDir = cameraPosition - position;
+	vec3 eyeDir = normalize(cameraPosition - position);
 	vec3 H = normalize(eyeDir + lightDir);
 	
-	float nDotH = saturate(dot(normal, H));
-	float specularPower = pow(nDotH, 32);
-	
 	vec4 specularColor = texture2D(samplerSpecular, project);
+	
+	float nDotH = saturate(dot(normal, H));
+	float specularPower = pow(nDotH, 16 * specularColor.w);
+	
 	vec3 specular = specularColor.xyz * specularPower;
 	
 	float attenuation = dist / lightRange;
