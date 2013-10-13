@@ -165,6 +165,12 @@ namespace Triton.Renderer.Textures
 
 			Handles[index].Target = (TextureTarget)(int)target;
 
+			GL.BindTexture((OGL.TextureTarget)(int)Handles[index].Target, Handles[index].OpenGLHandle);
+			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, (TextureParameterName)ExtTextureFilterAnisotropic.TextureMaxAnisotropyExt, 4);
+			GL.Finish();
+
 			Handles[index].Initialized = true;
 		}
 
