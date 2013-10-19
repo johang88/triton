@@ -54,7 +54,7 @@ namespace Triton
 		public Vector4 ToAxisAngle()
 		{
 			Quaternion q = this;
-			if (Math.Abs(q.W) > 1.0f)
+			if (System.Math.Abs(q.W) > 1.0f)
 				q.Normalize();
 
 			Vector4 result = new Vector4();

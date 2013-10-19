@@ -32,20 +32,24 @@ namespace Triton.Graphics.Resources
 	{
 		static readonly char[] Magic = new char[] { 'M', 'E', 'S', 'H' };
 		const int Version_1 = 0x0100;
-		const int Version_1_1 = 0x0110;
+		const int Version_1_1 = 0x0120;
 
 		private readonly Backend Backend;
 		private readonly Triton.Common.IO.FileSystem FileSystem;
-
-		public MeshLoader(Backend backend, Triton.Common.IO.FileSystem fileSystem)
+		private readonly Triton.Common.ResourceManager ResourceManager;
+		
+		public MeshLoader(Backend backend, Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
 		{
 			if (backend == null)
 				throw new ArgumentNullException("backend");
 			if (fileSystem == null)
 				throw new ArgumentNullException("fileSystem");
+			if (resourceManager == null)
+				throw new ArgumentNullException("resourceManager");
 
 			Backend = backend;
 			FileSystem = fileSystem;
+			ResourceManager = resourceManager;
 		}
 
 		public Common.Resource Create(string name, string parameters)
@@ -80,7 +84,7 @@ namespace Triton.Graphics.Resources
 					throw new ArgumentException("invalid mesh, unknown version");
 
 				var meshCount = reader.ReadInt32();
-				mesh.Handles = new int[meshCount];
+				mesh.SubMeshes = new SubMesh[meshCount];
 
 				var resourcesToLoad = meshCount;
 				Renderer.RenderSystem.OnLoadedCallback onResourceLoaded = (handle, success, errors) =>
@@ -97,6 +101,12 @@ namespace Triton.Graphics.Resources
 
 				for (var i = 0; i < meshCount; i++)
 				{
+					var materialName = reader.ReadString();
+
+					Material material = null;
+					if (materialName != "no_material")
+						material = ResourceManager.Load<Material>(materialName);
+
 					var triangleCount = reader.ReadInt32();
 					var vertexCount = reader.ReadInt32();
 					var indexCount = reader.ReadInt32();
@@ -133,7 +143,11 @@ namespace Triton.Graphics.Resources
 					var vertices = reader.ReadBytes(vertexCount);
 					var indices = reader.ReadBytes(indexCount);
 
-					mesh.Handles[i] = Backend.RenderSystem.CreateMesh(triangleCount, vertexFormat, vertices, indices, false, onResourceLoaded);
+					mesh.SubMeshes[i] = new SubMesh
+					{
+						Handle = Backend.RenderSystem.CreateMesh(triangleCount, vertexFormat, vertices, indices, false, onResourceLoaded),
+						Material = material
+					};
 				}
 
 				resource.Parameters = parameters;
@@ -143,11 +157,11 @@ namespace Triton.Graphics.Resources
 		public void Unload(Common.Resource resource)
 		{
 			var mesh = (Mesh)resource;
-			foreach (var handle in mesh.Handles)
+			foreach (var subMesh in mesh.SubMeshes)
 			{
-				Backend.RenderSystem.DestroyMesh(handle);
+				Backend.RenderSystem.DestroyMesh(subMesh.Handle);
 			}
-			mesh.Handles = null;
+			mesh.SubMeshes = null;
 		}
 	}
 }

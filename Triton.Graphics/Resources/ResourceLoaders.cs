@@ -12,7 +12,7 @@ namespace Triton.Graphics.Resources
 		{
 			resourceManager.AddResourceLoader<Texture>(new TextureLoader(backend, fileSystem));
 			resourceManager.AddResourceLoader<ShaderProgram>(new ShaderLoader(backend, fileSystem));
-			resourceManager.AddResourceLoader<Mesh>(new MeshLoader(backend, fileSystem));
+			resourceManager.AddResourceLoader<Mesh>(new MeshLoader(backend, resourceManager, fileSystem));
 			resourceManager.AddResourceLoader<SkeletalAnimation.Skeleton>(new SkeletonLoader(fileSystem));
 			resourceManager.AddResourceLoader<Material>(new MaterialLoader(resourceManager, fileSystem));
 		}

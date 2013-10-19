@@ -5,12 +5,10 @@ attrib(vec2, iTexCoord, TexCoord);
 
 out vec2 texCoord;
 
-uniform(mat4x4, modelViewProjection, ModelViewProjection);
-
 void main()
 {
 	texCoord = iTexCoord;
-	gl_Position = modelViewProjection * vec4(iPosition, 1);
+	gl_Position = vec4(iPosition, 1);
 }
 
 #else

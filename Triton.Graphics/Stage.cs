@@ -23,17 +23,16 @@ namespace Triton.Graphics
 			ResourceManager = resourceManager;
 		}
 
-		public MeshInstance AddMesh(string mesh, string material)
+		public MeshInstance AddMesh(string mesh)
 		{
-			return AddMesh(ResourceManager.Load<Resources.Mesh>(mesh), ResourceManager.Load<Resources.Material>(material));
+			return AddMesh(ResourceManager.Load<Resources.Mesh>(mesh));
 		}
 
-		public MeshInstance AddMesh(Resources.Mesh mesh, Resources.Material material)
+		public MeshInstance AddMesh(Resources.Mesh mesh)
 		{
 			var instance = new MeshInstance
 			{
 				Mesh = mesh,
-				Material = material,
 				Orientation = Quaternion.Identity,
 				Position = Vector3.Zero
 			};
@@ -51,6 +50,20 @@ namespace Triton.Graphics
 		public IReadOnlyCollection<MeshInstance> GetMeshes()
 		{
 			return Meshes;
+		}
+
+		public Light CreateDirectionalLight(Vector3 direction, Vector3 color)
+		{
+			var light = new Light
+			{
+				Type = LighType.Directional,
+				Direction = direction,
+				Color = color
+			};
+
+			Lights.Add(light);
+
+			return light;
 		}
 
 		public Light CreatePointLight(Vector3 position, float range, Vector3 color)

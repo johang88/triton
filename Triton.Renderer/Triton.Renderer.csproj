@@ -65,6 +65,7 @@
     <Compile Include="BlendingFactorSrc.cs" />
     <Compile Include="CullFaceMode.cs" />
     <Compile Include="DDS\LoaderDDS.cs" />
+    <Compile Include="DepthFunction.cs" />
     <Compile Include="Meshes\MeshManager.cs" />
     <Compile Include="RenderSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -8,12 +8,18 @@ namespace Triton.Graphics.Resources
 {
 	public class Mesh : Triton.Common.Resource
 	{
-		public int[] Handles { get; internal set; }
+		public SubMesh[] SubMeshes { get; internal set; }
 
 		public Mesh(string name, string parameters)
 			: base(name, parameters)
 		{
-			Handles = new int[0];
+			SubMeshes = new SubMesh[0];
 		}
+	}
+
+	public class SubMesh
+	{
+		public Material Material;
+		public int Handle;
 	}
 }

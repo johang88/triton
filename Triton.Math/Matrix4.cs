@@ -192,7 +192,7 @@ namespace Triton
 
 		public static void CreatePerspectiveFieldOfView(float fovy, float aspect, float zNear, float zFar, out Matrix4 result)
 		{
-			if (fovy <= 0 || fovy > Math.PI)
+			if (fovy <= 0 || fovy > System.Math.PI)
 				throw new ArgumentOutOfRangeException("fovy");
 			if (aspect <= 0)
 				throw new ArgumentOutOfRangeException("aspect");
@@ -484,6 +484,11 @@ namespace Triton
 			float angle;
 			q.ToAxisAngle(out axis, out angle);
 			return CreateFromAxisAngle(axis, angle);
+		}
+
+		public static Matrix4 Transpose(Matrix4 mat)
+		{
+			return new Matrix4(mat.Column0, mat.Column1, mat.Column2, mat.Column3);
 		}
 	}
 }

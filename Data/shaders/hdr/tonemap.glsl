@@ -29,12 +29,12 @@ uniform(vec3, whitePoint, WhitePoint);
 
 vec3 tonemap(vec3 x)
 {
-	float A = 0.15;
-	float B = 0.50;
-	float C = 0.10;
-	float D = 0.20;
-	float E = 0.02;
-	float F = 0.30;
+	float A = 0.15f;
+	float B = 0.50f;
+	float C = 0.10f;
+	float D = 0.20f;
+	float E = 0.02f;
+	float F = 0.30f;
 	
 	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
 }
@@ -44,7 +44,10 @@ void main()
 	vec3 scene = texture2D(samplerScene, texCoord).xyz;
 	vec3 bloom = texture2D(samplerBloom, texCoord).xyz;
 
-	vec3 final = tonemap(scene * exposure) / tonemap(whitePoint);
+	scene = tonemap(scene * exposure);
+	vec3 whiteScale = 1.0f / tonemap(whitePoint);
+	
+	vec3 final = scene * whiteScale;
 	final += bloom;
 	
 	final = pow(final, (1.0f / 2.2f).xxx);

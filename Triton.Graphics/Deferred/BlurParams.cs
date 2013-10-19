@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.Deferred
 {
-	class AmbientLightParams
+	class BlurParams
 	{
 		public int HandleMVP;
-		public int HandleDiffuse;
-
-		public int HandleAmbientColor;
+		public int HandleScene;
+		public int HandleTexelSize;
 	}
 }

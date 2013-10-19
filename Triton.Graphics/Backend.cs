@@ -179,7 +179,9 @@ namespace Triton.Graphics
 							RenderSystem.BeginScene(renderTargetHandle, reader.ReadInt32(), reader.ReadInt32());
 
 							var color = reader.ReadVector4();
-							RenderSystem.Clear(color, true);
+							var clearDepth = reader.ReadBoolean();
+
+							RenderSystem.Clear(color, clearDepth);
 						}
 						break;
 					case OpCode.EndPass:
@@ -202,9 +204,10 @@ namespace Triton.Graphics
 							var src = (BlendingFactorSrc)reader.ReadInt32();
 							var dest = (BlendingFactorDest)reader.ReadInt32();
 							var cullFaceMode = (CullFaceMode)reader.ReadInt32();
+							var depthFunction = (DepthFunction)reader.ReadInt32();
 							var enableCullFace = reader.ReadBoolean();
 
-							RenderSystem.SetRenderStates(enableAlphaBlend, enableDepthWrite, enableDepthTest, src, dest, cullFaceMode, enableCullFace);
+							RenderSystem.SetRenderStates(enableAlphaBlend, enableDepthWrite, enableDepthTest, src, dest, cullFaceMode, enableCullFace, depthFunction);
 						}
 						break;
 					case OpCode.EndInstance:
@@ -253,6 +256,17 @@ namespace Triton.Graphics
 						{
 							var uniformHandle = reader.ReadInt32();
 							var v = reader.ReadVector3();
+							RenderSystem.SetUniform(uniformHandle, ref v);
+						}
+						break;
+					case OpCode.BindShaderVariableVector3Array:
+						{
+							var uniformHandle = reader.ReadInt32();
+
+							var count = reader.ReadInt32();
+							var v = new Vector3[count];
+							for (var i = 0; i < count; i++)
+								v[i] = reader.ReadVector3();
 							RenderSystem.SetUniform(uniformHandle, ref v);
 						}
 						break;
@@ -311,7 +325,7 @@ namespace Triton.Graphics
 		/// </summary>
 		/// <param name="renderTarget"></param>
 		/// <param name="clearColor"></param>
-		public void BeginPass(RenderTarget renderTarget, Vector4 clearColor)
+		public void BeginPass(RenderTarget renderTarget, Vector4 clearColor, bool clearDepth = true)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BeginPass);
 			if (renderTarget == null)
@@ -328,6 +342,7 @@ namespace Triton.Graphics
 			}
 
 			PrimaryBuffer.Writer.Write(clearColor);
+			PrimaryBuffer.Writer.Write(clearDepth);
 		}
 
 		/// <summary>
@@ -343,7 +358,7 @@ namespace Triton.Graphics
 		/// </summary>
 		/// <param name="shaderHandle"></param>
 		/// <param name="textures"></param>
-		public void BeginInstance(int shaderHandle, int[] textures, bool enableAlphaBlend = false, bool enableDepthWrite = true, bool enableDepthTest = true, BlendingFactorSrc src = BlendingFactorSrc.Zero, BlendingFactorDest dest = BlendingFactorDest.One, CullFaceMode cullFaceMode = CullFaceMode.Back, bool enableCullFace = true)
+		public void BeginInstance(int shaderHandle, int[] textures, bool enableAlphaBlend = false, bool enableDepthWrite = true, bool enableDepthTest = true, BlendingFactorSrc src = BlendingFactorSrc.Zero, BlendingFactorDest dest = BlendingFactorDest.One, CullFaceMode cullFaceMode = CullFaceMode.Back, bool enableCullFace = true, DepthFunction depthFunction = DepthFunction.Less)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BeginInstance);
 
@@ -361,6 +376,7 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write((int)src);
 			PrimaryBuffer.Writer.Write((int)dest);
 			PrimaryBuffer.Writer.Write((int)cullFaceMode);
+			PrimaryBuffer.Writer.Write((int)depthFunction);
 			PrimaryBuffer.Writer.Write(enableCullFace);
 		}
 
@@ -380,6 +396,16 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write(uniformHandle);
 
 			PrimaryBuffer.Writer.Write(ref value);
+		}
+
+		public void BindShaderVariable(int uniformHandle, ref Vector3[] value)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableVector3Array);
+			PrimaryBuffer.Writer.Write(uniformHandle);
+
+			PrimaryBuffer.Writer.Write(value.Length);
+			for (var i = 0; i < value.Length; i++)
+				PrimaryBuffer.Writer.Write(ref value[i]);
 		}
 
 		public void BindShaderVariable(int uniformHandle, ref Matrix4[] value)
@@ -473,7 +499,7 @@ namespace Triton.Graphics
 		/// <param name="numTargets">Numver of targets to create, useful for MRT rendering. Has to be >= 1</param>
 		/// <param name="createDepthBuffer">Set to true if a depth buffer is to be created</param>
 		/// <returns></returns>
-		public RenderTarget CreateRenderTarget(string name, int width, int height, Renderer.PixelInternalFormat pixelFormat, int numTargets, bool createDepthBuffer)
+		public RenderTarget CreateRenderTarget(string name, int width, int height, Renderer.PixelInternalFormat pixelFormat, int numTargets, bool createDepthBuffer, int? sharedDepthHandle = null)
 		{
 			if (string.IsNullOrWhiteSpace(name))
 				throw new ArgumentNullException("name");
@@ -488,7 +514,7 @@ namespace Triton.Graphics
 
 			var renderTarget = new RenderTarget(width, height);
 
-			renderTarget.Handle = RenderSystem.CreateRenderTarget(width, height, pixelFormat, numTargets, createDepthBuffer, out textureHandles, (handle, success, errors) =>
+			renderTarget.Handle = RenderSystem.CreateRenderTarget(width, height, pixelFormat, numTargets, createDepthBuffer, sharedDepthHandle, out textureHandles, (handle, success, errors) =>
 			{
 				renderTarget.IsReady = true;
 			});
@@ -511,6 +537,20 @@ namespace Triton.Graphics
 		public BatchBuffer CreateBatchBuffer(Renderer.VertexFormat vertexFormat = null, int initialCount = 128)
 		{
 			return new BatchBuffer(RenderSystem, vertexFormat, initialCount);
+		}
+
+		public int CreateMesh<T, T2>(int triangleCount, Renderer.VertexFormat vertexFormat, T[] vertexData, T2[] indexData, bool stream)
+			where T : struct
+			where T2 : struct
+		{
+			return RenderSystem.CreateMesh(triangleCount, vertexFormat, vertexData, indexData, stream, null);
+		}
+
+		public void UpdateMesh<T, T2>(int handle, int triangleCount, Renderer.VertexFormat vertexFormat, T[] vertexData, T2[] indexData, bool stream)
+			where T : struct
+			where T2 : struct
+		{
+			RenderSystem.SetMeshData(handle, vertexFormat, triangleCount, vertexData, indexData, stream, null);
 		}
 
 		public Resources.Texture CreateTexture(string name, int width, int height, PixelFormat pixelFormat, PixelInternalFormat interalFormat, byte[] data)
@@ -550,6 +590,7 @@ namespace Triton.Graphics
 			BindShaderVariableFloat,
 			BindShaderVariableVector2,
 			BindShaderVariableVector3,
+			BindShaderVariableVector3Array,
 			BindShaderVariableVector4,
 			DrawMesh
 		}

@@ -15,7 +15,7 @@ namespace Triton.Graphics
 			Orientation = Quaternion.Identity;
 
 			NearClipDistance = 0.1f;
-			FarClipDistance = 10000.0f;
+			FarClipDistance = 512.0f;
 		}
 
 		public void GetUpVector(out Vector3 up)

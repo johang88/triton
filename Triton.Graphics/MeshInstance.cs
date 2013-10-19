@@ -9,9 +9,8 @@ namespace Triton.Graphics
 	public class MeshInstance
 	{
 		public Resources.Mesh Mesh;
-		public Resources.Material Material;
 
 		public Vector3 Position;
-		public Quaternion Orientation;
+		public Quaternion Orientation = Quaternion.Identity;
 	}
 }

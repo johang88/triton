@@ -86,13 +86,29 @@ namespace Test
 			var hdrRenderer = new Triton.Graphics.HDR.HDRRenderer(ResourceManager, Backend, Width, Height);
 
 			var stage = new Triton.Graphics.Stage(ResourceManager);
+			
+			//stage.AddMesh("models/floor", "materials/floor");
 
-			stage.AddMesh("models/walls", "materials/wall");
-			stage.AddMesh("models/floor", "materials/floor");
-			stage.AddMesh("models/ceiling", "materials/ceiling");
-			stage.AddMesh("models/pillars", "materials/pillars");
+			Triton.Graphics.Terrain.Terrain terrain;
+			using (var stream = FileSystem.OpenRead("terrain.raw"))
+			{
+				var terrainSize = 512;
+				var terrainHeight = 256;
+				terrain = new Triton.Graphics.Terrain.Terrain(stream, Backend, terrainSize, terrainSize, terrainHeight, 256, 257, ResourceManager.Load<Triton.Graphics.Resources.Material>("materials/terrain"));
+				terrain.Position = new Vector3(-terrainSize / 2.0f, 0, -terrainSize / 2.0f);
 
-			stage.AmbientColor = new Vector3(0.1f, 0.1f, 0.1f);
+				var terrainInstance = stage.AddMesh(terrain.Mesh);
+				terrainInstance.Position = terrain.Position;
+			}
+
+			stage.AddMesh("models/T1_Wall").Position.Y = terrain.GetHeightAt(0, 0) - 1;
+			stage.AddMesh("models/T1_Roof").Position.Y = terrain.GetHeightAt(0, 0) - 1;
+			stage.AddMesh("models/T1_Planks").Position.Y = terrain.GetHeightAt(0, 0) - 1;
+			stage.AddMesh("models/T1_Brace").Position.Y = terrain.GetHeightAt(0, 0) - 1;
+
+			stage.AmbientColor = new Vector3(0.3f, 0.3f, 0.3f);
+
+			stage.CreateDirectionalLight(new Vector3(0.3f, -0.4f, 0.3f), new Vector3(1, 1, 1.1f) * 2.4f);
 
 			while (!ResourceManager.AllResourcesLoaded())
 			{
@@ -100,7 +116,6 @@ namespace Test
 			}
 
 			var spriteHandles = new SpriteHandles();
-			spriteHandles.HandleMVP = spriteShader.GetAliasedUniform("ModelViewProjection");
 			spriteHandles.HandleDiffuse = spriteShader.GetAliasedUniform("DiffuseTexture");
 
 			var camera = new Triton.Graphics.Camera(new Vector2(Width, Height));
@@ -153,6 +168,7 @@ namespace Test
 				camera.Orientation = Quaternion.Identity;
 				camera.Yaw(cameraYaw);
 				camera.Pitch(cameraPitch);
+				camera.Position.Y = terrain.GetHeightAt(camera.Position.X, camera.Position.Z) + 1.5f;
 
 				var movementDir = Quaternion.FromAxisAngle(Vector3.UnitY, cameraYaw);
 
@@ -190,8 +206,8 @@ namespace Test
 				flashlight.Direction = Vector3.Transform(new Vector3(0, -0.2f, 1.0f), camera.Orientation);
 
 				Backend.BeginScene();
-				deferredRenderer.Render(hdrRenderer.SceneTarget, stage, camera);
-				hdrRenderer.Render(camera);
+				var lighingOutput = deferredRenderer.Render(stage, camera);
+				hdrRenderer.Render(camera, lighingOutput);
 
 				var modelViewProjection = Matrix4.Identity;
 
@@ -211,7 +227,6 @@ namespace Test
 
 		class SpriteHandles
 		{
-			public int HandleMVP;
 			public int HandleDiffuse;
 		}
 	}

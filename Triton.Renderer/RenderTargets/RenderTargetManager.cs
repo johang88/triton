@@ -42,7 +42,7 @@ namespace Triton.Renderer.RenderTargets
 			{
 				if (Handles[i].Initialized)
 				{
-					if (Handles[i].DepthBufferObject != 0)
+					if (Handles[i].DepthBufferObject != 0 && !Handles[i].SharedDepth)
 						GL.DeleteRenderbuffers(1, ref Handles[i].DepthBufferObject);
 					GL.DeleteFramebuffers(1, ref Handles[i].FrameBufferObject);
 				}
@@ -83,7 +83,7 @@ namespace Triton.Renderer.RenderTargets
 			return CreateHandle(index, id);
 		}
 
-		public void Init(int handle, int width, int height, int[] textureHandles, bool createDepthBuffer)
+		public void Init(int handle, int width, int height, int[] textureHandles, bool createDepthBuffer, int? sharedDepthHandle)
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
@@ -103,11 +103,25 @@ namespace Triton.Renderer.RenderTargets
 			}
 
 			Handles[index].DepthBufferObject = 0;
+			Handles[index].SharedDepth = false;
+
 			if (createDepthBuffer)
 			{
 				GL.GenRenderbuffers(1, out Handles[index].DepthBufferObject);
 				GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, Handles[index].DepthBufferObject);
 				GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.DepthComponent24, width, height);
+				GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, Handles[index].DepthBufferObject);
+			}
+			else if (sharedDepthHandle.HasValue)
+			{
+				var depthHandle = sharedDepthHandle.Value;
+				int depthIndex, depthId;
+				ExtractHandle(depthHandle, out depthIndex, out depthId);
+
+				Handles[index].DepthBufferObject = Handles[depthIndex].DepthBufferObject;
+				Handles[index].SharedDepth = true;
+
+				GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, Handles[index].DepthBufferObject);
 				GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, Handles[index].DepthBufferObject);
 			}
 
@@ -198,6 +212,7 @@ namespace Triton.Renderer.RenderTargets
 
 			public int FrameBufferObject;
 			public int DepthBufferObject;
+			public bool SharedDepth;
 			public DrawBuffersEnum[] DrawBuffers;
 		}
 	}

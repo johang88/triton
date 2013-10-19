@@ -27,6 +27,8 @@ namespace Triton.Content.Meshes.Converters
 					int vertexCount = 0;
 					Vertex[] vertices = null;
 
+					subMesh.Material = reader.GetAttribute("material");
+
 					while (subReader.Read())
 					{
 						if (subReader.NodeType != XmlNodeType.Element)

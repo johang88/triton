@@ -28,9 +28,8 @@ sampler(2D, samplerPosition, PositionTexture);
 sampler(2D, samplerSpecular, SpecularTexture);
 sampler(2D, samplerDiffuse, DiffuseTexture);
 
-uniform(vec3, lightPosition, LightPosition);
+uniform(vec3, lightDirection, LightDirection);
 uniform(vec3, lightColor, LightColor);
-uniform(float, lightRange, LightRange);
 uniform(vec2, screenSize, ScreenSize);
 uniform(vec3, cameraPosition, CameraPosition);
 
@@ -41,9 +40,7 @@ void main()
 	vec3 normal = normalize(texture2D(samplerNormal, project).xyz);
 	vec3 position = texture2D(samplerPosition, project).xyz;
 	
-	vec3 lightDir = lightPosition - position;
-	float dist = length(lightDir);
-	lightDir = lightDir / dist;
+	vec3 lightDir = -normalize(lightDirection);
 	
 	float nDotL = saturate(dot(normal, lightDir));
 	
@@ -57,12 +54,9 @@ void main()
 	
 	vec3 specular = specularColor.xyz * lightColor.xyz * specularPower;
 	
-	float attenuation = dist / lightRange;
-	attenuation = saturate(1.0f - (attenuation * attenuation));
-	
 	vec3 diffuse = texture2D(samplerDiffuse, project);
 	
-	oColor.xyz = diffuse * (lightColor * nDotL * attenuation) + specular * attenuation;
+	oColor.xyz = diffuse * (lightColor * nDotL) + specular * nDotL;
 	oColor.a = 1.0f;
 }
 #endif

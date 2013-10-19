@@ -12,6 +12,7 @@ namespace Triton.Graphics.Deferred
 		public int HandleNormal;
 		public int HandlePosition;
 		public int HandleSpecular;
+		public int HandleDiffuse;
 
 		public int HandleCameraPosition;
 

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -112,7 +113,9 @@ namespace Triton.Renderer.Meshes
 			Handles[index].Initialized = false;
 		}
 
-		public void SetData(int handle, VertexFormat vertexFormat, int triangleCount, byte[] vertexData, byte[] indexData, bool stream)
+		public void SetData<T, T2>(int handle, VertexFormat vertexFormat, int triangleCount, T[] vertexData, T2[] indexData, bool stream)
+			where T : struct
+			where T2 : struct
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
@@ -125,38 +128,12 @@ namespace Triton.Renderer.Meshes
 			// Load vertex data
 			GL.BindBuffer(BufferTarget.ArrayBuffer, Handles[index].VertexBufferID);
 			if (vertexData != null)
-				GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(vertexData.Length), vertexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
+				GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(vertexData.Length * Marshal.SizeOf(typeof(T))), vertexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
 
 			// Load index data
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handles[index].IndexBufferID);
 			if (indexData != null)
-				GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(indexData.Length), indexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
-
-			ClearBindings();
-
-			Handles[index].TriangleCount = triangleCount;
-		}
-
-		public void SetData(int handle, VertexFormat vertexFormat, int triangleCount, float[] vertexData, int[] indexData, bool stream)
-		{
-			int index, id;
-			ExtractHandle(handle, out index, out id);
-
-			if (id == -1 || Handles[index].Id != id)
-				return;
-
-			InitBuffers(index, vertexFormat);
-
-			// Load vertex data
-			GL.BindBuffer(BufferTarget.ArrayBuffer, Handles[index].VertexBufferID);
-			if (vertexData != null)
-				GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(vertexData.Length), vertexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
-
-			// Load index data
-			GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handles[index].IndexBufferID);
-			if (indexData != null)
-				GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(indexData.Length), indexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
-
+				GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(indexData.Length * Marshal.SizeOf(typeof(T2))), indexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
 			ClearBindings();
 
 			Handles[index].TriangleCount = triangleCount;

@@ -14,7 +14,7 @@ namespace Triton.Content.Compilers
 	{
 		private Factory<string, IMeshImporter> ImporterFactory;
 
-		const int Version = 0x0110;
+		const int Version = 0x0120;
 
 		public MeshCompiler()
 		{
@@ -50,6 +50,9 @@ namespace Triton.Content.Compilers
 				// Sub meshes
 				foreach (var subMesh in mesh.SubMeshes)
 				{
+					// Material
+					writer.Write(subMesh.Material);
+
 					// Triangle count
 					writer.Write(subMesh.TriangleCount);
 

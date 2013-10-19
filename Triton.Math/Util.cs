@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Triton.Graphics.Deferred
+namespace Triton.Math
 {
-	class CombineParams
+	public class Util
 	{
-		public int HandleLight;
-		public int HandleSSAO;
+		public static float Lerp(float x, float y, float a)
+		{
+			return x + a * (y - x);
+		}
 	}
 }

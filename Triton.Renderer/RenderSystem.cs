@@ -111,7 +111,7 @@ namespace Triton.Renderer
 			Action loadAction = () =>
 			{
 				TextureManager.LoadDDS(handle, data);
-				
+
 				if (loadedCallback != null)
 					loadedCallback(handle, true, "");
 			};
@@ -149,7 +149,9 @@ namespace Triton.Renderer
 			GL.BindTexture((OpenTK.Graphics.OpenGL.TextureTarget)(int)target, openGLHandle);
 		}
 
-		public int CreateMesh(int triangleCount, VertexFormat vertexFormat, byte[] vertexData, byte[] indexData, bool stream, OnLoadedCallback loadedCallback)
+		public int CreateMesh<T, T2>(int triangleCount, VertexFormat vertexFormat, T[] vertexData, T2[] indexData, bool stream, OnLoadedCallback loadedCallback)
+			where T : struct
+			where T2 : struct
 		{
 			var handle = MeshManager.Create();
 			SetMeshData(handle, vertexFormat, triangleCount, vertexData, indexData, stream, loadedCallback);
@@ -162,7 +164,9 @@ namespace Triton.Renderer
 			MeshManager.Destroy(handle);
 		}
 
-		public void SetMeshData(int handle, VertexFormat vertexFormat, int triangleCount, byte[] vertexData, byte[] indexData, bool stream, OnLoadedCallback loadedCallback)
+		public void SetMeshData<T, T2>(int handle, VertexFormat vertexFormat, int triangleCount, T[] vertexData, T2[] indexData, bool stream, OnLoadedCallback loadedCallback)
+			where T : struct
+			where T2 : struct
 		{
 			AddToWorkQueue(() =>
 			{
@@ -199,7 +203,7 @@ namespace Triton.Renderer
 		public void BeginScene(int renderTargetHandle, int width, int height)
 		{
 			BindRenderTarget(renderTargetHandle);
-			
+
 			GL.Viewport(0, 0, width, height);
 		}
 
@@ -280,6 +284,11 @@ namespace Triton.Renderer
 			GL.UniformMatrix4(handle, value.Length, false, ref value[0].Row0.X);
 		}
 
+		public void SetUniform(int handle, ref Vector3[] value)
+		{
+			GL.Uniform3(handle, value.Length, ref value[0].X);
+		}
+
 		public void Clear(Triton.Vector4 clearColor, bool depth)
 		{
 			GL.ClearColor(clearColor.X, clearColor.Y, clearColor.Z, clearColor.W);
@@ -290,7 +299,7 @@ namespace Triton.Renderer
 			GL.Clear(mask);
 		}
 
-		public void SetRenderStates(bool enableAlphaBlend, bool enableDepthWrite, bool enableDepthTest, BlendingFactorSrc src, BlendingFactorDest dest, CullFaceMode cullFaceMode, bool enableCullFace)
+		public void SetRenderStates(bool enableAlphaBlend, bool enableDepthWrite, bool enableDepthTest, BlendingFactorSrc src, BlendingFactorDest dest, CullFaceMode cullFaceMode, bool enableCullFace, DepthFunction depthFunction = DepthFunction.Less)
 		{
 			if (enableAlphaBlend)
 				GL.Enable(EnableCap.Blend);
@@ -311,9 +320,11 @@ namespace Triton.Renderer
 
 			GL.BlendFunc((OpenTK.Graphics.OpenGL.BlendingFactorSrc)(int)src, (OpenTK.Graphics.OpenGL.BlendingFactorDest)(int)dest);
 			GL.CullFace((OpenTK.Graphics.OpenGL.CullFaceMode)(int)cullFaceMode);
+
+			GL.DepthFunc((OpenTK.Graphics.OpenGL.DepthFunction)(int)depthFunction);
 		}
 
-		public int CreateRenderTarget(int width, int height, Renderer.PixelInternalFormat pixelFormat, int numTargets, bool createDepthBuffer, out int[] textureHandles, OnLoadedCallback loadedCallback)
+		public int CreateRenderTarget(int width, int height, Renderer.PixelInternalFormat pixelFormat, int numTargets, bool createDepthBuffer, int? sharedDepthHandle, out int[] textureHandles, OnLoadedCallback loadedCallback)
 		{
 			textureHandles = new int[numTargets];
 			for (var i = 0; i < textureHandles.Length; i++)
@@ -335,7 +346,7 @@ namespace Triton.Renderer
 				var internalTextureHandles = textureHandlesCopy.Select(t => TextureManager.GetOpenGLHande(t)).ToArray();
 
 				// Init render target
-				RenderTargetManager.Init(renderTargetHandle, width, height, internalTextureHandles, createDepthBuffer);
+				RenderTargetManager.Init(renderTargetHandle, width, height, internalTextureHandles, createDepthBuffer, sharedDepthHandle);
 
 				if (loadedCallback != null)
 					loadedCallback(renderTargetHandle, true, "");

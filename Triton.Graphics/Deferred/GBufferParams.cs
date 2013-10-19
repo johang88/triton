@@ -10,6 +10,8 @@ namespace Triton.Graphics.Deferred
 	{
 		public int HandleMVP;
 		public int HandleWorld;
+		public int HandleWorldView;
+		public int HandleITWorldView;
 		public int HandleDiffuseTexture;
 		public int HandleNormalMap;
 		public int HandleSpecularMap;

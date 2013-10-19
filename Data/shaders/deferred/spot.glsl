@@ -21,11 +21,11 @@ import(shaders/utility/utils);
 in vec2 texCoord;
 
 out(vec4, oColor, 0);
-out(vec4, oSpecular, 1);
 
 sampler(2D, samplerNormal, NormalTexture);
 sampler(2D, samplerPosition, PositionTexture);
 sampler(2D, samplerSpecular, SpecularTexture);
+sampler(2D, samplerDiffuse, DiffuseTexture);
 
 uniform(vec3, lightPosition, LightPosition);
 uniform(vec3, lightColor, LightColor);
@@ -46,7 +46,7 @@ void main()
 	float dist = length(lightDir);
 	lightDir = lightDir / dist;
 	
-	float nDotL = dot(normal, lightDir);
+	float nDotL = saturate(dot(normal, lightDir));
 	
 	vec3 eyeDir = normalize(cameraPosition - position);
 	vec3 H = normalize(eyeDir + lightDir);
@@ -64,7 +64,9 @@ void main()
 	float spotLightAngle = saturate(dot(-lightDirection, lightDir));
 	float spotFallof = 1.0f - saturate((spotLightAngle - spotParams.x) / (spotParams.y - spotParams.x));
 	
-	oColor = vec4((lightColor * nDotL) * (spotFallof * attenuation).xxx, 1.0f);
-	oSpecular = vec4(specular * (spotFallof * attenuation).xxx, 1.0f);
+	vec3 diffuse = texture2D(samplerDiffuse, project);
+	
+	oColor.xyz = diffuse * (lightColor * nDotL * spotFallof * attenuation) + specular * spotFallof * attenuation;
+	oColor.a = 1.0f;
 }
 #endif

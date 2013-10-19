@@ -12,17 +12,18 @@ out vec2 texCoord;
 out vec4 position;
 
 uniform(mat4x4, world, World);
+uniform(mat4x4, worldView, WorldView);
 uniform(mat4x4, modelViewProjection, ModelViewProjection);
 
 void main()
 {
 	texCoord = iTexCoord;
 	
-	normal = normalize((world * vec4(iNormal, 0)).xyz);
-	tangent = normalize((world * vec4(iTangent, 0)).xyz);
-	bitangent = cross(normal, tangent);
+	normal = normalize(mat3x3(world) * iNormal);
+	tangent = normalize(mat3x3(world) * iTangent);
+	bitangent = normalize(cross(normal, tangent));
 	
-	position = world * vec4(iPosition, 1);
+	position = worldView * vec4(iPosition, 1);
 	
 	gl_Position = modelViewProjection * vec4(iPosition, 1);
 }
@@ -46,14 +47,18 @@ sampler(2D, samplerDiffuse, DiffuseTexture);
 sampler(2D, samplerNormal, NormalMap);
 sampler(2D, samplerSpecular, SpecularMap);
 
+uniform(mat4x4, itWorldView, ITWorldView);
+
 void main()
 {
-	mat3x3 rot = mat3x3(tangent, bitangent, normal);
+	mat3x3 rot = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
 
-	vec3 N = (texture2D(samplerNormal, texCoord).xyz - 0.5f) * 2.0f;
+	vec3 N = normalize(texture2D(samplerNormal, texCoord).xyz * 2.0f - 1.0f);
 	vec3 N2 = normalize(rot * N);
+	N2 = normalize(mat3x3(itWorldView) * N2);
 
 	vec4 diffuse = texture2D(samplerDiffuse, texCoord);
+	
 	vec4 specular = texture2D(samplerSpecular, texCoord);
 	
 	vec3 gamma = (2.2f).xxx;

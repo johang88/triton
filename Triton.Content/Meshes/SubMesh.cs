@@ -8,6 +8,7 @@ namespace Triton.Content.Meshes
 {
 	class SubMesh
 	{
+		public string Material;
 		public Renderer.VertexFormat VertexFormat;
 		public int TriangleCount;
 		public byte[] Vertices;

@@ -16,8 +16,6 @@ namespace Triton.Graphics
 	/// </summary>
 	public class BatchBuffer : IDisposable
 	{
-		private static int BatchBufferCount = 0;
-
 		private bool Disposed = false;
 		private float[] VertexData;
 		private int[] IndexData;
@@ -25,7 +23,7 @@ namespace Triton.Graphics
 		private int DataCount;
 		private Renderer.RenderSystem RenderSystem;
 
-		public Resources.Mesh Mesh { get; private set; }
+		public readonly int MeshHandle;
 
 		private readonly Renderer.VertexFormat VertexFormat;
 
@@ -42,8 +40,6 @@ namespace Triton.Graphics
 			VertexData = new float[dataCount];
 			IndexData = new int[initialTriangleCount];
 
-			Mesh = new Resources.Mesh("_sys/batch_buffer_/" + Common.StringConverter.ToString(++BatchBufferCount) + ".mesh", "");
-
 			if (vertexFormat != null)
 			{
 				VertexFormat = vertexFormat;
@@ -57,7 +53,7 @@ namespace Triton.Graphics
 				});
 			}
 
-			Mesh.Handles = new int[] { renderSystem.CreateMesh(0, VertexFormat, null, null, true, null) };
+			MeshHandle = renderSystem.CreateMesh(0, VertexFormat, new byte[0], new byte[0], true, null);
 		}
 
 		public void Dispose()
@@ -71,7 +67,7 @@ namespace Triton.Graphics
 			if (!isDisposing || Disposed)
 				return;
 
-			RenderSystem.DestroyMesh(Mesh.Handles[0]);
+			RenderSystem.DestroyMesh(MeshHandle);
 			Disposed = true;
 		}
 
@@ -92,7 +88,7 @@ namespace Triton.Graphics
 
 		public void End()
 		{
-			RenderSystem.SetMeshData(Mesh.Handles[0], VertexFormat, TriangleCount, VertexData, IndexData, true, null);
+			RenderSystem.SetMeshData(MeshHandle, VertexFormat, TriangleCount, VertexData, IndexData, true, null);
 		}
 
 		public void AddVector2(float x, float y)

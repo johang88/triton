@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace Triton.Common
 	/// </summary>
 	public class ResourceManager : IDisposable
 	{
-		private readonly Dictionary<string, Resource> Resources = new Dictionary<string, Resource>();
+		private readonly ConcurrentDictionary<string, Resource> Resources = new ConcurrentDictionary<string, Resource>();
 		private readonly Dictionary<Type, IResourceLoader> ResourceLoaders = new Dictionary<Type, IResourceLoader>();
 		private bool Disposed = false;
 		private readonly Action<Action> AddItemToWorkQueue;
@@ -74,7 +75,7 @@ namespace Triton.Common
 				if (!Resources.TryGetValue(name, out resource))
 				{
 					resource = loader.Create(name, parameters);
-					Resources.Add(name, resource);
+					Resources.AddOrUpdate(name, resource, (key, existingVal) => existingVal);
 				}
 
 				resource.ReferenceCount += 1;
@@ -136,7 +137,7 @@ namespace Triton.Common
 
 			lock (LoadingLock)
 			{
-				Resources.Add(resource.Name, resource);
+				Resources.AddOrUpdate(resource.Name, resource, (key, existingVal) => existingVal);
 				resource.State = ResourceLoadingState.Loaded;
 				resource.ReferenceCount += 1;
 			}

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.Deferred
 {
-	class SpotLightParams
+	class DirectionalLightParams
 	{
 		public int HandleMVP;
 		public int HandleNormal;
@@ -14,14 +14,10 @@ namespace Triton.Graphics.Deferred
 		public int HandleSpecular;
 		public int HandleDiffuse;
 
-		public int HandleDirection;
-
 		public int HandleCameraPosition;
 
-		public int HandleLightPositon;
+		public int HandleLightDirection;
 		public int HandleLightColor;
-		public int HandleLightRange;
 		public int HandleScreenSize;
-		public int HandleSpotLightParams;
 	}
 }
