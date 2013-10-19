@@ -8,14 +8,10 @@ namespace Triton.Graphics.Deferred
 {
 	class SSAOParams
 	{
-		public int HandleMVP;
-		public int HandlePosition;
-		public int HandleNormal;
-		public int HandleRandom;
-
-		public int HandleNoiseScale;
-		public int HandleSampleKernel;
-		public int HandleViewMatrix;
-		public int HandleProjectionMatrix;
+		public int HandleModelViewProjection = 0;
+		public int HandlePositionTexture = 0;
+		public int HandleNormalTexture = 0;
+		public int HandleRandomTexture = 0;
+		public int HandleNoiseScale = 0;
 	}
 }

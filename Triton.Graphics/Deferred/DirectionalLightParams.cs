@@ -8,16 +8,14 @@ namespace Triton.Graphics.Deferred
 {
 	class DirectionalLightParams
 	{
-		public int HandleMVP;
-		public int HandleNormal;
-		public int HandlePosition;
-		public int HandleSpecular;
-		public int HandleDiffuse;
-
-		public int HandleCameraPosition;
-
-		public int HandleLightDirection;
-		public int HandleLightColor;
-		public int HandleScreenSize;
+		public int HandleModelViewProjection = 0;
+		public int HandleNormalTexture = 0;
+		public int HandlePositionTexture = 0;
+		public int HandleSpecularTexture = 0;
+		public int HandleDiffuseTexture = 0;
+		public int HandleCameraPosition = 0;
+		public int HandleLightDirection = 0;
+		public int HandleLightColor = 0;
+		public int HandleScreenSize = 0;
 	}
 }

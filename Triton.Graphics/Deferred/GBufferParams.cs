@@ -8,12 +8,12 @@ namespace Triton.Graphics.Deferred
 {
 	class GBufferParams
 	{
-		public int HandleMVP;
-		public int HandleWorld;
-		public int HandleWorldView;
-		public int HandleITWorldView;
-		public int HandleDiffuseTexture;
-		public int HandleNormalMap;
-		public int HandleSpecularMap;
+		public int ModelViewProjection = 0;
+		public int HandleWorld = 0;
+		public int HandleWorldView = 0;
+		public int HandleITWorldView = 0;
+		public int HandleDiffuseTexture = 0;
+		public int HandleNormalMap = 0;
+		public int HandleSpecularMap = 0;
 	}
 }

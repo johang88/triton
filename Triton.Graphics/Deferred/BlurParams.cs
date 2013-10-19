@@ -8,8 +8,8 @@ namespace Triton.Graphics.Deferred
 {
 	class BlurParams
 	{
-		public int HandleMVP;
-		public int HandleScene;
-		public int HandleTexelSize;
+		public int HandleModelViewProjection = 0;
+		public int HandleSceneTexture = 0;
+		public int HandleTexelSize = 0;
 	}
 }

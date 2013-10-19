@@ -24,9 +24,6 @@ sampler(2D, samplerNormal, NormalTexture);
 sampler(2D, samplerRandom, RandomTexture);
 
 uniform(vec2, noiseScale, NoiseScale);
-uniform(vec3[64], sampleKernel, SampleKernel);
-uniform(mat4, viewMatrix, ViewMatrix);
-uniform(mat4, projectionMatrix, ProjectionMatrix);
 
 float bias = 0.55f;
 float intensity = 30.0f;

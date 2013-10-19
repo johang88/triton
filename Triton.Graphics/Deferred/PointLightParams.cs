@@ -8,17 +8,15 @@ namespace Triton.Graphics.Deferred
 {
 	class PointLightParams
 	{
-		public int HandleMVP;
-		public int HandleNormal;
-		public int HandlePosition;
-		public int HandleSpecular;
-		public int HandleDiffuse;
-
-		public int HandleCameraPosition;
-
-		public int HandleLightPositon;
-		public int HandleLightColor;
-		public int HandleLightRange;
-		public int HandleScreenSize;
+		public int HandleModelViewProjection = 0;
+		public int HandleNormalTexture = 0;
+		public int HandlePositionTexture = 0;
+		public int HandleSpecularTexture = 0;
+		public int HandleDiffuseTexture = 0;
+		public int HandleCameraPosition = 0;
+		public int HandleLightPosition = 0;
+		public int HandleLightColor = 0;
+		public int HandleLightRange = 0;
+		public int HandleScreenSize = 0;
 	}
 }

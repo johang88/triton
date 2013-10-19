@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace Triton.Graphics.Resources
 {
@@ -53,5 +54,23 @@ namespace Triton.Graphics.Resources
 			BindNamesToVarNames.Add(bindName, name);
 		}
 
+		public void GetUniformLocations<T>(T handles)
+		{
+			var type = typeof(T);
+			foreach (var field in type.GetFields())
+			{
+				if (field.FieldType != typeof(int))
+					continue;
+
+				var fieldName = field.Name;
+				var uniformName = fieldName.Replace("Handle", "");
+
+				int uniformLocation = -1;
+				if (HasAliasedUniform(uniformName))
+					uniformLocation = GetAliasedUniform(uniformName);
+
+				field.SetValue(handles, uniformLocation);
+			}
+		}
 	}
 }
