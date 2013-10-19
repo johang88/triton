@@ -153,10 +153,6 @@ namespace Triton.Graphics
 			return true;
 		}
 
-		public void BackgroundLoad()
-		{
-		}
-
 		void ExecuteCommandStream()
 		{
 			// We never clear the stream so there can be a lot of crap after the written position, 
