@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ServiceStack.Text;
 
 namespace Triton.Graphics.Resources
 {
@@ -26,7 +27,23 @@ namespace Triton.Graphics.Resources
 
 		public Common.Resource Create(string name, string parameters)
 		{
-			return new Materials.StandardMaterial(name, parameters);
+			var filename = name + ".mat.v";
+
+			using (var stream = FileSystem.OpenRead(filename))
+			using(var reader = new System.IO.StreamReader(stream))
+			{
+				var definition = JsonObject.Parse(reader.ReadToEnd());
+				var type = definition.Get("type") ?? "standard";
+
+				Material material;
+				if (type == "terrain")
+					material = new Materials.StandardMaterial(name, parameters);
+				else
+					material = new Materials.StandardMaterial(name, parameters);
+				material.Definition = definition;
+
+				return material;
+			}
 		}
 
 		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
@@ -34,25 +51,22 @@ namespace Triton.Graphics.Resources
 			var material = (Materials.StandardMaterial)resource;
 			var filename = resource.Name + ".mat.v";
 
-			using (var stream = FileSystem.OpenRead(filename))
-			{
-				var materialDefinition = ServiceStack.Text.JsonSerializer.DeserializeFromStream<MaterialDefintion>(stream);
+			var definition = material.Definition;
 
-				if (!string.IsNullOrWhiteSpace(materialDefinition.diffuse))
-					material.Diffuse = ResourceManager.Load<Texture>(materialDefinition.diffuse, "srgb");
-				if (!string.IsNullOrWhiteSpace(materialDefinition.normal))
-					material.Normal = ResourceManager.Load<Texture>(materialDefinition.normal);
-				if (!string.IsNullOrWhiteSpace(materialDefinition.gloss))
-					material.Gloss = ResourceManager.Load<Texture>(materialDefinition.gloss);
-				if (!string.IsNullOrWhiteSpace(materialDefinition.specular))
-					material.Specular = ResourceManager.Load<Texture>(materialDefinition.specular);
+			if (!string.IsNullOrWhiteSpace(definition.Get("diffuse")))
+				material.Diffuse = ResourceManager.Load<Texture>(definition.Get("diffuse"), "srgb");
+			if (!string.IsNullOrWhiteSpace(definition.Get("normal")))
+				material.Normal = ResourceManager.Load<Texture>(definition.Get("normal"));
+			if (!string.IsNullOrWhiteSpace(definition.Get("gloss")))
+				material.Gloss = ResourceManager.Load<Texture>(definition.Get("gloss"));
+			if (!string.IsNullOrWhiteSpace(definition.Get("specular")))
+				material.Specular = ResourceManager.Load<Texture>(definition.Get("specular"));
 				
-				var shader = DefaultShader;
-				if (!string.IsNullOrEmpty(materialDefinition.shader))
-					shader = materialDefinition.shader;
+			var shader = DefaultShader;
+			if (!string.IsNullOrEmpty(definition.Get("shader")))
+				shader = definition.Get("shader");
 
-				material.Shader = ResourceManager.Load<ShaderProgram>(shader);
-			}
+			material.Shader = ResourceManager.Load<ShaderProgram>(shader);
 
 			onLoaded(material);
 		}

@@ -9,6 +9,7 @@ namespace Triton.Graphics.Resources
 	public class Material : Triton.Common.Resource
 	{
 		private bool Initialized = false;
+		internal ServiceStack.Text.JsonObject Definition;
 
 		public Material(string name, string parameters)
 			: base(name, parameters)
