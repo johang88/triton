@@ -195,22 +195,11 @@ namespace Triton.Graphics.Deferred
 
 				foreach (var subMesh in mesh.Mesh.SubMeshes)
 				{
-
-					Backend.BeginInstance(GBufferShader.Handle, new int[] { subMesh.Material.Diffuse.Handle, subMesh.Material.Normal.Handle, subMesh.Material.Specular.Handle });
-
 					var worldView = world * view;
 					var itWorldView = Matrix4.Transpose(Matrix4.Invert(worldView));
 
-					Backend.BindShaderVariable(GBufferParams.ModelViewProjection, ref modelViewProjection);
-					Backend.BindShaderVariable(GBufferParams.HandleWorld, ref world);
-					Backend.BindShaderVariable(GBufferParams.HandleWorldView, ref worldView);
-					Backend.BindShaderVariable(GBufferParams.HandleITWorldView, ref itWorldView);
-					Backend.BindShaderVariable(GBufferParams.HandleDiffuseTexture, 0);
-					Backend.BindShaderVariable(GBufferParams.HandleNormalMap, 1);
-					Backend.BindShaderVariable(GBufferParams.HandleSpecularMap, 2);
-
+					subMesh.Material.BindMaterial(Backend, ref world, ref worldView, ref itWorldView, ref modelViewProjection);
 					Backend.DrawMesh(subMesh.Handle);
-
 					Backend.EndInstance();
 				}
 			}

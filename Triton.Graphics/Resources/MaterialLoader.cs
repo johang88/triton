@@ -11,6 +11,8 @@ namespace Triton.Graphics.Resources
 		private readonly Triton.Common.IO.FileSystem FileSystem;
 		private readonly Triton.Common.ResourceManager ResourceManager;
 
+		private const string DefaultShader = "shaders/deferred/gbuffer";
+
 		public MaterialLoader(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
 		{
 			if (resourceManager == null)
@@ -24,12 +26,12 @@ namespace Triton.Graphics.Resources
 
 		public Common.Resource Create(string name, string parameters)
 		{
-			return new Material(name, parameters);
+			return new Materials.StandardMaterial(name, parameters);
 		}
 
 		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
 		{
-			var material = (Material)resource;
+			var material = (Materials.StandardMaterial)resource;
 			var filename = resource.Name + ".mat.v";
 
 			using (var stream = FileSystem.OpenRead(filename))
@@ -44,6 +46,12 @@ namespace Triton.Graphics.Resources
 					material.Gloss = ResourceManager.Load<Texture>(materialDefinition.gloss);
 				if (!string.IsNullOrWhiteSpace(materialDefinition.specular))
 					material.Specular = ResourceManager.Load<Texture>(materialDefinition.specular);
+				
+				var shader = DefaultShader;
+				if (!string.IsNullOrEmpty(materialDefinition.shader))
+					shader = materialDefinition.shader;
+
+				material.Shader = ResourceManager.Load<ShaderProgram>(shader);
 			}
 
 			onLoaded(material);
@@ -51,11 +59,12 @@ namespace Triton.Graphics.Resources
 
 		public void Unload(Common.Resource resource)
 		{
-			var material = (Material)resource;
+			var material = (Materials.StandardMaterial)resource;
 			material.Diffuse = null;
 			material.Normal = null;
 			material.Gloss = null;
 			material.Specular = null;
+			material.Shader = null;
 		}
 
 		class MaterialDefintion
@@ -64,6 +73,7 @@ namespace Triton.Graphics.Resources
 			public string normal { get; set; }
 			public string gloss { get; set; }
 			public string specular { get; set; }
+			public string shader { get; set; }
 		}
 	}
 }
