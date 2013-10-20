@@ -86,29 +86,16 @@ namespace Test
 			var hdrRenderer = new Triton.Graphics.HDR.HDRRenderer(ResourceManager, Backend, Width, Height);
 
 			var stage = new Triton.Graphics.Stage(ResourceManager);
-			
-			//stage.AddMesh("models/floor", "materials/floor");
 
-			Triton.Graphics.Terrain.Terrain terrain;
-			using (var stream = FileSystem.OpenRead("terrain.raw"))
-			{
-				var terrainSize = 512;
-				var terrainHeight = 256;
-				terrain = new Triton.Graphics.Terrain.Terrain(stream, Backend, terrainSize, terrainSize, terrainHeight, 256, 257, ResourceManager.Load<Triton.Graphics.Resources.Material>("materials/terrain"));
-				terrain.Position = new Vector3(-terrainSize / 2.0f, 0, -terrainSize / 2.0f);
+			stage.AddMesh("models/walls");
+			stage.AddMesh("models/floor");
+			stage.AddMesh("models/ceiling");
+			stage.AddMesh("models/door");
+			stage.AddMesh("models/door001");
 
-				var terrainInstance = stage.AddMesh(terrain.Mesh);
-				terrainInstance.Position = terrain.Position;
-			}
+			stage.AmbientColor = new Vector3(0.1f, 0.1f, 0.1f);
 
-			stage.AddMesh("models/T1_Wall").Position.Y = terrain.GetHeightAt(0, 0) - 1;
-			stage.AddMesh("models/T1_Roof").Position.Y = terrain.GetHeightAt(0, 0) - 1;
-			stage.AddMesh("models/T1_Planks").Position.Y = terrain.GetHeightAt(0, 0) - 1;
-			stage.AddMesh("models/T1_Brace").Position.Y = terrain.GetHeightAt(0, 0) - 1;
-
-			stage.AmbientColor = new Vector3(0.3f, 0.3f, 0.3f);
-
-			stage.CreateDirectionalLight(new Vector3(0.3f, -0.4f, 0.3f), new Vector3(1, 1, 1.1f) * 2.4f);
+			//stage.CreateDirectionalLight(new Vector3(0.3f, -0.4f, 0.3f), new Vector3(1, 1, 1.1f) * 2.4f);
 
 			while (!ResourceManager.AllResourcesLoaded())
 			{
@@ -168,7 +155,6 @@ namespace Test
 				camera.Orientation = Quaternion.Identity;
 				camera.Yaw(cameraYaw);
 				camera.Pitch(cameraPitch);
-				camera.Position.Y = terrain.GetHeightAt(camera.Position.X, camera.Position.Z) + 1.5f;
 
 				var movementDir = Quaternion.FromAxisAngle(Vector3.UnitY, cameraYaw);
 
@@ -183,7 +169,7 @@ namespace Test
 				{
 					isCDown = false;
 
-					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 10.0f, new Vector3(1.4f, 0.68f, 0.65f));
+					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 4.0f, new Vector3(1.4f, 0.68f, 0.65f));
 				}
 
 				if (inputManager.IsKeyDown(Key.F))
