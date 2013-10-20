@@ -105,7 +105,20 @@ namespace Triton.Common
 
 		public void Unload(Resource resource, bool async = true)
 		{
-			if (!ResourceLoaders.ContainsKey(resource.GetType()))
+			IResourceLoader loader = null;
+			var resourceType = resource.GetType();
+			while (loader == null && resourceType != typeof(object))
+			{
+				if (ResourceLoaders.ContainsKey(resourceType))
+				{
+					loader = ResourceLoaders[resourceType];
+					break;
+				}
+
+				resourceType = resourceType.BaseType;
+			}
+
+			if (loader == null)
 				throw new InvalidOperationException("no resource loader for the specified type");
 
 			lock (LoadingLock)
@@ -113,7 +126,6 @@ namespace Triton.Common
 				if (resource.State == ResourceLoadingState.Loaded)
 				{
 					resource.State = ResourceLoadingState.Unloading;
-					var loader = ResourceLoaders[resource.GetType()];
 
 					Action unloadAction = () =>
 					{
