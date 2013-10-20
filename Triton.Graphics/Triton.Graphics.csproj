@@ -73,7 +73,6 @@
     <Compile Include="Deferred\CombineParams.cs" />
     <Compile Include="Deferred\DirectionalLightParams.cs" />
     <Compile Include="Deferred\DeferredRenderer.cs" />
-    <Compile Include="Deferred\GBufferParams.cs" />
     <Compile Include="Deferred\PointLightParams.cs" />
     <Compile Include="Deferred\SpotLightParams.cs" />
     <Compile Include="Deferred\SSAOParams.cs" />

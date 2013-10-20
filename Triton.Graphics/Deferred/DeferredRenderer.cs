@@ -11,7 +11,6 @@ namespace Triton.Graphics.Deferred
 		private readonly Common.ResourceManager ResourceManager;
 		private readonly Backend Backend;
 
-		private GBufferParams GBufferParams = new GBufferParams();
 		private AmbientLightParams AmbientLightParams = new AmbientLightParams();
 		private PointLightParams PointLightParams = new PointLightParams();
 		private DirectionalLightParams DirectionalLightParams = new DirectionalLightParams();
@@ -32,7 +31,6 @@ namespace Triton.Graphics.Deferred
 		private BatchBuffer QuadMesh;
 		private Resources.Mesh UnitSphere;
 
-		private Resources.ShaderProgram GBufferShader;
 		private Resources.ShaderProgram AmbientLightShader;
 		private Resources.ShaderProgram DirectionalLightShader;
 		private Resources.ShaderProgram PointLightShader;
@@ -66,7 +64,6 @@ namespace Triton.Graphics.Deferred
 			SSAOTarget1 = Backend.CreateRenderTarget("ssao1", width / ssaoScale, height / ssaoScale, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, false);
 			SSAOTarget2 = Backend.CreateRenderTarget("ssao2", width / ssaoScale, height / ssaoScale, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, false);
 
-			GBufferShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/gbuffer");
 			AmbientLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ambient");
 			DirectionalLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/directional");
 			PointLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/point");
@@ -88,7 +85,6 @@ namespace Triton.Graphics.Deferred
 
 		public void InitializeHandles()
 		{
-			GBufferShader.GetUniformLocations(GBufferParams);
 			CombineShader.GetUniformLocations(CombineParams);
 			AmbientLightShader.GetUniformLocations(AmbientLightParams);
 			DirectionalLightShader.GetUniformLocations(DirectionalLightParams);
