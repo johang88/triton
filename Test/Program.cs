@@ -89,11 +89,20 @@ namespace Test
 
 			stage.AddMesh("models/walls");
 			stage.AddMesh("models/floor");
+			stage.AddMesh("models/floor001");
 			stage.AddMesh("models/ceiling");
 			stage.AddMesh("models/door");
 			stage.AddMesh("models/door001");
+			stage.AddMesh("models/walls001");
 
 			stage.AmbientColor = new Vector3(0.1f, 0.1f, 0.1f);
+
+			float lightZ = 5.0f;
+			for (var i = 0; i < 10; i++)
+			{
+				stage.CreatePointLight(new Vector3(0, 2.0f, lightZ), 7.0f, new Vector3(0.9f, 1.01f, 1.12f) * 0.6f);
+				lightZ -= 5.0f;
+			}
 
 			//stage.CreateDirectionalLight(new Vector3(0.3f, -0.4f, 0.3f), new Vector3(1, 1, 1.1f) * 2.4f);
 
@@ -169,7 +178,7 @@ namespace Test
 				{
 					isCDown = false;
 
-					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 4.0f, new Vector3(1.4f, 0.68f, 0.65f));
+					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 10.0f, new Vector3(0.9f, 1.01f, 1.12f));
 				}
 
 				if (inputManager.IsKeyDown(Key.F))

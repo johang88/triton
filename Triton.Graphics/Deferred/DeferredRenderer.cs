@@ -228,7 +228,7 @@ namespace Triton.Graphics.Deferred
 
 				var radius = light.Range;
 
-				var cullFaceMode = Triton.Renderer.CullFaceMode.Back;
+				var cullFaceMode = Triton.Renderer.CullFaceMode.Front;
 				var depthFunction = Triton.Renderer.DepthFunction.Lequal;
 
 				var delta = light.Position - camera.Position;
@@ -269,7 +269,7 @@ namespace Triton.Graphics.Deferred
 				}
 				else if (light.Type == LighType.PointLight)
 				{
-					Backend.BeginInstance(PointLightShader.Handle, new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle }, true, false, true, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode, true, depthFunction);
+					Backend.BeginInstance(PointLightShader.Handle, new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle }, true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode, true, depthFunction);
 					Backend.BindShaderVariable(PointLightParams.HandleNormalTexture, 0);
 					Backend.BindShaderVariable(PointLightParams.HandlePositionTexture, 1);
 					Backend.BindShaderVariable(PointLightParams.HandleSpecularTexture, 2);
