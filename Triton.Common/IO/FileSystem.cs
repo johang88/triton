@@ -25,6 +25,7 @@ namespace Triton.Common.IO
 		public FileSystem()
 		{
 			RegisterPackageType("FileSystem", p => new FileSystemPackage(p, this));
+			RegisterPackageType("Zip", p => new ZipPackage(p));
 		}
 
 		public void AddFileChangedListener(FileChanged callback)
