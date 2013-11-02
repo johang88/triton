@@ -37,9 +37,14 @@ namespace Triton.Graphics.Resources
 			bool srgb = parameters.Contains("srgb");
 
 			using (var stream = FileSystem.OpenRead(filename))
-			using (var reader = new System.IO.BinaryReader(stream))
+			using (var data = new System.IO.MemoryStream(1024 * 1024))
 			{
-				var data = reader.ReadBytes((int)stream.Length);
+				var count =0 ;
+				var buffer = new byte[4096];
+				while ((count = stream.Read(buffer, 0, buffer.Length)) != 0)
+				{
+					data.Write(buffer, 0, count);
+				}
 
 				Renderer.RenderSystem.OnLoadedCallback onResourceLoaded = (handle, success, errors) =>
 				{
@@ -49,7 +54,7 @@ namespace Triton.Graphics.Resources
 						onLoaded(resource);
 				};
 
-				texture.Handle = Backend.RenderSystem.CreateFromDDS(data, onResourceLoaded);
+				texture.Handle = Backend.RenderSystem.CreateFromDDS(data.GetBuffer(), onResourceLoaded);
 				resource.Parameters = parameters;
 			}
 		}
