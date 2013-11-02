@@ -246,7 +246,7 @@ namespace Triton.Graphics.Deferred
 				{
 					modelViewProjection = Matrix4.Identity;
 
-					Backend.BeginInstance(DirectionalLightShader.Handle, new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle }, true, true, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode);
+					Backend.BeginInstance(DirectionalLightShader.Handle, new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle }, true, true, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
 					Backend.BindShaderVariable(DirectionalLightParams.HandleNormalTexture, 0);
 					Backend.BindShaderVariable(DirectionalLightParams.HandlePositionTexture, 1);
 					Backend.BindShaderVariable(DirectionalLightParams.HandleSpecularTexture, 2);

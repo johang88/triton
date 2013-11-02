@@ -29,8 +29,8 @@ namespace Triton.Game
 
 		public Input.InputManager InputManager { get; private set; }
 
-		private Graphics.Deferred.DeferredRenderer DeferredRenderer;
-		private Graphics.HDR.HDRRenderer HDRRenderer;
+		public Graphics.Deferred.DeferredRenderer DeferredRenderer { get; private set; }
+		public Graphics.HDR.HDRRenderer HDRRenderer { get; private set; }
 
 		public Game(string name, string logPath = "logs/")
 		{
@@ -105,6 +105,8 @@ namespace Triton.Game
 			{
 				var frameTime = (float)watch.Elapsed.TotalSeconds;
 				watch.Restart();
+
+				InputManager.Update();
 
 				Update(frameTime);
 
