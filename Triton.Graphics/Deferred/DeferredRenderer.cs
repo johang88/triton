@@ -291,7 +291,7 @@ namespace Triton.Graphics.Deferred
 				}
 				else if (light.Type == LighType.SpotLight)
 				{
-					Backend.BeginInstance(SpotLightShader.Handle, new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle }, true, false, true, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode, true, depthFunction);
+					Backend.BeginInstance(SpotLightShader.Handle, new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle }, true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode, true, depthFunction);
 					Backend.BindShaderVariable(SpotLightParams.HandleNormalTexture, 0);
 					Backend.BindShaderVariable(SpotLightParams.HandlePositionTexture, 1);
 					Backend.BindShaderVariable(SpotLightParams.HandleSpecularTexture, 2);

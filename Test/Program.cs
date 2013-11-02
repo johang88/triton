@@ -95,14 +95,18 @@ namespace Test
 			stage.AddMesh("models/door001");
 			stage.AddMesh("models/walls001");
 
+			stage.AddMesh("models/crate").Position = new Vector3(0, 1, 2);
+
 			stage.AmbientColor = new Vector3(0.1f, 0.1f, 0.1f);
 
 			float lightZ = 5.0f;
 			for (var i = 0; i < 10; i++)
 			{
-				stage.CreatePointLight(new Vector3(0, 2.0f, lightZ), 7.0f, new Vector3(0.9f, 1.01f, 1.12f) * 0.6f);
+				//stage.CreatePointLight(new Vector3(0, 2.0f, lightZ), 7.0f, new Vector3(0.9f, 1.01f, 1.12f) * 0.6f);
 				lightZ -= 5.0f;
 			}
+
+			stage.CreateSpotLight(new Vector3(0, 2.8f, 2), -Vector3.UnitY, 0.1f, 1.8f, 4.0f, new Vector3(1, 0.3f, 0.35f));
 
 			//stage.CreateDirectionalLight(new Vector3(0.3f, -0.4f, 0.3f), new Vector3(1, 1, 1.1f) * 2.4f);
 

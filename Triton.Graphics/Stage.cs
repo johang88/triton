@@ -83,6 +83,7 @@ namespace Triton.Graphics
 
 		public Light CreateSpotLight(Vector3 position, Vector3 direction, float innerAngle, float outerAngle, float range, Vector3 color)
 		{
+			direction.Normalize();
 			var light = new Light
 			{
 				Type = LighType.SpotLight,

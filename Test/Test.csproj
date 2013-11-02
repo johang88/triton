@@ -74,6 +74,10 @@
       <Project>{354b215a-cc57-408b-900d-e7e1f95c04c2}</Project>
       <Name>Triton.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Triton.Game\Triton.Game.csproj">
+      <Project>{3cd6878f-354e-4897-ac21-04330b65ebbb}</Project>
+      <Name>Triton.Game</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Triton.Graphics\Triton.Graphics.csproj">
       <Project>{6a7e740c-692d-4e66-bc84-e79d6bf0b025}</Project>
       <Name>Triton.Graphics</Name>
