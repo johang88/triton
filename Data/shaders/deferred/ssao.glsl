@@ -52,7 +52,7 @@ void main()
 	float occlusion = 0.0f;
 	int iterations = 4;
 	for (int i = 0; i < iterations; i++) {
-		vec2 coord1 = reflect(vec[i], rand) * rad;
+		vec2 coord1 = (reflect(vec3(vec[i], 0), rand) * rad).xy;
 		vec2 coord2 = vec2(coord1.x * 0.707f - coord1.y * 0.707f, coord1.x * 0.707f + coord1.y * 0.707f);
 		
 		occlusion += ambientOcclusion(texCoord, coord1 * 0.25f, position, normal);

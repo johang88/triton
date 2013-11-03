@@ -1,7 +1,7 @@
 // Package: lighting.phong
 
 vec3 phong(vec3 normal, vec3 viewer, vec3 lightDir, float specularPower, 
-vec3 lightColor, vec3 ambientColor, vec3 diffuseColor, vec3 specularColor, float att)
+vec3 lightColor, vec3 diffuseColor, vec3 specularColor, float att)
 {
 	vec3 halfAngle = normalize(lightDir + viewer);
 	
@@ -16,8 +16,7 @@ vec3 lightColor, vec3 ambientColor, vec3 diffuseColor, vec3 specularColor, float
 	
 	vec3 fresnelTerm = specularColor + (1.0f - specularColor) * exponential;
 	
-	//vec3 specular = specularTerm * nDotL * fresnelTerm * lightColor;
-	vec3 specular = blinnPong * specularColor;
+	vec3 specular = specularTerm * nDotL * fresnelTerm * lightColor;
 	
-	return (ambientColor + nDotL * lightColor * att) * diffuseColor + specular * att;
+	return (nDotL * lightColor * att) * diffuseColor + specular * att;
 }
