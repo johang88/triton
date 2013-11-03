@@ -12,7 +12,7 @@ vec3 lightColor, vec3 diffuseColor, vec3 specularColor, float att)
 	float specularTerm = (specularPower + 2.0f) / (specularPower / 2.0f) * blinnPong;
 	
 	float base = saturate(dot(halfAngle, lightDir));
-	float exponential = pow(base, 5.0f);
+	float exponential = pow(1.0f - base, 5.0f);
 	
 	vec3 fresnelTerm = specularColor + (1.0f - specularColor) * exponential;
 	
