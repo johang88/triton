@@ -55,7 +55,7 @@ void main()
 	float attenuation = dist / lightRange;
 	attenuation = saturate(1.0f - (attenuation * attenuation));
 	
-	oColor.xyz = phong(normal, eyeDir, lightDir, specularPower, lightColor, diffuse, specularColor.xyz, 1.0f);
+	oColor.xyz = phong(normal, eyeDir, lightDir, specularPower, lightColor, diffuse, specularColor.xyz, attenuation);
 	oColor.w = 1.0f;
 }
 #endif

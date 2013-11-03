@@ -59,7 +59,7 @@ void main()
 	float spotLightAngle = saturate(dot(-lightDirection, lightDir));
 	float spotFallof = 1.0f - saturate((spotLightAngle - spotParams.x) / (spotParams.y - spotParams.x));
 	
-	oColor.xyz = phong(normal, eyeDir, lightDir, specularPower, lightColor, diffuse, specularColor.xyz, 1.0f);
+	oColor.xyz = phong(normal, eyeDir, lightDir, specularPower, lightColor, diffuse, specularColor.xyz, attenuation * spotFallof);
 	oColor.w = 1.0f;
 }
 #endif
