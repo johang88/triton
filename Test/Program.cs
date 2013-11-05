@@ -108,6 +108,8 @@ namespace Test
 
 			stage.CreateSpotLight(new Vector3(0, 0.5f, -2), Vector3.UnitZ, 0.1f, 0.6f, 16.0f, new Vector3(1, 1, 1.2f), true, 0.01f);
 
+			//stage.CreatePointLight(new Vector3(0, 1.5f, 0), 10.0f, new Vector3(1, 0.2f, 0.2f), true, 0.03f);
+
 			while (!ResourceManager.AllResourcesLoaded())
 			{
 				Thread.Sleep(1);
@@ -176,7 +178,7 @@ namespace Test
 				{
 					isCDown = false;
 
-					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 4.0f, new Vector3(0.9f, 1.01f, 1.12f));
+					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 4.0f, new Vector3(0.9f, 1.01f, 1.12f), false);
 				}
 
 				if (inputManager.IsKeyDown(Key.K))

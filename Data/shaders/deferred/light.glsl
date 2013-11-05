@@ -41,10 +41,9 @@ uniform(vec3, cameraPosition, CameraPosition);
 uniform(vec3, lightDirection, LightDirection);
 
 #ifdef SHADOWS
-sampler(2DShadow, samplerShadow, ShadowMap);
 uniform(mat4x4, invView, InverseViewMatrix);
+sampler(2DShadow, samplerShadow, ShadowMap);
 uniform(mat4x4, shadowViewProj, ShadowViewProjection);
-uniform(float, inverseShadowMapSize, InverseShadowMapSize);
 uniform(vec2, clipPlane, ClipPlane);
 uniform(float, shadowBias, ShadowBias);
 #endif
@@ -85,7 +84,7 @@ void main()
 #endif
 	
 #ifdef SHADOWS
-	float shadow = check_shadow(samplerShadow, position, invView, shadowViewProj, inverseShadowMapSize, clipPlane, shadowBias);
+	float shadow = check_shadow(samplerShadow, position, invView, shadowViewProj, clipPlane, shadowBias);
 #else
 	float shadow = 1.0f;
 #endif

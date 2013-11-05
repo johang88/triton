@@ -23,7 +23,6 @@ namespace Triton.Graphics.Deferred
 		public int HandleSpotLightParams = 0;
 		public int HandleInverseViewMatrix = 0;
 		public int ShadowViewProjection = 0;
-		public int InverseShadowMapSize = 0;
 		public int HandleShadowBias = 0;
 		public int HandleClipPlane = 0;
 	}

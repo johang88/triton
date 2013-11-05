@@ -13,6 +13,7 @@ namespace Triton.Graphics.Deferred
 
 		private AmbientLightParams AmbientLightParams = new AmbientLightParams();
 		private LightParams PointLightParams = new LightParams();
+		private LightParams PointLightShadowParams = new LightParams();
 		private LightParams DirectionalLightParams = new LightParams();
 		private LightParams SpotLightParams = new LightParams();
 		private LightParams SpotLightShadowParams = new LightParams();
@@ -20,6 +21,7 @@ namespace Triton.Graphics.Deferred
 		private BlurParams BlurParams = new BlurParams();
 		private CombineParams CombineParams = new CombineParams();
 		private RenderShadowsParams RenderShadowsParams = new RenderShadowsParams();
+		private RenderShadowsParams RenderShadowsCubeParams = new RenderShadowsParams();
 
 		private Vector2 ScreenSize;
 
@@ -37,12 +39,17 @@ namespace Triton.Graphics.Deferred
 		private Resources.ShaderProgram AmbientLightShader;
 		private Resources.ShaderProgram DirectionalLightShader;
 		private Resources.ShaderProgram PointLightShader;
+		private Resources.ShaderProgram PointLightShadowShader;
 		private Resources.ShaderProgram SpotLightShader;
 		private Resources.ShaderProgram SpotLightShadowShader;
 		private Resources.ShaderProgram SSAOShader;
 		private Resources.ShaderProgram BlurShader;
 		private Resources.ShaderProgram CombineShader;
 		private Resources.ShaderProgram RenderShadowsShader;
+		private Resources.ShaderProgram RenderShadowsCubeShader;
+
+		// Used for point light shadows
+		private Light ShadowSpotLight = new Light();
 
 		private Resources.Texture RandomNoiseTexture;
 
@@ -78,12 +85,14 @@ namespace Triton.Graphics.Deferred
 			AmbientLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ambient");
 			DirectionalLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light");
 			PointLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "POINT_LIGHT");
+			PointLightShadowShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "POINT_LIGHT,SHADOWS");
 			SpotLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "SPOT_LIGHT");
 			SpotLightShadowShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "SPOT_LIGHT,SHADOWS");
 			SSAOShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ssao");
 			BlurShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/blur");
 			CombineShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/combine");
 			RenderShadowsShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/render_shadows");
+			RenderShadowsCubeShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/render_shadows_cube");
 
 			RandomNoiseTexture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/random_n");
 
@@ -102,11 +111,13 @@ namespace Triton.Graphics.Deferred
 			AmbientLightShader.GetUniformLocations(AmbientLightParams);
 			DirectionalLightShader.GetUniformLocations(DirectionalLightParams);
 			PointLightShader.GetUniformLocations(PointLightParams);
+			PointLightShadowShader.GetUniformLocations(PointLightShadowParams);
 			SpotLightShader.GetUniformLocations(SpotLightParams);
 			SpotLightShadowShader.GetUniformLocations(SpotLightShadowParams);
 			SSAOShader.GetUniformLocations(SSAOParams);
 			BlurShader.GetUniformLocations(BlurParams);
 			RenderShadowsShader.GetUniformLocations(RenderShadowsParams);
+			RenderShadowsCubeShader.GetUniformLocations(RenderShadowsCubeParams);
 		}
 
 		public RenderTarget Render(Stage stage, Camera camera)
@@ -242,132 +253,170 @@ namespace Triton.Graphics.Deferred
 				if (!light.Enabled)
 					continue;
 
-				// Pad the radius of the rendered sphere a little, it's quite low poly so there will be minor artifacts otherwise
-				var radius = light.Range * 1.1f;
-
-				var cullFaceMode = Triton.Renderer.CullFaceMode.Back;
-				var depthFunction = Triton.Renderer.DepthFunction.Lequal;
-
-				var cameraDistanceToLight = light.Position - camera.Position;
-
-				// We pad it once again to avoid any artifacted when the camera is close to the edge of the bounding sphere
-				if (cameraDistanceToLight.Length <= radius * 1.1f)
+				if (light.Type == LighType.PointLight && light.CastShadows)
 				{
-					cullFaceMode = Triton.Renderer.CullFaceMode.Front;
-					depthFunction = Renderer.DepthFunction.Gequal;
-				}
+					ShadowSpotLight.Type = LighType.SpotLight;
+					ShadowSpotLight.Position = light.Position;
+					ShadowSpotLight.Range = light.Range;
+					ShadowSpotLight.CastShadows = true;
+					ShadowSpotLight.ShadowBias = light.ShadowBias;
 
-				// Initialize shadow map
-				Matrix4 shadowViewProjection;
-				Vector2 shadowCameraClipPlane;
+					ShadowSpotLight.Color = light.Color;
 
-				if (light.CastShadows)
-				{
-					RenderSpotlightShadows(SpotShadowsRenderTarget, light, stage, camera, out shadowViewProjection, out shadowCameraClipPlane);
-					Backend.ChangeRenderTarget(LightAccumulation);
-				}
-				else
-				{
-					shadowViewProjection = Matrix4.Identity;
-					shadowCameraClipPlane = Vector2.Zero;
-				}
+					ShadowSpotLight.InnerAngle = OpenTK.MathHelper.PiOver2 - 0.001f;
+					ShadowSpotLight.OuterAngle = OpenTK.MathHelper.PiOver2 + 0.32f;
 
-				// Calculate matrices
-				var world = Matrix4.Scale(radius) * Matrix4.CreateTranslation(light.Position);
-				modelViewProjection = world * view * projection;
+					ShadowSpotLight.Direction = Vector3.UnitX;
+					RenderLight(camera, ref view, ref projection, stage, ref modelViewProjection, ref cameraPositionViewSpace, ShadowSpotLight);
 
-				// Convert light color to linear space
-				var lightColor = new Vector3((float)System.Math.Pow(light.Color.X, 2.2f), (float)System.Math.Pow(light.Color.Y, 2.2f), (float)System.Math.Pow(light.Color.Z, 2.2f));
+					ShadowSpotLight.Direction = -Vector3.UnitX;
+					RenderLight(camera, ref view, ref projection, stage, ref modelViewProjection, ref cameraPositionViewSpace, ShadowSpotLight);
 
-				// Select the correct shader
-				var shader = DirectionalLightShader;
-				var shaderParams = DirectionalLightParams;
+					ShadowSpotLight.Direction = Vector3.UnitY;
+					RenderLight(camera, ref view, ref projection, stage, ref modelViewProjection, ref cameraPositionViewSpace, ShadowSpotLight);
 
-				if (light.Type == LighType.PointLight)
-				{
-					shader = PointLightShader;
-					shaderParams = PointLightParams;
-				}
-				else if (light.Type == LighType.SpotLight)
-				{
-					shader = light.CastShadows ? SpotLightShadowShader : SpotLightShader;
-					shaderParams = light.CastShadows ? SpotLightShadowParams : SpotLightParams;
-				}
+					ShadowSpotLight.Direction = -Vector3.UnitY;
+					RenderLight(camera, ref view, ref projection, stage, ref modelViewProjection, ref cameraPositionViewSpace, ShadowSpotLight);
 
-				// Setup textures and begin rendering with the chosen shader
-				int[] textures;
-				if (light.CastShadows)
-				{
-					textures = new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle, SpotShadowsRenderTarget.Textures[0].Handle };
+					ShadowSpotLight.Direction = Vector3.UnitZ;
+					RenderLight(camera, ref view, ref projection, stage, ref modelViewProjection, ref cameraPositionViewSpace, ShadowSpotLight);
+
+					ShadowSpotLight.Direction = -Vector3.UnitZ;
+					RenderLight(camera, ref view, ref projection, stage, ref modelViewProjection, ref cameraPositionViewSpace, ShadowSpotLight);
 				}
 				else
 				{
-					textures = new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle };
+					RenderLight(camera, ref view, ref projection, stage, ref modelViewProjection, ref cameraPositionViewSpace, light);
 				}
-
-				var depthCheck = light.Type != LighType.Directional;
-				Backend.BeginInstance(shader.Handle, textures, true, false, depthCheck, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode, true, depthFunction);
-
-				// Setup texture samplers
-				Backend.BindShaderVariable(shaderParams.HandleNormalTexture, 0);
-				Backend.BindShaderVariable(shaderParams.HandlePositionTexture, 1);
-				Backend.BindShaderVariable(shaderParams.HandleSpecularTexture, 2);
-				Backend.BindShaderVariable(shaderParams.HandleDiffuseTexture, 3);
-
-				// Common uniforms
-				Backend.BindShaderVariable(shaderParams.HandleScreenSize, ref ScreenSize);
-				Backend.BindShaderVariable(shaderParams.HandleModelViewProjection, ref modelViewProjection);
-				Backend.BindShaderVariable(shaderParams.HandleLightColor, ref lightColor);
-				Backend.BindShaderVariable(shaderParams.HandleCameraPosition, ref cameraPositionViewSpace);
-
-				if (light.Type == LighType.Directional || light.Type == LighType.SpotLight)
-				{
-					var lightDirWS = light.Direction.Normalize();
-
-					var lightDirection = Vector3.Transform(light.Direction, Matrix4.Transpose(Matrix4.Invert(view)));
-					lightDirection = lightDirection.Normalize();
-
-					Backend.BindShaderVariable(shaderParams.HandleLightDirection, ref lightDirection);
-				}
-
-				if (light.Type == LighType.PointLight || light.Type == LighType.SpotLight)
-				{
-					Vector3 lightPosition;
-					Vector3.Transform(ref light.Position, ref view, out lightPosition);
-
-					Backend.BindShaderVariable(shaderParams.HandleLightPosition, ref lightPosition);
-					Backend.BindShaderVariable(shaderParams.HandleLightRange, light.Range);
-				}
-
-				if (light.Type == LighType.SpotLight)
-				{
-					var spotParams = new Vector2((float)System.Math.Cos(light.InnerAngle / 2.0f), (float)System.Math.Cos(light.OuterAngle / 2.0f));
-					Backend.BindShaderVariable(shaderParams.HandleSpotLightParams, ref spotParams);
-				}
-
-				if (light.CastShadows)
-				{
-					var inverseViewMatrix = Matrix4.Invert(view);
-
-					Backend.BindShaderVariable(shaderParams.HandleShadowMap, 4);
-					Backend.BindShaderVariable(shaderParams.HandleInverseViewMatrix, ref inverseViewMatrix);
-					Backend.BindShaderVariable(shaderParams.ShadowViewProjection, ref shadowViewProjection);
-					Backend.BindShaderVariable(shaderParams.InverseShadowMapSize, 1.0f / (float)SpotShadowsRenderTarget.Width);
-					Backend.BindShaderVariable(shaderParams.HandleClipPlane, ref shadowCameraClipPlane);
-					Backend.BindShaderVariable(shaderParams.HandleShadowBias, light.ShadowBias);
-				}
-
-				if (light.Type == LighType.Directional)
-				{
-					Backend.DrawMesh(QuadMesh.MeshHandle);
-				}
-				else
-				{
-					Backend.DrawMesh(UnitSphere.SubMeshes[0].Handle);
-				}
-
-				Backend.EndInstance();
 			}
+		}
+
+		private void RenderLight(Camera camera, ref Matrix4 view, ref Matrix4 projection, Stage stage, ref Matrix4 modelViewProjection, ref Vector3 cameraPositionViewSpace, Light light)
+		{
+			// Pad the radius of the rendered sphere a little, it's quite low poly so there will be minor artifacts otherwise
+			var radius = light.Range * 1.1f;
+
+			var cullFaceMode = Triton.Renderer.CullFaceMode.Back;
+			var depthFunction = Triton.Renderer.DepthFunction.Lequal;
+
+			var cameraDistanceToLight = light.Position - camera.Position;
+
+			// We pad it once again to avoid any artifacted when the camera is close to the edge of the bounding sphere
+			if (cameraDistanceToLight.Length <= radius * 1.1f)
+			{
+				cullFaceMode = Triton.Renderer.CullFaceMode.Front;
+				depthFunction = Renderer.DepthFunction.Gequal;
+			}
+
+			// Initialize shadow map
+			Matrix4 shadowViewProjection;
+			Vector2 shadowCameraClipPlane;
+
+			if (light.CastShadows)
+			{
+				RenderSpotlightShadows(SpotShadowsRenderTarget, light, stage, camera, out shadowViewProjection, out shadowCameraClipPlane);
+				Backend.ChangeRenderTarget(LightAccumulation);
+			}
+			else
+			{
+				shadowViewProjection = Matrix4.Identity;
+				shadowCameraClipPlane = Vector2.Zero;
+			}
+
+			// Calculate matrices
+			var world = Matrix4.Scale(radius) * Matrix4.CreateTranslation(light.Position);
+			modelViewProjection = world * view * projection;
+
+			// Convert light color to linear space
+			var lightColor = new Vector3((float)System.Math.Pow(light.Color.X, 2.2f), (float)System.Math.Pow(light.Color.Y, 2.2f), (float)System.Math.Pow(light.Color.Z, 2.2f));
+
+			// Select the correct shader
+			var shader = DirectionalLightShader;
+			var shaderParams = DirectionalLightParams;
+
+			if (light.Type == LighType.PointLight)
+			{
+				shader = light.CastShadows ? PointLightShadowShader : PointLightShader;
+				shaderParams = light.CastShadows ? PointLightShadowParams : PointLightParams;
+			}
+			else if (light.Type == LighType.SpotLight)
+			{
+				shader = light.CastShadows ? SpotLightShadowShader : SpotLightShader;
+				shaderParams = light.CastShadows ? SpotLightShadowParams : SpotLightParams;
+			}
+
+			// Setup textures and begin rendering with the chosen shader
+			int[] textures;
+			if (light.CastShadows)
+			{
+				textures = new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle, SpotShadowsRenderTarget.Textures[0].Handle };
+			}
+			else
+			{
+				textures = new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle };
+			}
+
+			var depthCheck = light.Type != LighType.Directional;
+			Backend.BeginInstance(shader.Handle, textures, true, false, depthCheck, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode, true, depthFunction);
+
+			// Setup texture samplers
+			Backend.BindShaderVariable(shaderParams.HandleNormalTexture, 0);
+			Backend.BindShaderVariable(shaderParams.HandlePositionTexture, 1);
+			Backend.BindShaderVariable(shaderParams.HandleSpecularTexture, 2);
+			Backend.BindShaderVariable(shaderParams.HandleDiffuseTexture, 3);
+
+			// Common uniforms
+			Backend.BindShaderVariable(shaderParams.HandleScreenSize, ref ScreenSize);
+			Backend.BindShaderVariable(shaderParams.HandleModelViewProjection, ref modelViewProjection);
+			Backend.BindShaderVariable(shaderParams.HandleLightColor, ref lightColor);
+			Backend.BindShaderVariable(shaderParams.HandleCameraPosition, ref cameraPositionViewSpace);
+
+			if (light.Type == LighType.Directional || light.Type == LighType.SpotLight)
+			{
+				var lightDirWS = light.Direction.Normalize();
+
+				var lightDirection = Vector3.Transform(light.Direction, Matrix4.Transpose(Matrix4.Invert(view)));
+				lightDirection = lightDirection.Normalize();
+
+				Backend.BindShaderVariable(shaderParams.HandleLightDirection, ref lightDirection);
+			}
+
+			if (light.Type == LighType.PointLight || light.Type == LighType.SpotLight)
+			{
+				Vector3 lightPosition;
+				Vector3.Transform(ref light.Position, ref view, out lightPosition);
+
+				Backend.BindShaderVariable(shaderParams.HandleLightPosition, ref lightPosition);
+				Backend.BindShaderVariable(shaderParams.HandleLightRange, light.Range);
+			}
+
+			if (light.Type == LighType.SpotLight)
+			{
+				var spotParams = new Vector2((float)System.Math.Cos(light.InnerAngle / 2.0f), (float)System.Math.Cos(light.OuterAngle / 2.0f));
+				Backend.BindShaderVariable(shaderParams.HandleSpotLightParams, ref spotParams);
+			}
+
+			if (light.CastShadows)
+			{
+				var inverseViewMatrix = Matrix4.Invert(view);
+
+				Backend.BindShaderVariable(shaderParams.HandleShadowMap, 4);
+				Backend.BindShaderVariable(shaderParams.HandleInverseViewMatrix, ref inverseViewMatrix);
+				Backend.BindShaderVariable(shaderParams.ShadowViewProjection, ref shadowViewProjection);
+				Backend.BindShaderVariable(shaderParams.HandleClipPlane, ref shadowCameraClipPlane);
+				Backend.BindShaderVariable(shaderParams.HandleShadowBias, light.ShadowBias);
+			}
+
+			if (light.Type == LighType.Directional)
+			{
+				Backend.DrawMesh(QuadMesh.MeshHandle);
+			}
+			else
+			{
+				Backend.DrawMesh(UnitSphere.SubMeshes[0].Handle);
+			}
+
+			Backend.EndInstance();
 		}
 
 		private void RenderSpotlightShadows(RenderTarget renderTarget, Light light, Stage stage, Camera camera, out Matrix4 viewProjection, out Vector2 clipPlane)
@@ -381,7 +430,7 @@ namespace Triton.Graphics.Deferred
 			clipPlane = new Vector2(camera.NearClipDistance, light.Range);
 
 			var view = Matrix4.LookAt(light.Position, light.Position + light.Direction, Vector3.Transform(-Vector3.UnitY, orientation));
-			var projection = Matrix4.CreatePerspectiveFieldOfView(OpenTK.MathHelper.PiOver2, renderTarget.Width / renderTarget.Height, clipPlane.X, clipPlane.Y);
+			var projection = Matrix4.CreatePerspectiveFieldOfView(light.OuterAngle, renderTarget.Width / renderTarget.Height, clipPlane.X, clipPlane.Y);
 
 			viewProjection = view * projection;
 

@@ -25,12 +25,9 @@ float random(vec3 seed, int i){
 	return fract(sin(dot_product) * 43758.5453);
 }
 
-float check_shadow(sampler2DShadow shadowMap, vec3 viewPos, mat4x4 invView, mat4x4 shadowViewProj, float texelSize, vec2 clipPlane, float shadowBias) {
+float check_shadow(sampler2DShadow shadowMap, vec3 viewPos, mat4x4 invView, mat4x4 shadowViewProj, vec2 clipPlane, float shadowBias) {
 	vec3 worldPos = (invView * vec4(viewPos, 1)).xyz;
 	vec4 shadowUv = shadowViewProj * vec4(worldPos, 1);
-
-	vec2 jitterFactor = fract(gl_FragCoord.xy * vec2(18428.4f, 23614.3f)) * 2.0f - 1.0f;
-	vec2 o = texelSize.xx * 0.93f * jitterFactor;
 
 	vec2 uv = 0.5f * shadowUv.xy / shadowUv.w + vec2(0.5f, 0.5f);
 	
@@ -43,4 +40,18 @@ float check_shadow(sampler2DShadow shadowMap, vec3 viewPos, mat4x4 invView, mat4
 	}
 	
 	return c / SAMPLES;
+}
+
+float check_shadow_cube(samplerCubeShadow shadowMap, vec3 viewPos, mat4x4 invView, mat4x4 shadowView, mat4x4 shadowProj, vec2 clipPlane, float shadowBias) {
+	vec3 worldPos = (invView * vec4(viewPos, 1)).xyz;
+	
+	vec4 position_ls = shadowView * vec4(worldPos, 1);
+	vec4 abs_position = abs(position_ls);
+	float fs_z = -max(abs_position.x, max(abs_position.y, abs_position.z));
+	
+	vec4 shadowUv = shadowProj * vec4(0, 0, fs_z, 0);
+	
+	float distance = (shadowUv.z / (clipPlane.y - clipPlane.x)) - shadowBias;
+
+	return texture(shadowMap, vec4(position_ls.xyz, distance));
 }

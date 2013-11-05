@@ -95,6 +95,12 @@ namespace Triton.Graphics.Resources
 			var vertexShaderSource = "#version 330 core\n#define VERTEX_SHADER\n"+defines+"\n" + shaderSource;
 			var fragmentShaderSource = "#version 330 core\n#define FRAGMENT_SHADER\n" + defines + "\n" + shaderSource;
 
+			var geometryShaderSource = "";
+			if (shaderSource.Contains("GEOMETRY_SHADER"))
+			{
+				geometryShaderSource = "#version 330 core\n#define GEOMETRY_SHADER\n" + defines + "\n" + shaderSource;
+			}
+
 			// Convert attribs to the correct format
 			// The format is attribIndex => name
 			var attribs = new string[(int)Renderer.VertexFormatSemantic.Last];
@@ -142,9 +148,9 @@ namespace Triton.Graphics.Resources
 			};
 
 			if (shader.Handle == -1)
-				shader.Handle = Backend.RenderSystem.CreateShader(vertexShaderSource, fragmentShaderSource, attribs, fragDataLocations, onResourceLoaded);
+				shader.Handle = Backend.RenderSystem.CreateShader(vertexShaderSource, fragmentShaderSource, geometryShaderSource, attribs, fragDataLocations, onResourceLoaded);
 			else
-				Backend.RenderSystem.SetShaderData(shader.Handle, vertexShaderSource, fragmentShaderSource, attribs, fragDataLocations, onResourceLoaded);
+				Backend.RenderSystem.SetShaderData(shader.Handle, vertexShaderSource, fragmentShaderSource, geometryShaderSource, attribs, fragDataLocations, onResourceLoaded);
 		}
 
 		public void Unload(Common.Resource resource)

@@ -66,14 +66,16 @@ namespace Triton.Graphics
 			return light;
 		}
 
-		public Light CreatePointLight(Vector3 position, float range, Vector3 color)
+		public Light CreatePointLight(Vector3 position, float range, Vector3 color, bool castShadows, float shadowBias = 0.001f)
 		{
 			var light = new Light
 			{
 				Type = LighType.PointLight,
 				Position = position,
 				Range = range,
-				Color = color
+				Color = color,
+				CastShadows = castShadows,
+				ShadowBias = shadowBias
 			};
 
 			Lights.Add(light);

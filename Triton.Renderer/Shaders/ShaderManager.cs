@@ -72,6 +72,8 @@ namespace Triton.Renderer.Shaders
 				{
 					GL.DeleteShader(Handles[i].VertexHandle);
 					GL.DeleteShader(Handles[i].FragmentHandle);
+					if (Handles[i].GeometryHandle != 0)
+						GL.DeleteShader(Handles[i].GeometryHandle);
 					GL.DeleteProgram(Handles[i].ProgramHandle);
 				}
 				Handles[i].Initialized = false;
@@ -144,13 +146,15 @@ namespace Triton.Renderer.Shaders
 			{
 				GL.DeleteShader(Handles[index].VertexHandle);
 				GL.DeleteShader(Handles[index].FragmentHandle);
+				if (Handles[index].GeometryHandle != 0)
+					GL.DeleteShader(Handles[index].GeometryHandle);
 				GL.DeleteProgram(Handles[index].ProgramHandle);
 			}
 
 			Handles[index].Initialized = false;
 		}
 
-		public bool SetShaderData(int handle, string vertexShader, string fragmentShader, string[] attribs, string[] fragDataLocations, out string errors)
+		public bool SetShaderData(int handle, string vertexShader, string fragmentShader, string geometryShader, string[] attribs, string[] fragDataLocations, out string errors)
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
@@ -165,6 +169,12 @@ namespace Triton.Renderer.Shaders
 			{
 				Handles[index].VertexHandle = GL.CreateShader(ShaderType.VertexShader);
 				Handles[index].FragmentHandle = GL.CreateShader(ShaderType.FragmentShader);
+
+				if (!string.IsNullOrEmpty(geometryShader))
+					Handles[index].GeometryHandle = GL.CreateShader(ShaderType.GeometryShader);
+				else
+					Handles[index].GeometryHandle = 0;
+
 				Handles[index].ProgramHandle = GL.CreateProgram();
 			}
 
@@ -172,6 +182,11 @@ namespace Triton.Renderer.Shaders
 
 			GL.ShaderSource(Handles[index].VertexHandle, vertexShader);
 			GL.ShaderSource(Handles[index].FragmentHandle, fragmentShader);
+
+			if (!string.IsNullOrEmpty(geometryShader))
+			{
+				GL.ShaderSource(Handles[index].GeometryHandle, fragmentShader);
+			}
 
 			GL.CompileShader(Handles[index].VertexHandle);
 			GL.CompileShader(Handles[index].FragmentHandle);
@@ -193,6 +208,8 @@ namespace Triton.Renderer.Shaders
 				// Clean up the shader stuff so we don't risk a leak :)
 				GL.DeleteShader(Handles[index].VertexHandle);
 				GL.DeleteShader(Handles[index].FragmentHandle);
+				if (Handles[index].GeometryHandle != 0)
+					GL.DeleteShader(Handles[index].GeometryHandle);
 				GL.DeleteProgram(Handles[index].ProgramHandle);
 
 				Handles[index].Initialized = false;
@@ -263,6 +280,7 @@ namespace Triton.Renderer.Shaders
 			public int ProgramHandle;
 			public int VertexHandle;
 			public int FragmentHandle;
+			public int GeometryHandle;
 			public short Id;
 			public bool Initialized;
 		}
