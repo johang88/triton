@@ -83,7 +83,7 @@ float check_shadow(sampler2DShadow shadowMap, vec3 viewPos, mat4x4 invView, mat4
 	
 	float c = 0.0f;
 	for (int i = 0; i < SAMPLES; i++) {
-		int index = int(16.0 * random(gl_FragCoord.xyy, i)) % 16;
+		int index = int(16.0 * random(floor(worldPos.xyz * 1000.0f), i)) % 16;
 		c += texture(shadowMap, vec3(uv.xy - poissonDisk[index] / 700.0f, distance));
 	}
 	
