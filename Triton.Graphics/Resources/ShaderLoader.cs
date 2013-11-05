@@ -92,8 +92,8 @@ namespace Triton.Graphics.Resources
 				defines = definesBuilder.ToString();
 			}
 
-			var vertexShaderSource = "#version 150\n#define VERTEX_SHADER\n"+defines+"\n" + shaderSource;
-			var fragmentShaderSource = "#version 150\n#define FRAGMENT_SHADER\n" + defines + "\n" + shaderSource;
+			var vertexShaderSource = "#version 330 core\n#define VERTEX_SHADER\n"+defines+"\n" + shaderSource;
+			var fragmentShaderSource = "#version 330 core\n#define FRAGMENT_SHADER\n" + defines + "\n" + shaderSource;
 
 			// Convert attribs to the correct format
 			// The format is attribIndex => name
