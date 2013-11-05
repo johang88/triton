@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Graphics;
+using OGL = OpenTK.Graphics.OpenGL;
 
 namespace Triton.Renderer
 {
@@ -351,6 +352,36 @@ namespace Triton.Renderer
 
 				// Init render target
 				RenderTargetManager.Init(renderTargetHandle, width, height, internalTextureHandles, createDepthBuffer, sharedDepthHandle);
+
+				if (loadedCallback != null)
+					loadedCallback(renderTargetHandle, true, "");
+			});
+
+			return renderTargetHandle;
+		}
+
+		public int CreateDepthRenderTarget(int width, int height, Renderer.PixelInternalFormat pixelFormat, out int textureHandle, OnLoadedCallback loadedCallback)
+		{
+			textureHandle = TextureManager.Create();
+
+			var textureHandleCopy = textureHandle;
+			var renderTargetHandle = RenderTargetManager.Create();
+
+			AddToWorkQueue(() =>
+			{
+				// Init texture handles with default data
+				TextureManager.SetPixelData(textureHandleCopy, TextureTarget.Texture2D, width, height, null, PixelFormat.DepthComponent, pixelFormat, PixelType.Float, false, false);
+
+				var glTextureHandle = TextureManager.GetOpenGLHande(textureHandleCopy);
+
+				GL.BindTexture(OGL.TextureTarget.Texture2D, glTextureHandle);
+				GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+				GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+				GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, (int)DepthFunction.Lequal);
+				GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
+
+				// Init render target
+				RenderTargetManager.InitDepthOnly(renderTargetHandle, width, height, glTextureHandle);
 
 				if (loadedCallback != null)
 					loadedCallback(renderTargetHandle, true, "");

@@ -27,7 +27,6 @@ sampler(2D, samplerNormal, NormalTexture);
 sampler(2D, samplerPosition, PositionTexture);
 sampler(2D, samplerSpecular, SpecularTexture);
 sampler(2D, samplerDiffuse, DiffuseTexture);
-sampler(2D, samplerShadow, ShadowMap);
 
 uniform(vec3, lightPosition, LightPosition);
 uniform(vec3, lightColor, LightColor);
@@ -37,6 +36,7 @@ uniform(vec2, screenSize, ScreenSize);
 uniform(vec3, cameraPosition, CameraPosition);
 uniform(vec3, lightDirection, LightDirection);
 #ifdef SHADOWS
+sampler(2DShadow, samplerShadow, ShadowMap);
 uniform(mat4x4, invView, InverseViewMatrix);
 uniform(mat4x4, shadowViewProj, ShadowViewProjection);
 uniform(float, inverseShadowMapSize, InverseShadowMapSize);
@@ -70,7 +70,7 @@ float random(vec3 seed, int i){
 	return fract(sin(dot_product) * 43758.5453);
 }
 
-float check_shadow(sampler2D shadowMap, vec3 viewPos, mat4x4 invView, mat4x4 shadowViewProj, float texelSize) {
+float check_shadow(sampler2DShadow shadowMap, vec3 viewPos, mat4x4 invView, mat4x4 shadowViewProj, float texelSize) {
 	vec3 worldPos = (invView * vec4(viewPos, 1)).xyz;
 	vec4 shadowUv = shadowViewProj * vec4(worldPos, 1);
 
@@ -84,7 +84,7 @@ float check_shadow(sampler2D shadowMap, vec3 viewPos, mat4x4 invView, mat4x4 sha
 	float c = 0.0f;
 	for (int i = 0; i < SAMPLES; i++) {
 		int index = int(16.0 * random(gl_FragCoord.xyy, i)) % 16;
-		c += step(distance, texture2D(shadowMap, uv.xy - poissonDisk[index] / 700.0f).x);
+		c += texture(shadowMap, vec3(uv.xy - poissonDisk[index] / 700.0f, distance));
 	}
 	
 	return c / SAMPLES;

@@ -141,6 +141,41 @@ namespace Triton.Renderer.RenderTargets
 			Handles[index].Initialized = true;
 		}
 
+		public void InitDepthOnly(int handle, int width, int height, int textureHandle)
+		{
+			int index, id;
+			ExtractHandle(handle, out index, out id);
+
+			if (id == -1 || Handles[index].Id != id)
+				return;
+
+			GL.GenFramebuffers(1, out Handles[index].FrameBufferObject);
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, Handles[index].FrameBufferObject);
+
+			Handles[index].DrawBuffers = new DrawBuffersEnum[] { DrawBuffersEnum.None };
+			GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, textureHandle, 0);
+
+			Handles[index].DepthBufferObject = 0;
+			Handles[index].SharedDepth = false;
+
+			GL.DrawBuffer(DrawBufferMode.None);
+
+			var status = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
+			if (status != FramebufferErrorCode.FramebufferComplete)
+			{
+				if (Handles[index].DepthBufferObject != 0)
+					GL.DeleteRenderbuffers(1, ref Handles[index].DepthBufferObject);
+				GL.DeleteFramebuffers(1, ref Handles[index].FrameBufferObject);
+				Handles[index].DepthBufferObject = 0;
+				throw new Exception("Framebuffer not complete!");
+			}
+
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+			RenderSystem.CheckGLError();
+
+			Handles[index].Initialized = true;
+		}
+
 		public void Destroy(int handle)
 		{
 			int index, id;

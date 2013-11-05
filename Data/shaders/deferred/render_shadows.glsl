@@ -16,12 +16,13 @@ void main()
 
 in vec4 position;
 
-out(vec4, oColor, 0);
+out(float, fragmentdepth, 0);
 uniform(vec2, clipPlane, ClipPlane);
 
 void main()
 {
 	float depth = position.z / (clipPlane.y - clipPlane.x);
-	oColor = vec4(depth.xxx, 1.0f);
+	fragmentdepth = depth;
+	gl_FragDepth = depth;
 }
 #endif

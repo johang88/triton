@@ -95,7 +95,7 @@ namespace Test
 			stage.AddMesh("models/door001");
 			stage.AddMesh("models/walls001");
 
-			stage.AddMesh("models/crate").Position = new Vector3(0, 0.3f, 2);
+			stage.AddMesh("models/crate").Position = new Vector3(0, 0.0f, 2);
 
 			stage.AmbientColor = new Vector3(0.1f, 0.1f, 0.1f);
 
@@ -106,7 +106,7 @@ namespace Test
 				lightZ -= 5.0f;
 			}
 
-			stage.CreateSpotLight(new Vector3(0, 1.5f, 0), Vector3.UnitZ, 0.1f, 1.4f, 6.0f, new Vector3(1, 0.3f, 0.35f), true, 0.05f);
+			stage.CreateSpotLight(new Vector3(0, 0.5f, -2), Vector3.UnitZ, 0.1f, 1.4f, 16.0f, new Vector3(1, 0.3f, 0.35f), true);
 
 			//stage.CreateDirectionalLight(new Vector3(0.3f, -0.4f, 0.3f), new Vector3(1, 1, 1.1f) * 2.4f);
 

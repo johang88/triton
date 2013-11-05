@@ -578,6 +578,41 @@ namespace Triton.Graphics
 			return renderTarget;
 		}
 
+		/// <summary>
+		/// Creates a render target with a texture attached to the depth attachment, useful for shadows.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="width"></param>
+		/// <param name="height"></param>
+		/// <param name="pixelFormat"></param>
+		/// <returns></returns>
+		public RenderTarget CreateDepthRenderTarget(string name, int width, int height, Renderer.PixelInternalFormat pixelFormat)
+		{
+			if (string.IsNullOrWhiteSpace(name))
+				throw new ArgumentNullException("name");
+			if (width <= 0)
+				throw new ArgumentException("width <= 0");
+			if (height <= 0)
+				throw new ArgumentException("height <= 0");
+
+			int textureHandle;
+
+			var renderTarget = new RenderTarget(width, height);
+
+			renderTarget.Handle = RenderSystem.CreateDepthRenderTarget(width, height, pixelFormat, out textureHandle, (handle, success, errors) =>
+			{
+				renderTarget.IsReady = true;
+			});
+
+			var texture = new Resources.Texture("_sys/render_targets/" + name, "");
+			texture.Handle = textureHandle;
+			ResourceManager.Manage(texture);
+
+			renderTarget.Textures = new Resources.Texture[] { texture };
+
+			return renderTarget;
+		}
+
 		public BatchBuffer CreateBatchBuffer(Renderer.VertexFormat vertexFormat = null, int initialCount = 128)
 		{
 			return new BatchBuffer(RenderSystem, vertexFormat, initialCount);

@@ -71,7 +71,7 @@ namespace Triton.Graphics.Deferred
 			SSAOTarget1 = Backend.CreateRenderTarget("ssao1", width / ssaoScale, height / ssaoScale, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, false);
 			SSAOTarget2 = Backend.CreateRenderTarget("ssao2", width / ssaoScale, height / ssaoScale, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, false);
 
-			ShadowsRenderTarget = Backend.CreateRenderTarget("spot_shadows", 128, 128, Renderer.PixelInternalFormat.R32f, 1, true);
+			ShadowsRenderTarget = Backend.CreateDepthRenderTarget("spot_shadows", 128, 128, Renderer.PixelInternalFormat.DepthComponent16);
 
 			AmbientLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ambient");
 			DirectionalLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/directional");
@@ -386,7 +386,7 @@ namespace Triton.Graphics.Deferred
 			{
 				var world = Matrix4.CreateTranslation(mesh.Position) * Matrix4.Rotate(mesh.Orientation);
 				var worldView = world * view;
-				
+
 				modelViewProjection = world * view * projection;
 
 				foreach (var subMesh in mesh.Mesh.SubMeshes)
