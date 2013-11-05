@@ -72,11 +72,9 @@
     <Compile Include="Deferred\AmbientLightParams.cs" />
     <Compile Include="Deferred\BlurParams.cs" />
     <Compile Include="Deferred\CombineParams.cs" />
-    <Compile Include="Deferred\DirectionalLightParams.cs" />
     <Compile Include="Deferred\DeferredRenderer.cs" />
-    <Compile Include="Deferred\PointLightParams.cs" />
     <Compile Include="Deferred\RenderShadowsParams.cs" />
-    <Compile Include="Deferred\SpotLightParams.cs" />
+    <Compile Include="Deferred\LightParams.cs" />
     <Compile Include="Deferred\SSAOParams.cs" />
     <Compile Include="HDR\BlurParams.cs" />
     <Compile Include="HDR\HighPassParams.cs" />

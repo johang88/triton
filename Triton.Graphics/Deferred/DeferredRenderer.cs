@@ -12,10 +12,10 @@ namespace Triton.Graphics.Deferred
 		private readonly Backend Backend;
 
 		private AmbientLightParams AmbientLightParams = new AmbientLightParams();
-		private PointLightParams PointLightParams = new PointLightParams();
-		private DirectionalLightParams DirectionalLightParams = new DirectionalLightParams();
-		private SpotLightParams SpotLightParams = new SpotLightParams();
-		private SpotLightParams SpotLightShadowParams = new SpotLightParams();
+		private LightParams PointLightParams = new LightParams();
+		private LightParams DirectionalLightParams = new LightParams();
+		private LightParams SpotLightParams = new LightParams();
+		private LightParams SpotLightShadowParams = new LightParams();
 		private SSAOParams SSAOParams = new SSAOParams();
 		private BlurParams BlurParams = new BlurParams();
 		private CombineParams CombineParams = new CombineParams();
@@ -74,10 +74,10 @@ namespace Triton.Graphics.Deferred
 			ShadowsRenderTarget = Backend.CreateDepthRenderTarget("spot_shadows", 128, 128, Renderer.PixelInternalFormat.DepthComponent16);
 
 			AmbientLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ambient");
-			DirectionalLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/directional");
-			PointLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/point");
-			SpotLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/spot");
-			SpotLightShadowShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/spot", "SHADOWS");
+			DirectionalLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light");
+			PointLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "POINT_LIGHT");
+			SpotLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "SPOT_LIGHT");
+			SpotLightShadowShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "SPOT_LIGHT,SHADOWS");
 			SSAOShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ssao");
 			BlurShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/blur");
 			CombineShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/combine");
