@@ -255,115 +255,116 @@ namespace Triton.Graphics.Deferred
 					depthFunction = Renderer.DepthFunction.Gequal;
 				}
 
+				// Initialize shadow map
+				Matrix4 shadowViewProjection;
+				Vector2 shadowCameraClipPlane;
+
+				if (light.CastShadows)
+				{
+					RenderSpotlightShadows(ShadowsRenderTarget, light, stage, camera, out shadowViewProjection, out shadowCameraClipPlane);
+					Backend.ChangeRenderTarget(LightAccumulation);
+				}
+				else
+				{
+					shadowViewProjection = Matrix4.Identity;
+					shadowCameraClipPlane = Vector2.Zero;
+				}
+
+				// Calculate matrices
 				var world = Matrix4.Scale(radius) * Matrix4.CreateTranslation(light.Position);
 				modelViewProjection = world * view * projection;
+
+				// Convert light color to linear space
 				var lightColor = new Vector3((float)System.Math.Pow(light.Color.X, 2.2f), (float)System.Math.Pow(light.Color.Y, 2.2f), (float)System.Math.Pow(light.Color.Z, 2.2f));
 
-				if (light.Type == LighType.Directional)
+				// Select the correct shader
+				var shader = DirectionalLightShader;
+				var shaderParams = DirectionalLightParams;
+
+				if (light.Type == LighType.PointLight)
 				{
-					modelViewProjection = Matrix4.Identity;
+					shader = PointLightShader;
+					shaderParams = PointLightParams;
+				}
+				else if (light.Type == LighType.SpotLight)
+				{
+					shader = light.CastShadows ? SpotLightShadowShader : SpotLightShader;
+					shaderParams = light.CastShadows ? SpotLightShadowParams : SpotLightParams;
+				}
 
-					Backend.BeginInstance(DirectionalLightShader.Handle, new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle }, true, true, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
-					Backend.BindShaderVariable(DirectionalLightParams.HandleNormalTexture, 0);
-					Backend.BindShaderVariable(DirectionalLightParams.HandlePositionTexture, 1);
-					Backend.BindShaderVariable(DirectionalLightParams.HandleSpecularTexture, 2);
-					Backend.BindShaderVariable(DirectionalLightParams.HandleDiffuseTexture, 3);
-					Backend.BindShaderVariable(DirectionalLightParams.HandleScreenSize, ref ScreenSize);
+				// Setup textures and begin rendering with the chosen shader
+				int[] textures;
+				if (light.CastShadows)
+				{
+					textures = new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle, ShadowsRenderTarget.Textures[0].Handle };
+				}
+				else
+				{
+					textures = new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle };
+				}
 
+				var depthCheck = light.Type != LighType.Directional;
+				Backend.BeginInstance(shader.Handle, textures, true, false, depthCheck, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode, true, depthFunction);
+
+				// Setup texture samplers
+				Backend.BindShaderVariable(shaderParams.HandleNormalTexture, 0);
+				Backend.BindShaderVariable(shaderParams.HandlePositionTexture, 1);
+				Backend.BindShaderVariable(shaderParams.HandleSpecularTexture, 2);
+				Backend.BindShaderVariable(shaderParams.HandleDiffuseTexture, 3);
+
+				// Common uniforms
+				Backend.BindShaderVariable(shaderParams.HandleScreenSize, ref ScreenSize);
+				Backend.BindShaderVariable(shaderParams.HandleModelViewProjection, ref modelViewProjection);
+				Backend.BindShaderVariable(shaderParams.HandleLightColor, ref lightColor);
+				Backend.BindShaderVariable(shaderParams.HandleCameraPosition, ref cameraPositionViewSpace);
+
+				if (light.Type == LighType.Directional || light.Type == LighType.SpotLight)
+				{
 					var lightDirWS = light.Direction.Normalize();
 
 					var lightDirection = Vector3.Transform(light.Direction, Matrix4.Transpose(Matrix4.Invert(view)));
 					lightDirection = lightDirection.Normalize();
 
-					Backend.BindShaderVariable(DirectionalLightParams.HandleModelViewProjection, ref modelViewProjection);
-					Backend.BindShaderVariable(DirectionalLightParams.HandleLightDirection, ref lightDirection);
-					Backend.BindShaderVariable(DirectionalLightParams.HandleLightColor, ref lightColor);
-					Backend.BindShaderVariable(DirectionalLightParams.HandleCameraPosition, ref cameraPositionViewSpace);
-
-					Backend.DrawMesh(QuadMesh.MeshHandle);
-
-					Backend.EndInstance();
-				}
-				else if (light.Type == LighType.PointLight)
-				{
-					Backend.BeginInstance(PointLightShader.Handle, new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle }, true, false, true, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode, true, depthFunction);
-					Backend.BindShaderVariable(PointLightParams.HandleNormalTexture, 0);
-					Backend.BindShaderVariable(PointLightParams.HandlePositionTexture, 1);
-					Backend.BindShaderVariable(PointLightParams.HandleSpecularTexture, 2);
-					Backend.BindShaderVariable(PointLightParams.HandleDiffuseTexture, 3);
-					Backend.BindShaderVariable(PointLightParams.HandleScreenSize, ref ScreenSize);
-
-					Vector3 lightPosition;
-					Vector3.Transform(ref light.Position, ref view, out lightPosition);
-
-					Backend.BindShaderVariable(PointLightParams.HandleModelViewProjection, ref modelViewProjection);
-					Backend.BindShaderVariable(PointLightParams.HandleLightPosition, ref lightPosition);
-					Backend.BindShaderVariable(PointLightParams.HandleLightColor, ref lightColor);
-					Backend.BindShaderVariable(PointLightParams.HandleLightRange, light.Range);
-					Backend.BindShaderVariable(PointLightParams.HandleCameraPosition, ref cameraPositionViewSpace);
-
-					Backend.DrawMesh(UnitSphere.SubMeshes[0].Handle);
-
-					Backend.EndInstance();
-				}
-				else if (light.Type == LighType.SpotLight)
-				{
-					Matrix4 shadowViewProjection;
-					Vector2 shadowCameraClipPlane;
-
-					if (light.CastShadows)
-					{
-						RenderSpotlightShadows(ShadowsRenderTarget, light, stage, camera, out shadowViewProjection, out shadowCameraClipPlane);
-						Backend.ChangeRenderTarget(LightAccumulation);
-					}
-					else
-					{
-						shadowViewProjection = Matrix4.Identity;
-						shadowCameraClipPlane = Vector2.Zero;
-					}
-
-					var shader = light.CastShadows ? SpotLightShadowShader : SpotLightShader;
-					var shaderParams = light.CastShadows ? SpotLightShadowParams : SpotLightParams;
-
-					Vector3 lightPosition;
-					Vector3.Transform(ref light.Position, ref view, out lightPosition);
-
-					var lightDirection = Vector3.Transform(light.Direction, Matrix4.Transpose(Matrix4.Invert(view)));
-					lightDirection = lightDirection.Normalize();
-
-					Backend.BeginInstance(shader.Handle, new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle, ShadowsRenderTarget.Textures[0].Handle }, true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode, true, depthFunction);
-					Backend.BindShaderVariable(shaderParams.HandleNormalTexture, 0);
-					Backend.BindShaderVariable(shaderParams.HandlePositionTexture, 1);
-					Backend.BindShaderVariable(shaderParams.HandleSpecularTexture, 2);
-					Backend.BindShaderVariable(shaderParams.HandleDiffuseTexture, 3);
-					Backend.BindShaderVariable(shaderParams.HandleScreenSize, ref ScreenSize);
-
-					Backend.BindShaderVariable(shaderParams.HandleModelViewProjection, ref modelViewProjection);
-					Backend.BindShaderVariable(shaderParams.HandleLightPosition, ref lightPosition);
-					Backend.BindShaderVariable(shaderParams.HandleLightColor, ref lightColor);
-					Backend.BindShaderVariable(shaderParams.HandleLightRange, light.Range);
 					Backend.BindShaderVariable(shaderParams.HandleLightDirection, ref lightDirection);
-
-					var spotParams = new Vector2((float)System.Math.Cos(light.InnerAngle / 2.0f), (float)System.Math.Cos(light.OuterAngle / 2.0f));
-						Backend.BindShaderVariable(shaderParams.HandleSpotLightParams, ref spotParams);
-						Backend.BindShaderVariable(shaderParams.HandleCameraPosition, ref cameraPositionViewSpace);
-
-					if (light.CastShadows)
-					{
-						var inverseViewMatrix = Matrix4.Invert(view);
-
-						Backend.BindShaderVariable(shaderParams.HandleShadowMap, 4);
-						Backend.BindShaderVariable(shaderParams.HandleInverseViewMatrix, ref inverseViewMatrix);
-						Backend.BindShaderVariable(shaderParams.ShadowViewProjection, ref shadowViewProjection);
-						Backend.BindShaderVariable(shaderParams.InverseShadowMapSize, 1.0f / (float)ShadowsRenderTarget.Width);
-						Backend.BindShaderVariable(shaderParams.HandleClipPlane, ref shadowCameraClipPlane);
-						Backend.BindShaderVariable(shaderParams.HandleShadowBias, light.ShadowBias);
-					}
-
-					Backend.DrawMesh(UnitSphere.SubMeshes[0].Handle);
-
-					Backend.EndInstance();
 				}
+
+				if (light.Type == LighType.PointLight || light.Type == LighType.SpotLight)
+				{
+					Vector3 lightPosition;
+					Vector3.Transform(ref light.Position, ref view, out lightPosition);
+
+					Backend.BindShaderVariable(shaderParams.HandleLightPosition, ref lightPosition);
+					Backend.BindShaderVariable(shaderParams.HandleLightRange, light.Range);
+				}
+
+				if (light.Type == LighType.SpotLight)
+				{
+					var spotParams = new Vector2((float)System.Math.Cos(light.InnerAngle / 2.0f), (float)System.Math.Cos(light.OuterAngle / 2.0f));
+					Backend.BindShaderVariable(shaderParams.HandleSpotLightParams, ref spotParams);
+				}
+
+				if (light.CastShadows)
+				{
+					var inverseViewMatrix = Matrix4.Invert(view);
+
+					Backend.BindShaderVariable(shaderParams.HandleShadowMap, 4);
+					Backend.BindShaderVariable(shaderParams.HandleInverseViewMatrix, ref inverseViewMatrix);
+					Backend.BindShaderVariable(shaderParams.ShadowViewProjection, ref shadowViewProjection);
+					Backend.BindShaderVariable(shaderParams.InverseShadowMapSize, 1.0f / (float)ShadowsRenderTarget.Width);
+					Backend.BindShaderVariable(shaderParams.HandleClipPlane, ref shadowCameraClipPlane);
+					Backend.BindShaderVariable(shaderParams.HandleShadowBias, light.ShadowBias);
+				}
+
+				if (light.Type == LighType.Directional)
+				{
+					Backend.DrawMesh(QuadMesh.MeshHandle);
+				}
+				else
+				{
+					Backend.DrawMesh(UnitSphere.SubMeshes[0].Handle);
+				}
+
+				Backend.EndInstance();
 			}
 		}
 
