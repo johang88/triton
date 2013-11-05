@@ -93,7 +93,10 @@ namespace Triton.Common
 						{
 							resource.State = ResourceLoadingState.Loaded;
 
-							Log.WriteLine("Loaded {0} of type {1}", name, typeof(TResource));
+							if (!string.IsNullOrWhiteSpace(parameters))
+								Log.WriteLine("Loaded {0}?{2} of type {1}", name, typeof(TResource), parameters);
+							else
+								Log.WriteLine("Loaded {0} of type {1}", name, typeof(TResource));
 
 							if (onLoaded != null)
 								onLoaded(r);
