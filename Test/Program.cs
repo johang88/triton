@@ -106,7 +106,7 @@ namespace Test
 				lightZ -= 5.0f;
 			}
 
-			stage.CreateSpotLight(new Vector3(0, 0.5f, -2), Vector3.UnitZ, 0.1f, 1.4f, 16.0f, new Vector3(1, 0.3f, 0.35f), true);
+			stage.CreateSpotLight(new Vector3(0, 0.5f, -2), Vector3.UnitZ, 0.1f, 0.6f, 16.0f, new Vector3(1, 0.3f, 0.35f), true, 0.01f);
 
 			//stage.CreateDirectionalLight(new Vector3(0.3f, -0.4f, 0.3f), new Vector3(1, 1, 1.1f) * 2.4f);
 
