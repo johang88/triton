@@ -81,7 +81,7 @@ namespace Triton.Graphics
 			return light;
 		}
 
-		public Light CreateSpotLight(Vector3 position, Vector3 direction, float innerAngle, float outerAngle, float range, Vector3 color)
+		public Light CreateSpotLight(Vector3 position, Vector3 direction, float innerAngle, float outerAngle, float range, Vector3 color, bool castShadows)
 		{
 			direction.Normalize();
 			var light = new Light
@@ -92,7 +92,8 @@ namespace Triton.Graphics
 				Color = color,
 				Direction = direction,
 				InnerAngle = innerAngle,
-				OuterAngle = outerAngle
+				OuterAngle = outerAngle,
+				CastShadows = castShadows
 			};
 
 			Lights.Add(light);

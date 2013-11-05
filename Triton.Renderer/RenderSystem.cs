@@ -48,7 +48,7 @@ namespace Triton.Renderer
 			AddToWorkQueue = addToWorkQueue;
 
 			WindowInfo = windowInfo;
-			var graphicsMode = new GraphicsMode(32, 16, 0, 0);
+			var graphicsMode = new GraphicsMode(32, 24, 0, 0);
 
 			Context = new GraphicsContext(graphicsMode, WindowInfo, 3, 0, GraphicsContextFlags.ForwardCompatible);
 			Context.MakeCurrent(WindowInfo);
@@ -64,10 +64,6 @@ namespace Triton.Renderer
 
 			GL.Enable(EnableCap.CullFace);
 			GL.FrontFace(FrontFaceDirection.Ccw);
-
-			GL.ClampColor(ClampColorTarget.ClampReadColor, ClampColorMode.False);
-			GL.ClampColor(ClampColorTarget.ClampVertexColor, ClampColorMode.False);
-			GL.ClampColor(ClampColorTarget.ClampFragmentColor, ClampColorMode.False);
 		}
 
 		public void Dispose()
@@ -294,7 +290,10 @@ namespace Triton.Renderer
 			GL.ClearColor(clearColor.X, clearColor.Y, clearColor.Z, clearColor.W);
 			var mask = ClearBufferMask.ColorBufferBit;
 			if (depth)
-				mask |= ClearBufferMask.DepthBufferBit;
+			{
+				GL.DepthMask(true);
+				mask |= ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit;
+			}
 
 			GL.Clear(mask);
 		}
@@ -340,7 +339,7 @@ namespace Triton.Renderer
 				// Init texture handles with default data
 				for (var i = 0; i < textureHandlesCopy.Length; i++)
 				{
-					TextureManager.SetPixelData(textureHandlesCopy[i], TextureTarget.Texture2D, width, height, null, PixelFormat.Rgba, pixelFormat, PixelType.Float, false);
+					TextureManager.SetPixelData(textureHandlesCopy[i], TextureTarget.Texture2D, width, height, null, PixelFormat.Rgba, pixelFormat, PixelType.Float, false, false);
 				}
 
 				var internalTextureHandles = textureHandlesCopy.Select(t => TextureManager.GetOpenGLHande(t)).ToArray();
@@ -367,9 +366,20 @@ namespace Triton.Renderer
 
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, openGLHandle);
 			if (drawBuffers == null)
-				GL.DrawBuffer(DrawBufferMode.ColorAttachment0);
+				GL.DrawBuffer(DrawBufferMode.Back);
 			else
 				GL.DrawBuffers(drawBuffers.Length, drawBuffers);
+
+			CheckGLError();
+		}
+
+		internal static void CheckGLError()
+		{
+			ErrorCode error;
+			while ((error = GL.GetError()) != ErrorCode.NoError)
+			{
+				throw new Exception(string.Format("OpenGL error {0}", error));
+			}
 		}
 	}
 }

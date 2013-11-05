@@ -19,6 +19,7 @@ namespace Triton.Graphics.Deferred
 		private BlurParams Blur1Params = new BlurParams();
 		private BlurParams Blur2Params = new BlurParams();
 		private CombineParams CombineParams = new CombineParams();
+		private RenderShadowsParams RenderShadowsParams = new RenderShadowsParams();
 
 		private Vector2 ScreenSize;
 
@@ -27,6 +28,7 @@ namespace Triton.Graphics.Deferred
 		private RenderTarget Output;
 		private RenderTarget SSAOTarget1;
 		private RenderTarget SSAOTarget2;
+		private RenderTarget ShadowsRenderTarget;
 
 		private BatchBuffer QuadMesh;
 		private Resources.Mesh UnitSphere;
@@ -39,6 +41,7 @@ namespace Triton.Graphics.Deferred
 		private Resources.ShaderProgram Blur1Shader;
 		private Resources.ShaderProgram Blur2Shader;
 		private Resources.ShaderProgram CombineShader;
+		private Resources.ShaderProgram RenderShadowsShader;
 
 		private Resources.Texture RandomNoiseTexture;
 
@@ -64,6 +67,8 @@ namespace Triton.Graphics.Deferred
 			SSAOTarget1 = Backend.CreateRenderTarget("ssao1", width / ssaoScale, height / ssaoScale, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, false);
 			SSAOTarget2 = Backend.CreateRenderTarget("ssao2", width / ssaoScale, height / ssaoScale, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, false);
 
+			ShadowsRenderTarget = Backend.CreateRenderTarget("spot_shadows", 1024, 1024, Renderer.PixelInternalFormat.R32f, 1, true);
+
 			AmbientLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ambient");
 			DirectionalLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/directional");
 			PointLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/point");
@@ -72,6 +77,7 @@ namespace Triton.Graphics.Deferred
 			Blur1Shader = ResourceManager.Load<Resources.ShaderProgram>("shaders/hdr/blur1");
 			Blur2Shader = ResourceManager.Load<Resources.ShaderProgram>("shaders/hdr/blur2");
 			CombineShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/combine");
+			RenderShadowsShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/render_shadows");
 
 			RandomNoiseTexture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/random_n");
 
@@ -93,6 +99,7 @@ namespace Triton.Graphics.Deferred
 			SSAOShader.GetUniformLocations(SSAOParams);
 			Blur1Shader.GetUniformLocations(Blur1Params);
 			Blur2Shader.GetUniformLocations(Blur2Params);
+			RenderShadowsShader.GetUniformLocations(RenderShadowsParams);
 		}
 
 		public RenderTarget Render(Stage stage, Camera camera)
@@ -120,7 +127,7 @@ namespace Triton.Graphics.Deferred
 			Backend.BeginPass(LightAccumulation, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 			RenderAmbientLight(stage);
-			RenderLights(camera, ref view, ref projection, stage.GetLights());
+			RenderLights(camera, ref view, ref projection, stage.GetLights(), stage);
 
 			Backend.EndPass();
 
@@ -189,11 +196,11 @@ namespace Triton.Graphics.Deferred
 				var world = Matrix4.CreateTranslation(mesh.Position) * Matrix4.Rotate(mesh.Orientation);
 				modelViewProjection = world * view * projection;
 
+				var worldView = world * view;
+				var itWorldView = Matrix4.Transpose(Matrix4.Invert(worldView));
+
 				foreach (var subMesh in mesh.Mesh.SubMeshes)
 				{
-					var worldView = world * view;
-					var itWorldView = Matrix4.Transpose(Matrix4.Invert(worldView));
-
 					subMesh.Material.BindMaterial(Backend, ref world, ref worldView, ref itWorldView, ref modelViewProjection);
 					Backend.DrawMesh(subMesh.Handle);
 					Backend.EndInstance();
@@ -215,7 +222,7 @@ namespace Triton.Graphics.Deferred
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 		}
 
-		private void RenderLights(Camera camera, ref Matrix4 view, ref Matrix4 projection, IReadOnlyCollection<Light> lights)
+		private void RenderLights(Camera camera, ref Matrix4 view, ref Matrix4 projection, IReadOnlyCollection<Light> lights, Stage stage)
 		{
 			Matrix4 modelViewProjection = Matrix4.Identity;
 			Vector3 cameraPositionViewSpace;
@@ -291,11 +298,16 @@ namespace Triton.Graphics.Deferred
 				}
 				else if (light.Type == LighType.SpotLight)
 				{
-					Backend.BeginInstance(SpotLightShader.Handle, new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle }, true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode, true, depthFunction);
+					Matrix4 shadowViewProjection;
+					RenderSpotlightShadows(ShadowsRenderTarget, light, stage, camera, out shadowViewProjection);
+					Backend.ChangeRenderTarget(LightAccumulation);
+
+					Backend.BeginInstance(SpotLightShader.Handle, new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle, ShadowsRenderTarget.Textures[0].Handle }, true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode, true, depthFunction);
 					Backend.BindShaderVariable(SpotLightParams.HandleNormalTexture, 0);
 					Backend.BindShaderVariable(SpotLightParams.HandlePositionTexture, 1);
 					Backend.BindShaderVariable(SpotLightParams.HandleSpecularTexture, 2);
 					Backend.BindShaderVariable(SpotLightParams.HandleDiffuseTexture, 3); ;
+					Backend.BindShaderVariable(SpotLightParams.HandleShadowMap, 4); ;
 					Backend.BindShaderVariable(SpotLightParams.HandleScreenSize, ref ScreenSize);
 
 					Vector3 lightPosition;
@@ -316,11 +328,53 @@ namespace Triton.Graphics.Deferred
 					Backend.BindShaderVariable(SpotLightParams.HandleSpotLightParams, ref spotParams);
 					Backend.BindShaderVariable(SpotLightParams.HandleCameraPosition, ref cameraPositionViewSpace);
 
+					var inverseViewMatrix = Matrix4.Invert(view);
+
+					Backend.BindShaderVariable(SpotLightParams.HandleInverseViewMatrix, ref inverseViewMatrix);
+					Backend.BindShaderVariable(SpotLightParams.ShadowViewProjection, ref shadowViewProjection);
+					Backend.BindShaderVariable(SpotLightParams.InverseShadowMapSize, 1.0f / (float)ShadowsRenderTarget.Width);
+
 					Backend.DrawMesh(UnitSphere.SubMeshes[0].Handle);
 
 					Backend.EndInstance();
 				}
 			}
+		}
+
+		private void RenderSpotlightShadows(RenderTarget renderTarget, Light light, Stage stage, Camera camera, out Matrix4 viewProjection)
+		{
+			Backend.BeginPass(renderTarget, new Vector4(0, 0, 0, 1), true);
+
+			var modelViewProjection = Matrix4.Identity;
+
+			var orientation = Quaternion.FromAxisAngle(light.Direction, OpenTK.MathHelper.Pi);
+
+			var view = Matrix4.LookAt(light.Position, light.Position + light.Direction, Vector3.Transform(-Vector3.UnitY, orientation));
+			var projection = Matrix4.CreatePerspectiveFieldOfView(1.04719755f, renderTarget.Width / renderTarget.Height, 0.1f, 100.0f);
+
+			viewProjection = view * projection;
+
+			var meshes = stage.GetMeshes();
+			foreach (var mesh in meshes)
+			{
+				var world = Matrix4.CreateTranslation(mesh.Position) * Matrix4.Rotate(mesh.Orientation);
+				var worldView = world * view;
+				
+				modelViewProjection = world * view * projection;
+
+				foreach (var subMesh in mesh.Mesh.SubMeshes)
+				{
+					Backend.BeginInstance(RenderShadowsShader.Handle, new int[] { }, false, true, true);
+					//Backend.BindShaderVariable(RenderShadowsParams.ModelView, ref worldView);
+					Backend.BindShaderVariable(RenderShadowsParams.ModelViewProjection, ref modelViewProjection);
+
+					Backend.DrawMesh(subMesh.Handle);
+
+					Backend.EndInstance();
+				}
+			}
+
+			Backend.EndPass();
 		}
 	}
 }

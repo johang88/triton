@@ -50,7 +50,7 @@
   <ItemGroup>
     <Reference Include="OpenTK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\johan\Desktop\tinyrocket\Build\OpenTK.dll</HintPath>
+      <HintPath>..\..\..\..\GitHub\opentk\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>..\packages\ServiceStack.Text.3.9.59\lib\net35\ServiceStack.Text.dll</HintPath>
@@ -74,6 +74,7 @@
     <Compile Include="Deferred\DirectionalLightParams.cs" />
     <Compile Include="Deferred\DeferredRenderer.cs" />
     <Compile Include="Deferred\PointLightParams.cs" />
+    <Compile Include="Deferred\RenderShadowsParams.cs" />
     <Compile Include="Deferred\SpotLightParams.cs" />
     <Compile Include="Deferred\SSAOParams.cs" />
     <Compile Include="HDR\BlurParams.cs" />

@@ -172,12 +172,22 @@ namespace Triton.Graphics
 						{
 							var renderTargetHandle = reader.ReadInt32();
 
-							RenderSystem.BeginScene(renderTargetHandle, reader.ReadInt32(), reader.ReadInt32());
+							var width = reader.ReadInt32();
+							var height = reader.ReadInt32();
+
+							RenderSystem.BeginScene(renderTargetHandle, width, height);
 
 							var color = reader.ReadVector4();
 							var clearDepth = reader.ReadBoolean();
 
 							RenderSystem.Clear(color, clearDepth);
+						}
+						break;
+					case OpCode.ChangeRenderTarget:
+						{
+							var renderTargetHandle = reader.ReadInt32();
+
+							RenderSystem.BeginScene(renderTargetHandle, reader.ReadInt32(), reader.ReadInt32());
 						}
 						break;
 					case OpCode.EndPass:
@@ -314,6 +324,23 @@ namespace Triton.Graphics
 			PrimaryBuffer = tmp;
 
 			DoubleBufferSynchronizer.Release();
+		}
+
+		public void ChangeRenderTarget(RenderTarget renderTarget)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.ChangeRenderTarget);
+			if (renderTarget == null)
+			{
+				PrimaryBuffer.Writer.Write(0);
+				PrimaryBuffer.Writer.Write(Window.Width);
+				PrimaryBuffer.Writer.Write(Window.Height);
+			}
+			else
+			{
+				PrimaryBuffer.Writer.Write(renderTarget.Handle);
+				PrimaryBuffer.Writer.Write(renderTarget.Width);
+				PrimaryBuffer.Writer.Write(renderTarget.Height);
+			}
 		}
 
 		/// <summary>
@@ -577,6 +604,7 @@ namespace Triton.Graphics
 		enum OpCode : byte
 		{
 			BeginPass,
+			ChangeRenderTarget,
 			EndPass,
 			BeginInstance,
 			EndInstance,

@@ -13,6 +13,7 @@ namespace Triton.Graphics.Deferred
 		public int HandlePositionTexture = 0;
 		public int HandleSpecularTexture = 0;
 		public int HandleDiffuseTexture = 0;
+		public int HandleShadowMap = 0;
 		public int HandleLightDirection = 0;
 		public int HandleCameraPosition = 0;
 		public int HandleLightPosition = 0;
@@ -20,5 +21,8 @@ namespace Triton.Graphics.Deferred
 		public int HandleLightRange = 0;
 		public int HandleScreenSize = 0;
 		public int HandleSpotLightParams = 0;
+		public int HandleInverseViewMatrix = 0;
+		public int ShadowViewProjection = 0;
+		public int InverseShadowMapSize = 0;
 	}
 }

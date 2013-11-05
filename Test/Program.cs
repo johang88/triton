@@ -95,7 +95,7 @@ namespace Test
 			stage.AddMesh("models/door001");
 			stage.AddMesh("models/walls001");
 
-			stage.AddMesh("models/crate").Position = new Vector3(0, 1, 2);
+			stage.AddMesh("models/crate").Position = new Vector3(0, 0.3f, 2);
 
 			stage.AmbientColor = new Vector3(0.1f, 0.1f, 0.1f);
 
@@ -106,7 +106,7 @@ namespace Test
 				lightZ -= 5.0f;
 			}
 
-			stage.CreateSpotLight(new Vector3(0, 2.8f, 2), -Vector3.UnitY, 0.1f, 1.8f, 4.0f, new Vector3(1, 0.3f, 0.35f));
+			stage.CreateSpotLight(new Vector3(0, 1.5f, 0), Vector3.UnitZ, 0.1f, 1.4f, 12.0f, new Vector3(1, 0.3f, 0.35f), true);
 
 			//stage.CreateDirectionalLight(new Vector3(0.3f, -0.4f, 0.3f), new Vector3(1, 1, 1.1f) * 2.4f);
 
@@ -128,16 +128,12 @@ namespace Test
 			stopWatch.Start();
 
 			var isCDown = false;
-			var isFDown = false;
-
-			var flashlight = stage.CreateSpotLight(camera.Position, Vector3.UnitZ, 0.2f, 1.0f, 8.0f, new Vector3(1.2f, 1.1f, 0.8f) * 1.2f);
-			flashlight.Enabled = false;
 
 			Backend.CursorVisible = false;
 
 			var quad = Backend.CreateBatchBuffer();
 			quad.Begin();
-			quad.AddQuad(new Vector2(-1, -1), new Vector2(0.5f, 0.5f), new Vector2(0, 1), new Vector2(1, -1));
+			quad.AddQuad(new Vector2(-1, -1), new Vector2(2, 2), Vector2.Zero, new Vector2(1, 1));
 			quad.End();
 
 			while (Running)
@@ -185,30 +181,14 @@ namespace Test
 					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 10.0f, new Vector3(0.9f, 1.01f, 1.12f));
 				}
 
-				if (inputManager.IsKeyDown(Key.F))
-				{
-					isFDown = true;
-				}
-				else if (isFDown)
-				{
-					isFDown = false;
-
-					flashlight.Enabled = !flashlight.Enabled;
-				}
-
 				if (inputManager.IsKeyDown(Key.K))
 					hdrRenderer.Exposure -= 1.0f * deltaTime;
 				if (inputManager.IsKeyDown(Key.L))
 					hdrRenderer.Exposure += 1.0f * deltaTime;
 
-				flashlight.Position = camera.Position;
-				flashlight.Direction = Vector3.Transform(new Vector3(0, -0.2f, 1.0f), camera.Orientation);
-
 				Backend.BeginScene();
 				var lighingOutput = deferredRenderer.Render(stage, camera);
 				hdrRenderer.Render(camera, lighingOutput);
-
-				var modelViewProjection = Matrix4.Identity;
 
 				Backend.EndScene();
 

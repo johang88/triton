@@ -110,7 +110,9 @@ namespace Triton.Renderer.RenderTargets
 				GL.GenRenderbuffers(1, out Handles[index].DepthBufferObject);
 				GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, Handles[index].DepthBufferObject);
 				GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.DepthComponent24, width, height);
+
 				GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, Handles[index].DepthBufferObject);
+				GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);
 			}
 			else if (sharedDepthHandle.HasValue)
 			{
@@ -118,11 +120,9 @@ namespace Triton.Renderer.RenderTargets
 				int depthIndex, depthId;
 				ExtractHandle(depthHandle, out depthIndex, out depthId);
 
-				Handles[index].DepthBufferObject = Handles[depthIndex].DepthBufferObject;
 				Handles[index].SharedDepth = true;
 
-				GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, Handles[index].DepthBufferObject);
-				GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, Handles[index].DepthBufferObject);
+				GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, Handles[depthIndex].DepthBufferObject);
 			}
 
 			var status = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
@@ -132,10 +132,11 @@ namespace Triton.Renderer.RenderTargets
 					GL.DeleteRenderbuffers(1, ref Handles[index].DepthBufferObject);
 				GL.DeleteFramebuffers(1, ref Handles[index].FrameBufferObject);
 				Handles[index].DepthBufferObject = 0;
-				return;
+				throw new Exception("Framebuffer not complete!");
 			}
 
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+			RenderSystem.CheckGLError();
 
 			Handles[index].Initialized = true;
 		}
@@ -184,6 +185,8 @@ namespace Triton.Renderer.RenderTargets
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, Handles[index].FrameBufferObject);
 			GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, Handles[index].DepthBufferObject);
 			GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.DepthComponent24, width, height);
+			GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);
+
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
 			// The render target can now be used

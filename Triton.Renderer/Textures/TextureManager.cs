@@ -119,7 +119,7 @@ namespace Triton.Renderer.Textures
 			Handles[index].Initialized = false;
 		}
 
-		public void SetPixelData(int handle, TextureTarget target, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap = true)
+		public void SetPixelData(int handle, TextureTarget target, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap = true, bool enableFiltering = true)
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
@@ -137,9 +137,21 @@ namespace Triton.Renderer.Textures
 			GL.TexImage2D((OGL.TextureTarget)(int)Handles[index].Target, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
 			if (mipmap)
 				GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, (TextureParameterName)ExtTextureFilterAnisotropic.TextureMaxAnisotropyExt, 4);
+
+			if (enableFiltering)
+			{
+				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, (TextureParameterName)ExtTextureFilterAnisotropic.TextureMaxAnisotropyExt, 4);
+			}
+			else
+			{
+				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+			}
+
 			GL.Finish();
 
 			var error = GL.GetError();
