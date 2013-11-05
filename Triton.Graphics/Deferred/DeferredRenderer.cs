@@ -325,8 +325,6 @@ namespace Triton.Graphics.Deferred
 					Vector3 lightPosition;
 					Vector3.Transform(ref light.Position, ref view, out lightPosition);
 
-					var lightDirWS = light.Direction.Normalize();
-
 					var lightDirection = Vector3.Transform(light.Direction, Matrix4.Transpose(Matrix4.Invert(view)));
 					lightDirection = lightDirection.Normalize();
 
