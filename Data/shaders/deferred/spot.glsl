@@ -36,6 +36,7 @@ uniform(float, lightRange, LightRange);
 uniform(vec2, screenSize, ScreenSize);
 uniform(vec3, cameraPosition, CameraPosition);
 uniform(vec3, lightDirection, LightDirection);
+#ifdef SHADOWS
 uniform(mat4x4, invView, InverseViewMatrix);
 uniform(mat4x4, shadowViewProj, ShadowViewProjection);
 uniform(float, inverseShadowMapSize, InverseShadowMapSize);
@@ -63,6 +64,7 @@ float check_shadow(sampler2D shadowMap, vec3 viewPos, mat4x4 invView, mat4x4 sha
 	
 	return c / 9.0f;
 }
+#endif
 
 void main()
 {
@@ -87,9 +89,14 @@ void main()
 	float spotLightAngle = saturate(dot(-lightDirection, lightDir));
 	float spotFallof = 1.0f - saturate((spotLightAngle - spotParams.x) / (spotParams.y - spotParams.x));
 	
+#ifdef SHADOWS
 	float shadow = check_shadow(samplerShadow, position, invView, shadowViewProj, inverseShadowMapSize);
+#else
+	float shadow = 1.0f;
+#endif
 	
 	oColor.xyz = phong(normal, eyeDir, lightDir, specularPower, lightColor, diffuse, specularColor.xyz, attenuation * spotFallof) * shadow;
+	
 	oColor.w = 1.0f;
 }
 #endif
