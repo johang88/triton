@@ -285,6 +285,11 @@ namespace Triton.Renderer
 			GL.Uniform3(handle, value.Length, ref value[0].X);
 		}
 
+		public void SetUniform(int handle, ref Vector4[] value)
+		{
+			GL.Uniform4(handle, value.Length, ref value[0].X);
+		}
+
 		public void Clear(Triton.Vector4 clearColor, bool depth)
 		{
 			GL.ClearColor(clearColor.X, clearColor.Y, clearColor.Z, clearColor.W);
@@ -365,6 +370,7 @@ namespace Triton.Renderer
 			var openGLHandle = RenderTargetManager.GetOpenGLHande(handle, out drawBuffers);
 
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, openGLHandle);
+			
 			if (drawBuffers == null)
 				GL.DrawBuffer(DrawBufferMode.Back);
 			else

@@ -67,6 +67,7 @@
   <ItemGroup>
     <Compile Include="Backend.cs" />
     <Compile Include="BatchBuffer.cs" />
+    <Compile Include="BlurHelper.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Deferred\AmbientLightParams.cs" />
     <Compile Include="Deferred\BlurParams.cs" />

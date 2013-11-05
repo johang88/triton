@@ -16,8 +16,7 @@ namespace Triton.Graphics.Deferred
 		private DirectionalLightParams DirectionalLightParams = new DirectionalLightParams();
 		private SpotLightParams SpotLightParams = new SpotLightParams();
 		private SSAOParams SSAOParams = new SSAOParams();
-		private BlurParams Blur1Params = new BlurParams();
-		private BlurParams Blur2Params = new BlurParams();
+		private BlurParams BlurParams = new BlurParams();
 		private CombineParams CombineParams = new CombineParams();
 		private RenderShadowsParams RenderShadowsParams = new RenderShadowsParams();
 
@@ -38,14 +37,17 @@ namespace Triton.Graphics.Deferred
 		private Resources.ShaderProgram PointLightShader;
 		private Resources.ShaderProgram SpotLightShader;
 		private Resources.ShaderProgram SSAOShader;
-		private Resources.ShaderProgram Blur1Shader;
-		private Resources.ShaderProgram Blur2Shader;
+		private Resources.ShaderProgram BlurShader;
 		private Resources.ShaderProgram CombineShader;
 		private Resources.ShaderProgram RenderShadowsShader;
 
 		private Resources.Texture RandomNoiseTexture;
 
 		private bool HandlesInitialized = false;
+
+		private Vector4[] BlurWeights = new Vector4[15];
+		private Vector4[] BlurOffsetsHorz = new Vector4[15];
+		private Vector4[] BlurOffsetsVert = new Vector4[15];
 
 		public DeferredRenderer(Common.ResourceManager resourceManager, Backend backend, int width, int height)
 		{
@@ -74,8 +76,7 @@ namespace Triton.Graphics.Deferred
 			PointLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/point");
 			SpotLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/spot");
 			SSAOShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ssao");
-			Blur1Shader = ResourceManager.Load<Resources.ShaderProgram>("shaders/hdr/blur1");
-			Blur2Shader = ResourceManager.Load<Resources.ShaderProgram>("shaders/hdr/blur2");
+			BlurShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/blur");
 			CombineShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/combine");
 			RenderShadowsShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/render_shadows");
 
@@ -87,6 +88,7 @@ namespace Triton.Graphics.Deferred
 			QuadMesh.End();
 
 			UnitSphere = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/unit_sphere");
+			BlurHelper.Init(ref BlurWeights, ref BlurOffsetsHorz, ref BlurOffsetsVert, new Vector2(1.0f / (float)SSAOTarget1.Width, 1.0f / (float)SSAOTarget1.Height));
 		}
 
 		public void InitializeHandles()
@@ -97,8 +99,7 @@ namespace Triton.Graphics.Deferred
 			PointLightShader.GetUniformLocations(PointLightParams);
 			SpotLightShader.GetUniformLocations(SpotLightParams);
 			SSAOShader.GetUniformLocations(SSAOParams);
-			Blur1Shader.GetUniformLocations(Blur1Params);
-			Blur2Shader.GetUniformLocations(Blur2Params);
+			BlurShader.GetUniformLocations(BlurParams);
 			RenderShadowsShader.GetUniformLocations(RenderShadowsParams);
 		}
 
@@ -167,20 +168,22 @@ namespace Triton.Graphics.Deferred
 
 			// Blur 1
 			Backend.BeginPass(SSAOTarget1, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-			Backend.BeginInstance(Blur1Shader.Handle, new int[] { SSAOTarget2.Textures[0].Handle });
-			Backend.BindShaderVariable(Blur1Params.HandleModelViewProjection, ref modelViewProjection);
-			Backend.BindShaderVariable(Blur1Params.HandleSceneTexture, 0);
-			Backend.BindShaderVariable(Blur1Params.HandleTexelSize, 1.0f / (float)SSAOTarget1.Width);
+			Backend.BeginInstance(BlurShader.Handle, new int[] { SSAOTarget2.Textures[0].Handle });
+			Backend.BindShaderVariable(BlurParams.HandleModelViewProjection, ref modelViewProjection);
+			Backend.BindShaderVariable(BlurParams.HandleSceneTexture, 0);
+			Backend.BindShaderVariable(BlurParams.SampleWeights, ref BlurWeights);
+			Backend.BindShaderVariable(BlurParams.HandleSampleOffsets, ref BlurOffsetsHorz);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 			Backend.EndPass();
 
 			// Blur 2
 			Backend.BeginPass(SSAOTarget2, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-			Backend.BeginInstance(Blur2Shader.Handle, new int[] { SSAOTarget1.Textures[0].Handle });
-			Backend.BindShaderVariable(Blur2Params.HandleModelViewProjection, ref modelViewProjection);
-			Backend.BindShaderVariable(Blur2Params.HandleSceneTexture, 0);
-			Backend.BindShaderVariable(Blur2Params.HandleTexelSize, 1.0f / (float)SSAOTarget1.Height);
+			Backend.BeginInstance(BlurShader.Handle, new int[] { SSAOTarget1.Textures[0].Handle });
+			Backend.BindShaderVariable(BlurParams.HandleModelViewProjection, ref modelViewProjection);
+			Backend.BindShaderVariable(BlurParams.HandleSceneTexture, 0);
+			Backend.BindShaderVariable(BlurParams.SampleWeights, ref BlurWeights);
+			Backend.BindShaderVariable(BlurParams.HandleSampleOffsets, ref BlurOffsetsVert);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 			Backend.EndPass();

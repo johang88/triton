@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Math;
 
 namespace Triton.Graphics.HDR
 {
@@ -20,18 +21,20 @@ namespace Triton.Graphics.HDR
 
 		private Resources.ShaderProgram TonemapShader;
 		private Resources.ShaderProgram HighPassShader;
-		
-		private Resources.ShaderProgram Blur1Shader;
-		private Resources.ShaderProgram Blur2Shader;
+
+		private Resources.ShaderProgram BlurShader;
 
 		private TonemapParams TonemapParams = new TonemapParams();
 		private HighPassParams HighPassParams = new HighPassParams();
-		
-		private BlurParams Blur1Params = new BlurParams();
-		private BlurParams Blur2Params = new BlurParams();
+
+		private BlurParams BlurParams = new BlurParams();
 
 		public float Exposure = 1.0f;
 		public Vector3 WhitePoint = new Vector3(1, 1, 1) * 1.2f;
+
+		private Vector4[] BlurWeights = new Vector4[15];
+		private Vector4[] BlurOffsetsHorz = new Vector4[15];
+		private Vector4[] BlurOffsetsVert = new Vector4[15];
 
 		public HDRRenderer(Common.ResourceManager resourceManager, Backend backend, int width, int height)
 		{
@@ -49,35 +52,30 @@ namespace Triton.Graphics.HDR
 
 			TonemapShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/hdr/tonemap");
 			HighPassShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/hdr/highpass");
-			Blur1Shader = ResourceManager.Load<Resources.ShaderProgram>("shaders/hdr/blur1");
-			Blur2Shader = ResourceManager.Load<Resources.ShaderProgram>("shaders/hdr/blur2");
+			BlurShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/blur");
 
 			QuadMesh = Backend.CreateBatchBuffer();
 			QuadMesh.Begin();
 			QuadMesh.AddQuad(new Vector2(-1, -1), new Vector2(2, 2), Vector2.Zero, new Vector2(1, 1));
 			QuadMesh.End();
+
+			BlurHelper.Init(ref BlurWeights, ref BlurOffsetsHorz, ref BlurOffsetsVert, new Vector2(1.0f / (float)Blur1Target.Width, 1.0f / (float)Blur1Target.Height));
 		}
 
 		public void InitializeHandles()
 		{
-			TonemapParams.HandleMVP = TonemapShader.GetAliasedUniform("ModelViewProjection"); ;
+			TonemapParams.HandleMVP = TonemapShader.GetAliasedUniform("ModelViewProjection");
 			TonemapParams.HandleScene = TonemapShader.GetAliasedUniform("SceneTexture");
 			TonemapParams.HandleBloom = TonemapShader.GetAliasedUniform("BloomTexture");
 			TonemapParams.HandleWhitePoint = TonemapShader.GetAliasedUniform("WhitePoint");
 			TonemapParams.HandleExposure = TonemapShader.GetAliasedUniform("Exposure");
 
-			HighPassParams.HandleMVP = HighPassShader.GetAliasedUniform("ModelViewProjection"); ;
+			HighPassParams.HandleMVP = HighPassShader.GetAliasedUniform("ModelViewProjection");
 			HighPassParams.HandleScene = HighPassShader.GetAliasedUniform("SceneTexture");
 			HighPassParams.HandleWhitePoint = HighPassShader.GetAliasedUniform("WhitePoint");
 			HighPassParams.HandleExposure = HighPassShader.GetAliasedUniform("Exposure");
 
-			Blur1Params.HandleMVP = Blur1Shader.GetAliasedUniform("ModelViewProjection"); ;
-			Blur1Params.HandleScene = Blur1Shader.GetAliasedUniform("SceneTexture");
-			Blur1Params.HandleTexelSize = Blur1Shader.GetAliasedUniform("TexelSize");
-
-			Blur2Params.HandleMVP = Blur2Shader.GetAliasedUniform("ModelViewProjection"); ;
-			Blur2Params.HandleScene = Blur2Shader.GetAliasedUniform("SceneTexture");
-			Blur2Params.HandleTexelSize = Blur2Shader.GetAliasedUniform("TexelSize");
+			BlurShader.GetUniformLocations(BlurParams);
 		}
 
 		public void Render(Camera camera, RenderTarget inputTarget)
@@ -101,25 +99,30 @@ namespace Triton.Graphics.HDR
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 			Backend.EndPass();
 
-			// Blur 1
-			Backend.BeginPass(Blur1Target, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-			Backend.BeginInstance(Blur1Shader.Handle, new int[] { Blur2Target.Textures[0].Handle });
-			Backend.BindShaderVariable(Blur1Params.HandleMVP, ref modelViewProjection);
-			Backend.BindShaderVariable(Blur1Params.HandleScene, 0);
-			Backend.BindShaderVariable(Blur1Params.HandleTexelSize, 1.0f / (float)Blur1Target.Width);
+			for (var i = 0; i < 2; i++)
+			{
+				// Blur 1
+				Backend.BeginPass(Blur1Target, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+				Backend.BeginInstance(BlurShader.Handle, new int[] { Blur2Target.Textures[0].Handle });
+				Backend.BindShaderVariable(BlurParams.HandleModelViewProjection, ref modelViewProjection);
+				Backend.BindShaderVariable(BlurParams.HandleSceneTexture, 0);
+				Backend.BindShaderVariable(BlurParams.SampleWeights, ref BlurWeights);
+				Backend.BindShaderVariable(BlurParams.HandleSampleOffsets, ref BlurOffsetsHorz);
 
-			Backend.DrawMesh(QuadMesh.MeshHandle);
-			Backend.EndPass();
+				Backend.DrawMesh(QuadMesh.MeshHandle);
+				Backend.EndPass();
 
-			// Blur 2
-			Backend.BeginPass(Blur2Target, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-			Backend.BeginInstance(Blur2Shader.Handle, new int[] { Blur1Target.Textures[0].Handle });
-			Backend.BindShaderVariable(Blur2Params.HandleMVP, ref modelViewProjection);
-			Backend.BindShaderVariable(Blur2Params.HandleScene, 0);
-			Backend.BindShaderVariable(Blur2Params.HandleTexelSize, 1.0f / (float)Blur1Target.Height);
+				// Blur 2
+				Backend.BeginPass(Blur2Target, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+				Backend.BeginInstance(BlurShader.Handle, new int[] { Blur1Target.Textures[0].Handle });
+				Backend.BindShaderVariable(BlurParams.HandleModelViewProjection, ref modelViewProjection);
+				Backend.BindShaderVariable(BlurParams.HandleSceneTexture, 0);
+				Backend.BindShaderVariable(BlurParams.SampleWeights, ref BlurWeights);
+				Backend.BindShaderVariable(BlurParams.HandleSampleOffsets, ref BlurOffsetsVert);
 
-			Backend.DrawMesh(QuadMesh.MeshHandle);
-			Backend.EndPass();
+				Backend.DrawMesh(QuadMesh.MeshHandle);
+				Backend.EndPass();
+			}
 
 			// Tonemap and apply glow!
 			Backend.BeginPass(null, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));

@@ -10,6 +10,7 @@ namespace Triton.Graphics.Deferred
 	{
 		public int HandleModelViewProjection = 0;
 		public int HandleSceneTexture = 0;
-		public int HandleTexelSize = 0;
+		public int HandleSampleOffsets = 0;
+		public int SampleWeights = 0;
 	}
 }

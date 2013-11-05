@@ -8,8 +8,9 @@ namespace Triton.Graphics.HDR
 {
 	class BlurParams
 	{
-		public int HandleMVP;
-		public int HandleScene;
-		public int HandleTexelSize;
+		public int HandleModelViewProjection = 0;
+		public int HandleSceneTexture = 0;
+		public int HandleSampleOffsets = 0;
+		public int SampleWeights = 0;
 	}
 }

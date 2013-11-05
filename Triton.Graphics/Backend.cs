@@ -276,6 +276,17 @@ namespace Triton.Graphics
 							RenderSystem.SetUniform(uniformHandle, ref v);
 						}
 						break;
+					case OpCode.BindShaderVariableVector4Array:
+						{
+							var uniformHandle = reader.ReadInt32();
+
+							var count = reader.ReadInt32();
+							var v = new Vector4[count];
+							for (var i = 0; i < count; i++)
+								v[i] = reader.ReadVector4();
+							RenderSystem.SetUniform(uniformHandle, ref v);
+						}
+						break;
 					case OpCode.BindShaderVariableVector2:
 						{
 							var uniformHandle = reader.ReadInt32();
@@ -424,6 +435,16 @@ namespace Triton.Graphics
 		public void BindShaderVariable(int uniformHandle, ref Vector3[] value)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableVector3Array);
+			PrimaryBuffer.Writer.Write(uniformHandle);
+
+			PrimaryBuffer.Writer.Write(value.Length);
+			for (var i = 0; i < value.Length; i++)
+				PrimaryBuffer.Writer.Write(ref value[i]);
+		}
+
+		public void BindShaderVariable(int uniformHandle, ref Vector4[] value)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableVector4Array);
 			PrimaryBuffer.Writer.Write(uniformHandle);
 
 			PrimaryBuffer.Writer.Write(value.Length);
@@ -616,6 +637,7 @@ namespace Triton.Graphics
 			BindShaderVariableVector3,
 			BindShaderVariableVector3Array,
 			BindShaderVariableVector4,
+			BindShaderVariableVector4Array,
 			DrawMesh
 		}
 
