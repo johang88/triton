@@ -240,13 +240,16 @@ namespace Triton.Graphics.Deferred
 				if (!light.Enabled)
 					continue;
 
-				var radius = light.Range;
+				// Pad the radius of the rendered sphere a little, it's quite low poly so there will be minor artifacts otherwise
+				var radius = light.Range * 1.1f;
 
-				var cullFaceMode = Triton.Renderer.CullFaceMode.Front;
+				var cullFaceMode = Triton.Renderer.CullFaceMode.Back;
 				var depthFunction = Triton.Renderer.DepthFunction.Lequal;
 
-				var delta = light.Position - camera.Position;
-				if (delta.Length <= radius)
+				var cameraDistanceToLight = light.Position - camera.Position;
+
+				// We pad it once again to avoid any artifacted when the camera is close to the edge of the bounding sphere
+				if (cameraDistanceToLight.Length <= radius * 1.1f)
 				{
 					cullFaceMode = Triton.Renderer.CullFaceMode.Front;
 					depthFunction = Renderer.DepthFunction.Gequal;
@@ -283,7 +286,7 @@ namespace Triton.Graphics.Deferred
 				}
 				else if (light.Type == LighType.PointLight)
 				{
-					Backend.BeginInstance(PointLightShader.Handle, new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle }, true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode, true, depthFunction);
+					Backend.BeginInstance(PointLightShader.Handle, new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle }, true, false, true, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode, true, depthFunction);
 					Backend.BindShaderVariable(PointLightParams.HandleNormalTexture, 0);
 					Backend.BindShaderVariable(PointLightParams.HandlePositionTexture, 1);
 					Backend.BindShaderVariable(PointLightParams.HandleSpecularTexture, 2);
@@ -375,7 +378,7 @@ namespace Triton.Graphics.Deferred
 			clipPlane = new Vector2(camera.NearClipDistance, light.Range);
 
 			var view = Matrix4.LookAt(light.Position, light.Position + light.Direction, Vector3.Transform(-Vector3.UnitY, orientation));
-			var projection = Matrix4.CreatePerspectiveFieldOfView(1.04719755f, renderTarget.Width / renderTarget.Height, clipPlane.X, clipPlane.Y);
+			var projection = Matrix4.CreatePerspectiveFieldOfView(OpenTK.MathHelper.PiOver2, renderTarget.Width / renderTarget.Height, clipPlane.X, clipPlane.Y);
 
 			viewProjection = view * projection;
 

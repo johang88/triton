@@ -53,7 +53,7 @@ void main()
 	vec3 eyeDir = normalize(cameraPosition - position);
 	
 	float attenuation = dist / lightRange;
-	attenuation = saturate(1.0f - (attenuation * attenuation));
+	attenuation = 1.0f - saturate(attenuation * attenuation);
 	
 	oColor.xyz = phong(normal, eyeDir, lightDir, specularPower, lightColor, diffuse, specularColor.xyz, attenuation);
 	oColor.w = 1.0f;

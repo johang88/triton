@@ -178,7 +178,7 @@ namespace Test
 				{
 					isCDown = false;
 
-					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 10.0f, new Vector3(0.9f, 1.01f, 1.12f));
+					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 4.0f, new Vector3(0.9f, 1.01f, 1.12f));
 				}
 
 				if (inputManager.IsKeyDown(Key.K))
