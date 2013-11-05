@@ -30,5 +30,7 @@ namespace Triton.Graphics
 		public bool CastShadows = false;
 
 		public bool Enabled = true;
+
+		public float ShadowBias = 0.001f;
 	}
 }

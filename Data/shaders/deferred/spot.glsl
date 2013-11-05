@@ -40,6 +40,8 @@ uniform(vec3, lightDirection, LightDirection);
 uniform(mat4x4, invView, InverseViewMatrix);
 uniform(mat4x4, shadowViewProj, ShadowViewProjection);
 uniform(float, inverseShadowMapSize, InverseShadowMapSize);
+uniform(vec2, clipPlane, ClipPlane);
+uniform(float, shadowBias, ShadowBias);
 
 float check_shadow(sampler2D shadowMap, vec3 viewPos, mat4x4 invView, mat4x4 shadowViewProj, float texelSize) {
 	vec3 worldPos = (invView * vec4(viewPos, 1)).xyz;
@@ -50,7 +52,7 @@ float check_shadow(sampler2D shadowMap, vec3 viewPos, mat4x4 invView, mat4x4 sha
 
 	vec2 uv = 0.5f * shadowUv.xy / shadowUv.w + vec2(0.5f, 0.5f);
 	
-	float distance = (shadowUv.z / 100.0f) - 0.001f;
+	float distance = (shadowUv.z / (clipPlane.y - clipPlane.x)) - shadowBias;
 	
 	float c = step(distance, texture2D(shadowMap, uv.xy).x);
 	c += step(distance, texture2D(shadowMap, uv.xy - o.xy).x);

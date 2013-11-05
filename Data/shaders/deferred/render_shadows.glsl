@@ -17,16 +17,11 @@ void main()
 in vec4 position;
 
 out(vec4, oColor, 0);
+uniform(vec2, clipPlane, ClipPlane);
 
 void main()
 {
-	float depth = position.z / 100.0f;
-	
-	/*float dx = dFdx(position.z);
-	float dy = dFdy(position.w);
-	
-	depth += 0.5f * (dx * dx + dy * dy);*/
-	
+	float depth = position.z / (clipPlane.y - clipPlane.x);
 	oColor = vec4(depth.xxx, 1.0f);
 }
 #endif

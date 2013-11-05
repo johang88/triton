@@ -8,7 +8,7 @@ namespace Triton.Graphics.Deferred
 {
 	class RenderShadowsParams
 	{
-		public int ModelView = 0;
 		public int ModelViewProjection = 0;
+		public int HandleClipPlane = 0;
 	}
 }
