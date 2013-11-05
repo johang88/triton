@@ -79,8 +79,21 @@ namespace Triton.Graphics.Resources
 			Shaders.FragDataLocation[] shaderFragDataLocations;
 			shaderSource = preProcessor.Process(shaderSource, out shaderAttribs, out uniforms, out shaderFragDataLocations);
 
-			var vertexShaderSource = "#version 150\n#define VERTEX_SHADER\n" + shaderSource;
-			var fragmentShaderSource = "#version 150\n#define FRAGMENT_SHADER\n" + shaderSource;
+			var defines = "";
+
+			if (!string.IsNullOrWhiteSpace(parameters))
+			{
+				var definesBuilder = new StringBuilder();
+				foreach (var param in parameters.Split(','))
+				{
+					definesBuilder.AppendLine("#define " + param);
+				}
+
+				defines = definesBuilder.ToString();
+			}
+
+			var vertexShaderSource = "#version 150\n#define VERTEX_SHADER\n"+defines+"\n" + shaderSource;
+			var fragmentShaderSource = "#version 150\n#define FRAGMENT_SHADER\n" + defines + "\n" + shaderSource;
 
 			// Convert attribs to the correct format
 			// The format is attribIndex => name
