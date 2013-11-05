@@ -342,8 +342,8 @@ namespace Triton.Graphics.Deferred
 					Backend.BindShaderVariable(shaderParams.HandleLightDirection, ref lightDirection);
 
 					var spotParams = new Vector2((float)System.Math.Cos(light.InnerAngle / 2.0f), (float)System.Math.Cos(light.OuterAngle / 2.0f));
-					Backend.BindShaderVariable(shaderParams.HandleSpotLightParams, ref spotParams);
-					Backend.BindShaderVariable(shaderParams.HandleCameraPosition, ref cameraPositionViewSpace);
+						Backend.BindShaderVariable(shaderParams.HandleSpotLightParams, ref spotParams);
+						Backend.BindShaderVariable(shaderParams.HandleCameraPosition, ref cameraPositionViewSpace);
 
 					if (light.CastShadows)
 					{
