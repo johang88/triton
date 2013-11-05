@@ -66,16 +66,18 @@ namespace Triton.Common
 			if (!ResourceLoaders.ContainsKey(typeof(TResource)))
 				throw new InvalidOperationException("no resource loader for the specified type");
 
+			var identifier = name + "?" + parameters;
+
 			lock (LoadingLock)
 			{
 				var loader = ResourceLoaders[typeof(TResource)];
 
 				// Get or create the resource
 				Resource resource = null;
-				if (!Resources.TryGetValue(name, out resource))
+				if (!Resources.TryGetValue(identifier, out resource))
 				{
 					resource = loader.Create(name, parameters);
-					Resources.AddOrUpdate(name, resource, (key, existingVal) => existingVal);
+					Resources.AddOrUpdate(identifier, resource, (key, existingVal) => existingVal);
 				}
 
 				resource.ReferenceCount += 1;
