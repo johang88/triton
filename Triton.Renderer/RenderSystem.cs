@@ -360,7 +360,7 @@ namespace Triton.Renderer
 			return renderTargetHandle;
 		}
 
-		public int CreateDepthRenderTarget(int width, int height, Renderer.PixelInternalFormat pixelFormat, out int textureHandle, OnLoadedCallback loadedCallback)
+		public int CreateDepthRenderTarget(int width, int height, Renderer.PixelInternalFormat pixelFormat, bool isCubeMap, out int textureHandle, OnLoadedCallback loadedCallback)
 		{
 			textureHandle = TextureManager.Create();
 
@@ -370,15 +370,26 @@ namespace Triton.Renderer
 			AddToWorkQueue(() =>
 			{
 				// Init texture handles with default data
-				TextureManager.SetPixelData(textureHandleCopy, TextureTarget.Texture2D, width, height, null, PixelFormat.DepthComponent, pixelFormat, PixelType.Float, false, false);
+				TextureManager.SetPixelData(textureHandleCopy, isCubeMap ? TextureTarget.TextureCubeMap : TextureTarget.Texture2D, width, height, null, PixelFormat.DepthComponent, pixelFormat, PixelType.Float, false, false);
 
 				var glTextureHandle = TextureManager.GetOpenGLHande(textureHandleCopy);
 
-				GL.BindTexture(OGL.TextureTarget.Texture2D, glTextureHandle);
-				GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-				GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-				GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, (int)DepthFunction.Lequal);
-				GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
+				if (isCubeMap)
+				{
+					GL.BindTexture(OGL.TextureTarget.TextureCubeMap, glTextureHandle);
+					GL.TexParameter(OGL.TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+					GL.TexParameter(OGL.TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+					GL.TexParameter(OGL.TextureTarget.TextureCubeMap, TextureParameterName.TextureCompareFunc, (int)DepthFunction.Lequal);
+					GL.TexParameter(OGL.TextureTarget.TextureCubeMap, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
+				}
+				else
+				{
+					GL.BindTexture(OGL.TextureTarget.Texture2D, glTextureHandle);
+					GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+					GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+					GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, (int)DepthFunction.Lequal);
+					GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
+				}
 
 				// Init render target
 				RenderTargetManager.InitDepthOnly(renderTargetHandle, width, height, glTextureHandle);

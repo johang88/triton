@@ -28,7 +28,8 @@ namespace Triton.Graphics.Deferred
 		private RenderTarget Output;
 		private RenderTarget SSAOTarget1;
 		private RenderTarget SSAOTarget2;
-		private RenderTarget ShadowsRenderTarget;
+		private RenderTarget SpotShadowsRenderTarget;
+		private RenderTarget PointShadowsRenderTarget;
 
 		private BatchBuffer QuadMesh;
 		private Resources.Mesh UnitSphere;
@@ -71,7 +72,8 @@ namespace Triton.Graphics.Deferred
 			SSAOTarget1 = Backend.CreateRenderTarget("ssao1", width / ssaoScale, height / ssaoScale, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, false);
 			SSAOTarget2 = Backend.CreateRenderTarget("ssao2", width / ssaoScale, height / ssaoScale, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, false);
 
-			ShadowsRenderTarget = Backend.CreateDepthRenderTarget("spot_shadows", 128, 128, Renderer.PixelInternalFormat.DepthComponent16);
+			SpotShadowsRenderTarget = Backend.CreateDepthRenderTarget("spot_shadows", 128, 128, false, Renderer.PixelInternalFormat.DepthComponent16);
+			PointShadowsRenderTarget = Backend.CreateDepthRenderTarget("point_shadows", 128, 128, true, Renderer.PixelInternalFormat.DepthComponent16);
 
 			AmbientLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ambient");
 			DirectionalLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light");
@@ -261,7 +263,7 @@ namespace Triton.Graphics.Deferred
 
 				if (light.CastShadows)
 				{
-					RenderSpotlightShadows(ShadowsRenderTarget, light, stage, camera, out shadowViewProjection, out shadowCameraClipPlane);
+					RenderSpotlightShadows(SpotShadowsRenderTarget, light, stage, camera, out shadowViewProjection, out shadowCameraClipPlane);
 					Backend.ChangeRenderTarget(LightAccumulation);
 				}
 				else
@@ -296,7 +298,7 @@ namespace Triton.Graphics.Deferred
 				int[] textures;
 				if (light.CastShadows)
 				{
-					textures = new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle, ShadowsRenderTarget.Textures[0].Handle };
+					textures = new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle, SpotShadowsRenderTarget.Textures[0].Handle };
 				}
 				else
 				{
@@ -350,7 +352,7 @@ namespace Triton.Graphics.Deferred
 					Backend.BindShaderVariable(shaderParams.HandleShadowMap, 4);
 					Backend.BindShaderVariable(shaderParams.HandleInverseViewMatrix, ref inverseViewMatrix);
 					Backend.BindShaderVariable(shaderParams.ShadowViewProjection, ref shadowViewProjection);
-					Backend.BindShaderVariable(shaderParams.InverseShadowMapSize, 1.0f / (float)ShadowsRenderTarget.Width);
+					Backend.BindShaderVariable(shaderParams.InverseShadowMapSize, 1.0f / (float)SpotShadowsRenderTarget.Width);
 					Backend.BindShaderVariable(shaderParams.HandleClipPlane, ref shadowCameraClipPlane);
 					Backend.BindShaderVariable(shaderParams.HandleShadowBias, light.ShadowBias);
 				}

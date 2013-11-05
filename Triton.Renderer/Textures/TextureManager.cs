@@ -134,9 +134,20 @@ namespace Triton.Renderer.Textures
 
 			// Upload texture data to OpenGL
 			GL.BindTexture((OGL.TextureTarget)(int)Handles[index].Target, Handles[index].OpenGLHandle);
-			GL.TexImage2D((OGL.TextureTarget)(int)Handles[index].Target, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
-			if (mipmap)
-				GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+
+			if (target == TextureTarget.TextureCubeMap)
+			{
+				for (var i = 0; i < 6; i++)
+				{
+					GL.TexImage2D(OGL.TextureTarget.TextureCubeMapPositiveX + i, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
+				}
+			}
+			else
+			{
+				GL.TexImage2D((OGL.TextureTarget)(int)Handles[index].Target, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
+				if (mipmap)
+					GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+			}
 
 			if (enableFiltering)
 			{
@@ -150,11 +161,16 @@ namespace Triton.Renderer.Textures
 				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
 				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
 				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+
+				if (target == TextureTarget.TextureCubeMap)
+				{
+					GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+				}
 			}
 
 			GL.Finish();
 
-			var error = GL.GetError();
+			RenderSystem.CheckGLError();
 
 			// The texture can now be used
 			Handles[index].Initialized = true;

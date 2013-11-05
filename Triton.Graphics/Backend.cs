@@ -586,7 +586,7 @@ namespace Triton.Graphics
 		/// <param name="height"></param>
 		/// <param name="pixelFormat"></param>
 		/// <returns></returns>
-		public RenderTarget CreateDepthRenderTarget(string name, int width, int height, Renderer.PixelInternalFormat pixelFormat)
+		public RenderTarget CreateDepthRenderTarget(string name, int width, int height, bool isCubeMap, Renderer.PixelInternalFormat pixelFormat)
 		{
 			if (string.IsNullOrWhiteSpace(name))
 				throw new ArgumentNullException("name");
@@ -599,7 +599,7 @@ namespace Triton.Graphics
 
 			var renderTarget = new RenderTarget(width, height);
 
-			renderTarget.Handle = RenderSystem.CreateDepthRenderTarget(width, height, pixelFormat, out textureHandle, (handle, success, errors) =>
+			renderTarget.Handle = RenderSystem.CreateDepthRenderTarget(width, height, pixelFormat, isCubeMap, out textureHandle, (handle, success, errors) =>
 			{
 				renderTarget.IsReady = true;
 			});
