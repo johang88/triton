@@ -106,7 +106,7 @@ namespace Test
 				lightZ -= 5.0f;
 			}
 
-			var light = stage.CreateSpotLight(new Vector3(0, 0.5f, -2), Vector3.UnitZ, 0.1f, 0.6f, 16.0f, new Vector3(1, 1, 1.2f), true, 0.01f);
+			var light = stage.CreateSpotLight(new Vector3(0, 0.5f, -2), Vector3.UnitZ, 0.1f, 0.6f, 16.0f, new Vector3(1, 1, 1.2f) * 1.5f, true, 0.01f);
 
 			//stage.CreatePointLight(new Vector3(0, 1.5f, 0), 10.0f, new Vector3(1, 0.2f, 0.2f), true, 0.03f);
 
@@ -141,6 +141,10 @@ namespace Test
 			quad.End();
 
 			float lightRotation = 0.0f;
+
+			hdrRenderer.WhitePoint = new Vector3(1, 1, 1) * 11.1f;
+
+			var rng = new Random();
 
 			while (Running)
 			{
@@ -194,11 +198,12 @@ namespace Test
 				{
 					isCDown = false;
 
-					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 4.0f, new Vector3(0.9f, 1.01f, 1.12f), false);
+					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 4.0f + (float)rng.NextDouble() * 5.0f, 
+						new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble()) * (0.1f + (float)rng.NextDouble() * 2.0f), false);
 				}
 
-				light.Direction = Vector3.Transform(Vector3.UnitZ, Quaternion.FromAxisAngle(Vector3.UnitY, lightRotation));
-				lightRotation += deltaTime;
+				//light.Direction = Vector3.Transform(Vector3.UnitZ, Quaternion.FromAxisAngle(Vector3.UnitY, lightRotation));
+				//lightRotation += deltaTime;
 
 				flashlight.Position = camera.Position;
 				flashlight.Position.Y -= 1.2f;
