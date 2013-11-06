@@ -9,9 +9,8 @@ namespace Triton.Graphics
 {
 	class BlurHelper
 	{
-		public static void Init(ref Vector4[] blurWeights, ref Vector4[] blurOffsetsHorz, ref Vector4[] blurOffsetsVert, Vector2 texelSize)
+		public static void Init(ref Vector4[] blurWeights, ref Vector4[] blurOffsetsHorz, ref Vector4[] blurOffsetsVert, Vector2 texelSize, float deviation = 3.0f)
 		{
-			float deviation = 3.0f;
 			blurOffsetsHorz[0] = Vector4.Zero;
 			blurOffsetsVert[0] = Vector4.Zero;
 			blurWeights[0] = new Vector4(
