@@ -35,6 +35,7 @@ namespace Triton.Graphics.Deferred
 
 		private BatchBuffer QuadMesh;
 		private Resources.Mesh UnitSphere;
+		private Resources.Mesh UnitCone;
 
 		private Resources.ShaderProgram AmbientLightShader;
 		private Resources.ShaderProgram DirectionalLightShader;
@@ -102,6 +103,7 @@ namespace Triton.Graphics.Deferred
 			QuadMesh.End();
 
 			UnitSphere = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/unit_sphere");
+			UnitCone = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/unit_cone");
 			BlurHelper.Init(ref BlurWeights, ref BlurOffsetsHorz, ref BlurOffsetsVert, new Vector2(1.0f / (float)SSAOTarget1.Width, 1.0f / (float)SSAOTarget1.Height));
 		}
 
@@ -301,11 +303,22 @@ namespace Triton.Graphics.Deferred
 
 			var cameraDistanceToLight = light.Position - camera.Position;
 
-			// We pad it once again to avoid any artifacted when the camera is close to the edge of the bounding sphere
-			if (cameraDistanceToLight.Length <= radius * 1.1f)
+			if (light.Type == LighType.PointLight)
 			{
-				cullFaceMode = Triton.Renderer.CullFaceMode.Front;
-				depthFunction = Renderer.DepthFunction.Gequal;
+				// We pad it once again to avoid any artifacted when the camera is close to the edge of the bounding sphere
+				if (cameraDistanceToLight.Length <= radius * 1.1f)
+				{
+					cullFaceMode = Triton.Renderer.CullFaceMode.Front;
+					depthFunction = Renderer.DepthFunction.Gequal;
+				}
+			}
+			else if (light.Type == LighType.SpotLight)
+			{
+				if (IsInsideSpotLight(light, camera))
+				{
+					cullFaceMode = Triton.Renderer.CullFaceMode.Front;
+					depthFunction = Renderer.DepthFunction.Gequal;
+				}
 			}
 
 			// Initialize shadow map
@@ -324,7 +337,16 @@ namespace Triton.Graphics.Deferred
 			}
 
 			// Calculate matrices
-			var world = Matrix4.Scale(radius) * Matrix4.CreateTranslation(light.Position);
+			var scaleMatrix = Matrix4.Scale(radius);
+
+			if (light.Type == LighType.SpotLight)
+			{
+				var height = light.Range;
+				var spotRadius = (float)System.Math.Tan(light.OuterAngle / 2.0f) * height;
+				scaleMatrix = Matrix4.Scale(spotRadius, spotRadius, height);
+			}
+
+			var world = scaleMatrix * Matrix4.CreateTranslation(light.Position);
 			modelViewProjection = world * view * projection;
 
 			// Convert light color to linear space
@@ -411,12 +433,35 @@ namespace Triton.Graphics.Deferred
 			{
 				Backend.DrawMesh(QuadMesh.MeshHandle);
 			}
-			else
+			else if (light.Type == LighType.PointLight)
 			{
 				Backend.DrawMesh(UnitSphere.SubMeshes[0].Handle);
 			}
-
+			else
+			{
+				Backend.DrawMesh(UnitCone.SubMeshes[0].Handle);
+			}
+			
 			Backend.EndInstance();
+		}
+
+		bool IsInsideSpotLight(Light light, Camera camera)
+		{
+			var lightPos = light.Position;
+			var lightDir = light.Direction;
+			var attAngle = light.OuterAngle;
+
+			var clipRangeFix = -lightDir * (camera.NearClipDistance / (float)System.Math.Tan(attAngle / 2.0f));
+			lightPos = lightPos + clipRangeFix;
+
+			var lightToCamDir = camera.Position - lightPos;
+			float distanceFromLight = lightToCamDir.Length;
+			lightToCamDir = lightToCamDir.Normalize();
+
+			float cosAngle = Vector3.Dot(lightToCamDir, lightDir);
+			var angle = (float)System.Math.Acos(cosAngle);
+
+			return (distanceFromLight <= (light.Range + clipRangeFix.Length)) && angle <= attAngle;
 		}
 
 		private void RenderSpotlightShadows(RenderTarget renderTarget, Light light, Stage stage, Camera camera, out Matrix4 viewProjection, out Vector2 clipPlane)
