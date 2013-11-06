@@ -106,7 +106,7 @@ namespace Test
 				lightZ -= 5.0f;
 			}
 
-			stage.CreateSpotLight(new Vector3(0, 0.5f, -2), Vector3.UnitZ, 0.1f, 0.6f, 16.0f, new Vector3(1, 1, 1.2f), true, 0.01f);
+			var light = stage.CreateSpotLight(new Vector3(0, 0.5f, -2), Vector3.UnitZ, 0.1f, 0.6f, 16.0f, new Vector3(1, 1, 1.2f), true, 0.01f);
 
 			//stage.CreatePointLight(new Vector3(0, 1.5f, 0), 10.0f, new Vector3(1, 0.2f, 0.2f), true, 0.03f);
 
@@ -128,6 +128,10 @@ namespace Test
 			stopWatch.Start();
 
 			var isCDown = false;
+			var isFDown = false;
+
+			var flashlight = stage.CreateSpotLight(camera.Position, Vector3.UnitZ, 0.1f, 0.9f, 16.0f, new Vector3(1.2f, 1.1f, 0.8f), true, 0.05f);
+			flashlight.Enabled = false;
 
 			Backend.CursorVisible = false;
 
@@ -135,6 +139,8 @@ namespace Test
 			quad.Begin();
 			quad.AddQuad(new Vector2(-1, -1), new Vector2(2, 2), Vector2.Zero, new Vector2(1, 1));
 			quad.End();
+
+			float lightRotation = 0.0f;
 
 			while (Running)
 			{
@@ -170,6 +176,16 @@ namespace Test
 				movement = Vector3.Transform(movement * deltaTime * MovementSpeed, movementDir);
 				camera.Move(ref movement);
 
+				if (inputManager.IsKeyDown(Key.F))
+				{
+					isFDown = true;
+				}
+				else if (isFDown)
+				{
+					isFDown = false;
+					flashlight.Enabled = !flashlight.Enabled;
+				}
+
 				if (inputManager.IsKeyDown(Key.C))
 				{
 					isCDown = true;
@@ -180,6 +196,13 @@ namespace Test
 
 					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 4.0f, new Vector3(0.9f, 1.01f, 1.12f), false);
 				}
+
+				light.Direction = Vector3.Transform(Vector3.UnitZ, Quaternion.FromAxisAngle(Vector3.UnitY, lightRotation));
+				lightRotation += deltaTime;
+
+				flashlight.Position = camera.Position;
+				flashlight.Position.Y -= 1.2f;
+				flashlight.Direction = Vector3.Transform(new Vector3(0, 0, 1.0f), camera.Orientation);
 
 				if (inputManager.IsKeyDown(Key.K))
 					hdrRenderer.Exposure -= 1.0f * deltaTime;

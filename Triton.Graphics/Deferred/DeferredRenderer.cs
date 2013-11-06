@@ -80,7 +80,7 @@ namespace Triton.Graphics.Deferred
 			SSAOTarget1 = Backend.CreateRenderTarget("ssao1", width / ssaoScale, height / ssaoScale, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, false);
 			SSAOTarget2 = Backend.CreateRenderTarget("ssao2", width / ssaoScale, height / ssaoScale, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, false);
 
-			SpotShadowsRenderTarget = Backend.CreateDepthRenderTarget("spot_shadows", 128, 128, false, Renderer.PixelInternalFormat.DepthComponent16);
+			SpotShadowsRenderTarget = Backend.CreateDepthRenderTarget("spot_shadows", 512, 512, false, Renderer.PixelInternalFormat.DepthComponent16);
 			PointShadowsRenderTarget = Backend.CreateDepthRenderTarget("point_shadows", 128, 128, true, Renderer.PixelInternalFormat.DepthComponent16);
 
 			AmbientLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ambient");
@@ -215,7 +215,7 @@ namespace Triton.Graphics.Deferred
 			var meshes = stage.GetMeshes();
 			foreach (var mesh in meshes)
 			{
-				var world = Matrix4.CreateTranslation(mesh.Position) * Matrix4.Rotate(mesh.Orientation);
+				var world = Matrix4.Rotate(mesh.Orientation) * Matrix4.CreateTranslation(mesh.Position);
 				modelViewProjection = world * view * projection;
 
 				var worldView = world * view;
@@ -343,10 +343,19 @@ namespace Triton.Graphics.Deferred
 			{
 				var height = light.Range;
 				var spotRadius = (float)System.Math.Tan(light.OuterAngle / 2.0f) * height;
-				scaleMatrix = Matrix4.Scale(spotRadius, spotRadius, height);
+				scaleMatrix = Matrix4.Scale(spotRadius, height, spotRadius);
 			}
 
-			var world = scaleMatrix * Matrix4.CreateTranslation(light.Position);
+			Matrix4 world;
+
+			if (light.Type == LighType.SpotLight)
+			{
+				world = (scaleMatrix * Matrix4.Rotate(Vector3.GetRotationTo(Vector3.UnitY, light.Direction))) * Matrix4.CreateTranslation(light.Position);
+			}
+			else
+			{
+				world = scaleMatrix * Matrix4.CreateTranslation(light.Position);
+			}
 			modelViewProjection = world * view * projection;
 
 			// Convert light color to linear space
@@ -470,11 +479,11 @@ namespace Triton.Graphics.Deferred
 
 			var modelViewProjection = Matrix4.Identity;
 
-			var orientation = Quaternion.FromAxisAngle(light.Direction, OpenTK.MathHelper.Pi);
+			var orientation = Vector3.GetRotationTo(Vector3.UnitY, light.Direction);
 
 			clipPlane = new Vector2(camera.NearClipDistance, light.Range);
 
-			var view = Matrix4.LookAt(light.Position, light.Position + light.Direction, Vector3.Transform(-Vector3.UnitY, orientation));
+			var view = Matrix4.LookAt(light.Position, light.Position + light.Direction, Vector3.UnitY);
 			var projection = Matrix4.CreatePerspectiveFieldOfView(light.OuterAngle, renderTarget.Width / renderTarget.Height, clipPlane.X, clipPlane.Y);
 
 			viewProjection = view * projection;
@@ -482,7 +491,7 @@ namespace Triton.Graphics.Deferred
 			var meshes = stage.GetMeshes();
 			foreach (var mesh in meshes)
 			{
-				var world = Matrix4.CreateTranslation(mesh.Position) * Matrix4.Rotate(mesh.Orientation);
+				var world = Matrix4.Rotate(mesh.Orientation) * Matrix4.CreateTranslation(mesh.Position);
 				var worldView = world * view;
 
 				modelViewProjection = world * view * projection;

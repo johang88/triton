@@ -451,5 +451,40 @@ namespace Triton
 			result.Y = blend * (b.Y - a.Y) + a.Y;
 			result.Z = blend * (b.Z - a.Z) + a.Z;
 		}
+
+		public static Quaternion GetRotationTo(Vector3 from, Vector3 to)
+		{
+			Vector3 v0 = from;
+			Vector3 v1 = to;
+
+			v0.Normalize();
+			v1.Normalize();
+
+			float d;
+			Vector3.Dot(ref v0, ref v1, out d);
+
+			if (d >= 1.0f)
+				return Quaternion.Identity;
+
+			if (d < (1e-6f - 1.0f))
+			{
+				Vector3 axis = Vector3.Cross(Vector3.UnitX, from);
+				if (axis.LengthSquared == 0.0f)
+					axis = Vector3.Cross(Vector3.UnitY, from);
+				axis.Normalize();
+				return Quaternion.FromAxisAngle(axis, 3.14159f);
+			}
+
+			float s = (float)System.Math.Sqrt((1 + d) * 2.0);
+			float invs = 1.0f / s;
+
+			Vector3 c;
+			Vector3.Cross(ref v0, ref v1, out c);
+
+			Quaternion q = new Quaternion(c.X * invs, c.Y * invs, c.Z * invs, s * 0.5f);
+			q.Normalize();
+
+			return q;
+		}
 	}
 }
