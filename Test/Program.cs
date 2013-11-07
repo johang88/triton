@@ -106,9 +106,9 @@ namespace Test
 				lightZ -= 5.0f;
 			}
 
-			var light = stage.CreateSpotLight(new Vector3(0, 0.5f, -2), Vector3.UnitZ, 0.1f, 0.6f, 16.0f, new Vector3(1, 1, 1.2f) * 1.5f, true, 0.01f);
+			stage.CreateSpotLight(new Vector3(0, 0.5f, -2), Vector3.UnitZ, 0.1f, 0.6f, 16.0f, new Vector3(1, 1, 1.2f) * 1.5f, true, 0.01f);
 
-			//stage.CreatePointLight(new Vector3(0, 1.5f, 0), 10.0f, new Vector3(1, 0.2f, 0.2f), true, 0.03f);
+			var light = stage.CreatePointLight(new Vector3(0, 1.5f, 0), 10.0f, new Vector3(1, 0.2f, 0.2f), false, 0.03f);
 
 			while (!ResourceManager.AllResourcesLoaded())
 			{
@@ -145,10 +145,13 @@ namespace Test
 			hdrRenderer.WhitePoint = new Vector3(1, 1, 1) * 11.1f;
 
 			var rng = new Random();
+			var elapsedTime = 0.0f;
 
 			while (Running)
 			{
 				var deltaTime = (float)stopWatch.Elapsed.TotalSeconds;
+				elapsedTime += deltaTime;
+
 				stopWatch.Restart();
 
 				if (Backend.HasFocus)
@@ -204,6 +207,8 @@ namespace Test
 
 				//light.Direction = Vector3.Transform(Vector3.UnitZ, Quaternion.FromAxisAngle(Vector3.UnitY, lightRotation));
 				//lightRotation += deltaTime;
+
+				light.Intensity = 1.5f + (float)System.Math.Sin(elapsedTime * 3.0f);
 
 				flashlight.Position = camera.Position;
 				flashlight.Position.Y -= 1.2f;

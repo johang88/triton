@@ -262,6 +262,7 @@ namespace Triton.Graphics.Deferred
 					ShadowSpotLight.Range = light.Range;
 					ShadowSpotLight.CastShadows = true;
 					ShadowSpotLight.ShadowBias = light.ShadowBias;
+					ShadowSpotLight.Intensity = light.Intensity;
 
 					ShadowSpotLight.Color = light.Color;
 
@@ -359,7 +360,8 @@ namespace Triton.Graphics.Deferred
 			modelViewProjection = world * view * projection;
 
 			// Convert light color to linear space
-			var lightColor = new Vector3((float)System.Math.Pow(light.Color.X, 2.2f), (float)System.Math.Pow(light.Color.Y, 2.2f), (float)System.Math.Pow(light.Color.Z, 2.2f));
+			var lightColor = light.Color * light.Intensity;
+			lightColor = new Vector3((float)System.Math.Pow(lightColor.X, 2.2f), (float)System.Math.Pow(lightColor.Y, 2.2f), (float)System.Math.Pow(lightColor.Z, 2.2f));
 
 			// Select the correct shader
 			var shader = DirectionalLightShader;
