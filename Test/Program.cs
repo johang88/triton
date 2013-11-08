@@ -96,6 +96,7 @@ namespace Test
 			stage.AddMesh("models/walls001");
 
 			stage.AddMesh("models/crate").Position = new Vector3(0, 0.0f, 2);
+			stage.AddMesh("models/crate").Position = new Vector3(0, 0.0f, -3);
 
 			stage.AmbientColor = new Vector3(0.1f, 0.1f, 0.1f);
 
@@ -108,7 +109,7 @@ namespace Test
 
 			stage.CreateSpotLight(new Vector3(0, 0.5f, -2), Vector3.UnitZ, 0.1f, 0.6f, 16.0f, new Vector3(1, 1, 1.2f) * 1.5f, true, 0.01f);
 
-			var light = stage.CreatePointLight(new Vector3(0, 1.5f, 0), 10.0f, new Vector3(1, 0.2f, 0.2f), false, 0.03f);
+			var light = stage.CreatePointLight(new Vector3(0, 1.5f, 0), 10.0f, new Vector3(1, 0.2f, 0.2f), true, 0.01f);
 
 			while (!ResourceManager.AllResourcesLoaded())
 			{
@@ -130,7 +131,7 @@ namespace Test
 			var isCDown = false;
 			var isFDown = false;
 
-			var flashlight = stage.CreateSpotLight(camera.Position, Vector3.UnitZ, 0.1f, 0.9f, 16.0f, new Vector3(1.2f, 1.1f, 0.8f), true, 0.05f);
+			var flashlight = stage.CreateSpotLight(camera.Position, Vector3.UnitZ, 0.1f, 0.9f, 16.0f, new Vector3(1.2f, 1.1f, 0.8f), false, 0.05f);
 			flashlight.Enabled = false;
 
 			Backend.CursorVisible = false;
