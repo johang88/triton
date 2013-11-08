@@ -533,32 +533,18 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write(handle);
 		}
 
-		/// <summary>
-		/// Create a new render target
-		/// </summary>
-		/// <param name="name">Name of the render target, the texture name will be derived from this in the form '_sys/render_targets/{name}_{texture_number}</param>
-		/// <param name="width">Width of the render target</param>
-		/// <param name="height">Height of the render target</param>
-		/// <param name="pixelFormat">Desired pixel format of the render target</param>
-		/// <param name="numTargets">Numver of targets to create, useful for MRT rendering. Has to be >= 1</param>
-		/// <param name="createDepthBuffer">Set to true if a depth buffer is to be created</param>
-		/// <returns></returns>
-		public RenderTarget CreateRenderTarget(string name, int width, int height, Renderer.PixelInternalFormat pixelFormat, int numTargets, bool createDepthBuffer, int? sharedDepthHandle = null)
+		public RenderTarget CreateRenderTarget(string name, Renderer.RenderTargets.Definition definition)
 		{
 			if (string.IsNullOrWhiteSpace(name))
 				throw new ArgumentNullException("name");
-			if (width <= 0)
-				throw new ArgumentException("width <= 0");
-			if (height <= 0)
-				throw new ArgumentException("height <= 0");
-			if (numTargets <= 0)
-				throw new ArgumentException("numTargets <= 0");
+			if (definition == null)
+				throw new ArgumentNullException("definition");
 
 			int[] textureHandles;
 
-			var renderTarget = new RenderTarget(width, height);
+			var renderTarget = new RenderTarget(definition.Width, definition.Height);
 
-			renderTarget.Handle = RenderSystem.CreateRenderTarget(width, height, pixelFormat, numTargets, createDepthBuffer, sharedDepthHandle, out textureHandles, (handle, success, errors) =>
+			renderTarget.Handle = RenderSystem.CreateRenderTarget(definition, out textureHandles, (handle, success, errors) =>
 			{
 				renderTarget.IsReady = true;
 			});
@@ -574,41 +560,6 @@ namespace Triton.Graphics
 			}
 
 			renderTarget.Textures = textures;
-
-			return renderTarget;
-		}
-
-		/// <summary>
-		/// Creates a render target with a texture attached to the depth attachment, useful for shadows.
-		/// </summary>
-		/// <param name="name"></param>
-		/// <param name="width"></param>
-		/// <param name="height"></param>
-		/// <param name="pixelFormat"></param>
-		/// <returns></returns>
-		public RenderTarget CreateDepthRenderTarget(string name, int width, int height, bool isCubeMap, Renderer.PixelInternalFormat pixelFormat)
-		{
-			if (string.IsNullOrWhiteSpace(name))
-				throw new ArgumentNullException("name");
-			if (width <= 0)
-				throw new ArgumentException("width <= 0");
-			if (height <= 0)
-				throw new ArgumentException("height <= 0");
-
-			int textureHandle;
-
-			var renderTarget = new RenderTarget(width, height);
-
-			renderTarget.Handle = RenderSystem.CreateDepthRenderTarget(width, height, pixelFormat, isCubeMap, out textureHandle, (handle, success, errors) =>
-			{
-				renderTarget.IsReady = true;
-			});
-
-			var texture = new Resources.Texture("_sys/render_targets/" + name, "");
-			texture.Handle = textureHandle;
-			ResourceManager.Manage(texture);
-
-			renderTarget.Textures = new Resources.Texture[] { texture };
 
 			return renderTarget;
 		}

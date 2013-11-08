@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Renderer.RenderTargets;
 
 namespace Triton.Graphics.Deferred
 {
@@ -31,7 +32,6 @@ namespace Triton.Graphics.Deferred
 		private RenderTarget SSAOTarget1;
 		private RenderTarget SSAOTarget2;
 		private RenderTarget SpotShadowsRenderTarget;
-		private RenderTarget PointShadowsRenderTarget;
 
 		private BatchBuffer QuadMesh;
 		private Resources.Mesh UnitSphere;
@@ -72,17 +72,43 @@ namespace Triton.Graphics.Deferred
 
 			ScreenSize = new Vector2(width, height);
 
-			GBuffer = Backend.CreateRenderTarget("gbuffer", width, height, Triton.Renderer.PixelInternalFormat.Rgba32f, 4, true);
-			LightAccumulation = Backend.CreateRenderTarget("light_accumulation", width, height, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, false, GBuffer.Handle);
-			Output = Backend.CreateRenderTarget("deferred_output", width, height, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, false, GBuffer.Handle);
+			// GBuffer = Backend.CreateRenderTarget("gbuffer", width, height, Triton.Renderer.PixelInternalFormat.Rgba32f, 4, true);
+			GBuffer = Backend.CreateRenderTarget("gbuffer", new Definition(width, height, false, new List<Definition.Attachment>()
+			{
+				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba32f, Renderer.PixelType.Float, 0),
+				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba32f, Renderer.PixelType.Float, 1),
+				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba32f, Renderer.PixelType.Float, 2),
+				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba32f, Renderer.PixelType.Float, 3),
+				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.Depth24Stencil8, Renderer.PixelType.Float, 0)
+			}));
+
+			LightAccumulation = Backend.CreateRenderTarget("light_accumulation", new Definition(width, height, false, new List<Definition.Attachment>()
+			{
+				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba32f, Renderer.PixelType.Float, 0),
+				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.Depth24Stencil8, Renderer.PixelType.Float, GBuffer.Handle)
+			}));
+
+			Output = Backend.CreateRenderTarget("deferred_output", new Definition(width, height, false, new List<Definition.Attachment>()
+			{
+				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba32f, Renderer.PixelType.Float, 0),
+				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.Depth24Stencil8, Renderer.PixelType.Float, GBuffer.Handle)
+			}));
 
 			int ssaoScale = 1;
-			SSAOTarget1 = Backend.CreateRenderTarget("ssao1", width / ssaoScale, height / ssaoScale, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, false);
-			SSAOTarget2 = Backend.CreateRenderTarget("ssao2", width / ssaoScale, height / ssaoScale, Triton.Renderer.PixelInternalFormat.Rgba32f, 1, false);
+			SSAOTarget1 = Backend.CreateRenderTarget("ssao1", new Definition(width / ssaoScale, height / ssaoScale, false, new List<Definition.Attachment>()
+			{
+				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba32f, Renderer.PixelType.Float, 0),
+			}));
+			SSAOTarget2 = Backend.CreateRenderTarget("ssao2", new Definition(width / ssaoScale, height / ssaoScale, false, new List<Definition.Attachment>()
+			{
+				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba32f, Renderer.PixelType.Float, 0),
+			}));
 
-			SpotShadowsRenderTarget = Backend.CreateDepthRenderTarget("spot_shadows", 512, 512, false, Renderer.PixelInternalFormat.DepthComponent16);
-			PointShadowsRenderTarget = Backend.CreateDepthRenderTarget("point_shadows", 128, 128, true, Renderer.PixelInternalFormat.DepthComponent16);
-
+			SpotShadowsRenderTarget = Backend.CreateRenderTarget("spot_shadows", new Definition(512, 512, true, new List<Definition.Attachment>()
+			{
+				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent16, Renderer.PixelType.Float, 0),
+			}));
+			
 			AmbientLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ambient");
 			DirectionalLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light");
 			PointLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "POINT_LIGHT");

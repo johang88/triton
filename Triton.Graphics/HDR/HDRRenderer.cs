@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Triton.Math;
+using Triton.Renderer.RenderTargets;
 
 namespace Triton.Graphics.HDR
 {
@@ -47,9 +48,15 @@ namespace Triton.Graphics.HDR
 			Backend = backend;
 
 			int blurScale = 2;
-			Blur1Target = Backend.CreateRenderTarget("blur1", width / blurScale, height / blurScale, Triton.Renderer.PixelInternalFormat.Rgba16f, 1, false);
-			Blur2Target = Backend.CreateRenderTarget("blur2", width / blurScale, height / blurScale, Triton.Renderer.PixelInternalFormat.Rgba16f, 1, false);
-
+			Blur1Target = Backend.CreateRenderTarget("blur1", new Definition(width / blurScale, height / blurScale, false, new List<Definition.Attachment>()
+			{
+				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba32f, Renderer.PixelType.Float, 0),
+			}));
+			Blur2Target = Backend.CreateRenderTarget("blur2", new Definition(width / blurScale, height / blurScale, false, new List<Definition.Attachment>()
+			{
+				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba32f, Renderer.PixelType.Float, 0),
+			}));
+	
 			TonemapShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/hdr/tonemap");
 			HighPassShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/hdr/highpass");
 			BlurShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/blur");

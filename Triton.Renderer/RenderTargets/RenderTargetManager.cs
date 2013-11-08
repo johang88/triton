@@ -83,6 +83,73 @@ namespace Triton.Renderer.RenderTargets
 			return CreateHandle(index, id);
 		}
 
+		public void Init(int handle, Definition definition)
+		{
+			int index, id;
+			ExtractHandle(handle, out index, out id);
+
+			if (id == -1 || Handles[index].Id != id)
+				return;
+
+			GL.GenFramebuffers(1, out Handles[index].FrameBufferObject);
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, Handles[index].FrameBufferObject);
+
+			var drawBuffers = new List<DrawBuffersEnum>();
+
+			foreach (var attachment in definition.Attachments)
+			{
+				if (attachment.AttachmentPoint == Definition.AttachmentPoint.Color)
+				{
+					drawBuffers.Add(DrawBuffersEnum.ColorAttachment0 + attachment.Index);
+					GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0 + attachment.Index, OGL.TextureTarget.Texture2D, attachment.TextureHandle, 0);
+				}
+				else if (attachment.AttachmentPoint == Definition.AttachmentPoint.Depth)
+				{
+					if (attachment.Index == 0 && attachment.TextureHandle == 0)
+					{
+						GL.GenRenderbuffers(1, out Handles[index].DepthBufferObject);
+						GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, Handles[index].DepthBufferObject);
+						GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.DepthComponent24, definition.Width, definition.Height);
+
+						GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, Handles[index].DepthBufferObject);
+						GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);
+					}
+					else if (attachment.TextureHandle != 0)
+					{
+						GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, attachment.TextureHandle, 0);
+					}
+					else if (attachment.Index != 0)
+					{
+						var depthHandle = attachment.Index;
+						int depthIndex, depthId;
+						ExtractHandle(depthHandle, out depthIndex, out depthId);
+
+						Handles[index].SharedDepth = true;
+						GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, Handles[depthIndex].DepthBufferObject);
+					}
+				}
+			}
+
+			if (drawBuffers.Count == 0)
+			{
+				drawBuffers.Add(DrawBuffersEnum.None);
+				GL.DrawBuffer(DrawBufferMode.None);
+			}
+
+			Handles[index].DrawBuffers = drawBuffers.ToArray();
+
+			var status = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
+			if (status != FramebufferErrorCode.FramebufferComplete)
+			{
+				throw new Exception("Framebuffer not complete!");
+			}
+
+			RenderSystem.CheckGLError();
+			Handles[index].Initialized = true;
+
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+		}
+
 		public void Init(int handle, int width, int height, int[] textureHandles, bool createDepthBuffer, int? sharedDepthHandle)
 		{
 			int index, id;

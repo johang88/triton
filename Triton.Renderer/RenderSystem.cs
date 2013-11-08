@@ -329,70 +329,47 @@ namespace Triton.Renderer
 			GL.DepthFunc((OpenTK.Graphics.OpenGL.DepthFunction)(int)depthFunction);
 		}
 
-		public int CreateRenderTarget(int width, int height, Renderer.PixelInternalFormat pixelFormat, int numTargets, bool createDepthBuffer, int? sharedDepthHandle, out int[] textureHandles, OnLoadedCallback loadedCallback)
+		public int CreateRenderTarget(RenderTargets.Definition definition, out int[] textureHandles, OnLoadedCallback loadedCallback)
 		{
-			textureHandles = new int[numTargets];
-			for (var i = 0; i < textureHandles.Length; i++)
+			var internalTextureHandles = new List<int>();
+
+			foreach (var attachment in definition.Attachments)
 			{
-				textureHandles[i] = TextureManager.Create();
+				if (attachment.AttachmentPoint == RenderTargets.Definition.AttachmentPoint.Color || definition.RenderDepthToTexture)
+				{
+					var textureHandle = TextureManager.Create();
+					internalTextureHandles.Add(textureHandle);
+					attachment.TextureHandle = textureHandle;
+				}
 			}
 
-			var textureHandlesCopy = textureHandles;
+			textureHandles = internalTextureHandles.ToArray();
+
 			var renderTargetHandle = RenderTargetManager.Create();
 
 			AddToWorkQueue(() =>
 			{
-				// Init texture handles with default data
-				for (var i = 0; i < textureHandlesCopy.Length; i++)
+				foreach (var attachment in definition.Attachments)
 				{
-					TextureManager.SetPixelData(textureHandlesCopy[i], TextureTarget.Texture2D, width, height, null, PixelFormat.Rgba, pixelFormat, PixelType.Float, false, false);
-				}
+					if (attachment.AttachmentPoint == RenderTargets.Definition.AttachmentPoint.Color || definition.RenderDepthToTexture)
+					{
+						TextureManager.SetPixelData(attachment.TextureHandle, TextureTarget.Texture2D, definition.Width, definition.Height, null, attachment.PixelFormat, attachment.PixelInternalFormat, attachment.PixelType, false, false);
+						// Replace with gl handle
+						attachment.TextureHandle = TextureManager.GetOpenGLHande(attachment.TextureHandle);
 
-				var internalTextureHandles = textureHandlesCopy.Select(t => TextureManager.GetOpenGLHande(t)).ToArray();
-
-				// Init render target
-				RenderTargetManager.Init(renderTargetHandle, width, height, internalTextureHandles, createDepthBuffer, sharedDepthHandle);
-
-				if (loadedCallback != null)
-					loadedCallback(renderTargetHandle, true, "");
-			});
-
-			return renderTargetHandle;
-		}
-
-		public int CreateDepthRenderTarget(int width, int height, Renderer.PixelInternalFormat pixelFormat, bool isCubeMap, out int textureHandle, OnLoadedCallback loadedCallback)
-		{
-			textureHandle = TextureManager.Create();
-
-			var textureHandleCopy = textureHandle;
-			var renderTargetHandle = RenderTargetManager.Create();
-
-			AddToWorkQueue(() =>
-			{
-				// Init texture handles with default data
-				TextureManager.SetPixelData(textureHandleCopy, isCubeMap ? TextureTarget.TextureCubeMap : TextureTarget.Texture2D, width, height, null, PixelFormat.DepthComponent, pixelFormat, PixelType.Float, false, false);
-
-				var glTextureHandle = TextureManager.GetOpenGLHande(textureHandleCopy);
-
-				if (isCubeMap)
-				{
-					GL.BindTexture(OGL.TextureTarget.TextureCubeMap, glTextureHandle);
-					GL.TexParameter(OGL.TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-					GL.TexParameter(OGL.TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-					GL.TexParameter(OGL.TextureTarget.TextureCubeMap, TextureParameterName.TextureCompareFunc, (int)DepthFunction.Lequal);
-					GL.TexParameter(OGL.TextureTarget.TextureCubeMap, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
-				}
-				else
-				{
-					GL.BindTexture(OGL.TextureTarget.Texture2D, glTextureHandle);
-					GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-					GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-					GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, (int)DepthFunction.Lequal);
-					GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
+						if (attachment.AttachmentPoint == RenderTargets.Definition.AttachmentPoint.Depth)
+						{
+							GL.BindTexture(OGL.TextureTarget.Texture2D, attachment.TextureHandle);
+							GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+							GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+							GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, (int)DepthFunction.Lequal);
+							GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
+						}
+					}
 				}
 
 				// Init render target
-				RenderTargetManager.InitDepthOnly(renderTargetHandle, width, height, glTextureHandle);
+				RenderTargetManager.Init(renderTargetHandle, definition);
 
 				if (loadedCallback != null)
 					loadedCallback(renderTargetHandle, true, "");
@@ -412,7 +389,7 @@ namespace Triton.Renderer
 			var openGLHandle = RenderTargetManager.GetOpenGLHande(handle, out drawBuffers);
 
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, openGLHandle);
-			
+
 			if (drawBuffers == null)
 				GL.DrawBuffer(DrawBufferMode.Back);
 			else
