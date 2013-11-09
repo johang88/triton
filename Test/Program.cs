@@ -141,8 +141,6 @@ namespace Test
 			quad.AddQuad(new Vector2(-1, -1), new Vector2(2, 2), Vector2.Zero, new Vector2(1, 1));
 			quad.End();
 
-			float lightRotation = 0.0f;
-
 			hdrRenderer.WhitePoint = new Vector3(1, 1, 1) * 11.1f;
 
 			var rng = new Random();
@@ -202,14 +200,15 @@ namespace Test
 				{
 					isCDown = false;
 
-					stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 4.0f + (float)rng.NextDouble() * 5.0f, 
-						new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble()) * (0.1f + (float)rng.NextDouble() * 2.0f), false);
+					var pointLight = stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 4.0f + (float)rng.NextDouble() * 5.0f, 
+						new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble()), false);
+					pointLight.Intensity = (0.3f + (float)rng.NextDouble() * 2.0f);
 				}
 
 				//light.Direction = Vector3.Transform(Vector3.UnitZ, Quaternion.FromAxisAngle(Vector3.UnitY, lightRotation));
 				//lightRotation += deltaTime;
 
-				light.Intensity = 1.5f + (float)System.Math.Sin(elapsedTime * 3.0f);
+				light.Intensity = 1.5f + (float)System.Math.Sin(elapsedTime * 3.5f);
 
 				flashlight.Position = camera.Position;
 				flashlight.Position.Y -= 1.2f;
