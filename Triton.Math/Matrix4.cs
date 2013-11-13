@@ -490,5 +490,22 @@ namespace Triton
 		{
 			return new Matrix4(mat.Column0, mat.Column1, mat.Column2, mat.Column3);
 		}
+
+		public float M11 { get { return Row0.X; } set { Row0.X = value; } }
+		public float M12 { get { return Row0.Y; } set { Row0.Y = value; } }
+		public float M13 { get { return Row0.Z; } set { Row0.Z = value; } }
+		public float M14 { get { return Row0.W; } set { Row0.W = value; } }
+		public float M21 { get { return Row1.X; } set { Row1.X = value; } }
+		public float M22 { get { return Row1.Y; } set { Row1.Y = value; } }
+		public float M23 { get { return Row1.Z; } set { Row1.Z = value; } }
+		public float M24 { get { return Row1.W; } set { Row1.W = value; } }
+		public float M31 { get { return Row2.X; } set { Row2.X = value; } }
+		public float M32 { get { return Row2.Y; } set { Row2.Y = value; } }
+		public float M33 { get { return Row2.Z; } set { Row2.Z = value; } }
+		public float M34 { get { return Row2.W; } set { Row2.W = value; } }
+		public float M41 { get { return Row3.X; } set { Row3.X = value; } }
+		public float M42 { get { return Row3.Y; } set { Row3.Y = value; } }
+		public float M43 { get { return Row3.Z; } set { Row3.Z = value; } }
+		public float M44 { get { return Row3.W; } set { Row3.W = value; } }
 	}
 }
