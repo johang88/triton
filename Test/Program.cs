@@ -117,9 +117,9 @@ namespace Test
 			PhysicsWorld.CreateBoxBody(0.1f, 5.0f, 90.0f, new Vector3(-4f, 0, 0), true);
 			PhysicsWorld.CreateBoxBody(0.1f, 5.0f, 90.0f, new Vector3(4f, 0, 0), true);
 
-			CreateGameObject("models/crate", new Vector3(1, 1, 1), new Vector3(1, 5.5f, 2));
-			CreateGameObject("models/crate", new Vector3(1, 1, 1), new Vector3(0, 3.5f, 2));
-			CreateGameObject("models/crate", new Vector3(1, 1, 1), new Vector3(-0.5f, 1.5f, 2));
+			CreateGameObject("models/crate", new Vector3(1, 1, 1), new Vector3(1.5f, 0.55f, 4));
+			CreateGameObject("models/crate", new Vector3(1, 1, 1), new Vector3(0, 0.55f, 4));
+			CreateGameObject("models/crate", new Vector3(1, 1, 1), new Vector3(-1.5f, 0.55f, 4));
 
 			Stage.AmbientColor = new Vector3(0.1f, 0.1f, 0.1f);
 
@@ -166,7 +166,7 @@ namespace Test
 			bool isBDown = false;
 
 			var characterController = PhysicsWorld.CreateCharacterController(1.8f, 0.5f);
-			characterController.SetPosition(new Vector3(0, 0.1f, 0));
+			characterController.SetPosition(new Vector3(0, 1.4f, 0));
 
 			var accumulator = 0.0f;
 			var physicsStepSize = 1.0f / 100.0f;

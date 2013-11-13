@@ -55,6 +55,7 @@ namespace Triton.Physics
 			body.IsActive = true;
 			body.IsStatic = isStatic;
 			body.EnableDebugDraw = true;
+			body.Material.KineticFriction = 1.0f;
 
 			return body;
 		}
