@@ -113,9 +113,9 @@ namespace Test
 			Stage.AddMesh("models/door001");
 			Stage.AddMesh("models/walls001");
 
-			PhysicsWorld.CreateBoxBody(30.0f, 0.1f, 30.0f, new Vector3(0, -0.05f, 0), true);
-			PhysicsWorld.CreateBoxBody(0.1f, 5.0f, 30.0f, new Vector3(-4f, 0, 0), true);
-			PhysicsWorld.CreateBoxBody(0.1f, 5.0f, 30.0f, new Vector3(4f, 0, 0), true);
+			PhysicsWorld.CreateBoxBody(90.0f, 0.1f, 90.0f, new Vector3(0, -0.05f, 0), true);
+			PhysicsWorld.CreateBoxBody(0.1f, 5.0f, 90.0f, new Vector3(-4f, 0, 0), true);
+			PhysicsWorld.CreateBoxBody(0.1f, 5.0f, 90.0f, new Vector3(4f, 0, 0), true);
 
 			CreateGameObject("models/crate", new Vector3(1, 1, 1), new Vector3(1, 5.5f, 2));
 			CreateGameObject("models/crate", new Vector3(1, 1, 1), new Vector3(0, 3.5f, 2));
@@ -165,6 +165,12 @@ namespace Test
 			bool debugPhysics = false;
 			bool isBDown = false;
 
+			var characterController = PhysicsWorld.CreateCharacterController(1.8f, 0.5f);
+			characterController.SetPosition(new Vector3(0, 0.1f, 0));
+
+			var accumulator = 0.0f;
+			var physicsStepSize = 1.0f / 100.0f;
+
 			while (Running)
 			{
 				var deltaTime = (float)stopWatch.Elapsed.TotalSeconds;
@@ -175,7 +181,12 @@ namespace Test
 				if (Backend.HasFocus)
 					inputManager.Update();
 
-				PhysicsWorld.Update(deltaTime);
+				accumulator += deltaTime;
+				while (accumulator >= physicsStepSize)
+				{
+					PhysicsWorld.Update(physicsStepSize);
+					accumulator -= physicsStepSize;
+				}
 
 				foreach (var gameObject in GameObjects)
 				{
@@ -196,6 +207,14 @@ namespace Test
 				else if (inputManager.IsKeyDown(Key.D))
 					movement.X = -1.0f;
 
+				if (movement.LengthSquared > 0.0f)
+				{
+					movement = movement.Normalize();
+				}
+
+				var movementDir = Quaternion.FromAxisAngle(Vector3.UnitY, cameraYaw);
+				movement = Vector3.Transform(movement * MovementSpeed, movementDir);
+
 				cameraYaw += -inputManager.MouseDelta.X * MouseSensitivity;
 				cameraPitch += inputManager.MouseDelta.Y * MouseSensitivity;
 
@@ -203,10 +222,9 @@ namespace Test
 				camera.Yaw(cameraYaw);
 				camera.Pitch(cameraPitch);
 
-				var movementDir = Quaternion.FromAxisAngle(Vector3.UnitY, cameraYaw);
-
-				movement = Vector3.Transform(movement * deltaTime * MovementSpeed, movementDir);
-				camera.Move(ref movement);
+				characterController.TryJump = inputManager.IsKeyDown(Key.Space);
+				characterController.TargetVelocity = movement;
+				camera.Position = characterController.Position;
 
 				if (inputManager.IsKeyDown(Key.F))
 				{

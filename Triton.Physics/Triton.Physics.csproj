@@ -61,6 +61,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Body.cs" />
+    <Compile Include="CharacterController.cs" />
+    <Compile Include="Character\CharacterControllerConstraint.cs" />
     <Compile Include="Conversion.cs" />
     <Compile Include="DebugDrawer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

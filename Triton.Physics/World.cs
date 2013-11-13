@@ -16,7 +16,6 @@ namespace Triton.Physics
 		private readonly List<Body> Bodies = new List<Body>();
 		private readonly DebugDrawer DebugDrawer;
 
-		private int LastId = 0;
 		private Vector3[] DebugColors = new Vector3[]
 		{
 			new	Vector3(1, 0, 0),
@@ -35,11 +34,6 @@ namespace Triton.Physics
 			DebugDrawer = new DebugDrawer(backend, resourceManager);
 		}
 
-		private int GetNextId()
-		{
-			return LastId++;
-		}
-
 		public void Clear()
 		{
 			PhysicsWorld.Clear();
@@ -55,13 +49,11 @@ namespace Triton.Physics
 			PhysicsWorld.Step(stepSize, true);
 		}
 
-		RigidBody CreateRigidBody(Jitter.Collision.Shapes.Shape shape, int id, bool isStatic)
+		RigidBody CreateRigidBody(Jitter.Collision.Shapes.Shape shape,  bool isStatic)
 		{
 			var body = new RigidBody(shape);
-			body.AllowDeactivation = false;
 			body.IsActive = true;
 			body.IsStatic = isStatic;
-			body.Tag = id;
 			body.EnableDebugDraw = true;
 
 			return body;
@@ -69,13 +61,12 @@ namespace Triton.Physics
 
 		public Body CreateSphereBody(float radius, Vector3 position, bool isStatic = false)
 		{
-			var id = GetNextId();
 			var shape = new SphereShape(radius);
-			var rigidBody = CreateRigidBody(shape, id, isStatic);
+			var rigidBody = CreateRigidBody(shape, isStatic);
 
 			rigidBody.Position = Conversion.ToJitterVector(ref position);
 
-			var body = new Body(rigidBody, id);
+			var body = new Body(rigidBody);
 			rigidBody.Tag = body;
 
 			Bodies.Add(body);
@@ -87,14 +78,12 @@ namespace Triton.Physics
 
 		public Body CreateBoxBody(float length, float height, float width, Vector3 position, bool isStatic = false)
 		{
-			var id = GetNextId();
 			var shape = new BoxShape(length, height, width);
-			var rigidBody = CreateRigidBody(shape, id, isStatic);
-
+			var rigidBody = CreateRigidBody(shape, isStatic);
 
 			rigidBody.Position = Conversion.ToJitterVector(ref position);
 
-			var body = new Body(rigidBody, id);
+			var body = new Body(rigidBody);
 			rigidBody.Tag = body;
 
 			Bodies.Add(body);
@@ -102,6 +91,22 @@ namespace Triton.Physics
 			PhysicsWorld.AddBody(rigidBody);
 
 			return body;
+		}
+
+		public CharacterController CreateCharacterController(float length, float radius)
+		{
+			var shape = new CapsuleShape(length, radius);
+			var rigidBody = CreateRigidBody(shape, false);
+			rigidBody.EnableDebugDraw = false;
+
+			PhysicsWorld.AddBody(rigidBody);
+
+			var controller = new CharacterController(PhysicsWorld, rigidBody);
+			rigidBody.Tag = controller;
+
+			Bodies.Add(controller);
+
+			return controller;
 		}
 
 		public void RemoveBody(Body body)

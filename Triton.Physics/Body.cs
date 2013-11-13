@@ -8,25 +8,29 @@ namespace Triton.Physics
 {
 	public class Body
 	{
-		public readonly int Id;
 		internal Jitter.Dynamics.RigidBody RigidBody;
 
-		public Vector3 Position;
-		public Matrix4 Orientation;
+		public Vector3 Position = Vector3.Zero;
+		public Matrix4 Orientation = Matrix4.Identity;
 
 		public object Tag = null;
 		public int CollisionLayer = 1;
 
-		internal Body(Jitter.Dynamics.RigidBody rigidBody, int id)
+		internal Body(Jitter.Dynamics.RigidBody rigidBody)
 		{
 			RigidBody = rigidBody;
-			Id = id;
 		}
 
-		internal void Update()
+		internal virtual void Update()
 		{
 			Position = Conversion.ToTritonVector(RigidBody.Position);
 			Orientation = Conversion.ToTritonMatrix(RigidBody.Orientation);
+		}
+
+		public void SetPosition(Vector3 position)
+		{
+			Position = position;
+			RigidBody.Position = Conversion.ToJitterVector(ref position);
 		}
 	}
 }
