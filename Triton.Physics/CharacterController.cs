@@ -19,6 +19,7 @@ namespace Triton.Physics
 			: base(body)
 		{
 			RigidBody.SetMassProperties(JMatrix.Zero, 1.0f, true);
+			RigidBody.AllowDeactivation = false;
 
 			Controller = new Character.CharacterControllerConstraint(world, RigidBody);
 			world.AddConstraint(Controller);
