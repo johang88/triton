@@ -62,13 +62,26 @@
   <ItemGroup>
     <Compile Include="Body.cs" />
     <Compile Include="Conversion.cs" />
+    <Compile Include="DebugDrawer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="World.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Triton.Common\Triton.Common.csproj">
+      <Project>{354b215a-cc57-408b-900d-e7e1f95c04c2}</Project>
+      <Name>Triton.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Triton.Graphics\Triton.Graphics.csproj">
+      <Project>{6a7e740c-692d-4e66-bc84-e79d6bf0b025}</Project>
+      <Name>Triton.Graphics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">
       <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>
       <Name>Triton.Math</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Triton.Renderer\Triton.Renderer.csproj">
+      <Project>{d8da8b59-a4b9-4de1-920e-5d056375c71e}</Project>
+      <Name>Triton.Renderer</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

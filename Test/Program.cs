@@ -95,7 +95,7 @@ namespace Test
 		{
 			WaitHandle.WaitAll(new WaitHandle[] { RendererReady });
 
-			PhysicsWorld = new Triton.Physics.World();
+			PhysicsWorld = new Triton.Physics.World(Backend, ResourceManager);
 			var inputManager = new InputManager(Backend.WindowBounds);
 
 			var spriteShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/sprite");
@@ -113,9 +113,9 @@ namespace Test
 			Stage.AddMesh("models/door001");
 			Stage.AddMesh("models/walls001");
 
-			PhysicsWorld.CreateBoxBody(30.0f, 0.1f, 15.0f, new Vector3(0, -0.1f, 0), true);
-			PhysicsWorld.CreateBoxBody(30.0f, 5.0f, 0.01f, new Vector3(-2.5f, 0, 0), true);
-			PhysicsWorld.CreateBoxBody(30.0f, 5.0f, 0.01f, new Vector3(2.5f, 0, 0), true);
+			PhysicsWorld.CreateBoxBody(30.0f, 0.1f, 30.0f, new Vector3(0, -0.05f, 0), true);
+			PhysicsWorld.CreateBoxBody(0.1f, 5.0f, 30.0f, new Vector3(-4f, 0, 0), true);
+			PhysicsWorld.CreateBoxBody(0.1f, 5.0f, 30.0f, new Vector3(4f, 0, 0), true);
 
 			CreateGameObject("models/crate", new Vector3(1, 1, 1), new Vector3(1, 5.5f, 2));
 			CreateGameObject("models/crate", new Vector3(1, 1, 1), new Vector3(0, 3.5f, 2));
@@ -161,6 +161,9 @@ namespace Test
 
 			var rng = new Random();
 			var elapsedTime = 0.0f;
+
+			bool debugPhysics = false;
+			bool isBDown = false;
 
 			while (Running)
 			{
@@ -215,6 +218,16 @@ namespace Test
 					flashlight.Enabled = !flashlight.Enabled;
 				}
 
+				if (inputManager.IsKeyDown(Key.B))
+				{
+					isBDown = true;
+				}
+				else if (isBDown)
+				{
+					isBDown = false;
+					debugPhysics = !debugPhysics;
+				}
+
 				if (inputManager.IsKeyDown(Key.C))
 				{
 					isCDown = true;
@@ -245,6 +258,11 @@ namespace Test
 				Backend.BeginScene();
 				var lighingOutput = deferredRenderer.Render(Stage, camera);
 				hdrRenderer.Render(camera, lighingOutput);
+
+				if (debugPhysics)
+				{
+					PhysicsWorld.DrawDebugInfo(camera);
+				}
 
 				Backend.EndScene();
 
