@@ -21,6 +21,19 @@ namespace Triton
 			this.w = w;
 		}
 
+		public Quaternion(ref Matrix4 matrix)
+		{
+			var scale = System.Math.Pow(matrix.Determinant, 1.0 / 3.0);
+
+			w = (float)System.Math.Sqrt(System.Math.Max(0, scale + matrix[0, 0] + matrix[1, 1] + matrix[2, 2])) / 2;
+			Xyz.X = (float)System.Math.Sqrt(System.Math.Max(0, scale + matrix[0, 0] - matrix[1, 1] - matrix[2, 2])) / 2;
+			Xyz.Y = (float)System.Math.Sqrt(System.Math.Max(0, scale - matrix[0, 0] + matrix[1, 1] - matrix[2, 2])) / 2;
+			Xyz.Z = (float)System.Math.Sqrt(System.Math.Max(0, scale - matrix[0, 0] - matrix[1, 1] + matrix[2, 2])) / 2;
+			if (matrix[2, 1] - matrix[1, 2] < 0) X = -X;
+			if (matrix[0, 2] - matrix[2, 0] < 0) Y = -Y;
+			if (matrix[1, 0] - matrix[0, 1] < 0) Z = -Z;
+		}
+
 		public Quaternion(Vector3 v, float w)
 		{
 			this.Xyz = v;

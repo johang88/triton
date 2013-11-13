@@ -38,6 +38,26 @@ namespace Triton
 			Row3 = new Vector4(m30, m31, m32, m33);
 		}
 
+		public float this[int rowIndex, int columnIndex]
+		{
+			get
+			{
+				if (rowIndex == 0) return Row0[columnIndex];
+				else if (rowIndex == 1) return Row1[columnIndex];
+				else if (rowIndex == 2) return Row2[columnIndex];
+				else if (rowIndex == 3) return Row3[columnIndex];
+				throw new IndexOutOfRangeException("You tried to access this matrix at: (" + rowIndex + ", " + columnIndex + ")");
+			}
+			set
+			{
+				if (rowIndex == 0) Row0[columnIndex] = value;
+				else if (rowIndex == 1) Row1[columnIndex] = value;
+				else if (rowIndex == 2) Row2[columnIndex] = value;
+				else if (rowIndex == 3) Row3[columnIndex] = value;
+				else throw new IndexOutOfRangeException("You tried to set this matrix at: (" + rowIndex + ", " + columnIndex + ")");
+			}
+		}
+
 		public float Determinant
 		{
 			get

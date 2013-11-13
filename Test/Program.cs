@@ -26,7 +26,11 @@ namespace Test
 		private Triton.Common.ResourceManager ResourceManager;
 		private WorkerThread Worker = new WorkerThread();
 		private Thread UpdateThread;
+		private Triton.Physics.World PhysicsWorld;
 		private bool Running;
+
+		private Triton.Graphics.Stage Stage;
+		private List<GameObject> GameObjects = new List<GameObject>();
 
 		public Program()
 		{
@@ -74,10 +78,24 @@ namespace Test
 			}
 		}
 
+		GameObject CreateGameObject(string filename, Vector3 size, Vector3 position)
+		{
+			var body = PhysicsWorld.CreateBoxBody(size.X, size.Y, size.Z, position, false);
+
+			var mesh = Stage.AddMesh(filename);
+			mesh.Position = position;
+
+			var gameObject = new GameObject(mesh, body);
+			GameObjects.Add(gameObject);
+
+			return gameObject;
+		}
+
 		void UpdateLoop()
 		{
 			WaitHandle.WaitAll(new WaitHandle[] { RendererReady });
 
+			PhysicsWorld = new Triton.Physics.World();
 			var inputManager = new InputManager(Backend.WindowBounds);
 
 			var spriteShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/sprite");
@@ -85,31 +103,29 @@ namespace Test
 			var deferredRenderer = new Triton.Graphics.Deferred.DeferredRenderer(ResourceManager, Backend, Width, Height);
 			var hdrRenderer = new Triton.Graphics.HDR.HDRRenderer(ResourceManager, Backend, Width, Height);
 
-			var stage = new Triton.Graphics.Stage(ResourceManager);
+			Stage = new Triton.Graphics.Stage(ResourceManager);
 
-			stage.AddMesh("models/walls");
-			stage.AddMesh("models/floor");
-			stage.AddMesh("models/floor001");
-			stage.AddMesh("models/ceiling");
-			stage.AddMesh("models/door");
-			stage.AddMesh("models/door001");
-			stage.AddMesh("models/walls001");
+			Stage.AddMesh("models/walls");
+			Stage.AddMesh("models/floor");
+			Stage.AddMesh("models/floor001");
+			Stage.AddMesh("models/ceiling");
+			Stage.AddMesh("models/door");
+			Stage.AddMesh("models/door001");
+			Stage.AddMesh("models/walls001");
 
-			stage.AddMesh("models/crate").Position = new Vector3(0, 0.0f, 2);
-			stage.AddMesh("models/crate").Position = new Vector3(0, 0.0f, -3);
+			PhysicsWorld.CreateBoxBody(30.0f, 0.1f, 15.0f, new Vector3(0, -0.1f, 0), true);
+			PhysicsWorld.CreateBoxBody(30.0f, 5.0f, 0.01f, new Vector3(-2.5f, 0, 0), true);
+			PhysicsWorld.CreateBoxBody(30.0f, 5.0f, 0.01f, new Vector3(2.5f, 0, 0), true);
 
-			stage.AmbientColor = new Vector3(0.1f, 0.1f, 0.1f);
+			CreateGameObject("models/crate", new Vector3(1, 1, 1), new Vector3(1, 5.5f, 2));
+			CreateGameObject("models/crate", new Vector3(1, 1, 1), new Vector3(0, 3.5f, 2));
+			CreateGameObject("models/crate", new Vector3(1, 1, 1), new Vector3(-0.5f, 1.5f, 2));
 
-			float lightZ = 5.0f;
-			for (var i = 0; i < 10; i++)
-			{
-				//stage.CreatePointLight(new Vector3(0, 2.0f, lightZ), 7.0f, new Vector3(0.9f, 1.01f, 1.12f) * 0.6f);
-				lightZ -= 5.0f;
-			}
+			Stage.AmbientColor = new Vector3(0.1f, 0.1f, 0.1f);
 
-			stage.CreateSpotLight(new Vector3(0, 0.5f, -2), Vector3.UnitZ, 0.1f, 0.6f, 16.0f, new Vector3(1, 1, 1.2f) * 1.5f, true, 0.01f);
+			Stage.CreateSpotLight(new Vector3(0, 0.5f, -2), Vector3.UnitZ, 0.1f, 0.6f, 16.0f, new Vector3(1, 1, 1.2f) * 1.5f, true, 0.01f);
 
-			var light = stage.CreatePointLight(new Vector3(0, 1.5f, 0), 10.0f, new Vector3(1, 0.2f, 0.2f), true, 0.01f);
+			var light = Stage.CreatePointLight(new Vector3(0, 1.5f, 0), 10.0f, new Vector3(1, 0.2f, 0.2f), true, 0.01f);
 
 			while (!ResourceManager.AllResourcesLoaded())
 			{
@@ -131,7 +147,7 @@ namespace Test
 			var isCDown = false;
 			var isFDown = false;
 
-			var flashlight = stage.CreateSpotLight(camera.Position, Vector3.UnitZ, 0.1f, 0.9f, 16.0f, new Vector3(1.2f, 1.1f, 0.8f), false, 0.05f);
+			var flashlight = Stage.CreateSpotLight(camera.Position, Vector3.UnitZ, 0.1f, 0.9f, 16.0f, new Vector3(1.2f, 1.1f, 0.8f), false, 0.05f);
 			flashlight.Enabled = false;
 
 			Backend.CursorVisible = false;
@@ -155,6 +171,13 @@ namespace Test
 
 				if (Backend.HasFocus)
 					inputManager.Update();
+
+				PhysicsWorld.Update(deltaTime);
+
+				foreach (var gameObject in GameObjects)
+				{
+					gameObject.Update();
+				}
 
 				if (inputManager.IsKeyDown(Key.Escape))
 					Running = false;
@@ -200,7 +223,7 @@ namespace Test
 				{
 					isCDown = false;
 
-					var pointLight = stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 4.0f + (float)rng.NextDouble() * 5.0f, 
+					var pointLight = Stage.CreatePointLight(camera.Position - new Vector3(0, 1.0f, 0), 4.0f + (float)rng.NextDouble() * 5.0f,
 						new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble()), false);
 					pointLight.Intensity = (0.3f + (float)rng.NextDouble() * 2.0f);
 				}
@@ -220,7 +243,7 @@ namespace Test
 					hdrRenderer.Exposure += 1.0f * deltaTime;
 
 				Backend.BeginScene();
-				var lighingOutput = deferredRenderer.Render(stage, camera);
+				var lighingOutput = deferredRenderer.Render(Stage, camera);
 				hdrRenderer.Render(camera, lighingOutput);
 
 				Backend.EndScene();
