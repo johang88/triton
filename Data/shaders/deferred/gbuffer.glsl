@@ -19,8 +19,8 @@ void main()
 {
 	texCoord = iTexCoord;
 	
-	normal = normalize(mat3x3(world) * iNormal);
-	tangent = normalize(mat3x3(world) * iTangent);
+	normal = normalize(iNormal);
+	tangent = normalize(iTangent);
 	bitangent = normalize(cross(normal, tangent));
 	
 	position = worldView * vec4(iPosition, 1);
