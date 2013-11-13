@@ -10,7 +10,6 @@ namespace Triton.Graphics
 	{
 		public Resources.Mesh Mesh;
 
-		public Vector3 Position;
-		public Quaternion Orientation = Quaternion.Identity;
+		public Matrix4 World = Matrix4.Identity;
 	}
 }

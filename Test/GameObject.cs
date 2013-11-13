@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton;
 
 namespace Test
 {
@@ -19,10 +20,7 @@ namespace Test
 
 		public void Update()
 		{
-			Mesh.Position = Body.Position;
-
-			var orientationMatrix = Body.Orientation;
-			Mesh.Orientation = new Triton.Quaternion(ref orientationMatrix);
+			Mesh.World = Body.Orientation * Matrix4.CreateTranslation(Body.Position);
 		}
 	}
 }

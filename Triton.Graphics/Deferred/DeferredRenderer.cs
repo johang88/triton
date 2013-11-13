@@ -241,7 +241,7 @@ namespace Triton.Graphics.Deferred
 			var meshes = stage.GetMeshes();
 			foreach (var mesh in meshes)
 			{
-				var world = Matrix4.Rotate(mesh.Orientation) * Matrix4.CreateTranslation(mesh.Position);
+				var world = mesh.World;
 				modelViewProjection = world * view * projection;
 
 				var worldView = world * view;
@@ -519,7 +519,7 @@ namespace Triton.Graphics.Deferred
 			var meshes = stage.GetMeshes();
 			foreach (var mesh in meshes)
 			{
-				var world = Matrix4.Rotate(mesh.Orientation) * Matrix4.CreateTranslation(mesh.Position);
+				var world = mesh.World;
 				var worldView = world * view;
 
 				modelViewProjection = world * view * projection;

@@ -133,7 +133,7 @@ namespace Triton.Graphics.HDR
 
 			// Tonemap and apply glow!
 			Backend.BeginPass(null, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-			Backend.BeginInstance(TonemapShader.Handle, new int[] { inputTarget.Textures[0].Handle, Blur2Target.Textures[0].Handle }, false, false);
+			Backend.BeginInstance(TonemapShader.Handle, new int[] { inputTarget.Textures[0].Handle, Blur2Target.Textures[0].Handle });
 			Backend.BindShaderVariable(TonemapParams.HandleMVP, ref modelViewProjection);
 			Backend.BindShaderVariable(TonemapParams.HandleScene, 0);
 			Backend.BindShaderVariable(TonemapParams.HandleBloom, 1);

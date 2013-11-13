@@ -83,7 +83,7 @@ namespace Test
 			var body = PhysicsWorld.CreateBoxBody(size.X, size.Y, size.Z, position, false);
 
 			var mesh = Stage.AddMesh(filename);
-			mesh.Position = position;
+			mesh.World = Matrix4.CreateTranslation(position);
 
 			var gameObject = new GameObject(mesh, body);
 			GameObjects.Add(gameObject);
@@ -261,7 +261,9 @@ namespace Test
 
 				if (debugPhysics)
 				{
+					Backend.BeginPass(null, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 					PhysicsWorld.DrawDebugInfo(camera);
+					Backend.EndPass();
 				}
 
 				Backend.EndScene();

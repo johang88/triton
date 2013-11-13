@@ -40,34 +40,20 @@ namespace Triton.Physics
 
 		public static Matrix4 ToTritonMatrix(ref JMatrix matrix)
 		{
-			return new Matrix4(matrix.M11,
-							   matrix.M12,
-							   matrix.M13,
-							   0.0f,
-							matrix.M21,
-							matrix.M22,
-							matrix.M23,
-							0.0f,
-							matrix.M31,
-							matrix.M32,
-							matrix.M33,
-							0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+			return new Matrix4(
+				matrix.M11, matrix.M12, matrix.M13, 0.0f,
+				matrix.M21, matrix.M22, matrix.M23, 0.0f,
+				matrix.M31, matrix.M32, matrix.M33, 0.0f,
+				0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
 		public static Matrix4 ToTritonMatrix(JMatrix matrix)
 		{
-			return new Matrix4(matrix.M11,
-							   matrix.M12,
-							   matrix.M13,
-							   0.0f,
-							matrix.M21,
-							matrix.M22,
-							matrix.M23,
-							0.0f,
-							matrix.M31,
-							matrix.M32,
-							matrix.M33,
-							0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+			return new Matrix4(
+				matrix.M11, matrix.M12, matrix.M13, 0.0f,
+				matrix.M21, matrix.M22, matrix.M23, 0.0f,
+				matrix.M31, matrix.M32, matrix.M33, 0.0f,
+				0.0f, 0.0f, 0.0f, 1.0f);
 		}
 	}
 }

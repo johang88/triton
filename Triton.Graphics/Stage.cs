@@ -32,9 +32,7 @@ namespace Triton.Graphics
 		{
 			var instance = new MeshInstance
 			{
-				Mesh = mesh,
-				Orientation = Quaternion.Identity,
-				Position = Vector3.Zero
+				Mesh = mesh
 			};
 
 			Meshes.Add(instance);
