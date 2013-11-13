@@ -64,7 +64,10 @@ namespace Triton.Physics.Character
 			DeltaVelocity = TargetVelocity - Body1.LinearVelocity;
 			DeltaVelocity.Y = 0.0f;
 
-			DeltaVelocity *= 0.02f;
+			var fraction = 0.02f;
+			if (WalkingOn == null)
+				fraction = 0.0001f; 
+			DeltaVelocity *= fraction;
 
 			if (DeltaVelocity.LengthSquared() != 0.0f)
 			{

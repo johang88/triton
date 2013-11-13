@@ -19,6 +19,7 @@ namespace Triton.Physics
 		internal Body(Jitter.Dynamics.RigidBody rigidBody)
 		{
 			RigidBody = rigidBody;
+			RigidBody.EnableSpeculativeContacts = true;
 		}
 
 		internal virtual void Update()

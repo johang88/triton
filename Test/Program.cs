@@ -16,7 +16,7 @@ namespace Test
 		const int Width = 1280;
 		const int Height = 720;
 
-		const float MovementSpeed = 6.0f;
+		const float MovementSpeed = 5.0f;
 		const float MouseSensitivity = 0.0025f;
 
 		private ManualResetEvent RendererReady = new ManualResetEvent(false);
