@@ -129,31 +129,51 @@ namespace Triton.Game
 
 				Update(frameTime);
 
-				GraphicsBackend.BeginScene();
-
-				var lightOutput = DeferredRenderer.Render(Stage, Camera);
-				HDRRenderer.Render(Camera, lightOutput);
-
-				if (DebugPhysics)
-				{
-					GraphicsBackend.BeginPass(null, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-					PhysicsWorld.DrawDebugInfo(Camera);
-					GraphicsBackend.EndPass();
-				}
-
-				GraphicsBackend.EndScene();
+				RenderScene();
 				Thread.Sleep(1);
 			}
 		}
 
+		/// <summary>
+		/// Feed render commands to the graphics backend.
+		/// Only override this method if you wish to customize the rendering pipeline.
+		/// </summary>
+		protected virtual void RenderScene()
+		{
+			GraphicsBackend.BeginScene();
+
+			var lightOutput = DeferredRenderer.Render(Stage, Camera);
+			HDRRenderer.Render(Camera, lightOutput);
+
+			if (DebugPhysics)
+			{
+				GraphicsBackend.BeginPass(null, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+				PhysicsWorld.DrawDebugInfo(Camera);
+				GraphicsBackend.EndPass();
+			}
+
+			GraphicsBackend.EndScene();
+		}
+
+		/// <summary>
+		/// Mount packages to the file system
+		/// <see cref="Triton.Common.IO.FileSystem.AddPackage"/>
+		/// </summary>
 		protected virtual void MountFileSystem()
 		{
 		}
 
+		/// <summary>
+		/// Preload resources before the main loop is started
+		/// </summary>
 		protected virtual void LoadResources()
 		{
 		}
 
+		/// <summary>
+		/// Update the game
+		/// </summary>
+		/// <param name="frameTime"></param>
 		protected virtual void Update(float frameTime)
 		{
 		}
