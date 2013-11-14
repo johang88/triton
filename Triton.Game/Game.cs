@@ -32,6 +32,11 @@ namespace Triton.Game
 		public Graphics.Deferred.DeferredRenderer DeferredRenderer { get; private set; }
 		public Graphics.HDR.HDRRenderer HDRRenderer { get; private set; }
 
+		public Triton.Physics.World PhysicsWorld { get; private set; }
+
+		public float PhysicsStepSize = 1.0f / 100.0f;
+		public bool DebugPhysics = false;
+
 		public Game(string name, string logPath = "logs/")
 		{
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
@@ -82,6 +87,8 @@ namespace Triton.Game
 		{
 			WaitHandle.WaitAll(new WaitHandle[] { RendererReady });
 
+			PhysicsWorld = new Triton.Physics.World(GraphicsBackend, ResourceManager);
+
 			DeferredRenderer = new Graphics.Deferred.DeferredRenderer(ResourceManager, GraphicsBackend, Width, Height);
 			HDRRenderer = new Graphics.HDR.HDRRenderer(ResourceManager, GraphicsBackend, Width, Height);
 
@@ -101,12 +108,24 @@ namespace Triton.Game
 			var watch = new System.Diagnostics.Stopwatch();
 			watch.Start();
 
+			var accumulator = 0.0f;
+
 			while (Running)
 			{
 				var frameTime = (float)watch.Elapsed.TotalSeconds;
 				watch.Restart();
 
-				InputManager.Update();
+				if (GraphicsBackend.HasFocus)
+				{
+					InputManager.Update();
+				}
+
+				accumulator += frameTime;
+				while (accumulator >= PhysicsStepSize)
+				{
+					PhysicsWorld.Update(PhysicsStepSize);
+					accumulator -= PhysicsStepSize;
+				}
 
 				Update(frameTime);
 
@@ -114,6 +133,13 @@ namespace Triton.Game
 
 				var lightOutput = DeferredRenderer.Render(Stage, Camera);
 				HDRRenderer.Render(Camera, lightOutput);
+
+				if (DebugPhysics)
+				{
+					GraphicsBackend.BeginPass(null, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+					PhysicsWorld.DrawDebugInfo(Camera);
+					GraphicsBackend.EndPass();
+				}
 
 				GraphicsBackend.EndScene();
 				Thread.Sleep(1);
