@@ -45,6 +45,12 @@ namespace Triton.Graphics
 			Meshes.Remove(mesh);
 		}
 
+		public void Clear()
+		{
+			Meshes.Clear();
+			Lights.Clear();
+		}
+
 		public IReadOnlyCollection<MeshInstance> GetMeshes()
 		{
 			return Meshes;
