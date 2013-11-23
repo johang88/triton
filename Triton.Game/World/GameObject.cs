@@ -16,7 +16,8 @@ namespace Triton.Game.World
 		public readonly GameWorld World;
 		public bool Active { get; private set; }
 
-		public readonly Components.Transform Transform;
+		public Vector3 Position = Vector3.Zero;
+		public Matrix4 Orientation = Matrix4.Identity;
 
 		public GameObject(GameWorld world, int id)
 		{
@@ -25,11 +26,6 @@ namespace Triton.Game.World
 
 			World = world;
 			Id = id;
-
-			// Everyone get's a transform
-			Transform = new Components.Transform();
-			Components.Add(Transform);
-			Transform.OnAttached(this);
 		}
 
 		public void OnAttached()
@@ -42,7 +38,7 @@ namespace Triton.Game.World
 
 		public void OnDetached()
 		{
-			Components.ForEach(c => c.OnDetached());
+			Components.ForEach(c => c.OnDeactivate());
 			Children.ForEach(c => c.OnDetached());
 
 			Active = false;
@@ -61,9 +57,6 @@ namespace Triton.Game.World
 
 			if (component.Owner != null)
 				throw new ArgumentException("component is already attached to a game object");
-
-			if (component is Components.Transform)
-				return;
 
 			// Determine and add missing required components
 			foreach (var attribute in component.GetType().GetCustomAttributes(typeof(RequiresComponentAttribute), true))
@@ -90,7 +83,7 @@ namespace Triton.Game.World
 				throw new ArgumentException("does not own component");
 
 			Components.Remove(component);
-			component.OnDetached();
+			component.OnDeactivate();
 		}
 
 		public bool HasComponent<TComponentType>()
