@@ -30,7 +30,7 @@ namespace Triton.Game.World.Components
 		{
 			base.Update(stepSize);
 
-			
+			MeshInstance.World = Owner.Orientation * Matrix4.CreateTranslation(Owner.Position);
 		}
 	}
 }
