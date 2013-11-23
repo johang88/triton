@@ -9,7 +9,7 @@ namespace Triton.Game.World
 	public interface IComponent
 	{
 		void OnAttached(GameObject owner);
-		void OnDeactivate();
+		void OnDetached();
 
 		void OnActivate();
 

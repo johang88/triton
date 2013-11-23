@@ -28,7 +28,7 @@ namespace Triton.Game.World
 
 		}
 
-		public virtual void OnDeactivate()
+		public virtual void OnDetached()
 		{
 
 		}

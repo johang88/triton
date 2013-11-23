@@ -10,9 +10,9 @@ namespace Triton.Game.World.Components
 	{
 		protected Physics.Body Body;
 
-		public override void OnDeactivate()
+		public override void OnDetached()
 		{
-			base.OnDeactivate();
+			base.OnDetached();
 
 			World.PhysicsWorld.RemoveBody(Body);
 		}

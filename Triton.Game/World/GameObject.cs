@@ -38,7 +38,7 @@ namespace Triton.Game.World
 
 		public void OnDetached()
 		{
-			Components.ForEach(c => c.OnDeactivate());
+			Components.ForEach(c => c.OnDetached());
 			Children.ForEach(c => c.OnDetached());
 
 			Active = false;
@@ -72,6 +72,11 @@ namespace Triton.Game.World
 
 			Components.Add(component);
 			component.OnAttached(this);
+
+			if (Active)
+			{
+				component.OnActivate();
+			}
 		}
 
 		public void RemoveComponent(IComponent component)
@@ -83,7 +88,7 @@ namespace Triton.Game.World
 				throw new ArgumentException("does not own component");
 
 			Components.Remove(component);
-			component.OnDeactivate();
+			component.OnDetached();
 		}
 
 		public bool HasComponent<TComponentType>()

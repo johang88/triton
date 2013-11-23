@@ -12,16 +12,16 @@ namespace Triton.Game.World.Components
 
 		private Graphics.MeshInstance MeshInstance;
 
-		public override void OnActivate()
+		public override void OnAttached(GameObject owner)
 		{
-			base.OnActivate();
+			base.OnAttached(owner);
 
 			MeshInstance = World.Stage.AddMesh(Filename);
 		}
 
-		public override void OnDeactivate()
+		public override void OnDetached()
 		{
-			base.OnDeactivate();
+			base.OnDetached();
 
 			World.Stage.RemoveMesh(MeshInstance);
 		}
