@@ -26,6 +26,12 @@ namespace Triton.Physics
 			new	Vector3(0, 1, 1),
 		};
 
+		public Vector3 Gravity
+		{
+			get { return Conversion.ToTritonVector(PhysicsWorld.Gravity); }
+			set { PhysicsWorld.Gravity = Conversion.ToJitterVector(ref value); }
+		}
+
 		public World(Backend backend, ResourceManager resourceManager)
 		{
 			var collisionSystem = new Jitter.Collision.CollisionSystemPersistentSAP();
