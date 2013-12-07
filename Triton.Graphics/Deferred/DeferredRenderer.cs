@@ -162,7 +162,7 @@ namespace Triton.Graphics.Deferred
 			camera.GetProjectionMatrix(out projection);
 
 			// Render scene to GBuffer
-			Backend.BeginPass(GBuffer, new Vector4(0.0f, 0.0f, 0.0f, 0.0f), true);
+			Backend.BeginPass(GBuffer, stage.ClearColor, true);
 			RenderScene(stage, ref view, ref projection);
 			Backend.EndPass();
 

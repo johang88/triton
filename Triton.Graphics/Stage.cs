@@ -14,6 +14,7 @@ namespace Triton.Graphics
 		private readonly List<Light> Lights = new List<Light>();
 
 		public Vector3 AmbientColor = new Vector3(0.2f, 0.2f, 0.2f);
+		public Vector4 ClearColor = Vector4.Zero;
 
 		public Stage(Common.ResourceManager resourceManager)
 		{
