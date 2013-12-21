@@ -37,7 +37,7 @@ namespace Triton.Content.Compilers
 				arguments += inputPath + " ";
 				arguments += outputPath;
 
-				var startInfo = new ProcessStartInfo(@"C:\Program Files\NVIDIA Corporation\NVIDIA Texture Tools 2\bin\nvcompress", arguments);
+				var startInfo = new ProcessStartInfo(@"nvcompress", arguments);
 				startInfo.UseShellExecute = false;
 				Process.Start(startInfo);
 			}
