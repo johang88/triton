@@ -55,6 +55,11 @@ namespace Triton.Renderer
 			Context.MakeCurrent(WindowInfo);
 			Context.LoadAll();
 
+			Common.Log.WriteLine("OpenGL Context initialized");
+			Common.Log.WriteLine(" - Color format: {0}", Context.GraphicsMode.ColorFormat);
+			Common.Log.WriteLine(" - Depth: {0}", Context.GraphicsMode.Depth);
+			Common.Log.WriteLine(" - FSAA Samples: {0}", Context.GraphicsMode.Samples);
+
 			TextureManager = new Textures.TextureManager();
 			MeshManager = new Meshes.MeshManager();
 			ShaderManager = new Shaders.ShaderManager();

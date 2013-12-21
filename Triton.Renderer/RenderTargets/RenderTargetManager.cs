@@ -96,8 +96,11 @@ namespace Triton.Renderer.RenderTargets
 
 			var drawBuffers = new List<DrawBuffersEnum>();
 
+			Common.Log.WriteLine("Creating frame buffer object, {0}x{1}", definition.Width, definition.Height);
 			foreach (var attachment in definition.Attachments)
 			{
+				Common.Log.WriteLine(" - ap = {0}, pf = {1}, pif = {2}, pt = {3}", attachment.AttachmentPoint, attachment.PixelFormat, attachment.PixelInternalFormat, attachment.PixelType);
+
 				if (attachment.AttachmentPoint == Definition.AttachmentPoint.Color)
 				{
 					drawBuffers.Add(DrawBuffersEnum.ColorAttachment0 + attachment.Index);
@@ -141,6 +144,7 @@ namespace Triton.Renderer.RenderTargets
 			var status = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
 			if (status != FramebufferErrorCode.FramebufferComplete)
 			{
+				Common.Log.WriteLine("Could not create framebuffer, status = " + status.ToString(), Common.LogLevel.Error);
 				throw new Exception("Framebuffer not complete, " + status.ToString());
 			}
 
@@ -149,100 +153,7 @@ namespace Triton.Renderer.RenderTargets
 
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 		}
-
-		public void Init(int handle, int width, int height, int[] textureHandles, bool createDepthBuffer, int? sharedDepthHandle)
-		{
-			int index, id;
-			ExtractHandle(handle, out index, out id);
-
-			if (id == -1 || Handles[index].Id != id)
-				return;
-
-			GL.GenFramebuffers(1, out Handles[index].FrameBufferObject);
-			GL.BindFramebuffer(FramebufferTarget.Framebuffer, Handles[index].FrameBufferObject);
-
-			Handles[index].DrawBuffers = new DrawBuffersEnum[textureHandles.Length];
-
-			for (var i = 0; i < textureHandles.Length; i++)
-			{
-				Handles[index].DrawBuffers[i] = DrawBuffersEnum.ColorAttachment0 + i;
-				GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0 + i, OGL.TextureTarget.Texture2D, textureHandles[i], 0);
-			}
-
-			Handles[index].DepthBufferObject = 0;
-			Handles[index].SharedDepth = false;
-
-			if (createDepthBuffer)
-			{
-				GL.GenRenderbuffers(1, out Handles[index].DepthBufferObject);
-				GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, Handles[index].DepthBufferObject);
-				GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.DepthComponent24, width, height);
-
-				GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, Handles[index].DepthBufferObject);
-				GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);
-			}
-			else if (sharedDepthHandle.HasValue)
-			{
-				var depthHandle = sharedDepthHandle.Value;
-				int depthIndex, depthId;
-				ExtractHandle(depthHandle, out depthIndex, out depthId);
-
-				Handles[index].SharedDepth = true;
-
-				GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, Handles[depthIndex].DepthBufferObject);
-			}
-
-			var status = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
-			if (status != FramebufferErrorCode.FramebufferComplete)
-			{
-				if (Handles[index].DepthBufferObject != 0)
-					GL.DeleteRenderbuffers(1, ref Handles[index].DepthBufferObject);
-				GL.DeleteFramebuffers(1, ref Handles[index].FrameBufferObject);
-				Handles[index].DepthBufferObject = 0;
-				throw new Exception("Framebuffer not complete!");
-			}
-
-			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-			RenderSystem.CheckGLError();
-
-			Handles[index].Initialized = true;
-		}
-
-		public void InitDepthOnly(int handle, int width, int height, int textureHandle)
-		{
-			int index, id;
-			ExtractHandle(handle, out index, out id);
-
-			if (id == -1 || Handles[index].Id != id)
-				return;
-
-			GL.GenFramebuffers(1, out Handles[index].FrameBufferObject);
-			GL.BindFramebuffer(FramebufferTarget.Framebuffer, Handles[index].FrameBufferObject);
-
-			Handles[index].DrawBuffers = new DrawBuffersEnum[] { DrawBuffersEnum.None };
-			GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, textureHandle, 0);
-
-			Handles[index].DepthBufferObject = 0;
-			Handles[index].SharedDepth = false;
-
-			GL.DrawBuffer(DrawBufferMode.None);
-
-			var status = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
-			if (status != FramebufferErrorCode.FramebufferComplete)
-			{
-				if (Handles[index].DepthBufferObject != 0)
-					GL.DeleteRenderbuffers(1, ref Handles[index].DepthBufferObject);
-				GL.DeleteFramebuffers(1, ref Handles[index].FrameBufferObject);
-				Handles[index].DepthBufferObject = 0;
-				throw new Exception("Framebuffer not complete!");
-			}
-
-			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-			RenderSystem.CheckGLError();
-
-			Handles[index].Initialized = true;
-		}
-
+		
 		public void Destroy(int handle)
 		{
 			int index, id;

@@ -24,7 +24,7 @@ namespace Triton.Common
 		public static void WriteLine(string message, LogLevel level)
 		{
 			if (string.IsNullOrWhiteSpace(message))
-				return; // Skip logging of empty
+				return; // Skip logging of empty messages
 
 			lock (Lock)
 			{

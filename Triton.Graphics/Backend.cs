@@ -77,6 +77,8 @@ namespace Triton.Graphics
 			Window.Visible = true;
 			Window.Closing += Window_Closing;
 
+			Log.WriteLine("Window created @ {0}x{1} {2}", width, height, fullscreen ? "fullscreen" : "windowed");
+
 			// Setup the render system
 			RenderSystem = new Renderer.RenderSystem(Window.WindowInfo, ProcessQueue.Enqueue);
 			Watch = new System.Diagnostics.Stopwatch();
