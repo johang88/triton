@@ -37,7 +37,7 @@ namespace Triton.Graphics.Resources
 		private readonly Backend Backend;
 		private readonly Triton.Common.IO.FileSystem FileSystem;
 		private readonly Triton.Common.ResourceManager ResourceManager;
-		
+
 		public MeshLoader(Backend backend, Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
 		{
 			if (backend == null)
@@ -160,7 +160,14 @@ namespace Triton.Graphics.Resources
 			foreach (var subMesh in mesh.SubMeshes)
 			{
 				Backend.RenderSystem.DestroyMesh(subMesh.Handle);
+
+				if (subMesh.Material != null)
+				{
+					ResourceManager.Unload(subMesh.Material);
+					subMesh.Material = null;
+				}
 			}
+
 			mesh.SubMeshes = null;
 		}
 	}

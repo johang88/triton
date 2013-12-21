@@ -21,6 +21,10 @@ namespace Triton.Graphics.Resources
 			Initialized = true;
 		}
 
+		public virtual void Unload()
+		{
+		}
+
 		/// <summary>
 		/// Bind the material, this will call BeginInstance on the backend
 		/// It is up to the caller to call EndInstance
@@ -30,7 +34,7 @@ namespace Triton.Graphics.Resources
 		/// <param name="worldView"></param>
 		/// <param name="itWorldView"></param>
 		/// <param name="modelViewProjection"></param>
-		public virtual void BindMaterial(Backend backend, ref Matrix4 world, ref Matrix4 worldView, ref Matrix4 itWorldView, ref Matrix4 modelViewProjection)
+		public virtual void BindMaterial(Backend backend, ref Matrix4 world, ref Matrix4 worldView, ref Matrix4 itWorldView, ref Matrix4 modelViewProjection, SkeletalAnimation.SkeletonInstance skeleton)
 		{
 			if (!Initialized)
 			{

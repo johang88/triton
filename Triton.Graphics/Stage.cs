@@ -29,7 +29,7 @@ namespace Triton.Graphics
 			return AddMesh(ResourceManager.Load<Resources.Mesh>(mesh));
 		}
 
-		public MeshInstance AddMesh(Resources.Mesh mesh)
+		private MeshInstance AddMesh(Resources.Mesh mesh)
 		{
 			var instance = new MeshInstance
 			{
@@ -44,6 +44,7 @@ namespace Triton.Graphics
 		public void RemoveMesh(MeshInstance mesh)
 		{
 			Meshes.Remove(mesh);
+			ResourceManager.Unload(mesh.Mesh);
 		}
 
 		public void Clear()

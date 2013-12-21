@@ -9,7 +9,7 @@ namespace Triton.Graphics
 	public class MeshInstance
 	{
 		public Resources.Mesh Mesh;
-
+		public SkeletalAnimation.SkeletonInstance Skeleton;
 		public Matrix4 World = Matrix4.Identity;
 	}
 }

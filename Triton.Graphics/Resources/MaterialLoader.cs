@@ -35,11 +35,9 @@ namespace Triton.Graphics.Resources
 				var definition = JsonObject.Parse(reader.ReadToEnd());
 				var type = definition.Get("type") ?? "standard";
 
-				Material material;
-				if (type == "terrain")
-					material = new Materials.StandardMaterial(name, parameters);
-				else
-					material = new Materials.StandardMaterial(name, parameters);
+				var isSkinned = Common.StringConverter.ParseBool(definition.Get("is_skinned") ?? "false");
+
+				Material material = new Materials.StandardMaterial(name, parameters, ResourceManager, isSkinned);
 				material.Definition = definition;
 
 				return material;
@@ -66,19 +64,15 @@ namespace Triton.Graphics.Resources
 			if (!string.IsNullOrEmpty(definition.Get("shader")))
 				shader = definition.Get("shader");
 
-			material.Shader = ResourceManager.Load<ShaderProgram>(shader);
+			material.Shader = ResourceManager.Load<ShaderProgram>(shader, material.IsSkinned ? "SKINNED" : "");
 
 			onLoaded(material);
 		}
 
 		public void Unload(Common.Resource resource)
 		{
-			var material = (Materials.StandardMaterial)resource;
-			material.Diffuse = null;
-			material.Normal = null;
-			material.Gloss = null;
-			material.Specular = null;
-			material.Shader = null;
+			var material = (Material)resource;
+			material.Unload();
 		}
 
 		class MaterialDefintion

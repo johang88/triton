@@ -22,7 +22,7 @@ namespace Triton.Graphics.Deferred
 		private BlurParams BlurParams = new BlurParams();
 		private CombineParams CombineParams = new CombineParams();
 		private RenderShadowsParams RenderShadowsParams = new RenderShadowsParams();
-		private RenderShadowsParams RenderShadowsCubeParams = new RenderShadowsParams();
+		private RenderShadowsParams RenderShadowsSkinnedParams = new RenderShadowsParams();
 
 		private Vector2 ScreenSize;
 
@@ -47,7 +47,7 @@ namespace Triton.Graphics.Deferred
 		private Resources.ShaderProgram BlurShader;
 		private Resources.ShaderProgram CombineShader;
 		private Resources.ShaderProgram RenderShadowsShader;
-		private Resources.ShaderProgram RenderShadowsCubeShader;
+		private Resources.ShaderProgram RenderShadowsSkinnedShader;
 
 		// Used for point light shadows
 		private Light ShadowSpotLight = new Light();
@@ -72,7 +72,6 @@ namespace Triton.Graphics.Deferred
 
 			ScreenSize = new Vector2(width, height);
 
-			// GBuffer = Backend.CreateRenderTarget("gbuffer", width, height, Triton.Renderer.PixelInternalFormat.Rgba32f, 4, true);
 			GBuffer = Backend.CreateRenderTarget("gbuffer", new Definition(width, height, false, new List<Definition.Attachment>()
 			{
 				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba32f, Renderer.PixelType.Float, 0),
@@ -119,7 +118,7 @@ namespace Triton.Graphics.Deferred
 			BlurShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/blur");
 			CombineShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/combine");
 			RenderShadowsShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/render_shadows");
-			RenderShadowsCubeShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/render_shadows_cube");
+			RenderShadowsSkinnedShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/render_shadows", "SKINNED");
 
 			RandomNoiseTexture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/random_n");
 
@@ -145,7 +144,7 @@ namespace Triton.Graphics.Deferred
 			SSAOShader.GetUniformLocations(SSAOParams);
 			BlurShader.GetUniformLocations(BlurParams);
 			RenderShadowsShader.GetUniformLocations(RenderShadowsParams);
-			RenderShadowsCubeShader.GetUniformLocations(RenderShadowsCubeParams);
+			RenderShadowsSkinnedShader.GetUniformLocations(RenderShadowsSkinnedParams);
 		}
 
 		public RenderTarget Render(Stage stage, Camera camera)
@@ -249,7 +248,7 @@ namespace Triton.Graphics.Deferred
 
 				foreach (var subMesh in mesh.Mesh.SubMeshes)
 				{
-					subMesh.Material.BindMaterial(Backend, ref world, ref worldView, ref itWorldView, ref modelViewProjection);
+					subMesh.Material.BindMaterial(Backend, ref world, ref worldView, ref itWorldView, ref modelViewProjection, mesh.Skeleton);
 					Backend.DrawMesh(subMesh.Handle);
 					Backend.EndInstance();
 				}

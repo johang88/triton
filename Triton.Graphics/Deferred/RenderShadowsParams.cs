@@ -10,5 +10,6 @@ namespace Triton.Graphics.Deferred
 	{
 		public int ModelViewProjection = 0;
 		public int HandleClipPlane = 0;
+		public int HandleBones = 0;
 	}
 }

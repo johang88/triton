@@ -4,6 +4,10 @@ attrib(vec3, iPosition, Position);
 attrib(vec2, iTexCoord, TexCoord);
 attrib(vec3, iNormal, Normal);
 attrib(vec3, iTangent, Tangent);
+#ifdef SKINNED
+attrib(vec4, iBoneIndex, BoneIndex);
+attrib(vec4, iBoneWeight, BoneWeight);
+#endif
 
 out vec3 normal;
 out vec3 tangent;
@@ -15,10 +19,39 @@ uniform(mat4x4, world, World);
 uniform(mat4x4, worldView, WorldView);
 uniform(mat4x4, modelViewProjection, ModelViewProjection);
 
+#ifdef SKINNED
+uniform(mat4x4[64], bones, Bones);
+#endif
+
 void main()
 {
 	texCoord = iTexCoord;
 	
+#ifdef SKINNED
+	vec4 blendPos = vec4(0, 0, 0, 0);
+	vec3 blendNormal = vec3(0, 0, 0);
+	
+	for (int bone = 0; bone < 4; bone++)
+	{
+		int index = int(iBoneIndex[bone]);
+		float weight = iBoneWeight[bone];
+		
+		mat4 worldMatrix = bones[index];
+		blendPos += (worldMatrix * vec4(iPosition, 1)) * weight;
+		
+		mat3 worldRot = mat3(worldMatrix[0].xyz, worldMatrix[1].xyz, worldMatrix[2].xyz);
+		blendNormal+= (worldRot * iNormal) * weight;
+	}
+	
+	blendPos = vec4(blendPos.xyz, 1);
+	
+	normal = normalize(blendNormal);
+	tangent = normalize(iTangent);
+	bitangent = cross(normal, tangent);
+	position = worldView * blendPos;
+
+	gl_Position = modelViewProjection * blendPos;
+#else
 	normal = normalize(iNormal);
 	tangent = normalize(iTangent);
 	bitangent = normalize(cross(normal, tangent));
@@ -26,6 +59,7 @@ void main()
 	position = worldView * vec4(iPosition, 1);
 	
 	gl_Position = modelViewProjection * vec4(iPosition, 1);
+#endif
 }
 
 #else

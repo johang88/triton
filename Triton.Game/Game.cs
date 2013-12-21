@@ -37,6 +37,8 @@ namespace Triton.Game
 		public float PhysicsStepSize = 1.0f / 100.0f;
 		public bool DebugPhysics = false;
 
+		public World.GameWorld GameWorld;
+
 		public Game(string name, string logPath = "logs/")
 		{
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
@@ -50,7 +52,7 @@ namespace Triton.Game
 			MountFileSystem();
 		}
 
-		public void Dispose()
+		public virtual void Dispose()
 		{
 			ResourceManager.Dispose();
 		}
@@ -97,6 +99,8 @@ namespace Triton.Game
 
 			InputManager = new Input.InputManager(GraphicsBackend.WindowBounds);
 
+			GameWorld = new World.GameWorld(Stage, InputManager, ResourceManager, PhysicsWorld);
+
 			LoadResources();
 
 			// Wait until all initial resources have been loaded
@@ -126,6 +130,8 @@ namespace Triton.Game
 					PhysicsWorld.Update(PhysicsStepSize);
 					accumulator -= PhysicsStepSize;
 				}
+
+				GameWorld.Update(frameTime);
 
 				Update(frameTime);
 

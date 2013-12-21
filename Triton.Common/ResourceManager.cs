@@ -11,7 +11,7 @@ namespace Triton.Common
 	/// <summary>
 	/// Manages all the various resources in the engine
 	/// 
-	/// All resources are resource counted, any resource with a reference count == 0 is eligable for unloading.
+	/// All resources are reference counted, any resource with a reference count == 0 is eligable for unloading.
 	/// Unloaded resources are usually put on the loading queue the next time they are used. 
 	/// 
 	/// It is also possible to force unload of a single resource or of all resource with referenceCount &lt;= n.
