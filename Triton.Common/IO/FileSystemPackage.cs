@@ -21,10 +21,12 @@ namespace Triton.Common.IO
 
 			FileSystem = fileSystem;
 
-			if (!path.EndsWith("\\"))
+			if (!path.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString()))
 			{
-				path = path + "\\";
+				path = path + System.IO.Path.DirectorySeparatorChar;
 			}
+
+			path = path.Replace('\\', System.IO.Path.DirectorySeparatorChar);
 
 			if (!Directory.Exists(path))
 			{
