@@ -141,7 +141,7 @@ namespace Triton.Renderer.RenderTargets
 			var status = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
 			if (status != FramebufferErrorCode.FramebufferComplete)
 			{
-				throw new Exception("Framebuffer not complete!");
+				throw new Exception("Framebuffer not complete, " + status.ToString());
 			}
 
 			RenderSystem.CheckGLError();
