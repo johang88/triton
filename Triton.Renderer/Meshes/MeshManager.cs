@@ -92,16 +92,8 @@ namespace Triton.Renderer.Meshes
 
 			lock (Lock)
 			{
-				if (NextFree == -1)
-				{
-					Handles[index].Id = -1;
-					NextFree = index;
-				}
-				else
-				{
-					Handles[index].Id = (short)NextFree;
-					NextFree = index;
-				}
+				Handles[index].Id = (short)NextFree;
+				NextFree = index;
 			}
 
 			if (Handles[index].Initialized)

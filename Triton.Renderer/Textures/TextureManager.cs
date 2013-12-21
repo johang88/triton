@@ -101,16 +101,8 @@ namespace Triton.Renderer.Textures
 
 			lock (Lock)
 			{
-				if (NextFree == -1)
-				{
-					Handles[index].Id = -1;
-					NextFree = (short)index;
-				}
-				else
-				{
-					Handles[index].Id = NextFree;
-					NextFree = (short)index;
-				}
+				Handles[index].Id = NextFree;
+				NextFree = (short)index;
 			}
 
 			if (Handles[index].Initialized)
