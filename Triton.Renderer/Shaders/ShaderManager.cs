@@ -235,7 +235,7 @@ namespace Triton.Renderer.Shaders
 
 			// Check for link errors
 
-			GL.GetProgram(Handles[index].ProgramHandle, ProgramParameter.LinkStatus, out errorCode);
+			GL.GetProgram(Handles[index].ProgramHandle, GetProgramParameterName.LinkStatus, out errorCode);
 			if (errorCode != 1)
 			{
 				GL.GetProgramInfoLog(Handles[index].ProgramHandle, out errors);
