@@ -65,6 +65,7 @@
     <Compile Include="World\Components\RigidBody.cs" />
     <Compile Include="World\Components\CharacterController.cs" />
     <Compile Include="World\Components\Mesh.cs" />
+    <Compile Include="World\Components\SkeletalMesh.cs" />
     <Compile Include="World\GameObject.cs" />
     <Compile Include="World\GameWorld.cs" />
     <Compile Include="World\IComponent.cs" />
