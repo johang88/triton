@@ -85,6 +85,12 @@ namespace ContentProcessor
 				if (extension == ".xml") // Get sub extension
 					extension = Path.GetExtension(Path.GetFileNameWithoutExtension(file)) + ".xml";
 
+				var fileOutputDirectory = Path.GetDirectoryName(fileOutputPath);
+				if (!Directory.Exists(fileOutputDirectory))
+				{
+					Directory.CreateDirectory(fileOutputDirectory);
+				}
+
 				var compiler = Compilers.Create(extension);
 				compiler.Compile(file, fileOutputPath);
 
