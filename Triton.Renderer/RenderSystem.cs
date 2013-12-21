@@ -188,7 +188,7 @@ namespace Triton.Renderer
 				return;
 
 			GL.BindVertexArray(vertexArrayObjectId);
-			GL.DrawElements(BeginMode.Triangles, triangleCount * 3, DrawElementsType.UnsignedInt, IntPtr.Zero);
+			GL.DrawElements(PrimitiveType.Triangles, triangleCount * 3, DrawElementsType.UnsignedInt, IntPtr.Zero);
 		}
 
 		public void BeginScene(int renderTargetHandle, int width, int height)
