@@ -98,7 +98,7 @@ namespace Triton.Renderer
 
 		public void DestroyTexture(int handle)
 		{
-			TextureManager.Destroy(handle);
+			AddToWorkQueue(() => TextureManager.Destroy(handle));
 		}
 
 		public int CreateFromDDS(byte[] data, OnLoadedCallback loadedCallback)
@@ -158,7 +158,7 @@ namespace Triton.Renderer
 
 		public void DestroyMesh(int handle)
 		{
-			MeshManager.Destroy(handle);
+			AddToWorkQueue(() => MeshManager.Destroy(handle));
 		}
 
 		public void SetMeshData<T, T2>(int handle, VertexFormat vertexFormat, int triangleCount, T[] vertexData, T2[] indexData, bool stream, OnLoadedCallback loadedCallback)
@@ -219,7 +219,7 @@ namespace Triton.Renderer
 
 		public void DestroyShader(int handle)
 		{
-			ShaderManager.Destroy(handle);
+			AddToWorkQueue(() => ShaderManager.Destroy(handle));
 		}
 
 		public void SetShaderData(int handle, string vertexShaderSource, string fragmentShaderSource, string geometryShaderSource, string[] attribs, string[] fragDataLocations, OnLoadedCallback loadedCallback)
@@ -380,7 +380,7 @@ namespace Triton.Renderer
 
 		public void DestroyRenderTarget(int handle)
 		{
-			RenderTargetManager.Destroy(handle);
+			AddToWorkQueue(() => RenderTargetManager.Destroy(handle));
 		}
 
 		public void BindRenderTarget(int handle)
