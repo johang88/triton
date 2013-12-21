@@ -118,10 +118,7 @@ namespace Triton.Renderer
 					loadedCallback(handle, true, "");
 			};
 
-			if (Context.IsCurrent)
-				loadAction();
-			else
-				AddToWorkQueue(loadAction);
+			AddToWorkQueue(loadAction);
 
 			return handle;
 		}
@@ -136,10 +133,7 @@ namespace Triton.Renderer
 					loadedCallback(handle, true, "");
 			};
 
-			if (Context.IsCurrent)
-				loadAction();
-			else
-				AddToWorkQueue(loadAction);
+			AddToWorkQueue(loadAction);
 		}
 
 		public void BindTexture(int handle, int textureUnit)
