@@ -105,6 +105,36 @@ namespace Triton.Renderer.Meshes
 			Handles[index].Initialized = false;
 		}
 
+		public void SetDataDirect(int handle, int triangleCount, IntPtr vertexDataLength, IntPtr indexDataLength, IntPtr vertexData, IntPtr indexData, bool stream)
+		{
+			int index, id;
+			ExtractHandle(handle, out index, out id);
+
+			if (id == -1 || Handles[index].Id != id)
+				return;
+
+			if (!Handles[index].Initialized)
+				return;
+
+			// Load vertex data
+			GL.BindBuffer(BufferTarget.ArrayBuffer, Handles[index].VertexBufferID);
+			if (vertexData != null)
+				GL.BufferData(BufferTarget.ArrayBuffer, vertexDataLength, vertexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
+
+			RenderSystem.CheckGLError();
+
+			// Load index data
+			GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handles[index].IndexBufferID);
+			if (indexData != null)
+				GL.BufferData(BufferTarget.ElementArrayBuffer, indexDataLength, indexData, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
+
+			RenderSystem.CheckGLError();
+
+			ClearBindings();
+
+			Handles[index].TriangleCount = triangleCount;
+		}
+
 		public void SetData<T, T2>(int handle, VertexFormat vertexFormat, int triangleCount, T[] vertexData, T2[] indexData, bool stream)
 			where T : struct
 			where T2 : struct

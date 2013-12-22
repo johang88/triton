@@ -311,6 +311,34 @@ namespace Triton.Graphics
 							RenderSystem.RenderMesh(meshHandle);
 						}
 						break;
+					case OpCode.UpdateMesh:
+						{
+							var meshHandle = reader.ReadInt32();
+							var triangleCount = reader.ReadInt32();
+							var stream = reader.ReadBoolean();
+
+							var vertexCount = reader.ReadInt32();
+							var indexCount = reader.ReadInt32();
+
+							var vertexLength = vertexCount * sizeof(float);
+							var indexLength = indexCount * sizeof(int);
+
+							var buffer = ((MemoryStream)reader.BaseStream).GetBuffer();
+
+							unsafe
+							{
+								fixed (byte* p = buffer)
+								{
+									IntPtr vertices = (IntPtr)p;
+									IntPtr indices = (IntPtr)(p + vertexLength);
+
+									RenderSystem.SetMeshDataDirect(meshHandle, triangleCount, (IntPtr)vertexLength, (IntPtr) indexLength, vertices, indices, stream);
+								}
+							}
+
+							reader.BaseStream.Position += vertexLength + indexLength;
+						}
+						break;
 				}
 			}
 		}
@@ -544,6 +572,30 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write(handle);
 		}
 
+		/// <summary>
+		/// Uploads a mesh inline in the command stream, UpdateMesh() is preferred if it not neccecary to change a mesh while rendering.
+		/// </summary>
+		public void UpdateMeshInline(int handle, int triangleCount, float[] vertexData, int[] indexData, bool stream)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.UpdateMesh);
+			PrimaryBuffer.Writer.Write(handle);
+			PrimaryBuffer.Writer.Write(triangleCount);
+			PrimaryBuffer.Writer.Write(stream);
+
+			PrimaryBuffer.Writer.Write(vertexData.Length);
+			PrimaryBuffer.Writer.Write(indexData.Length);
+
+			for (var i = 0; i < vertexData.Length; i++)
+			{
+				PrimaryBuffer.Writer.Write(vertexData[i]);
+			}
+
+			for (var i = 0; i < indexData.Length; i++)
+			{
+				PrimaryBuffer.Writer.Write(indexData[i]);
+			}
+		}
+
 		public RenderTarget CreateRenderTarget(string name, Renderer.RenderTargets.Definition definition)
 		{
 			if (string.IsNullOrWhiteSpace(name))
@@ -615,6 +667,11 @@ namespace Triton.Graphics
 			RenderSystem.SetTextureData(texture.Handle, texture.Width, texture.Height, data, texture.PixelFormat, texture.PixelInternalFormat, PixelType.UnsignedByte, null);
 		}
 
+		public SpriteBatch CreateSpriteBatch()
+		{
+			return new SpriteBatch(this, RenderSystem, ResourceManager);
+		}
+
 		/// <summary>
 		/// Op codes used in the rendering instructions
 		/// All opcodes have a variable amount of parameters
@@ -635,6 +692,7 @@ namespace Triton.Graphics
 			BindShaderVariableVector3Array,
 			BindShaderVariableVector4,
 			BindShaderVariableVector4Array,
+			UpdateMesh,
 			DrawMesh
 		}
 

@@ -91,6 +91,11 @@ namespace Triton.Graphics
 			RenderSystem.SetMeshData(MeshHandle, VertexFormat, TriangleCount, VertexData, IndexData, true, null);
 		}
 
+		public void EndInline(Backend backend)
+		{
+			backend.UpdateMeshInline(MeshHandle, TriangleCount, VertexData, IndexData, true);
+		}
+
 		public void AddVector2(float x, float y)
 		{
 			CheckSize(2);
@@ -181,6 +186,30 @@ namespace Triton.Graphics
 
 			AddVector3(position.X + size.X, position.Y, 0);
 			AddVector2(uvPositon.X + uvSize.X, uvPositon.Y);
+
+			AddTriangle(firstIndex, firstIndex + 2, firstIndex + 1);
+			AddTriangle(firstIndex, firstIndex + 3, firstIndex + 2);
+		}
+
+		public void AddQuad(Vector2 position, Vector2 size, Vector2 uvPositon, Vector2 uvSize, Vector4 color)
+		{
+			var firstIndex = DataCount / (3 + 3 + 3 + 2);
+
+			AddVector3(position.X, position.Y, 0);
+			AddVector2(ref uvPositon);
+			AddVector4(ref color);
+
+			AddVector3(position.X, position.Y + size.Y, 0);
+			AddVector2(uvPositon.X, uvPositon.Y + uvSize.Y);
+			AddVector4(ref color);
+
+			AddVector3(position.X + size.X, position.Y + size.Y, 0);
+			AddVector2(uvPositon.X + uvSize.X, uvPositon.Y + uvSize.Y);
+			AddVector4(ref color);
+
+			AddVector3(position.X + size.X, position.Y, 0);
+			AddVector2(uvPositon.X + uvSize.X, uvPositon.Y);
+			AddVector4(ref color);
 
 			AddTriangle(firstIndex, firstIndex + 2, firstIndex + 1);
 			AddTriangle(firstIndex, firstIndex + 3, firstIndex + 2);

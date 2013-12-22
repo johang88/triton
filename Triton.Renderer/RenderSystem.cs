@@ -173,6 +173,11 @@ namespace Triton.Renderer
 			});
 		}
 
+		public void SetMeshDataDirect(int handle, int triangleCount, IntPtr vertexDataLength, IntPtr indexDataLength, IntPtr vertexData, IntPtr indexData, bool stream)
+		{
+			MeshManager.SetDataDirect(handle, triangleCount, vertexDataLength, indexDataLength, vertexData, indexData, stream);
+		}
+
 		public void RenderMesh(int handle)
 		{
 			int triangleCount, vertexArrayObjectId, indexBufferId;

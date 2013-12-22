@@ -106,6 +106,7 @@
     <Compile Include="SkeletalAnimation\SkeletonInstance.cs" />
     <Compile Include="SkeletalAnimation\Track.cs" />
     <Compile Include="SkeletalAnimation\Transform.cs" />
+    <Compile Include="SpriteBatch.cs" />
     <Compile Include="SpriteShader.cs" />
     <Compile Include="Stage.cs" />
     <Compile Include="Terrain\Terrain.cs" />

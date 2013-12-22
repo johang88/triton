@@ -2,18 +2,24 @@
 
 attrib(vec3, iPosition, Position);
 attrib(vec2, iTexCoord, TexCoord);
+attrib(vec4, iColor, Color);
+
+uniform(mat4x4, modelViewProjection, ModelViewProjection);
 
 out vec2 texCoord;
+out vec4 color;
 
 void main()
 {
 	texCoord = iTexCoord;
-	gl_Position = vec4(iPosition, 1);
+	color = iColor;
+	gl_Position = modelViewProjection * vec4(iPosition, 1);
 }
 
 #else
 
 in vec2 texCoord;
+in vec4 color;
 
 out(vec4, oColor, 0);
 
@@ -21,7 +27,8 @@ sampler(2D, samplerDiffuse, DiffuseTexture);
 
 void main()
 {
-	vec3 diffuse = texture2D(samplerDiffuse, texCoord).xyz;
-	oColor = vec4(diffuse, 1.0f);
+	vec4 diffuse = texture2D(samplerDiffuse, texCoord) * color;
+	
+	oColor = vec4(1, 0, 1, 1);
 }
 #endif

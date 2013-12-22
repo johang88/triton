@@ -165,6 +165,9 @@ namespace Test
 			var characterController = PhysicsWorld.CreateCharacterController(1.8f, 0.5f);
 			characterController.SetPosition(new Vector3(0, 1.4f, 0));
 
+			var texture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/misc_WoodenCrate_1k_d");
+			var spriteBatch = Backend.CreateSpriteBatch();
+
 			var accumulator = 0.0f;
 			var physicsStepSize = 1.0f / 100.0f;
 
@@ -280,6 +283,9 @@ namespace Test
 					PhysicsWorld.DrawDebugInfo(camera);
 					Backend.EndPass();
 				}
+
+				spriteBatch.RenderQuad(texture, Vector2.Zero, new Vector2(512, 512));
+				spriteBatch.Render(1280, 720);
 
 				Backend.EndScene();
 
