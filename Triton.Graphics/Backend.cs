@@ -10,6 +10,7 @@ using System.IO;
 using System.Collections.Concurrent;
 using Triton.Common;
 using Triton.Renderer;
+using System.Runtime.InteropServices;
 
 namespace Triton.Graphics
 {
@@ -329,10 +330,10 @@ namespace Triton.Graphics
 							{
 								fixed (byte* p = buffer)
 								{
-									IntPtr vertices = (IntPtr)p;
-									IntPtr indices = (IntPtr)(p + vertexLength);
+									var vertices = (p + reader.BaseStream.Position);
+									var indices = (p + reader.BaseStream.Position + vertexLength);
 
-									RenderSystem.SetMeshDataDirect(meshHandle, triangleCount, (IntPtr)vertexLength, (IntPtr) indexLength, vertices, indices, stream);
+									RenderSystem.SetMeshDataDirect(meshHandle, triangleCount, (IntPtr)vertexLength, (IntPtr)indexLength, (IntPtr)vertices, (IntPtr)indices, stream);
 								}
 							}
 
