@@ -192,15 +192,19 @@ namespace Triton
 
 		public static void CreateOrthographicOffCenter(float left, float right, float bottom, float top, float zNear, float zFar, out Matrix4 result)
 		{
-			float invRL = 1 / (right - left);
-			float invTB = 1 / (top - bottom);
-			float invFN = 1 / (zFar - zNear);
+			result = Identity;
 
-			result = new Matrix4(
-				2 * invRL, 2 * invTB, -2 * invFN, 0,
-				0, 0, 0, 0,
-				0, 0, 0, 0,
-				(right + left) * invRL, -(top + bottom) * invTB, -(zFar + zNear) * invFN, 1);
+			float invRL = 1.0f / (right - left);
+			float invTB = 1.0f / (top - bottom);
+			float invFN = 1.0f / (zFar - zNear);
+
+			result.Row0.X = 2 * invRL;
+			result.Row1.Y = 2 * invTB;
+			result.Row2.Z = -2 * invFN;
+
+			result.Row3.X = -(right + left) * invRL;
+			result.Row3.Y = -(top + bottom) * invTB;
+			result.Row3.Z = -(zFar + zNear) * invFN;
 		}
 
 		public static Matrix4 CreateOrthographicOffCenter(float left, float right, float bottom, float top, float zNear, float zFar)
