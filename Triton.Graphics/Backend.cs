@@ -63,6 +63,9 @@ namespace Triton.Graphics
 		public bool HasFocus { get { return Window.Focused; } }
 		public bool CursorVisible { get; set; }
 
+		// Used as a cache to prevent generation of garabage during deserialization of the OpCode stream
+		private Matrix4[] MatrixDeserializationCache = new Matrix4[64];
+
 		public Backend(ResourceManager resourceManager, int width, int height, string title, bool fullscreen)
 		{
 			if (resourceManager == null)
@@ -82,6 +85,11 @@ namespace Triton.Graphics
 			// Setup the render system
 			RenderSystem = new Renderer.RenderSystem(Window.WindowInfo, ProcessQueue.Enqueue);
 			Watch = new System.Diagnostics.Stopwatch();
+
+			for (var i = 0; i < MatrixDeserializationCache.Length; i++)
+			{
+				MatrixDeserializationCache[i] = Matrix4.Identity;
+			}
 		}
 
 		public void Dispose()
@@ -224,8 +232,8 @@ namespace Triton.Graphics
 						{
 							var uniformHandle = reader.ReadInt32();
 
-							var m = reader.ReadMatrix4();
-							RenderSystem.SetUniform(uniformHandle, ref m);
+							reader.ReadMatrix4(ref MatrixDeserializationCache[0]);
+							RenderSystem.SetUniformMatrix4(uniformHandle, 1, ref MatrixDeserializationCache[0].Row0.X);
 						}
 						break;
 					case OpCode.BindShaderVariableMatrix4Array:
@@ -233,38 +241,39 @@ namespace Triton.Graphics
 							var uniformHandle = reader.ReadInt32();
 
 							var count = reader.ReadInt32();
-							var m = new Matrix4[count];
 							for (var i = 0; i < count; i++)
-								m[i] = reader.ReadMatrix4();
-							RenderSystem.SetUniform(uniformHandle, ref m);
+							{
+								reader.ReadMatrix4(ref MatrixDeserializationCache[i]);
+							}
+							RenderSystem.SetUniformMatrix4(uniformHandle, count, ref MatrixDeserializationCache[0].Row0.X);
 						}
 						break;
 					case OpCode.BindShaderVariableInt:
 						{
 							var uniformHandle = reader.ReadInt32();
 							var v = reader.ReadInt32();
-							RenderSystem.SetUniform(uniformHandle, v);
+							RenderSystem.SetUniformInt(uniformHandle, v);
 						}
 						break;
 					case OpCode.BindShaderVariableFloat:
 						{
 							var uniformHandle = reader.ReadInt32();
 							var v = reader.ReadSingle();
-							RenderSystem.SetUniform(uniformHandle, v);
+							RenderSystem.SetUniformFloat(uniformHandle, v);
 						}
 						break;
 					case OpCode.BindShaderVariableVector4:
 						{
 							var uniformHandle = reader.ReadInt32();
 							var v = reader.ReadVector4();
-							RenderSystem.SetUniform(uniformHandle, ref v);
+							RenderSystem.SetUniformVector4(uniformHandle, 1, ref v.X);
 						}
 						break;
 					case OpCode.BindShaderVariableVector3:
 						{
 							var uniformHandle = reader.ReadInt32();
 							var v = reader.ReadVector3();
-							RenderSystem.SetUniform(uniformHandle, ref v);
+							RenderSystem.SetUniformVector3(uniformHandle, 1, ref v.X);
 						}
 						break;
 					case OpCode.BindShaderVariableVector3Array:
@@ -275,7 +284,7 @@ namespace Triton.Graphics
 							var v = new Vector3[count];
 							for (var i = 0; i < count; i++)
 								v[i] = reader.ReadVector3();
-							RenderSystem.SetUniform(uniformHandle, ref v);
+							RenderSystem.SetUniformVector3(uniformHandle, v.Length, ref v[0].X);
 						}
 						break;
 					case OpCode.BindShaderVariableVector4Array:
@@ -286,14 +295,14 @@ namespace Triton.Graphics
 							var v = new Vector4[count];
 							for (var i = 0; i < count; i++)
 								v[i] = reader.ReadVector4();
-							RenderSystem.SetUniform(uniformHandle, ref v);
+							RenderSystem.SetUniformVector4(uniformHandle, v.Length, ref v[0].X);
 						}
 						break;
 					case OpCode.BindShaderVariableVector2:
 						{
 							var uniformHandle = reader.ReadInt32();
 							var v = reader.ReadVector2();
-							RenderSystem.SetUniform(uniformHandle, ref v);
+							RenderSystem.SetUniformVector2(uniformHandle, 1, ref v.X);
 						}
 						break;
 					case OpCode.DrawMesh:

@@ -234,49 +234,34 @@ namespace Triton.Renderer
 			return GL.GetUniformLocation(programHandle, name);
 		}
 
-		public void SetUniform(int handle, float value)
+		public void SetUniformFloat(int handle, float value)
 		{
 			GL.Uniform1(handle, value);
 		}
 
-		public void SetUniform(int handle, int value)
+		public void SetUniformInt(int handle, int value)
 		{
 			GL.Uniform1(handle, value);
 		}
 
-		public void SetUniform(int handle, ref Vector2 value)
+		public void SetUniformVector2(int handle, int count, ref float value)
 		{
-			GL.Uniform2(handle, 1, ref value.X);
+			GL.Uniform2(handle, count, ref value);
 		}
 
-		public void SetUniform(int handle, ref Vector3 value)
+		public void SetUniformMatrix4(int handle, int count, ref float value)
 		{
-			GL.Uniform3(handle, 1, ref value.X);
+			GL.UniformMatrix4(handle, count, false, ref value);
 		}
 
-		public void SetUniform(int handle, ref Vector4 value)
+		public void SetUniformVector3(int handle, int count, ref float value)
 		{
-			GL.Uniform4(handle, 1, ref value.X);
+			GL.Uniform3(handle, count, ref value);
 		}
 
-		public void SetUniform(int handle, ref Matrix4 value)
+		public void SetUniformVector4(int handle, int count, ref float value)
 		{
-			GL.UniformMatrix4(handle, 1, false, ref value.Row0.X);
-		}
-
-		public void SetUniform(int handle, ref Matrix4[] value)
-		{
-			GL.UniformMatrix4(handle, value.Length, false, ref value[0].Row0.X);
-		}
-
-		public void SetUniform(int handle, ref Vector3[] value)
-		{
-			GL.Uniform3(handle, value.Length, ref value[0].X);
-		}
-
-		public void SetUniform(int handle, ref Vector4[] value)
-		{
-			GL.Uniform4(handle, value.Length, ref value[0].X);
+			GL.Uniform4(handle, count, ref value);
 		}
 
 		public void Clear(Triton.Vector4 clearColor, bool depth)
