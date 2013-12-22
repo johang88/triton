@@ -345,16 +345,6 @@ namespace Triton.Graphics
 		}
 
 		/// <summary>
-		/// Add a command to the render threads work queue
-		/// These commands will be proccesed once a rendering iteration has finnished
-		/// </summary>
-		/// <param name="workItem"></param>
-		public void AddCommandToWorkQueue(Action workItem)
-		{
-			ProcessQueue.Enqueue(workItem);
-		}
-
-		/// <summary>
 		/// Begin a new scene, this will reset the primary commnad buffer
 		/// </summary>
 		public void BeginScene()
