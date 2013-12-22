@@ -85,7 +85,7 @@ namespace Triton.Common
 				{
 					resource.State = ResourceLoadingState.Loading;
 
-					var task = new Task(() =>
+					Task.Factory.StartNew(() =>
 					{
 						loader.Load(resource, parameters, (r) =>
 						{
@@ -100,8 +100,6 @@ namespace Triton.Common
 								onLoaded(r);
 						});
 					});
-
-					task.Start();
 				}
 
 				return (TResource)resource;
