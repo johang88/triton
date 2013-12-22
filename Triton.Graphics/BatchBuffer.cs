@@ -173,7 +173,7 @@ namespace Triton.Graphics
 		/// <param name="uvSize">UV Size of the quad, relative to the UV position</param>
 		public void AddQuad(Vector2 position, Vector2 size, Vector2 uvPositon, Vector2 uvSize)
 		{
-			var firstIndex = DataCount / (3 + 3 + 3 + 2);
+			var firstIndex = DataCount / (VertexFormat.Size / sizeof(float));
 
 			AddVector3(position.X, position.Y, 0);
 			AddVector2(ref uvPositon);
@@ -193,7 +193,7 @@ namespace Triton.Graphics
 
 		public void AddQuad(Vector2 position, Vector2 size, Vector2 uvPositon, Vector2 uvSize, Vector4 color)
 		{
-			var firstIndex = DataCount / (3 + 3 + 3 + 2);
+			var firstIndex = DataCount / (VertexFormat.Size / sizeof(float));
 
 			AddVector3(position.X, position.Y, 0);
 			AddVector2(ref uvPositon);
