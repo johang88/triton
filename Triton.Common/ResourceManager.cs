@@ -34,12 +34,10 @@ namespace Triton.Common
 		private readonly ConcurrentDictionary<string, Resource> Resources = new ConcurrentDictionary<string, Resource>();
 		private readonly Dictionary<Type, IResourceLoader> ResourceLoaders = new Dictionary<Type, IResourceLoader>();
 		private bool Disposed = false;
-		private readonly Action<Action> AddItemToWorkQueue;
 		private object LoadingLock = new object();
 
-		public ResourceManager(Action<Action> addItemToWorkQueue)
+		public ResourceManager()
 		{
-			AddItemToWorkQueue = addItemToWorkQueue;
 		}
 
 		public void Dispose()
@@ -87,7 +85,7 @@ namespace Triton.Common
 				{
 					resource.State = ResourceLoadingState.Loading;
 
-					AddItemToWorkQueue(() =>
+					var task = new Task(() =>
 					{
 						loader.Load(resource, parameters, (r) =>
 						{
@@ -102,6 +100,8 @@ namespace Triton.Common
 								onLoaded(r);
 						});
 					});
+
+					task.Start();
 				}
 
 				return (TResource)resource;
@@ -139,10 +139,11 @@ namespace Triton.Common
 						Log.WriteLine("Unloaded {0} of type {1}", resource.Name, resource.GetType());
 					};
 
+					var task = new Task(unloadAction);
 					if (async)
-						AddItemToWorkQueue(unloadAction);
+						task.Start();
 					else
-						unloadAction();
+						task.RunSynchronously();
 				}
 			}
 		}

@@ -24,7 +24,6 @@ namespace Test
 		private Triton.Graphics.Backend Backend;
 		private Triton.Common.IO.FileSystem FileSystem;
 		private Triton.Common.ResourceManager ResourceManager;
-		private WorkerThread Worker = new WorkerThread();
 		private Thread UpdateThread;
 		private Triton.Physics.World PhysicsWorld;
 		private bool Running;
@@ -38,7 +37,7 @@ namespace Test
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File("Logs/Test.txt"));
 
 			FileSystem = new Triton.Common.IO.FileSystem();
-			ResourceManager = new Triton.Common.ResourceManager(Worker.AddItem);
+			ResourceManager = new Triton.Common.ResourceManager();
 
 			FileSystem.AddPackage("FileSystem", "../data");
 		}

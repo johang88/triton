@@ -14,7 +14,6 @@ namespace Triton.Game
 		public Triton.Common.IO.FileSystem FileSystem { get; private set; }
 		public Triton.Common.ResourceManager ResourceManager { get; private set; }
 
-		public WorkerThread WorkerThread { get; private set; }
 		private Thread UpdateThread { get; set; }
 
 		public bool Running { get; set; }
@@ -44,10 +43,8 @@ namespace Triton.Game
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File(string.Format("{0}/{1}.txt", logPath, name)));
 
-			WorkerThread = new WorkerThread();
-
 			FileSystem = new Triton.Common.IO.FileSystem();
-			ResourceManager = new Triton.Common.ResourceManager(WorkerThread.AddItem);
+			ResourceManager = new Triton.Common.ResourceManager();
 
 			MountFileSystem();
 		}
