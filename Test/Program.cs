@@ -284,9 +284,6 @@ namespace Test
 					Backend.EndPass();
 				}
 
-				spriteBatch.RenderQuad(texture, Vector2.Zero, new Vector2(512, 512));
-				spriteBatch.Render(1280, 720);
-
 				Backend.EndScene();
 
 				Thread.Sleep(1);
