@@ -29,6 +29,6 @@ void main()
 {
 	vec4 diffuse = texture2D(samplerDiffuse, texCoord) * color;
 	
-	oColor = vec4(1, 0, 1, 1);
+	oColor = diffuse;
 }
 #endif
