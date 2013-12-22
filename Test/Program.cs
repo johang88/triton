@@ -37,8 +37,6 @@ namespace Test
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File("Logs/Test.txt"));
 
-			Worker = new WorkerThread();
-
 			FileSystem = new Triton.Common.IO.FileSystem();
 			ResourceManager = new Triton.Common.ResourceManager(Worker.AddItem);
 
