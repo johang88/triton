@@ -16,6 +16,7 @@ namespace Triton
 		public float W;
 
 		public static readonly Vector4 Zero = new Vector4(0, 0, 0, 0);
+		public static readonly Vector4 One = new Vector4(1, 1, 1, 1);
 		public static readonly Vector4 UnitX = new Vector4(1, 0, 0, 0);
 		public static readonly Vector4 UnitY = new Vector4(0, 1, 0, 0);
 		public static readonly Vector4 UnitZ = new Vector4(0, 0, 1, 0);
