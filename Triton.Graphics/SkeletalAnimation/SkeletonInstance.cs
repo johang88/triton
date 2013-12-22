@@ -94,7 +94,7 @@ namespace Triton.Graphics.SkeletalAnimation
 				var keyFrame = CurrentAnimation.Tracks[t].KeyFrames[keyFrameIndex];
 				var transform = keyFrame.Transform;
 
-				// Interpolate between key frames if neccecary<
+				// Interpolate between key frames if neccecary
 				if (keyFrameIndex < CurrentAnimation.Tracks[t].KeyFrames.Length - 1)
 				{
 					var keyFrame2 = CurrentAnimation.Tracks[t].KeyFrames[keyFrameIndex + 1];
@@ -104,13 +104,16 @@ namespace Triton.Graphics.SkeletalAnimation
 					{
 						alpha = alpha / (keyFrame2.Time - keyFrame.Time);
 
-						transform.Orientation = Quaternion.Slerp(keyFrame.Transform.Orientation, keyFrame2.Transform.Orientation, alpha);
-						transform.Position = Vector3.Lerp(keyFrame.Transform.Position, keyFrame2.Transform.Position, alpha);
+						Quaternion.Slerp(ref keyFrame.Transform.Orientation, ref keyFrame2.Transform.Orientation, alpha, out transform.Orientation);
+						Vector3.Lerp(ref keyFrame.Transform.Position, ref keyFrame2.Transform.Position, alpha, out transform.Position);
 					}
 				}
 
-				BoneTransforms[index].Orientation = Skeleton.BindPose[index].Orientation * transform.Orientation;
-				BoneTransforms[index].Position = Vector3.Transform(transform.Position, Skeleton.BindPose[index].Orientation) + Skeleton.BindPose[index].Position;
+				Quaternion.Multiply(ref Skeleton.BindPose[index].Orientation, ref transform.Orientation, out BoneTransforms[index].Orientation);
+
+				Vector3 transformedPosition;
+				Vector3.Transform(ref transform.Position, ref Skeleton.BindPose[index].Orientation, out transformedPosition);
+				Vector3.Add(ref transformedPosition, ref Skeleton.BindPose[index].Position, out BoneTransforms[index].Position);
 			}
 
 			WorldTransforms[0] = BoneTransforms[0];
@@ -119,20 +122,31 @@ namespace Triton.Graphics.SkeletalAnimation
 			for (var i = 1; i < BoneTransforms.Length; i++)
 			{
 				var parentIndex = Skeleton.BoneParents[i];
-				WorldTransforms[i].Orientation = WorldTransforms[parentIndex].Orientation * BoneTransforms[i].Orientation;
-				WorldTransforms[i].Position = Vector3.Transform(BoneTransforms[i].Position, WorldTransforms[parentIndex].Orientation) + WorldTransforms[parentIndex].Position;
+				
+				Quaternion.Multiply(ref WorldTransforms[parentIndex].Orientation, ref BoneTransforms[i].Orientation, out WorldTransforms[i].Orientation);
+
+				Vector3 transformedPosition;
+				Vector3.Transform(ref BoneTransforms[i].Position, ref WorldTransforms[parentIndex].Orientation, out transformedPosition);
+				Vector3.Add(ref transformedPosition, ref WorldTransforms[parentIndex].Position, out WorldTransforms[i].Position);
 			}
 
 			// Calculate final bone matrix
 			for (var i = 0; i < WorldTransforms.Length; i++)
 			{
-				Quaternion orientation = WorldTransforms[i].Orientation * InverseTransforms[i].Orientation;
-				Vector3 position = WorldTransforms[i].Position + Vector3.Transform(InverseTransforms[i].Position, orientation);
+				Quaternion orientation;
+				Quaternion.Multiply(ref  WorldTransforms[i].Orientation, ref InverseTransforms[i].Orientation, out orientation);
+
+				Vector3 transformedPosition;
+				Vector3.Transform(ref InverseTransforms[i].Position, ref orientation, out transformedPosition);
+
+				Vector3 position;
+				Vector3.Add(ref transformedPosition, ref WorldTransforms[i].Position, out position);
 
 				Matrix4 translationMatrix;
 				Matrix4.CreateTranslation(ref position, out translationMatrix);
 
-				Matrix4 rotationMatrix = Matrix4.Rotate(orientation);
+				Matrix4 rotationMatrix;
+				Matrix4.Rotate(ref orientation, out rotationMatrix);
 
 				Matrix4.Mult(ref rotationMatrix, ref translationMatrix, out FinalBoneTransforms[i]);
 			}

@@ -72,7 +72,7 @@ namespace Triton
 			}
 		}
 
-		public static void CreateFromAxisAngle(Vector3 axis, float angle, out Matrix4 result)
+		public static void CreateFromAxisAngle(ref Vector3 axis, float angle, out Matrix4 result)
 		{
 			float cos = (float)System.Math.Cos(-angle);
 			float sin = (float)System.Math.Sin(-angle);
@@ -86,10 +86,10 @@ namespace Triton
 								 0, 0, 0, 1);
 		}
 
-		public static Matrix4 CreateFromAxisAngle(Vector3 axis, float angle)
+		public static Matrix4 CreateFromAxisAngle(ref Vector3 axis, float angle)
 		{
 			Matrix4 result;
-			CreateFromAxisAngle(axis, angle, out result);
+			CreateFromAxisAngle(ref axis, angle, out result);
 			return result;
 		}
 
@@ -503,7 +503,16 @@ namespace Triton
 			Vector3 axis;
 			float angle;
 			q.ToAxisAngle(out axis, out angle);
-			return CreateFromAxisAngle(axis, angle);
+			return CreateFromAxisAngle(ref axis, angle);
+		}
+
+		public static void Rotate(ref Quaternion q, out Matrix4 m)
+		{
+			Vector3 axis;
+			float angle;
+			q.ToAxisAngle(out axis, out angle);
+
+			CreateFromAxisAngle(ref axis, angle, out m);
 		}
 
 		public static Matrix4 Transpose(Matrix4 mat)

@@ -331,20 +331,20 @@ namespace Triton
 		/// <param name="q2">The second quaternion</param>
 		/// <param name="blend">The blend factor</param>
 		/// <returns>A smooth blend between the given quaternions</returns>
-		public static Quaternion Slerp(Quaternion q1, Quaternion q2, float blend)
+		public static void Slerp(ref Quaternion q1, ref Quaternion q2, float blend, out Quaternion res)
 		{
 			// if either input is zero, return the other.
 			if (q1.LengthSquared == 0.0f)
 			{
 				if (q2.LengthSquared == 0.0f)
 				{
-					return Identity;
+					res = Identity;
 				}
-				return q2;
+				res = q2;
 			}
 			else if (q2.LengthSquared == 0.0f)
 			{
-				return q1;
+				res = q1;
 			}
 
 
@@ -353,7 +353,7 @@ namespace Triton
 			if (cosHalfAngle >= 1.0f || cosHalfAngle <= -1.0f)
 			{
 				// angle = 0.0f, so just return one input.
-				return q1;
+				res = q1;
 			}
 			else if (cosHalfAngle < 0.0f)
 			{
@@ -382,9 +382,9 @@ namespace Triton
 
 			Quaternion result = new Quaternion(blendA * q1.Xyz + blendB * q2.Xyz, blendA * q1.W + blendB * q2.W);
 			if (result.LengthSquared > 0.0f)
-				return Normalize(result);
+				Normalize(ref result, out res);
 			else
-				return Identity;
+				res = Identity;
 		}
 
 		/// <summary>
