@@ -93,7 +93,7 @@ namespace Triton.Graphics
 
 		public void EndInline(Backend backend)
 		{
-			backend.UpdateMeshInline(MeshHandle, TriangleCount, VertexData, IndexData, true);
+			backend.UpdateMeshInline(MeshHandle, TriangleCount, DataCount, TriangleCount, VertexData, IndexData, true);
 		}
 
 		public void AddVector2(float x, float y)

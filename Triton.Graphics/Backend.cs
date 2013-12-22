@@ -575,22 +575,22 @@ namespace Triton.Graphics
 		/// <summary>
 		/// Uploads a mesh inline in the command stream, UpdateMesh() is preferred if it not neccecary to change a mesh while rendering.
 		/// </summary>
-		public void UpdateMeshInline(int handle, int triangleCount, float[] vertexData, int[] indexData, bool stream)
+		public void UpdateMeshInline(int handle, int triangleCount, int vertexCount, int indexCount, float[] vertexData, int[] indexData, bool stream)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.UpdateMesh);
 			PrimaryBuffer.Writer.Write(handle);
 			PrimaryBuffer.Writer.Write(triangleCount);
 			PrimaryBuffer.Writer.Write(stream);
 
-			PrimaryBuffer.Writer.Write(vertexData.Length);
-			PrimaryBuffer.Writer.Write(indexData.Length);
+			PrimaryBuffer.Writer.Write(vertexCount);
+			PrimaryBuffer.Writer.Write(indexCount);
 
-			for (var i = 0; i < vertexData.Length; i++)
+			for (var i = 0; i < vertexCount; i++)
 			{
 				PrimaryBuffer.Writer.Write(vertexData[i]);
 			}
 
-			for (var i = 0; i < indexData.Length; i++)
+			for (var i = 0; i < indexCount; i++)
 			{
 				PrimaryBuffer.Writer.Write(indexData[i]);
 			}
