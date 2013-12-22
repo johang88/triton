@@ -15,6 +15,7 @@ namespace Triton.Graphics.Resources
 			resourceManager.AddResourceLoader<Mesh>(new MeshLoader(backend, resourceManager, fileSystem));
 			resourceManager.AddResourceLoader<SkeletalAnimation.Skeleton>(new SkeletonLoader(fileSystem));
 			resourceManager.AddResourceLoader<Material>(new MaterialLoader(resourceManager, fileSystem));
+			resourceManager.AddResourceLoader<BitmapFont>(new BitmapFontLoader(resourceManager, fileSystem));
 		}
 	}
 }

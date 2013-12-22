@@ -168,6 +168,8 @@ namespace Test
 			var texture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/misc_WoodenCrate_1k_d");
 			var spriteBatch = Backend.CreateSpriteBatch();
 
+			var font = ResourceManager.Load<Triton.Graphics.Resources.BitmapFont>("fonts/system_font");
+
 			var accumulator = 0.0f;
 			var physicsStepSize = 1.0f / 100.0f;
 
@@ -283,6 +285,9 @@ namespace Test
 					PhysicsWorld.DrawDebugInfo(camera);
 					Backend.EndPass();
 				}
+
+				font.DrawText(spriteBatch, new Vector2(128, 128), Vector4.One, "Hello, world!");
+				spriteBatch.Render(1280, 720);
 
 				Backend.EndScene();
 

@@ -85,6 +85,8 @@
     <Compile Include="MeshInstance.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RenderTarget.cs" />
+    <Compile Include="Resources\BitmapFont.cs" />
+    <Compile Include="Resources\BitmapFontLoader.cs" />
     <Compile Include="Resources\Material.cs" />
     <Compile Include="Resources\MaterialLoader.cs" />
     <Compile Include="Resources\Materials\StandardMaterial.cs" />
