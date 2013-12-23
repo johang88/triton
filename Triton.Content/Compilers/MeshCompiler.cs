@@ -20,6 +20,7 @@ namespace Triton.Content.Compilers
 		{
 			ImporterFactory = new Factory<string, IMeshImporter>();
 			ImporterFactory.Add(".xml", () => new Meshes.Converters.OgreXmlConverter());
+			ImporterFactory.Add(".dae", () => new Meshes.Converters.AssimpConverter());
 		}
 
 		public void Compile(string inputPath, string outputPath)
@@ -30,7 +31,7 @@ namespace Triton.Content.Compilers
 			string extension = Path.GetExtension(inputPath.Replace(".mesh.xml", ".xml")).ToLowerInvariant();
 
 			var importer = ImporterFactory.Create(extension);
-			var mesh = importer.Import(File.OpenRead(inputPath));
+			var mesh = importer.Import(inputPath);
 
 			using (var stream = File.Open(outputPath, FileMode.Create))
 			using (var writer = new BinaryWriter(stream))

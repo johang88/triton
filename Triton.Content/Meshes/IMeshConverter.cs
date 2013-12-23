@@ -8,6 +8,6 @@ namespace Triton.Content.Meshes
 {
 	interface IMeshImporter
 	{
-		Mesh Import(System.IO.Stream stream);
+		Mesh Import(string filename);
 	}
 }

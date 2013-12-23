@@ -12,8 +12,9 @@ namespace Triton.Content.Meshes.Converters
 {
 	class OgreXmlConverter : IMeshImporter
 	{
-		public Mesh Import(Stream stream)
+		public Mesh Import(string filename)
 		{
+			using (var stream = System.IO.File.OpenRead(filename))
 			using (var reader = XmlReader.Create(stream))
 			{
 				var mesh = new Mesh();
