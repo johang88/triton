@@ -157,7 +157,6 @@ namespace Test
 			hdrRenderer.WhitePoint = new Vector3(1, 1, 1) * 11.1f;
 
 			var rng = new Random();
-			var elapsedTime = 0.0f;
 
 			bool debugPhysics = false;
 			bool isBDown = false;
@@ -173,8 +172,13 @@ namespace Test
 			var accumulator = 0.0f;
 			var physicsStepSize = 1.0f / 100.0f;
 
+			var frameCount = 0L;
+			var elapsedTime = 0.0f;
+
 			while (Running)
 			{
+				frameCount++;
+
 				var deltaTime = (float)stopWatch.Elapsed.TotalSeconds;
 				elapsedTime += deltaTime;
 
@@ -286,7 +290,10 @@ namespace Test
 					Backend.EndPass();
 				}
 
-				font.DrawText(spriteBatch, new Vector2(128, 128), Vector4.One, "Hello, world!");
+				var averageFPS = frameCount / elapsedTime;
+				var fps = 1.0f / deltaTime;
+
+				font.DrawText(spriteBatch, new Vector2(128, 128), Vector4.One, "Frame time: {0:0.00}ms\nAverage FPS: {1:0}\nFPS:{2:0}", deltaTime * 1000.0f, averageFPS, fps);
 				spriteBatch.Render(1280, 720);
 
 				Backend.EndScene();

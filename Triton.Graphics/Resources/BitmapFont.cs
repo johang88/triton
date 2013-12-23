@@ -18,15 +18,27 @@ namespace Triton.Graphics.Resources
 		{
 		}
 
-		public void DrawText(SpriteBatch sprite, Vector2 position, Vector4 color, string text, params string[] parameters)
+		public void DrawText(SpriteBatch sprite, Vector2 position, Vector4 color, string text, params object[] parameters)
 		{
 			if (parameters.Length > 0)
 			{
 				text = string.Format(text, parameters);
 			}
 
+			var startX = position.X;
+
 			foreach (var c in text)
 			{
+				if (c == '\t')
+				{
+					position.X += Glyphs.First().Value.XAdvance * 4;
+				}
+				else if (c == '\n')
+				{
+					position.X = startX;
+					position.Y -= LineHeight;
+				}
+
 				if (!Glyphs.ContainsKey(c))
 					continue;
 
