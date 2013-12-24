@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace Triton.Common
 {
@@ -24,7 +25,7 @@ namespace Triton.Common
 		{
 			if (!Lookup.ContainsKey(hashedString))
 			{
-				Lookup.Add(hashedString, value);
+				Lookup.TryAdd(hashedString, value);
 			}
 			else if (value != Lookup[hashedString])
 			{
@@ -32,6 +33,6 @@ namespace Triton.Common
 			}
 		}
 
-		static Dictionary<HashedString, string> Lookup = new Dictionary<HashedString, string>();
+		static ConcurrentDictionary<HashedString, string> Lookup = new ConcurrentDictionary<HashedString, string>();
 	}
 }
