@@ -27,18 +27,21 @@ namespace Triton.Graphics.Resources
 
 			var startX = position.X;
 
-			foreach (var c in text)
+			for (var i = 0; i < text.Length; i++ )
 			{
-				if (c == '\t')
-				{
-					position.X += Glyphs.First().Value.XAdvance * 4;
-				}
-				else if (c == '\n')
-				{
-					position.X = startX;
-					position.Y -= LineHeight;
-				}
+				var c = text[i];
 
+				switch (c)
+				{
+					case '\t':
+						position.X += Glyphs.First().Value.XAdvance * 4;
+						break;
+					case '\n':
+						position.X = startX;
+						position.Y -= LineHeight;
+						break;
+				}
+				
 				if (!Glyphs.ContainsKey(c))
 					continue;
 
