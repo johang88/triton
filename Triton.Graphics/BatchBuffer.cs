@@ -191,24 +191,24 @@ namespace Triton.Graphics
 			AddTriangle(firstIndex, firstIndex + 3, firstIndex + 2);
 		}
 
-		public void AddQuad(Vector2 position, Vector2 size, Vector2 uvPositon, Vector2 uvSize, Vector4 color)
+		public void AddQuadInverseUV(Vector2 position, Vector2 size, Vector2 uvPositon, Vector2 uvSize, Vector4 color)
 		{
 			var firstIndex = DataCount / (VertexFormat.Size / sizeof(float));
 
 			AddVector3(position.X, position.Y, 0);
-			AddVector2(ref uvPositon);
-			AddVector4(ref color);
-
-			AddVector3(position.X, position.Y + size.Y, 0);
 			AddVector2(uvPositon.X, uvPositon.Y + uvSize.Y);
 			AddVector4(ref color);
 
+			AddVector3(position.X, position.Y + size.Y, 0);
+			AddVector2(ref uvPositon);
+			AddVector4(ref color);
+
 			AddVector3(position.X + size.X, position.Y + size.Y, 0);
-			AddVector2(uvPositon.X + uvSize.X, uvPositon.Y + uvSize.Y);
+			AddVector2(uvPositon.X + uvSize.X, uvPositon.Y);
 			AddVector4(ref color);
 
 			AddVector3(position.X + size.X, position.Y, 0);
-			AddVector2(uvPositon.X + uvSize.X, uvPositon.Y);
+			AddVector2(uvPositon.X + uvSize.X, uvPositon.Y + uvSize.Y);
 			AddVector4(ref color);
 
 			AddTriangle(firstIndex, firstIndex + 2, firstIndex + 1);

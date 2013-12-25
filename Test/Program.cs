@@ -293,13 +293,7 @@ namespace Test
 				var averageFPS = frameCount / elapsedTime;
 				var fps = 1.0f / deltaTime;
 
-				font.DrawText(spriteBatch, new Vector2(128, 128), Vector4.One, "Frame time: {0:0.00}ms\nAverage FPS: {1:0}\nFPS:{2:0}", deltaTime * 1000.0f, averageFPS, fps);
-
-				font.DrawText(spriteBatch, new Vector2(300, 650), Vector4.One, "Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nUt in auctor arcu. \nProin ornare vestibulum vehicula. \nMaecenas at feugiat orci. \nNullam facilisis semper pretium. \nVivamus a posuere magna. \nMorbi sagittis, elit vel placerat aliquet, mi mi pretium sapien, in rhoncus nisl urna non dui. \nMauris dignissim commodo magna, id posuere ligula fringilla ut. Sed in hendrerit massa, ut pulvinar ligula. \nVestibulum magna metus, auctor eget erat quis, vestibulum varius quam. \nVestibulum eros velit, tincidunt vel ligula at, scelerisque tempor felis. \nIn sagittis placerat adipiscing. \nCurabitur rutrum nisi vel massa cursus hendrerit. ");
-
-				font.DrawText(spriteBatch, new Vector2(128, 150), Vector4.One, "0123456789!\"#¤%&/()=?abcdefghijklmnopqrstuvxyzåäöABCDEFGHIJKLMNOPQRSTUVXZÅÄÖ,.-;:_<>|");
-
-				font.DrawText(spriteBatch, new Vector2(300, 400), Vector4.One, "int main(int argc, char** argv) { \n\tprintf(\"Hello, world\");\n\treturn 0;\n}");
+				font.DrawText(spriteBatch, new Vector2(32, 32), Vector4.One, "Frame time: {0:0.00}ms\nAverage FPS: {1:0}\nFPS:{2:0}", deltaTime * 1000.0f, averageFPS, fps);
 
 				spriteBatch.Render(1280, 720);
 

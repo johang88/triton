@@ -98,7 +98,7 @@ namespace Triton.Graphics
 
 			Resources.Texture lastTexture = null;
 
-			var projectionMatrix = Matrix4.CreateOrthographicOffCenter(0.0f, width, 0, height, -1.0f, 1.0f);
+			var projectionMatrix = Matrix4.CreateOrthographicOffCenter(0.0f, width, height, 0.0f, -1.0f, 1.0f);
 
 			for (var i = 0; i < LastQuad; i++)
 			{
@@ -120,13 +120,13 @@ namespace Triton.Graphics
 					lastTexture = quad.Texture;
 				}
 
-				Buffer.AddQuad(quad.Position, quad.Size, quad.UvPositon, quad.UvSize, quad.Color);
+				Buffer.AddQuadInverseUV(quad.Position, quad.Size, quad.UvPositon, quad.UvSize, quad.Color);
 			}
 
 			Buffer.EndInline(Backend);
 
 			// Render final batch
-			Backend.BeginInstance(Shader.Handle, new int[] { lastTexture.Handle }, true, false, false, Renderer.BlendingFactorSrc.SrcAlpha, Renderer.BlendingFactorDest.OneMinusSrcAlpha);
+			Backend.BeginInstance(Shader.Handle, new int[] { lastTexture.Handle }, true, false, false, Renderer.BlendingFactorSrc.SrcAlpha, Renderer.BlendingFactorDest.OneMinusSrcAlpha, Renderer.CullFaceMode.Front);
 			Backend.BindShaderVariable(Params.HandleDiffuseTexture, 0);
 			Backend.BindShaderVariable(Params.HandleModelViewProjection, ref projectionMatrix);
 			Backend.DrawMesh(Buffer.MeshHandle);

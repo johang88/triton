@@ -38,7 +38,7 @@ namespace Triton.Graphics.Resources
 						break;
 					case '\n':
 						position.X = startX;
-						position.Y -= LineHeight;
+						position.Y += LineHeight;
 						break;
 				}
 				
