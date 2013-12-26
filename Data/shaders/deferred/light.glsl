@@ -11,7 +11,11 @@ void main()
 {
 	texCoord = iTexCoord;
 	
+#if defined(SPOT_LIGHT) || defined(POINT_LIGHT)
 	gl_Position = modelViewProjection * vec4(iPosition, 1);
+#else
+	gl_Position = vec4(iPosition, 1);
+#endif
 }
 
 #else
