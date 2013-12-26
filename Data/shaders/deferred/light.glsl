@@ -61,7 +61,7 @@ void main()
 	vec3 diffuse = texture2D(samplerDiffuse, project).xyz;
 	vec3 position = texture2D(samplerPosition, project).xyz;
 	
-	float specularPower = 32 * specularColor.w;
+	float specularPower = 128 * specularColor.w;
 	
 #if defined(SPOT_LIGHT) || defined(POINT_LIGHT)
 	vec3 lightDir = lightPosition - position;
