@@ -8,22 +8,38 @@ using System.Diagnostics;
 
 namespace Triton.Content.Compilers
 {
+	public class TextureSettings
+	{
+		public bool IsNormalMap { get; set; }
+	}
+
 	public class TextureCompiler : ICompiler
 	{
-		public void Compile(string inputPath, string outputPath)
+		public void Compile(string inputPath, string outputPath, ContentData contentData)
 		{
+			var filename = Path.GetFileNameWithoutExtension(inputPath);
 			var extension = Path.GetExtension(inputPath);
+
+			outputPath += ".dds";
+
+			TextureSettings settings;
+
+			if (contentData.Settings == null || !(contentData.Settings is TextureSettings))
+			{
+				settings = new TextureSettings();
+				contentData.Settings = settings;
+
+				settings.IsNormalMap = filename.EndsWith("_n");
+			}
+			else
+			{
+				settings = contentData.Settings as TextureSettings;
+			}
 
 			if (extension != ".dds")
 			{
-				outputPath = Path.ChangeExtension(outputPath, "dds");
-
-				var filename = Path.GetFileNameWithoutExtension(inputPath);
-
-				var isNormal = filename.EndsWith("_n");
-
 				var arguments = "";
-				if (isNormal)
+				if (settings.IsNormalMap)
 				{
 					arguments += "-normal ";
 					arguments += "-bc3 ";
@@ -39,7 +55,8 @@ namespace Triton.Content.Compilers
 
 				var startInfo = new ProcessStartInfo(@"nvcompress", arguments);
 				startInfo.UseShellExecute = false;
-				Process.Start(startInfo);
+				var process = Process.Start(startInfo);
+				process.WaitForExit();
 			}
 			else
 			{

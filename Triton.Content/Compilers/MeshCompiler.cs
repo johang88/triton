@@ -23,10 +23,9 @@ namespace Triton.Content.Compilers
 			ImporterFactory.Add(".dae", () => new Meshes.Converters.AssimpConverter());
 		}
 
-		public void Compile(string inputPath, string outputPath)
+		public void Compile(string inputPath, string outputPath, ContentData contentData)
 		{
-			outputPath = outputPath.Replace(".mesh.xml", ".xml");
-			outputPath = Path.ChangeExtension(outputPath, "mesh");
+			outputPath += ".mesh";
 
 			string extension = Path.GetExtension(inputPath.Replace(".mesh.xml", ".xml")).ToLowerInvariant();
 

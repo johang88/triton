@@ -22,10 +22,9 @@ namespace Triton.Content.Compilers
 			ImporterFactory.Add(".xml", () => new Skeletons.Converters.OgreXmlConverter());
 		}
 
-		public void Compile(string inputPath, string outputPath)
+		public void Compile(string inputPath, string outputPath, ContentData contentData)
 		{
-			outputPath = outputPath.Replace(".skeleton.xml", ".xml");
-			outputPath = Path.ChangeExtension(outputPath, "skeleton");
+			outputPath += ".skeleton";
 
 			string extension = Path.GetExtension(inputPath.Replace(".skeleton.xml", ".xml")).ToLowerInvariant();
 
@@ -77,7 +76,7 @@ namespace Triton.Content.Compilers
 					foreach (var track in animation.Tracks)
 					{
 						writer.Write(track.BoneIndex);
-						
+
 						// Key frame count
 						writer.Write(track.KeyFrames.Count);
 

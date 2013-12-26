@@ -6,25 +6,30 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
 using Triton.Common;
+using Triton.Content;
+using ServiceStack.Text;
+using ServiceStack.Text.Jsv;
 
 namespace ContentProcessor
 {
 	class Program
 	{
-		private const string CacheFilename = "___cache.dat";
+		private const string ContentDBFilename = "content_db.v";
 		private const string MeshConverterPath = "MeshConverter.exe";
 
-		private readonly Dictionary<string, long> Cache = new Dictionary<string, long>();
 		private readonly ManualResetEvent MeshProcessDone = new ManualResetEvent(false);
 
 		private readonly Triton.Common.CommandLineApplication Application;
 
 		private readonly Factory<string, Triton.Content.ICompiler> Compilers = new Factory<string, Triton.Content.ICompiler>();
+		private Dictionary<string, ContentData> ContentDB = new Dictionary<string, ContentData>();
 
 		public Program(string[] parameters)
 		{
 			Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
 			Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File("Logs/ContentProcessor.txt"));
+
+			ServiceStack.Text.JsConfig.IncludeTypeInfo = true;
 
 			Compilers.Add(".mesh", () => new Triton.Content.Compilers.MeshCompiler());
 			Compilers.Add(".mesh.xml", () => new Triton.Content.Compilers.MeshCompiler());
@@ -65,73 +70,60 @@ namespace ContentProcessor
 				Directory.CreateDirectory(outputDir);
 			}
 
-			if (!noCache)
+			var dbPath = Path.Combine(inputDir, ContentDBFilename);
+			if (File.Exists(dbPath))
 			{
-				LoadCache();
+				using (var stream = File.Open(dbPath, FileMode.Open, FileAccess.Read, FileShare.Delete))
+				{
+					ContentDB = TypeSerializer.DeserializeFromStream<Dictionary<string, ContentData>>(stream);
+				}
 			}
 
 			foreach (var file in Directory.GetFiles(inputDir, searchPattern, SearchOption.AllDirectories))
 			{
-				if (Cache.ContainsKey(file) && (File.GetLastWriteTime(file).Ticks - Cache[file]) <= 0)
-					continue;
+				var contentName = file.Replace(inputDir, "").Substring(1).Replace('\\', '/');
 
-				if (Cache.ContainsKey(file))
-					Cache[file] = File.GetLastWriteTime(file).Ticks;
-				else
-					Cache.Add(file, File.GetLastWriteTime(file).Ticks);
-
-				var fileOutputPath = Path.Combine(outputDir, file.Replace(inputDir, "").Substring(1));
+				var fileWithoutExtension = Path.GetFileNameWithoutExtension(file);
 
 				var extension = Path.GetExtension(file).ToLowerInvariant();
 				if (extension == ".xml") // Get sub extension
+				{
 					extension = Path.GetExtension(Path.GetFileNameWithoutExtension(file)) + ".xml";
+					fileWithoutExtension = Path.GetFileNameWithoutExtension(fileWithoutExtension);
+				}
 
-				var fileOutputDirectory = Path.GetDirectoryName(fileOutputPath);
+				fileWithoutExtension = Path.Combine(Path.GetDirectoryName(file), fileWithoutExtension);
+
+				ContentData content;
+				if (!ContentDB.TryGetValue(contentName, out content))
+				{
+					content = new ContentData();
+					content.OutputPath = fileWithoutExtension.Replace(inputDir, "").Substring(1).Replace('\\', '/');
+					ContentDB.Add(contentName, content);
+				}
+
+				if (!noCache && File.GetLastWriteTime(file) <= content.LastCompilation)
+					continue;
+
+				var outputPath = Path.Combine(outputDir, content.OutputPath);
+
+				var fileOutputDirectory = Path.GetDirectoryName(outputPath);
 				if (!Directory.Exists(fileOutputDirectory))
 				{
 					Directory.CreateDirectory(fileOutputDirectory);
 				}
 
-				var compiler = Compilers.Create(extension);
-				compiler.Compile(file, fileOutputPath);
-
-				Log.WriteLine("Processed {0}", file);
-			}
-
-			WriteCache();
-		}
-
-		void LoadCache()
-		{
-			if (!File.Exists(CacheFilename))
-				return;
-
-			using (var stream = File.Open(CacheFilename, FileMode.Open, FileAccess.Read, FileShare.Delete))
-			using (var reader = new StreamReader(stream))
-			{
-				while (!reader.EndOfStream)
+				if (Compilers.Exists(extension))
 				{
-					var cacheLine = reader.ReadLine().Split('|');
-					if (cacheLine.Length != 2)
-						continue;
+					var compiler = Compilers.Create(extension);
+					compiler.Compile(file, outputPath, content);
 
-					Cache.Add(cacheLine[0], long.Parse(cacheLine[1]));
+					Log.WriteLine("Processed {0}", file);
+					content.LastCompilation = DateTime.Now;
 				}
 			}
 
-			Log.WriteLine("Cache loaded");
-		}
-
-		void WriteCache()
-		{
-			using (var stream = File.Open(CacheFilename, FileMode.Create, FileAccess.Write, FileShare.Delete))
-			using (var writer = new StreamWriter(stream))
-			{
-				foreach (var entry in Cache)
-				{
-					writer.WriteLine("{0}|{1}", entry.Key, entry.Value);
-				}
-			}
+			File.WriteAllText(dbPath, ContentDB.ToJsv());
 		}
 
 		static void Main(string[] args)
