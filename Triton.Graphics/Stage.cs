@@ -29,7 +29,7 @@ namespace Triton.Graphics
 			return AddMesh(ResourceManager.Load<Resources.Mesh>(mesh));
 		}
 
-		private MeshInstance AddMesh(Resources.Mesh mesh)
+		public MeshInstance AddMesh(Resources.Mesh mesh)
 		{
 			var instance = new MeshInstance
 			{
