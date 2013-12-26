@@ -70,7 +70,7 @@ namespace Triton.Graphics
 			RenderQuad(texture, position, size, uvPosition, uvSize, Vector4.One);
 		}
 
-		public void RenderQuad(Resources.Texture texture, Vector2 position, Vector2 size, Vector2 uvPosition, Vector2 uvSize, Vector4 color)
+		public void RenderQuad(Resources.Texture texture, Vector2 position, Vector2 size, Vector2 uvPosition, Vector2 uvSize, Vector4 color, bool alphaBlend = true)
 		{
 			if (LastQuad == Quads.Count)
 			{
@@ -82,7 +82,7 @@ namespace Triton.Graphics
 			}
 
 			var quad = Quads[LastQuad++];
-			quad.Init(texture, position, size, uvPosition, uvSize, color);
+			quad.Init(texture, position, size, uvPosition, uvSize, color, alphaBlend);
 		}
 
 		public void Render(int width, int height)
@@ -97,19 +97,20 @@ namespace Triton.Graphics
 				return;
 
 			Resources.Texture lastTexture = null;
+			var lastAlpha = false;
 
 			var projectionMatrix = Matrix4.CreateOrthographicOffCenter(0.0f, width, height, 0.0f, -1.0f, 1.0f);
 
 			for (var i = 0; i < LastQuad; i++)
 			{
 				var quad = Quads[i];
-				if (lastTexture != quad.Texture)
+				if (lastTexture != quad.Texture || lastAlpha != quad.AlphaBlend)
 				{
 					if (lastTexture != null)
 					{
 						Buffer.EndInline(Backend);
-						
-						Backend.BeginInstance(Shader.Handle, new int[] { lastTexture.Handle }, true, false, false);
+
+						Backend.BeginInstance(Shader.Handle, new int[] { lastTexture.Handle }, lastAlpha, false, false, lastAlpha ? Renderer.BlendingFactorSrc.SrcAlpha : Renderer.BlendingFactorSrc.Zero, lastAlpha ? Renderer.BlendingFactorDest.OneMinusSrcAlpha : Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Front);
 						Backend.BindShaderVariable(Params.HandleDiffuseTexture, 0);
 						Backend.BindShaderVariable(Params.HandleModelViewProjection, ref projectionMatrix);
 						Backend.DrawMesh(Buffer.MeshHandle);
@@ -118,6 +119,7 @@ namespace Triton.Graphics
 
 					Buffer.Begin();
 					lastTexture = quad.Texture;
+					lastAlpha = quad.AlphaBlend;
 				}
 
 				Buffer.AddQuadInverseUV(quad.Position, quad.Size, quad.UvPositon, quad.UvSize, quad.Color);
@@ -126,7 +128,7 @@ namespace Triton.Graphics
 			Buffer.EndInline(Backend);
 
 			// Render final batch
-			Backend.BeginInstance(Shader.Handle, new int[] { lastTexture.Handle }, true, false, false, Renderer.BlendingFactorSrc.SrcAlpha, Renderer.BlendingFactorDest.OneMinusSrcAlpha, Renderer.CullFaceMode.Front);
+			Backend.BeginInstance(Shader.Handle, new int[] { lastTexture.Handle }, lastAlpha, false, false, lastAlpha ? Renderer.BlendingFactorSrc.SrcAlpha : Renderer.BlendingFactorSrc.Zero, lastAlpha ? Renderer.BlendingFactorDest.OneMinusSrcAlpha : Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Front);
 			Backend.BindShaderVariable(Params.HandleDiffuseTexture, 0);
 			Backend.BindShaderVariable(Params.HandleModelViewProjection, ref projectionMatrix);
 			Backend.DrawMesh(Buffer.MeshHandle);
@@ -143,7 +145,7 @@ namespace Triton.Graphics
 
 		class QuadInfo
 		{
-			public void Init(Resources.Texture texture, Vector2 position, Vector2 size, Vector2 uvPosition, Vector2 uvSize, Vector4 color)
+			public void Init(Resources.Texture texture, Vector2 position, Vector2 size, Vector2 uvPosition, Vector2 uvSize, Vector4 color, bool alphaBlend)
 			{
 				Texture = texture;
 				Position = position;
@@ -151,6 +153,7 @@ namespace Triton.Graphics
 				UvPositon = uvPosition;
 				UvSize = uvSize;
 				Color = color;
+				AlphaBlend = alphaBlend;
 			}
 
 			public Resources.Texture Texture;
@@ -159,6 +162,7 @@ namespace Triton.Graphics
 			public Vector2 UvPositon;
 			public Vector2 UvSize;
 			public Vector4 Color;
+			public bool AlphaBlend;
 		}
 	}
 }

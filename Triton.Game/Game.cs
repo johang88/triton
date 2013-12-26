@@ -34,9 +34,13 @@ namespace Triton.Game
 		public Triton.Physics.World PhysicsWorld { get; private set; }
 
 		public float PhysicsStepSize = 1.0f / 100.0f;
-		public bool DebugPhysics = false;
 
 		public World.GameWorld GameWorld;
+
+		public Graphics.SpriteBatch DebugSprite;
+		public Graphics.Resources.BitmapFont DebugFont;
+
+		public DebugFlags DebugFlags;
 
 		public Game(string name, string logPath = "logs/")
 		{
@@ -148,12 +152,26 @@ namespace Triton.Game
 			var lightOutput = DeferredRenderer.Render(Stage, Camera);
 			HDRRenderer.Render(Camera, lightOutput);
 
-			if (DebugPhysics)
+			if ((DebugFlags & DebugFlags.Physics ) == DebugFlags.Physics)
 			{
 				GraphicsBackend.BeginPass(null, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 				PhysicsWorld.DrawDebugInfo(Camera);
 				GraphicsBackend.EndPass();
 			}
+
+			if ((DebugFlags & DebugFlags.GBuffer) == DebugFlags.GBuffer)
+			{
+				var textures = DeferredRenderer.GBuffer.Textures;
+				for (var i = 0; i < textures.Length; i++)
+				{
+					DebugSprite.RenderQuad(textures[i], new Vector2(129 * i + 1, 1), new Vector2(128, 128), Vector2.Zero, Vector2.One, Vector4.One, false);
+				}
+
+				DebugSprite.Render(Width, Height);
+			}
+
+			DebugFont.DrawText(DebugSprite, new Vector2(128, 128), Vector4.Zero, "Hello, wrodl!");
+			DebugSprite.Render(Width, Height);
 
 			GraphicsBackend.EndScene();
 		}
@@ -171,6 +189,8 @@ namespace Triton.Game
 		/// </summary>
 		protected virtual void LoadResources()
 		{
+			DebugFont = ResourceManager.Load<Triton.Graphics.Resources.BitmapFont>("fonts/system_font");
+			DebugSprite = GraphicsBackend.CreateSpriteBatch();
 		}
 
 		/// <summary>

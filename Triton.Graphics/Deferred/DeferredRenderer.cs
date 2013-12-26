@@ -26,12 +26,12 @@ namespace Triton.Graphics.Deferred
 
 		private Vector2 ScreenSize;
 
-		private RenderTarget GBuffer;
-		private RenderTarget LightAccumulation;
-		private RenderTarget Output;
-		private RenderTarget SSAOTarget1;
-		private RenderTarget SSAOTarget2;
-		private RenderTarget SpotShadowsRenderTarget;
+		public readonly RenderTarget GBuffer;
+		private readonly RenderTarget LightAccumulation;
+		private readonly RenderTarget Output;
+		private readonly RenderTarget SSAOTarget1;
+		private readonly RenderTarget SSAOTarget2;
+		private readonly RenderTarget SpotShadowsRenderTarget;
 
 		private BatchBuffer QuadMesh;
 		private Resources.Mesh UnitSphere;
