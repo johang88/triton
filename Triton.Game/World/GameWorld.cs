@@ -24,7 +24,9 @@ namespace Triton.Game.World
 
 		private int LastGameObjectId = 0;
 
-		public GameWorld(Stage stage, InputManager inputManager, ResourceManager resourceManager, Triton.Physics.World physicsWorld)
+		public Graphics.Camera Camera { get; private set; }
+
+		public GameWorld(Stage stage, InputManager inputManager, ResourceManager resourceManager, Triton.Physics.World physicsWorld, Graphics.Camera camera)
 		{
 			if (stage == null)
 				throw new ArgumentNullException("stage");
@@ -34,11 +36,14 @@ namespace Triton.Game.World
 				throw new ArgumentNullException("resourceManager");
 			if (physicsWorld == null)
 				throw new ArgumentNullException("physicsWorld");
+			if (camera == null)
+				throw new ArgumentNullException("camera");
 
 			Stage = stage;
 			InputManager = inputManager;
 			ResourceManager = resourceManager;
 			PhysicsWorld = physicsWorld;
+			Camera = camera;
 		}
 
 		/// <summary>

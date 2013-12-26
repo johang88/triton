@@ -96,7 +96,7 @@ namespace Triton.Game
 
 			InputManager = new Input.InputManager(GraphicsBackend.WindowBounds);
 
-			GameWorld = new World.GameWorld(Stage, InputManager, ResourceManager, PhysicsWorld);
+			GameWorld = new World.GameWorld(Stage, InputManager, ResourceManager, PhysicsWorld, Camera);
 
 			LoadResources();
 
