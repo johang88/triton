@@ -10,6 +10,7 @@ namespace Triton.Game
 	public enum DebugFlags
 	{
 		GBuffer = 1,
-		Physics = 2
+		Physics = 2,
+		RenderStats = 4
 	}
 }

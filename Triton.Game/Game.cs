@@ -42,6 +42,10 @@ namespace Triton.Game
 
 		public DebugFlags DebugFlags;
 
+		private long FrameCount = 0;
+		private float FrameTime = 0.0f;
+		private float ElapsedTime = 0.0f;
+
 		public Game(string name, string logPath = "logs/")
 		{
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
@@ -117,24 +121,27 @@ namespace Triton.Game
 
 			while (Running)
 			{
-				var frameTime = (float)watch.Elapsed.TotalSeconds;
+				FrameCount++;
+				FrameTime = (float)watch.Elapsed.TotalSeconds;
 				watch.Restart();
+
+				ElapsedTime += FrameTime;
 
 				if (GraphicsBackend.HasFocus)
 				{
 					InputManager.Update();
 				}
 
-				accumulator += frameTime;
+				accumulator += FrameTime;
 				while (accumulator >= PhysicsStepSize)
 				{
 					PhysicsWorld.Update(PhysicsStepSize);
 					accumulator -= PhysicsStepSize;
 				}
 
-				GameWorld.Update(frameTime);
+				GameWorld.Update(FrameTime);
 
-				Update(frameTime);
+				Update(FrameTime);
 
 				RenderScene();
 				Thread.Sleep(1);
@@ -152,7 +159,7 @@ namespace Triton.Game
 			var lightOutput = DeferredRenderer.Render(Stage, Camera);
 			HDRRenderer.Render(Camera, lightOutput);
 
-			if ((DebugFlags & DebugFlags.Physics ) == DebugFlags.Physics)
+			if ((DebugFlags & DebugFlags.Physics) == DebugFlags.Physics)
 			{
 				GraphicsBackend.BeginPass(null, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 				PhysicsWorld.DrawDebugInfo(Camera);
@@ -170,8 +177,30 @@ namespace Triton.Game
 				DebugSprite.Render(Width, Height);
 			}
 
-			DebugFont.DrawText(DebugSprite, new Vector2(128, 128), Vector4.Zero, "Hello, wrodl!");
-			DebugSprite.Render(Width, Height);
+			if ((DebugFlags & Triton.Game.DebugFlags.RenderStats) == Triton.Game.DebugFlags.RenderStats)
+			{
+				var averageFPS = FrameCount / ElapsedTime;
+				var fps = 1.0f / FrameTime;
+
+				var allocatedMemory = GC.GetTotalMemory(false) / 1024 / 1024;
+
+				var offsetY = 1;
+
+				DebugFont.DrawText(DebugSprite, new Vector2(4, 4), Vector4.One, "Frame stats:");
+				DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tFrame time: {0:0.00}ms", FrameTime * 1000.0f);
+				DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tAverage FPS: {0:0}", averageFPS);
+				DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tFPS:{0:0}", fps);
+				DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "GC stats:");
+				DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tAllocated memory {0}mb", allocatedMemory);
+
+				DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tCollection count");
+				for (var i = 0; i < GC.MaxGeneration; i++ )
+				{
+					DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\t\tGen ({0})\t{1}", i, GC.CollectionCount(i));
+				}
+
+				DebugSprite.Render(Width, Height);
+			}
 
 			GraphicsBackend.EndScene();
 		}
