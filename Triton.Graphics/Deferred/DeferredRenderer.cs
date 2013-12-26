@@ -518,7 +518,7 @@ namespace Triton.Graphics.Deferred
 
 			var orientation = Vector3.GetRotationTo(Vector3.UnitY, light.Direction);
 
-			clipPlane = new Vector2(camera.NearClipDistance, light.Range);
+			clipPlane = new Vector2(light.ShadowNearClipDistance, light.Range);
 
 			Matrix4 view, projection;
 			if (light.Type == LighType.Directional)

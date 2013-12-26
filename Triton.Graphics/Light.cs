@@ -32,6 +32,7 @@ namespace Triton.Graphics
 		public bool Enabled = true;
 
 		public float ShadowBias = 0.001f;
+		public float ShadowNearClipDistance = 0.01f;
 
 		public float Intensity = 1.0f;
 	}
