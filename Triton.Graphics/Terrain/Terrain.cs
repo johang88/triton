@@ -25,7 +25,7 @@ namespace Triton.Graphics.Terrain
 
 		public Vector3 Position = Vector3.Zero;
 
-		public Terrain(System.IO.Stream stream, Backend backend, float width, float depth, float maxHeight, int res, int size, Resources.Material material)
+		public Terrain(System.IO.Stream stream, Backend backend, float width, float depth, float maxHeight, int res, int size, int uvTile, Resources.Material material)
 		{
 			if (backend == null)
 				throw new ArgumentNullException("backend");
@@ -74,7 +74,7 @@ namespace Triton.Graphics.Terrain
 					var p = new Vector3(_x, _y, _z);
 
 					vertices[x * vres + z] = new Vertex(p);
-					vertices[x * vres + z].TexCoord = new Vector2(x / ((float)Res / 128), z / ((float)Res / 128));
+					vertices[x * vres + z].TexCoord = new Vector2(x / ((float)Res / uvTile), z / ((float)Res / uvTile));
 					vertices[x * vres + z].Normal = GetNormalAt(_x, _z);
 					vertices[x * vres + z].Tangent = GetTangentAt(_x, _z);
 				}
