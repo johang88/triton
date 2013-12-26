@@ -15,6 +15,9 @@ namespace Triton.Graphics
 		private List<QuadInfo> Quads = new List<QuadInfo>();
 		private int LastQuad = 0;
 
+		private int RenderStateAlphaBlend;
+		private int RenderStateNoAlphaBlend;
+
 		/// <summary>
 		/// Should always be created through Backend.CreateSpriteBatch
 		/// </summary>
@@ -43,6 +46,9 @@ namespace Triton.Graphics
 			{
 				Quads.Add(new QuadInfo());
 			}
+
+			RenderStateAlphaBlend = Backend.CreateRenderState(true, false, false, Renderer.BlendingFactorSrc.SrcAlpha, Renderer.BlendingFactorDest.OneMinusSrcAlpha, Renderer.CullFaceMode.Front);
+			RenderStateNoAlphaBlend = Backend.CreateRenderState(false, false, false, Renderer.BlendingFactorSrc.Zero, Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Front);
 		}
 
 		public void RenderQuad(Resources.Texture texture, Vector2 position)
@@ -110,7 +116,7 @@ namespace Triton.Graphics
 					{
 						Buffer.EndInline(Backend);
 
-						Backend.BeginInstance(Shader.Handle, new int[] { lastTexture.Handle }, lastAlpha, false, false, lastAlpha ? Renderer.BlendingFactorSrc.SrcAlpha : Renderer.BlendingFactorSrc.Zero, lastAlpha ? Renderer.BlendingFactorDest.OneMinusSrcAlpha : Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Front);
+						Backend.BeginInstance(Shader.Handle, new int[] { lastTexture.Handle }, lastAlpha ? RenderStateAlphaBlend : RenderStateNoAlphaBlend);
 						Backend.BindShaderVariable(Params.HandleDiffuseTexture, 0);
 						Backend.BindShaderVariable(Params.HandleModelViewProjection, ref projectionMatrix);
 						Backend.DrawMesh(Buffer.MeshHandle);
@@ -128,7 +134,7 @@ namespace Triton.Graphics
 			Buffer.EndInline(Backend);
 
 			// Render final batch
-			Backend.BeginInstance(Shader.Handle, new int[] { lastTexture.Handle }, lastAlpha, false, false, lastAlpha ? Renderer.BlendingFactorSrc.SrcAlpha : Renderer.BlendingFactorSrc.Zero, lastAlpha ? Renderer.BlendingFactorDest.OneMinusSrcAlpha : Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Front);
+			Backend.BeginInstance(Shader.Handle, new int[] { lastTexture.Handle }, lastAlpha ? RenderStateAlphaBlend : RenderStateNoAlphaBlend);
 			Backend.BindShaderVariable(Params.HandleDiffuseTexture, 0);
 			Backend.BindShaderVariable(Params.HandleModelViewProjection, ref projectionMatrix);
 			Backend.DrawMesh(Buffer.MeshHandle);

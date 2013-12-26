@@ -63,6 +63,14 @@ namespace Triton.Graphics.Deferred
 		private Vector4[] BlurOffsetsHorz = new Vector4[15];
 		private Vector4[] BlurOffsetsVert = new Vector4[15];
 
+		private int AmbientRenderState;
+		private int LightAccumulatinRenderState;
+		private int ShadowsRenderState;
+
+		private int DirectionalRenderState;
+		private int LightInsideRenderState;
+		private int LightOutsideRenderState;
+
 		public DeferredRenderer(Common.ResourceManager resourceManager, Backend backend, int width, int height)
 		{
 			if (resourceManager == null)
@@ -139,6 +147,13 @@ namespace Triton.Graphics.Deferred
 			UnitSphere = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/unit_sphere");
 			UnitCone = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/unit_cone");
 			BlurHelper.Init(ref BlurWeights, ref BlurOffsetsHorz, ref BlurOffsetsVert, new Vector2(1.0f / (float)SSAOTarget1.Width, 1.0f / (float)SSAOTarget1.Height));
+
+			AmbientRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
+			LightAccumulatinRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
+			ShadowsRenderState = Backend.CreateRenderState(false, true, true);
+			DirectionalRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Back, true, Triton.Renderer.DepthFunction.Lequal);
+			LightInsideRenderState = Backend.CreateRenderState(true, false, true, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, Triton.Renderer.CullFaceMode.Front, true, Renderer.DepthFunction.Gequal);
+			LightOutsideRenderState = Backend.CreateRenderState(true, false, true, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Back, true, Triton.Renderer.DepthFunction.Lequal);
 		}
 
 		public void InitializeHandles()
@@ -189,7 +204,7 @@ namespace Triton.Graphics.Deferred
 			// Combine final pass
 			Backend.BeginPass(Output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
 
-			Backend.BeginInstance(CombineShader.Handle, new int[] { LightAccumulation.Textures[0].Handle, SSAOTarget2.Textures[0].Handle }, true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
+			Backend.BeginInstance(CombineShader.Handle, new int[] { LightAccumulation.Textures[0].Handle, SSAOTarget2.Textures[0].Handle }, LightAccumulatinRenderState);
 			Backend.BindShaderVariable(CombineParams.HandleLightTexture, 0);
 			Backend.BindShaderVariable(CombineParams.HandleSSAOTexture, 1);
 
@@ -271,7 +286,7 @@ namespace Triton.Graphics.Deferred
 
 			var ambientColor = new Vector3((float)System.Math.Pow(stage.AmbientColor.X, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Y, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Z, 2.2f));
 
-			Backend.BeginInstance(AmbientLightShader.Handle, new int[] { GBuffer.Textures[0].Handle }, true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
+			Backend.BeginInstance(AmbientLightShader.Handle, new int[] { GBuffer.Textures[0].Handle }, AmbientRenderState);
 			Backend.BindShaderVariable(AmbientLightParams.HandleDiffuseTexture, 0);
 			Backend.BindShaderVariable(AmbientLightParams.HandleModelViewProjection, ref modelViewProjection);
 			Backend.BindShaderVariable(AmbientLightParams.HandleAmbientColor, ref ambientColor);
@@ -334,26 +349,25 @@ namespace Triton.Graphics.Deferred
 			// Pad the radius of the rendered sphere a little, it's quite low poly so there will be minor artifacts otherwise
 			var radius = light.Range * 1.1f;
 
-			var cullFaceMode = Triton.Renderer.CullFaceMode.Back;
-			var depthFunction = Triton.Renderer.DepthFunction.Lequal;
+			var renderStateId = DirectionalRenderState;
 
 			var cameraDistanceToLight = light.Position - camera.Position;
 
 			if (light.Type == LighType.PointLight)
 			{
+				renderStateId = LightOutsideRenderState;
 				// We pad it once again to avoid any artifacted when the camera is close to the edge of the bounding sphere
 				if (cameraDistanceToLight.Length <= radius * 1.1f)
 				{
-					cullFaceMode = Triton.Renderer.CullFaceMode.Front;
-					depthFunction = Renderer.DepthFunction.Gequal;
+					renderStateId = LightInsideRenderState;
 				}
 			}
 			else if (light.Type == LighType.SpotLight)
 			{
+				renderStateId = LightOutsideRenderState;
 				if (IsInsideSpotLight(light, camera))
 				{
-					cullFaceMode = Triton.Renderer.CullFaceMode.Front;
-					depthFunction = Renderer.DepthFunction.Gequal;
+					renderStateId = LightInsideRenderState;
 				}
 			}
 
@@ -424,8 +438,7 @@ namespace Triton.Graphics.Deferred
 				textures = new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle };
 			}
 
-			var depthCheck = light.Type != LighType.Directional;
-			Backend.BeginInstance(shader.Handle, textures, true, false, depthCheck, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, cullFaceMode, true, depthFunction);
+			Backend.BeginInstance(shader.Handle, textures, renderStateId);
 
 			// Setup texture samplers
 			Backend.BindShaderVariable(shaderParams.HandleNormalTexture, 0);
@@ -544,7 +557,7 @@ namespace Triton.Graphics.Deferred
 
 				foreach (var subMesh in mesh.Mesh.SubMeshes)
 				{
-					Backend.BeginInstance(RenderShadowsShader.Handle, new int[] { }, false, true, true);
+					Backend.BeginInstance(RenderShadowsShader.Handle, new int[] { }, ShadowsRenderState);
 					Backend.BindShaderVariable(RenderShadowsParams.ModelViewProjection, ref modelViewProjection);
 					Backend.BindShaderVariable(RenderShadowsParams.HandleClipPlane, ref clipPlane);
 

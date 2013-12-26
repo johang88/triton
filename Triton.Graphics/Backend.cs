@@ -215,16 +215,9 @@ namespace Triton.Graphics
 								RenderSystem.BindTexture(reader.ReadInt32(), i);
 							}
 
-							var enableAlphaBlend = reader.ReadBoolean();
-							var enableDepthWrite = reader.ReadBoolean();
-							var enableDepthTest = reader.ReadBoolean();
-							var src = (BlendingFactorSrc)reader.ReadInt32();
-							var dest = (BlendingFactorDest)reader.ReadInt32();
-							var cullFaceMode = (CullFaceMode)reader.ReadInt32();
-							var depthFunction = (DepthFunction)reader.ReadInt32();
-							var enableCullFace = reader.ReadBoolean();
+							var renderStateId = reader.ReadInt32();
 
-							RenderSystem.SetRenderStates(enableAlphaBlend, enableDepthWrite, enableDepthTest, src, dest, cullFaceMode, enableCullFace, depthFunction);
+							RenderSystem.SetRenderState(renderStateId);
 						}
 						break;
 					case OpCode.EndInstance:
@@ -422,7 +415,7 @@ namespace Triton.Graphics
 		/// </summary>
 		/// <param name="shaderHandle"></param>
 		/// <param name="textures"></param>
-		public void BeginInstance(int shaderHandle, int[] textures, bool enableAlphaBlend = false, bool enableDepthWrite = true, bool enableDepthTest = true, BlendingFactorSrc src = BlendingFactorSrc.Zero, BlendingFactorDest dest = BlendingFactorDest.One, CullFaceMode cullFaceMode = CullFaceMode.Back, bool enableCullFace = true, DepthFunction depthFunction = DepthFunction.Less)
+		public void BeginInstance(int shaderHandle, int[] textures, int renderStateId = 0)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BeginInstance);
 
@@ -434,14 +427,7 @@ namespace Triton.Graphics
 				PrimaryBuffer.Writer.Write(textures[i]);
 			}
 
-			PrimaryBuffer.Writer.Write(enableAlphaBlend);
-			PrimaryBuffer.Writer.Write(enableDepthWrite);
-			PrimaryBuffer.Writer.Write(enableDepthTest);
-			PrimaryBuffer.Writer.Write((int)src);
-			PrimaryBuffer.Writer.Write((int)dest);
-			PrimaryBuffer.Writer.Write((int)cullFaceMode);
-			PrimaryBuffer.Writer.Write((int)depthFunction);
-			PrimaryBuffer.Writer.Write(enableCullFace);
+			PrimaryBuffer.Writer.Write(renderStateId);
 		}
 
 		public void EndInstance()
@@ -661,6 +647,11 @@ namespace Triton.Graphics
 		public SpriteBatch CreateSpriteBatch()
 		{
 			return new SpriteBatch(this, RenderSystem, ResourceManager);
+		}
+
+		public int CreateRenderState(bool enableAlphaBlend = false, bool enableDepthWrite = true, bool enableDepthTest = true, BlendingFactorSrc src = BlendingFactorSrc.Zero, BlendingFactorDest dest = BlendingFactorDest.One, CullFaceMode cullFaceMode = CullFaceMode.Back, bool enableCullFace = true, DepthFunction depthFunction = DepthFunction.Less)
+		{
+			return RenderSystem.CreateRenderState(enableAlphaBlend, enableDepthWrite, enableDepthTest, src, dest, cullFaceMode, enableCullFace, depthFunction);
 		}
 
 		/// <summary>

@@ -33,6 +33,7 @@ namespace Triton.Renderer
 		private readonly Meshes.MeshManager MeshManager;
 		private readonly Shaders.ShaderManager ShaderManager;
 		private readonly RenderTargets.RenderTargetManager RenderTargetManager;
+		private readonly RenderStates.RenderStateManager RenderStateManager;
 
 		private bool Disposed = false;
 		private readonly Action<Action> AddToWorkQueue;
@@ -64,11 +65,11 @@ namespace Triton.Renderer
 			MeshManager = new Meshes.MeshManager();
 			ShaderManager = new Shaders.ShaderManager();
 			RenderTargetManager = new RenderTargets.RenderTargetManager();
+			RenderStateManager = new RenderStates.RenderStateManager();
 
-			GL.Enable(EnableCap.DepthTest);
-			GL.DepthMask(true);
+			var initialRenderState = RenderStateManager.CreateRenderState(false, true, true, BlendingFactorSrc.Zero, BlendingFactorDest.One, CullFaceMode.Back, true, DepthFunction.Less);
+			RenderStateManager.ApplyRenderState(initialRenderState);
 
-			GL.Enable(EnableCap.CullFace);
 			GL.FrontFace(FrontFaceDirection.Ccw);
 		}
 
@@ -282,29 +283,14 @@ namespace Triton.Renderer
 			GL.Clear(mask);
 		}
 
-		public void SetRenderStates(bool enableAlphaBlend, bool enableDepthWrite, bool enableDepthTest, BlendingFactorSrc src, BlendingFactorDest dest, CullFaceMode cullFaceMode, bool enableCullFace, DepthFunction depthFunction = DepthFunction.Less)
+		public int CreateRenderState(bool enableAlphaBlend = false, bool enableDepthWrite = true, bool enableDepthTest = true, BlendingFactorSrc src = BlendingFactorSrc.Zero, BlendingFactorDest dest = BlendingFactorDest.One, CullFaceMode cullFaceMode = CullFaceMode.Back, bool enableCullFace = true, DepthFunction depthFunction = DepthFunction.Less)
 		{
-			if (enableAlphaBlend)
-				GL.Enable(EnableCap.Blend);
-			else
-				GL.Disable(EnableCap.Blend);
+			return RenderStateManager.CreateRenderState(enableAlphaBlend, enableDepthWrite, enableDepthTest, src, dest, cullFaceMode, enableCullFace, depthFunction);
+		}
 
-			if (enableDepthTest)
-				GL.Enable(EnableCap.DepthTest);
-			else
-				GL.Disable(EnableCap.DepthTest);
-
-			GL.DepthMask(enableDepthWrite);
-
-			if (enableCullFace)
-				GL.Enable(EnableCap.CullFace);
-			else
-				GL.Disable(EnableCap.CullFace);
-
-			GL.BlendFunc((OpenTK.Graphics.OpenGL.BlendingFactorSrc)(int)src, (OpenTK.Graphics.OpenGL.BlendingFactorDest)(int)dest);
-			GL.CullFace((OpenTK.Graphics.OpenGL.CullFaceMode)(int)cullFaceMode);
-
-			GL.DepthFunc((OpenTK.Graphics.OpenGL.DepthFunction)(int)depthFunction);
+		public void SetRenderState(int id)
+		{
+			RenderStateManager.ApplyRenderState(id);
 		}
 
 		public int CreateRenderTarget(RenderTargets.Definition definition, out int[] textureHandles, OnLoadedCallback loadedCallback)

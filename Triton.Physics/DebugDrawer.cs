@@ -17,6 +17,7 @@ namespace Triton.Physics
 		private ShaderParams Params = null;
 		public Vector3 Color = new Vector3(0, 1, 0);
 		private int TriangleIndex = 0;
+		private int RenderStateId;
 
 		public DebugDrawer(Backend backend, ResourceManager resourceManager)
 		{
@@ -32,6 +33,7 @@ namespace Triton.Physics
 			Batch.Begin();
 
 			Shader = resourceManager.Load<Graphics.Resources.ShaderProgram>("shaders/physic_debug_drawer");
+			RenderStateId = backend.CreateRenderState(false, true, true, BlendingFactorSrc.One, BlendingFactorDest.One);
 		}
 
 		public void DrawLine(Jitter.LinearMath.JVector start, Jitter.LinearMath.JVector end)
@@ -77,7 +79,7 @@ namespace Triton.Physics
 
 			Batch.End();
 
-			Backend.BeginInstance(Shader.Handle, new int[0], false, true, true, BlendingFactorSrc.One, BlendingFactorDest.One);
+			Backend.BeginInstance(Shader.Handle, new int[0], RenderStateId);
 
 			Backend.BindShaderVariable(Params.HandleModelViewProjection, ref modelViewProjectionMatrix);
 			Backend.BindShaderVariable(Params.HandleColor, ref Color);

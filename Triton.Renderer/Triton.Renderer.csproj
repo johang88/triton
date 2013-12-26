@@ -68,6 +68,7 @@
     <Compile Include="DDS\LoaderDDS.cs" />
     <Compile Include="DepthFunction.cs" />
     <Compile Include="Meshes\MeshManager.cs" />
+    <Compile Include="RenderStates\RenderStateManager.cs" />
     <Compile Include="RenderSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PixelFormat.cs" />
