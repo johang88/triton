@@ -88,7 +88,13 @@ void main()
 #endif
 	
 #ifdef SHADOWS
-	float shadow = check_shadow(samplerShadow, position, invView, shadowViewProj, clipPlane, shadowBias);
+	float bias = shadowBias;
+	
+	float cosTheta = clamp(dot(normal, lightDir), 0, 1);
+	bias = shadowBias * tan(acos(cosTheta));
+	bias = clamp(bias, 0.0f, shadowBias * 2.0f);
+	
+	float shadow = check_shadow(samplerShadow, position, invView, shadowViewProj, clipPlane, bias);
 #else
 	float shadow = 1.0f;
 #endif
