@@ -8,6 +8,23 @@ namespace Triton.Graphics
 {
 	public class Camera
 	{
+		public bool Orthographic = false;
+
+		public Matrix4? CustomViewMatrix = null;
+
+		public float NearClipDistance;
+		public float FarClipDistance;
+
+		public float Fov;
+
+		public Vector2 Viewport { get; private set; }
+
+		Vector3 Look = Vector3.UnitZ;
+		Vector3 Up = Vector3.UnitY;
+
+		public Quaternion Orientation;
+		public Vector3 Position;
+
 		public Camera(Vector2 viewport)
 		{
 			Viewport = viewport;
@@ -40,7 +57,7 @@ namespace Triton.Graphics
 			Vector3 up;
 			Vector3.Transform(ref Up, ref Orientation, out up);
 
-			Vector3 position = noTranslation ? Vector3.Zero : Position + Offset;
+			Vector3 position = noTranslation ? Vector3.Zero : Position;
 
 			viewMatrix = Matrix4.LookAt(position, position + look, up);
 		}
@@ -96,23 +113,5 @@ namespace Triton.Graphics
 			Position.Y += y;
 			Position.Z += z;
 		}
-
-		public bool Orthographic = false;
-
-		public Matrix4? CustomViewMatrix = null;
-
-		public float NearClipDistance;
-		public float FarClipDistance;
-
-		public float Fov;
-
-		public Vector2 Viewport { get; private set; }
-
-		Vector3 Look = Vector3.UnitZ;
-		Vector3 Up = Vector3.UnitY;
-
-		public Quaternion Orientation;
-		public Vector3 Position;
-		public Vector3 Offset;
 	}
 }
