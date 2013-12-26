@@ -16,6 +16,7 @@ namespace Triton.Graphics.Deferred
 		private LightParams PointLightParams = new LightParams();
 		private LightParams PointLightShadowParams = new LightParams();
 		private LightParams DirectionalLightParams = new LightParams();
+		private LightParams DirectionalLightShadowParams = new LightParams();
 		private LightParams SpotLightParams = new LightParams();
 		private LightParams SpotLightShadowParams = new LightParams();
 		private SSAOParams SSAOParams = new SSAOParams();
@@ -32,6 +33,7 @@ namespace Triton.Graphics.Deferred
 		private readonly RenderTarget SSAOTarget1;
 		private readonly RenderTarget SSAOTarget2;
 		private readonly RenderTarget SpotShadowsRenderTarget;
+		private readonly RenderTarget DirectionalShadowsRenderTarget;
 
 		private BatchBuffer QuadMesh;
 		private Resources.Mesh UnitSphere;
@@ -39,6 +41,7 @@ namespace Triton.Graphics.Deferred
 
 		private Resources.ShaderProgram AmbientLightShader;
 		private Resources.ShaderProgram DirectionalLightShader;
+		private Resources.ShaderProgram DirectionalLightShadowShader;
 		private Resources.ShaderProgram PointLightShader;
 		private Resources.ShaderProgram PointLightShadowShader;
 		private Resources.ShaderProgram SpotLightShader;
@@ -107,9 +110,15 @@ namespace Triton.Graphics.Deferred
 			{
 				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent16, Renderer.PixelType.Float, 0),
 			}));
-			
+
+			DirectionalShadowsRenderTarget = Backend.CreateRenderTarget("directional_shadows", new Definition(2048, 2048, true, new List<Definition.Attachment>()
+			{
+				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent16, Renderer.PixelType.Float, 0),
+			}));
+
 			AmbientLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ambient");
 			DirectionalLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light");
+			DirectionalLightShadowShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "SHADOWS");
 			PointLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "POINT_LIGHT");
 			PointLightShadowShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "POINT_LIGHT,SHADOWS");
 			SpotLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "SPOT_LIGHT");
@@ -137,6 +146,7 @@ namespace Triton.Graphics.Deferred
 			CombineShader.GetUniformLocations(CombineParams);
 			AmbientLightShader.GetUniformLocations(AmbientLightParams);
 			DirectionalLightShader.GetUniformLocations(DirectionalLightParams);
+			DirectionalLightShadowShader.GetUniformLocations(DirectionalLightShadowParams);
 			PointLightShader.GetUniformLocations(PointLightParams);
 			PointLightShadowShader.GetUniformLocations(PointLightShadowParams);
 			SpotLightShader.GetUniformLocations(SpotLightParams);
@@ -353,7 +363,7 @@ namespace Triton.Graphics.Deferred
 
 			if (light.CastShadows)
 			{
-				RenderSpotlightShadows(SpotShadowsRenderTarget, light, stage, camera, out shadowViewProjection, out shadowCameraClipPlane);
+				RenderShadows(light.Type == LighType.Directional ? DirectionalShadowsRenderTarget : SpotShadowsRenderTarget, light, stage, camera, out shadowViewProjection, out shadowCameraClipPlane);
 				Backend.ChangeRenderTarget(LightAccumulation);
 			}
 			else
@@ -389,8 +399,8 @@ namespace Triton.Graphics.Deferred
 			lightColor = new Vector3((float)System.Math.Pow(lightColor.X, 2.2f), (float)System.Math.Pow(lightColor.Y, 2.2f), (float)System.Math.Pow(lightColor.Z, 2.2f));
 
 			// Select the correct shader
-			var shader = DirectionalLightShader;
-			var shaderParams = DirectionalLightParams;
+			var shader = light.CastShadows ? DirectionalLightShadowShader : DirectionalLightShader;
+			var shaderParams = light.CastShadows ? DirectionalLightShadowParams : DirectionalLightParams;
 
 			if (light.Type == LighType.PointLight)
 			{
@@ -407,7 +417,7 @@ namespace Triton.Graphics.Deferred
 			int[] textures;
 			if (light.CastShadows)
 			{
-				textures = new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle, SpotShadowsRenderTarget.Textures[0].Handle };
+				textures = new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle, light.Type == LighType.Directional ? DirectionalShadowsRenderTarget.Textures[0].Handle : SpotShadowsRenderTarget.Textures[0].Handle };
 			}
 			else
 			{
@@ -477,7 +487,7 @@ namespace Triton.Graphics.Deferred
 			{
 				Backend.DrawMesh(UnitCone.SubMeshes[0].Handle);
 			}
-			
+
 			Backend.EndInstance();
 		}
 
@@ -500,7 +510,7 @@ namespace Triton.Graphics.Deferred
 			return (distanceFromLight <= (light.Range + clipRangeFix.Length)) && angle <= attAngle;
 		}
 
-		private void RenderSpotlightShadows(RenderTarget renderTarget, Light light, Stage stage, Camera camera, out Matrix4 viewProjection, out Vector2 clipPlane)
+		private void RenderShadows(RenderTarget renderTarget, Light light, Stage stage, Camera camera, out Matrix4 viewProjection, out Vector2 clipPlane)
 		{
 			Backend.BeginPass(renderTarget, new Vector4(0, 0, 0, 1), true);
 
@@ -510,8 +520,17 @@ namespace Triton.Graphics.Deferred
 
 			clipPlane = new Vector2(camera.NearClipDistance, light.Range);
 
-			var view = Matrix4.LookAt(light.Position, light.Position + light.Direction, Vector3.UnitY);
-			var projection = Matrix4.CreatePerspectiveFieldOfView(light.OuterAngle, renderTarget.Width / renderTarget.Height, clipPlane.X, clipPlane.Y);
+			Matrix4 view, projection;
+			if (light.Type == LighType.Directional)
+			{
+				view = Matrix4.LookAt(-light.Direction * light.Range, camera.Position, Vector3.UnitY);
+				projection = Matrix4.CreatePerspectiveFieldOfView(Math.Util.DegreesToRadians(40), renderTarget.Width / (float)renderTarget.Height, clipPlane.X, clipPlane.Y);
+			}
+			else
+			{
+				view = Matrix4.LookAt(light.Position, light.Position + light.Direction, Vector3.UnitY);
+				projection = Matrix4.CreatePerspectiveFieldOfView(light.OuterAngle, renderTarget.Width / (float)renderTarget.Height, clipPlane.X, clipPlane.Y);
+			}
 
 			viewProjection = view * projection;
 

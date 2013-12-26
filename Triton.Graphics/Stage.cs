@@ -58,13 +58,16 @@ namespace Triton.Graphics
 			return Meshes;
 		}
 
-		public Light CreateDirectionalLight(Vector3 direction, Vector3 color)
+		public Light CreateDirectionalLight(Vector3 direction, Vector3 color, bool castShadows, float shadowRange = 64.0f, float shadowBias = 0.001f)
 		{
 			var light = new Light
 			{
 				Type = LighType.Directional,
 				Direction = direction,
-				Color = color
+				Color = color,
+				CastShadows = castShadows,
+				ShadowBias = shadowBias,
+				Range = shadowRange
 			};
 
 			Lights.Add(light);
