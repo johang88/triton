@@ -539,7 +539,7 @@ namespace Triton.Graphics.Deferred
 			Matrix4 view, projection;
 			if (light.Type == LighType.Directional)
 			{
-				view = Matrix4.LookAt(-light.Direction * light.Range, camera.Position, Vector3.UnitY);
+				view = Matrix4.LookAt(camera.Position - light.Direction * light.Range, camera.Position, Vector3.UnitY);
 				projection = Matrix4.CreatePerspectiveFieldOfView(Math.Util.DegreesToRadians(40), renderTarget.Width / (float)renderTarget.Height, clipPlane.X, clipPlane.Y);
 			}
 			else
