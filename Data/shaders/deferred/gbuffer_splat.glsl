@@ -92,6 +92,7 @@ void main()
 	vec3 gamma = (2.2f).xxx;
 	diffuse.xyz = pow(diffuse.xyz, gamma);
 	specular.xyz = pow(specular.xyz, gamma);
+	specular.xyz = vec3(0, 0, 0);
 	
 	oColor = vec4(diffuse.xyz, 1.0f);
 	oNormal = vec4(N2.xyz, 1.0f);
