@@ -33,7 +33,7 @@ namespace Triton.Graphics.Deferred
 		private readonly RenderTarget SSAOTarget1;
 		private readonly RenderTarget SSAOTarget2;
 		private readonly RenderTarget SpotShadowsRenderTarget;
-		private readonly RenderTarget DirectionalShadowsRenderTarget;
+		public readonly RenderTarget DirectionalShadowsRenderTarget;
 
 		private BatchBuffer QuadMesh;
 		private Resources.Mesh UnitSphere;
@@ -534,7 +534,7 @@ namespace Triton.Graphics.Deferred
 
 			var orientation = Vector3.GetRotationTo(Vector3.UnitY, light.Direction);
 
-			clipPlane = new Vector2(light.ShadowNearClipDistance, light.Range);
+			clipPlane = new Vector2(light.ShadowNearClipDistance, light.Range * 2.0f);
 
 			Matrix4 view, projection;
 			if (light.Type == LighType.Directional)
@@ -554,7 +554,6 @@ namespace Triton.Graphics.Deferred
 			foreach (var mesh in meshes)
 			{
 				var world = mesh.World;
-				var worldView = world * view;
 
 				modelViewProjection = world * view * projection;
 
