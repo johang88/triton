@@ -486,6 +486,9 @@ namespace Triton.Graphics.Deferred
 				Backend.BindShaderVariable(shaderParams.ShadowViewProjection, ref shadowViewProjection);
 				Backend.BindShaderVariable(shaderParams.HandleClipPlane, ref shadowCameraClipPlane);
 				Backend.BindShaderVariable(shaderParams.HandleShadowBias, light.ShadowBias);
+
+				var texelSize = 1.0f / (light.Type == LighType.Directional ? DirectionalShadowsRenderTarget.Width : SpotShadowsRenderTarget.Width) ;
+				Backend.BindShaderVariable(shaderParams.HandleShadowMapTexelSize, texelSize);
 			}
 
 			if (light.Type == LighType.Directional)

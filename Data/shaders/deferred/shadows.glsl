@@ -25,7 +25,7 @@ float random(vec3 seed, int i){
 	return fract(sin(dot_product) * 43758.5453);
 }
 
-float check_shadow(sampler2DShadow shadowMap, vec3 viewPos, mat4x4 invView, mat4x4 shadowViewProj, vec2 clipPlane, float shadowBias) {
+float check_shadow(sampler2DShadow shadowMap, vec3 viewPos, mat4x4 invView, mat4x4 shadowViewProj, vec2 clipPlane, float shadowBias, float texelSize) {
 	vec3 worldPos = (invView * vec4(viewPos, 1)).xyz;
 	vec4 shadowUv = shadowViewProj * vec4(worldPos, 1);
 
@@ -36,7 +36,7 @@ float check_shadow(sampler2DShadow shadowMap, vec3 viewPos, mat4x4 invView, mat4
 	float c = 0.0f;
 	for (int i = 0; i < SAMPLES; i++) {
 		int index = int(16.0 * random(floor(worldPos.xyz * 1000.0f), i)) % 16;
-		c += texture(shadowMap, vec3(uv.xy - poissonDisk[index] / 700.0f, distance));
+		c += texture(shadowMap, vec3(uv.xy - poissonDisk[index] * texelSize, distance));
 	}
 	
 	return c / SAMPLES;

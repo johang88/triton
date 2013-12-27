@@ -25,5 +25,6 @@ namespace Triton.Graphics.Deferred
 		public int ShadowViewProjection = 0;
 		public int HandleShadowBias = 0;
 		public int HandleClipPlane = 0;
+		public int HandleShadowMapTexelSize = 0;
 	}
 }

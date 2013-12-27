@@ -50,6 +50,7 @@ sampler(2DShadow, samplerShadow, ShadowMap);
 uniform(mat4x4, shadowViewProj, ShadowViewProjection);
 uniform(vec2, clipPlane, ClipPlane);
 uniform(float, shadowBias, ShadowBias);
+uniform(float, texelSize, ShadowMapTexelSize);
 #endif
 
 void main()
@@ -94,7 +95,7 @@ void main()
 	bias = shadowBias * tan(acos(cosTheta));
 	bias = clamp(bias, 0.0f, shadowBias * 2.0f);
 	
-	float shadow = check_shadow(samplerShadow, position, invView, shadowViewProj, clipPlane, bias);
+	float shadow = check_shadow(samplerShadow, position, invView, shadowViewProj, clipPlane, bias, texelSize);
 #else
 	float shadow = 1.0f;
 #endif
