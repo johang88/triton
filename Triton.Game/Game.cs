@@ -172,7 +172,7 @@ namespace Triton.Game
 				textures.Add(DeferredRenderer.DirectionalShadowsRenderTarget.Textures[0]);
 				for (var i = 0; i < textures.Count; i++)
 				{
-					DebugSprite.RenderQuad(textures[i], new Vector2(129 * i + 1, 1), new Vector2(128, 128), Vector2.Zero, Vector2.One, Vector4.One, false);
+					DebugSprite.RenderQuad(textures[i], new Vector2(129 * i + 1, 1), new Vector2(128, 128), Vector2.Zero, Vector2.One, Vector4.One, false, i == 0 || i == 3);
 				}
 
 				DebugSprite.Render(Width, Height);
