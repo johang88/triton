@@ -8,15 +8,16 @@ vec3 lightColor, vec3 diffuseColor, vec3 specularColor, float att)
 	float nDotL = saturate(dot(normal, lightDir));
 	float nDotH = saturate(dot(normal, halfAngle));
 	
-	float blinnPong = pow(nDotH, specularPower);
-	float specularTerm = (specularPower + 2.0f) / (specularPower / 2.0f) * blinnPong;
+	float specularValue = pow(nDotH, specularPower);
 	
-	float base = saturate(dot(halfAngle, lightDir));
-	float exponential = pow(1.0f - base, 5.0f);
+	float base = 1.0 - dot(halfAngle, viewer);
+	float exponential = pow(base, 5.0);
 	
-	vec3 fresnelTerm = specularColor + (1.0f - specularColor) * exponential;
+	float F0 = 1.333;
+	float fresnel = exponential + F0 * (1.0 - exponential);
 	
-	vec3 specular = specularTerm * nDotL * fresnelTerm * lightColor;
+	specularValue *= fresnel;
 	
-	return (nDotL * lightColor * att) * diffuseColor + specular * att;
+	vec3 specular = specularColor * lightColor * specularValue;
+	return ((nDotL * lightColor) * diffuseColor + specular) * att;
 }
