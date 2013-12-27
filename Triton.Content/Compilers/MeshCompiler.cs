@@ -10,6 +10,11 @@ using Triton.Content.Meshes;
 
 namespace Triton.Content.Compilers
 {
+	public class MeshSettings
+	{
+		public string Material { get; set; }
+	}
+
 	public class MeshCompiler : ICompiler
 	{
 		private Factory<string, IMeshImporter> ImporterFactory;
@@ -28,6 +33,18 @@ namespace Triton.Content.Compilers
 			outputPath += ".mesh";
 
 			string extension = Path.GetExtension(inputPath.Replace(".mesh.xml", ".xml")).ToLowerInvariant();
+
+			MeshSettings settings;
+
+			if (contentData.Settings == null || !(contentData.Settings is MeshSettings))
+			{
+				settings = new MeshSettings();
+				contentData.Settings = settings;
+			}
+			else
+			{
+				settings = contentData.Settings as MeshSettings;
+			}
 
 			var importer = ImporterFactory.Create(extension);
 			var mesh = importer.Import(inputPath);
@@ -51,7 +68,7 @@ namespace Triton.Content.Compilers
 				foreach (var subMesh in mesh.SubMeshes)
 				{
 					// Material
-					writer.Write(subMesh.Material);
+					writer.Write(!string.IsNullOrWhiteSpace(settings.Material) ? settings.Material : subMesh.Material);
 
 					// Triangle count
 					writer.Write(subMesh.TriangleCount);
