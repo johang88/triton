@@ -51,7 +51,7 @@
   <ItemGroup>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\PC\Documents\GitHub\opentk\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
+      <HintPath>..\packages\OpenTK.1.1.1579.5793\lib\NET40\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>..\packages\ServiceStack.Text.3.9.59\lib\net35\ServiceStack.Text.dll</HintPath>

@@ -53,7 +53,7 @@
   <ItemGroup>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\PC\Documents\GitHub\opentk\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
+      <HintPath>..\packages\OpenTK.1.1.1579.5793\lib\NET40\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -71,6 +71,9 @@
       <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>
       <Name>Triton.Math</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
