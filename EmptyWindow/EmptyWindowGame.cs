@@ -20,7 +20,7 @@ namespace EmptyWindow
 			base.MountFileSystem();
 
 			// Mount the core resource package, this is required
-			FileSystem.AddPackage("FileSystem", "../Data");
+			FileSystem.AddPackage("FileSystem", "../Data/core_data");
 		}
 
 		protected override void LoadResources()
