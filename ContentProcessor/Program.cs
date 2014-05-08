@@ -108,14 +108,14 @@ namespace ContentProcessor
 
 				var outputPath = Path.Combine(outputDir, content.OutputPath);
 
-				var fileOutputDirectory = Path.GetDirectoryName(outputPath);
-				if (!Directory.Exists(fileOutputDirectory))
-				{
-					Directory.CreateDirectory(fileOutputDirectory);
-				}
-
 				if (Compilers.Exists(extension))
 				{
+					var fileOutputDirectory = Path.GetDirectoryName(outputPath);
+					if (!Directory.Exists(fileOutputDirectory))
+					{
+						Directory.CreateDirectory(fileOutputDirectory);
+					}
+
 					var compiler = Compilers.Create(extension);
 					compiler.Compile(file, outputPath, content);
 
