@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmptyWindow
+namespace Triton.Samples
 {
 	class Program
 	{
 		static void Main(string[] args)
 		{
-			using (var game = new EmptyWindowGame())
+			using (var game = new BasicSceneGame())
 			{
 				game.Run();
 			}

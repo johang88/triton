@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmptyWindow
+namespace Triton.Samples
 {
 	class EmptyWindowGame : Triton.Game.Game
 	{
@@ -21,13 +21,16 @@ namespace EmptyWindow
 
 			// Mount the core resource package, this is required
 			FileSystem.AddPackage("FileSystem", "../Data/core_data");
+
+			// Mount the sample data
+			FileSystem.AddPackage("FileSystem", "../Data/samples_data");
 		}
 
 		protected override void LoadResources()
 		{
 			base.LoadResources();
 
-			Stage.ClearColor = new Triton.Vector4(1, 0, 0, 0);
+			Stage.ClearColor = new Triton.Vector4(0.5f, 0.5f, 0.7f, 0);
 		}
 
 		protected override void Update(float frameTime)

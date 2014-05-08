@@ -44,7 +44,7 @@ namespace Triton.Game
 
 		private long FrameCount = 0;
 		private float FrameTime = 0.0f;
-		private float ElapsedTime = 0.0f;
+		protected float ElapsedTime = 0.0f;
 
 		public Game(string name, string logPath = "logs/")
 		{
