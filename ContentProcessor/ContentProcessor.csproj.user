@@ -4,6 +4,6 @@
     <StartArguments>in=..\Media out=..\Data</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <StartArguments>in=..\Media out=..\Data</StartArguments>
+    <StartArguments>in=test\in out=test\out nocache</StartArguments>
   </PropertyGroup>
 </Project>
