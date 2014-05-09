@@ -58,6 +58,20 @@ namespace Triton.Samples
 				new Triton.Vector3(0.9f, 0.5f, 0.3f), true, 0.05f);
 			Light.Intensity = LightBaseIntensity;
 
+			Stage.CreatePointLight(
+				new Vector3(2, 1, 3),
+				2.0f,
+				new Vector3(0.4f, 0.3f, 0.9f),
+				false
+				).Intensity = 2;
+
+			Stage.CreatePointLight(
+				new Vector3(-2, 1, 3),
+				2.0f,
+				new Vector3(0.4f, 0.9f, 0.3f),
+				false
+				).Intensity = 2;
+
 			// Setup the camera
 			Camera.Position = new Triton.Vector3(0, 2, 0);
 			Camera.Pitch(0.7f);
