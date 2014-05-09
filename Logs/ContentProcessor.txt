@@ -1,0 +1,8 @@
+Log file created: 2014-05-09 18:30:08
+<-> Processed ContentSource\core_data\models\unit_cone.mesh.xml
+<-> Processed ContentSource\core_data\models\unit_sphere.mesh.xml
+<-> Processed ContentSource\core_data\textures\random_n.tga
+<-> Processed ContentSource\samples_data\models\crate.mesh.xml
+<-> Processed ContentSource\samples_data\textures\crate_d.tga
+<-> Processed ContentSource\samples_data\textures\crate_n.tga
+<-> Processed ContentSource\samples_data\textures\crate_s.tga
