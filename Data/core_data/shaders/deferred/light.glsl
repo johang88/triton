@@ -75,8 +75,8 @@ void main()
 	vec3 eyeDir = normalize(cameraPosition - position);
 	
 #if defined(SPOT_LIGHT) || defined(POINT_LIGHT)
-	float attenuation = dist / lightRange;
-	attenuation = saturate(1.0f - (attenuation * attenuation));
+	float attenuation= saturate(1.0f - ((dist * dist) / (lightRange * lightRange)));
+	attenuation = attenuation * attenuation;
 #else
 	float attenuation = 1.0f;
 #endif
