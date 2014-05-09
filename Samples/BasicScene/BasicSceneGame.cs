@@ -52,25 +52,31 @@ namespace Triton.Samples
 
 			// Light it
 			Light = Stage.CreateSpotLight(
-				new Triton.Vector3(0, 4, 3),
-				new Triton.Vector3(0, -1, 0.3f),
-				0.6f, 0.9f, 6.0f,
-				new Triton.Vector3(0.9f, 0.5f, 0.3f), true, 0.05f);
-			Light.Intensity = LightBaseIntensity;
+				position: new Triton.Vector3(0, 4, 3),
+				direction: new Triton.Vector3(0, -1, 0.3f),
+				innerAngle: 0.6f, 
+				outerAngle: 0.9f, 
+				range: 6.0f,
+				color: new Triton.Vector3(0.9f, 0.5f, 0.3f), 
+				castShadows: true, 
+				shadowBias: 0.05f,
+				intensity: LightBaseIntensity);
 
 			Stage.CreatePointLight(
-				new Vector3(2, 1, 3),
-				2.0f,
-				new Vector3(0.4f, 0.3f, 0.9f),
-				false
-				).Intensity = 2;
+				position: new Vector3(2, 1, 3),
+				range: 2.0f,
+				color: new Vector3(0.4f, 0.3f, 0.9f),
+				castShadows: false,
+				intensity: 2
+				);
 
 			Stage.CreatePointLight(
-				new Vector3(-2, 1, 3),
-				2.0f,
-				new Vector3(0.4f, 0.9f, 0.3f),
-				false
-				).Intensity = 2;
+				position: new Vector3(-2, 1, 3),
+				range: 2.0f,
+				color: new Vector3(0.4f, 0.9f, 0.3f),
+				castShadows: false,
+				intensity: 2
+				);
 
 			// Setup the camera
 			Camera.Position = new Triton.Vector3(0, 2, 0);

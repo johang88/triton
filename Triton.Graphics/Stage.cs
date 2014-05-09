@@ -9,7 +9,7 @@ namespace Triton.Graphics
 	public class Stage
 	{
 		private readonly Common.ResourceManager ResourceManager;
-		
+
 		private readonly List<MeshInstance> Meshes = new List<MeshInstance>();
 		private readonly List<Light> Lights = new List<Light>();
 
@@ -58,7 +58,7 @@ namespace Triton.Graphics
 			return Meshes;
 		}
 
-		public Light CreateDirectionalLight(Vector3 direction, Vector3 color, bool castShadows, float shadowRange = 64.0f, float shadowBias = 0.001f)
+		public Light CreateDirectionalLight(Vector3 direction, Vector3 color, bool castShadows = false, float shadowRange = 64.0f, float shadowBias = 0.001f, float intensity = 1.0f)
 		{
 			var light = new Light
 			{
@@ -67,7 +67,8 @@ namespace Triton.Graphics
 				Color = color,
 				CastShadows = castShadows,
 				ShadowBias = shadowBias,
-				Range = shadowRange
+				Range = shadowRange,
+				Intensity = intensity
 			};
 
 			Lights.Add(light);
@@ -75,7 +76,7 @@ namespace Triton.Graphics
 			return light;
 		}
 
-		public Light CreatePointLight(Vector3 position, float range, Vector3 color, bool castShadows, float shadowBias = 0.001f)
+		public Light CreatePointLight(Vector3 position, float range, Vector3 color, bool castShadows = false, float shadowBias = 0.001f, float intensity = 1.0f)
 		{
 			var light = new Light
 			{
@@ -84,7 +85,8 @@ namespace Triton.Graphics
 				Range = range,
 				Color = color,
 				CastShadows = castShadows,
-				ShadowBias = shadowBias
+				ShadowBias = shadowBias,
+				Intensity = intensity
 			};
 
 			Lights.Add(light);
@@ -92,7 +94,7 @@ namespace Triton.Graphics
 			return light;
 		}
 
-		public Light CreateSpotLight(Vector3 position, Vector3 direction, float innerAngle, float outerAngle, float range, Vector3 color, bool castShadows, float shadowBias = 0.001f)
+		public Light CreateSpotLight(Vector3 position, Vector3 direction, float innerAngle, float outerAngle, float range, Vector3 color, bool castShadows = false, float shadowBias = 0.001f, float intensity = 1.0f)
 		{
 			direction.Normalize();
 			var light = new Light
@@ -105,7 +107,8 @@ namespace Triton.Graphics
 				InnerAngle = innerAngle,
 				OuterAngle = outerAngle,
 				CastShadows = castShadows,
-				ShadowBias = shadowBias
+				ShadowBias = shadowBias,
+				Intensity = intensity
 			};
 
 			Lights.Add(light);
