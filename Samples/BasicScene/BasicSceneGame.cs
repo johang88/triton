@@ -19,6 +19,8 @@ namespace Triton.Samples
 
 		private Random RNG = new Random();
 
+		private Vector3 CratePosition = new Vector3(0, 0, 3.0f);
+
 		public BasicSceneGame()
 			: base("BasicGame")
 		{
@@ -94,7 +96,9 @@ namespace Triton.Samples
 
 			// Rotate the crate around it's origin and setup the world matrix
 			CrateRotation += CrateRotationSpeed * frameTime;
-			Crate.World = Triton.Matrix4.CreateRotationY(CrateRotation) * Triton.Matrix4.CreateTranslation(0, 0, 3.0f);
+
+			var cratePos = CratePosition + new Vector3(0, 0.5f + 0.5f * (float)System.Math.Sin(ElapsedTime), 1 + 1.0f * (float)System.Math.Sin(ElapsedTime));
+			Crate.World = Triton.Matrix4.CreateRotationY(CrateRotation) * Triton.Matrix4.CreateTranslation(cratePos);
 
 			// Flickering light
 			Light.Intensity += LightFlickerDirection * 1.5f * frameTime;
