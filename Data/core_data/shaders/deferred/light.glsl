@@ -83,7 +83,8 @@ void main()
 	
 #ifdef SPOT_LIGHT
 	float spotLightAngle = saturate(dot(-lightDirection, lightDir));
-	float spotFallof = 1.0f - saturate((spotLightAngle - spotParams.x) / (spotParams.y - spotParams.x));
+	float cosInnerMinusOuterAngle = spotParams.x - spotParams.y;
+	float spotFallof = saturate((spotLightAngle - spotParams.y) / cosInnerMinusOuterAngle);
 	
 	attenuation *= spotFallof;
 #endif
