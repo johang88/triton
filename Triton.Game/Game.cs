@@ -35,6 +35,8 @@ namespace Triton.Game
 
 		public float PhysicsStepSize = 1.0f / 100.0f;
 
+		public Audio.AudioSystem AudioSystem { get; private set; }
+
 		public World.GameWorld GameWorld;
 
 		public Graphics.SpriteBatch DebugSprite;
@@ -59,6 +61,7 @@ namespace Triton.Game
 
 		public virtual void Dispose()
 		{
+			AudioSystem.Dispose();
 			ResourceManager.Dispose();
 		}
 
@@ -94,6 +97,7 @@ namespace Triton.Game
 		{
 			WaitHandle.WaitAll(new WaitHandle[] { RendererReady });
 
+			AudioSystem = new Audio.AudioSystem(FileSystem);
 			PhysicsWorld = new Triton.Physics.World(GraphicsBackend, ResourceManager);
 
 			DeferredRenderer = new Graphics.Deferred.DeferredRenderer(ResourceManager, GraphicsBackend, Width, Height);
@@ -138,6 +142,8 @@ namespace Triton.Game
 					PhysicsWorld.Update(PhysicsStepSize);
 					accumulator -= PhysicsStepSize;
 				}
+
+				AudioSystem.Update();
 
 				GameWorld.Update(FrameTime);
 
@@ -195,7 +201,7 @@ namespace Triton.Game
 				DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tAllocated memory {0}mb", allocatedMemory);
 
 				DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tCollection count");
-				for (var i = 0; i < GC.MaxGeneration; i++ )
+				for (var i = 0; i < GC.MaxGeneration; i++)
 				{
 					DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\t\tGen ({0})\t{1}", i, GC.CollectionCount(i));
 				}

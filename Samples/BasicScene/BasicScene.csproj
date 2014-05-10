@@ -69,6 +69,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Triton.Audio\Triton.Audio.csproj">
+      <Project>{ae39d529-64e2-476d-b99a-91d79dadda63}</Project>
+      <Name>Triton.Audio</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Triton.Common\Triton.Common.csproj">
       <Project>{354b215a-cc57-408b-900d-e7e1f95c04c2}</Project>
       <Name>Triton.Common</Name>

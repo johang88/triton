@@ -81,6 +81,9 @@ namespace Triton.Samples
 			// Setup the camera
 			Camera.Position = new Triton.Vector3(0, 2, 0);
 			Camera.Pitch(0.7f);
+
+			// Test some audio
+			AudioSystem.PlaySound2D("mus_keep2.ogg");
 		}
 
 		protected override void Update(float frameTime)
