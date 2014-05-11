@@ -24,5 +24,10 @@ namespace Triton.Game.World.Components
 			Owner.Position = Body.Position;
 			Owner.Orientation = Body.Orientation;
 		}
+
+		public void AddForce(Vector3 force)
+		{
+			Body.AddForce(force);
+		}
 	}
 }

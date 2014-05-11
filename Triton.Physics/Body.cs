@@ -33,5 +33,10 @@ namespace Triton.Physics
 			Position = position;
 			RigidBody.Position = Conversion.ToJitterVector(ref position);
 		}
+
+		public void AddForce(Vector3 force)
+		{
+			RigidBody.AddForce(Conversion.ToJitterVector(ref force));
+		}
 	}
 }
