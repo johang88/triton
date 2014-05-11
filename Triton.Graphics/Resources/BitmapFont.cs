@@ -13,6 +13,17 @@ namespace Triton.Graphics.Resources
 		public float LineHeight;
 		public Vector2 Scale = new Vector2();
 
+		private static Dictionary<string, Vector4> Colors = new Dictionary<string, Vector4>();
+
+		static BitmapFont()
+		{
+			Colors.Add("red", new Vector4(1, 0, 0, 1));
+			Colors.Add("blue", new Vector4(0, 0, 1, 1));
+			Colors.Add("green", new Vector4(0, 1, 0, 1));
+			Colors.Add("white", new Vector4(1, 1, 1, 1));
+			Colors.Add("black", new Vector4(0, 0, 0, 1));
+		}
+
 		public BitmapFont(string name, string parameters)
 			: base(name, parameters)
 		{
@@ -27,7 +38,7 @@ namespace Triton.Graphics.Resources
 
 			var startX = position.X;
 
-			for (var i = 0; i < text.Length; i++ )
+			for (var i = 0; i < text.Length; i++)
 			{
 				var c = text[i];
 
@@ -40,8 +51,39 @@ namespace Triton.Graphics.Resources
 						position.X = startX;
 						position.Y += LineHeight;
 						break;
+					case '[':
+						if (text.Length < i + 2 || text[i + 1] != '#')
+							break;
+
+						i += 2;
+						var colorCode = "";
+
+						while (text[i] != ']' && text.Length > i + 1)
+						{
+							colorCode += text[i++];
+						}
+
+						if (Colors.ContainsKey(colorCode))
+						{
+							color = Colors[colorCode];
+						}
+						else
+						{
+							var bytes = Common.Utility.Hex.StringToByteArray(colorCode);
+
+							color = new Vector4(
+								(float)bytes[0] / 255.0f,
+								(float)bytes[1] / 255.0f,
+								(float)bytes[2] / 255.0f,
+								1
+								);
+						}
+
+						c = text[++i];
+
+						break;
 				}
-				
+
 				if (!Glyphs.ContainsKey(c))
 					continue;
 
