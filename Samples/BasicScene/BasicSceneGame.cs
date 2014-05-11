@@ -22,7 +22,7 @@ namespace Triton.Samples
 		private Vector3 CratePosition = new Vector3(0, 0, 3.0f);
 
 		public BasicSceneGame()
-			: base("BasicGame")
+			: base("BasicScene")
 		{
 			Width = 1280;
 			Height = 720;

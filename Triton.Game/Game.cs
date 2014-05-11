@@ -48,8 +48,11 @@ namespace Triton.Game
 		private float FrameTime = 0.0f;
 		protected float ElapsedTime = 0.0f;
 
+		private readonly string Name;
+
 		public Game(string name, string logPath = "logs/")
 		{
+			Name = name;
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File(string.Format("{0}/{1}.txt", logPath, name)));
 
@@ -78,7 +81,7 @@ namespace Triton.Game
 
 		private void RenderLoop()
 		{
-			using (GraphicsBackend = new Triton.Graphics.Backend(ResourceManager, Width, Height, "Awesome Test Application", false))
+			using (GraphicsBackend = new Triton.Graphics.Backend(ResourceManager, Width, Height, Name, false))
 			{
 				Triton.Graphics.Resources.ResourceLoaders.Init(ResourceManager, GraphicsBackend, FileSystem);
 
