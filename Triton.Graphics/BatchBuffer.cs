@@ -19,7 +19,7 @@ namespace Triton.Graphics
 		private bool Disposed = false;
 		private float[] VertexData;
 		private int[] IndexData;
-		private int TriangleCount;
+		private int IndexCount;
 		private int DataCount;
 		private Renderer.RenderSystem RenderSystem;
 
@@ -82,18 +82,18 @@ namespace Triton.Graphics
 
 		public void Begin()
 		{
-			TriangleCount = 0;
+			IndexCount = 0;
 			DataCount = 0;
 		}
 
 		public void End()
 		{
-			RenderSystem.SetMeshData(MeshHandle, VertexFormat, TriangleCount, VertexData, IndexData, true, null);
+			RenderSystem.SetMeshData(MeshHandle, VertexFormat, IndexCount, VertexData, IndexData, true, null);
 		}
 
 		public void EndInline(Backend backend)
 		{
-			backend.UpdateMeshInline(MeshHandle, TriangleCount, DataCount, TriangleCount, VertexData, IndexData, true);
+			backend.UpdateMeshInline(MeshHandle, IndexCount / 3, DataCount, IndexCount, VertexData, IndexData, true);
 		}
 
 		public void AddVector2(float x, float y)
@@ -152,15 +152,15 @@ namespace Triton.Graphics
 
 		public void AddTriangle(int v1, int v2, int v3)
 		{
-			var requiredIndexBufferSize = TriangleCount + 3;
+			var requiredIndexBufferSize = IndexCount + 3;
 			if (IndexData.Length <= requiredIndexBufferSize)
 			{
 				Array.Resize(ref IndexData, IndexData.Length * 2);
 			}
 
-			IndexData[TriangleCount++] = v1;
-			IndexData[TriangleCount++] = v2;
-			IndexData[TriangleCount++] = v3;
+			IndexData[IndexCount++] = v1;
+			IndexData[IndexCount++] = v2;
+			IndexData[IndexCount++] = v3;
 		}
 
 		/// <summary>
