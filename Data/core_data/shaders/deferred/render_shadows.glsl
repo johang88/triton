@@ -1,9 +1,10 @@
+import(shaders/core);
 #ifdef VERTEX_SHADER
 
-attrib(vec3, iPosition, Position);
+layout(location = ATTRIB_POSITION) in vec3 iPosition;
 #ifdef SKINNED
-attrib(vec4, iBoneIndex, BoneIndex);
-attrib(vec4, iBoneWeight, BoneWeight);
+layout(location = ATTRIB_BONE_INDEX) in vec4 iBoneIndex;
+layout(location = ATTRIB_BONE_WEIGHT) in vec4 iBoneWeight;
 #endif
 
 out vec4 position;
@@ -41,7 +42,7 @@ void main()
 
 in vec4 position;
 
-out(float, fragmentdepth, 0);
+layout(location = 0) out float fragmentdepth;
 uniform(vec2, clipPlane, ClipPlane);
 
 void main()

@@ -1,8 +1,9 @@
+import(shaders/core);
 #ifdef VERTEX_SHADER
 
-attrib(vec3, iPosition, Position);
-attrib(vec2, iTexCoord, TexCoord);
-attrib(vec4, iColor, Color);
+layout(location = ATTRIB_POSITION) in vec3 iPosition;
+layout(location = ATTRIB_TEXCOORD_0) in vec2 iTexCoord;
+layout(location = ATTRIB_COLOR) in vec4 iColor;
 
 uniform(mat4x4, modelViewProjection, ModelViewProjection);
 
@@ -21,7 +22,7 @@ void main()
 in vec2 texCoord;
 in vec4 color;
 
-out(vec4, oColor, 0);
+layout(location = 0) out vec4 oColor;
 
 sampler(2D, samplerDiffuse, DiffuseTexture);
 

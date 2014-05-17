@@ -1,12 +1,14 @@
+import(shaders/core);
 #ifdef VERTEX_SHADER
 
-attrib(vec3, iPosition, Position);
-attrib(vec2, iTexCoord, TexCoord);
-attrib(vec3, iNormal, Normal);
-attrib(vec3, iTangent, Tangent);
+layout(location = ATTRIB_POSITION) in vec3 iPosition;
+layout(location = ATTRIB_TEXCOORD_0) in vec2 iTexCoord;
+layout(location = ATTRIB_NORMAL) in vec3 iNormal;
+layout(location = ATTRIB_TANGENT) in vec3 iTangent;
+
 #ifdef SKINNED
-attrib(vec4, iBoneIndex, BoneIndex);
-attrib(vec4, iBoneWeight, BoneWeight);
+layout(location = ATTRIB_BONE_INDEX) in vec4 iBoneIndex;
+layout(location = ATTRIB_BONE_WEIGHT) in vec4 iBoneWeight;
 #endif
 
 out vec3 normal;
@@ -72,10 +74,10 @@ in vec3 bitangent;
 in vec2 texCoord;
 in vec4 position;
 
-out(vec4, oColor, 0);
-out(vec4, oNormal, 1);
-out(vec4, oPosition, 2);
-out(vec4, oSpecular, 3);
+layout(location = 0) out vec4 oColor;
+layout(location = 1) out vec4 oNormal;
+layout(location = 2) out vec4 oPosition;
+layout(location = 3) out vec4 oSpecular;
 
 sampler(2D, samplerDiffuse, DiffuseTexture);
 sampler(2D, samplerNormal, NormalMap);

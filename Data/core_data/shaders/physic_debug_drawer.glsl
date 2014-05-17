@@ -1,8 +1,9 @@
+import(shaders/core);
 #ifdef VERTEX_SHADER
 
-attrib(vec3, iPosition, Position);
+layout(location = ATTRIB_POSITION) in vec3 iPosition;
+layout(location = ATTRIB_COLOR) in vec3 iColor;
 
-attrib(vec3, iColor, Color);
 out vec3 color;
 
 uniform(mat4x4, modelViewProjection, ModelViewProjection);
@@ -17,7 +18,7 @@ void main()
 
 in vec3 color;
 
-out(vec4, oColor, 0);
+layout(location = 0) out vec4 oColor;
 
 void main()
 {

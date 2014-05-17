@@ -1,7 +1,8 @@
+import(shaders/core);
 #ifdef VERTEX_SHADER
 
-attrib(vec3, iPosition, Position);
-attrib(vec2, iTexCoord, TexCoord);
+layout(location = ATTRIB_POSITION) in vec3 iPosition;
+layout(location = ATTRIB_TEXCOORD_0) in vec2 iTexCoord;
 
 out vec2 texCoord;
 
@@ -29,7 +30,7 @@ import(shaders/deferred/shadows);
 
 in vec2 texCoord;
 
-out(vec4, oColor, 0);
+layout(location = 0) out vec4 oColor;
 
 sampler(2D, samplerNormal, NormalTexture);
 sampler(2D, samplerPosition, PositionTexture);

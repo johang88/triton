@@ -1,9 +1,10 @@
+import(shaders/core);
 #ifdef VERTEX_SHADER
 
-attrib(vec3, iPosition, Position);
-attrib(vec2, iTexCoord, TexCoord);
-attrib(vec3, iNormal, Normal);
-attrib(vec3, iTangent, Tangent);
+layout(location = ATTRIB_POSITION) in vec3 iPosition;
+layout(location = ATTRIB_TEXCOORD_0) in vec2 iTexCoord;
+layout(location = ATTRIB_NORMAL) in vec3 iNormal;
+layout(location = ATTRIB_TANGENT) in vec3 iTangent;
 
 out vec3 normal;
 out vec3 tangent;
@@ -15,10 +16,6 @@ out vec4 position;
 uniform(mat4x4, world, World);
 uniform(mat4x4, worldView, WorldView);
 uniform(mat4x4, modelViewProjection, ModelViewProjection);
-
-#ifdef SKINNED
-uniform(mat4x4[64], bones, Bones);
-#endif
 
 void main()
 {
@@ -45,10 +42,10 @@ in vec2 texCoord;
 in vec2 texCoordDetail;
 in vec4 position;
 
-out(vec4, oColor, 0);
-out(vec4, oNormal, 1);
-out(vec4, oPosition, 2);
-out(vec4, oSpecular, 3);
+layout(location = 0) out vec4 oColor;
+layout(location = 1) out vec4 oNormal;
+layout(location = 2) out vec4 oPosition;
+layout(location = 3) out vec4 oSpecular;
 
 sampler(2D, samplerSplat, SplatTexture);
 sampler(2D, samplerNormal1, NormalMap1);
