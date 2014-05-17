@@ -9,9 +9,9 @@ layout(location = ATTRIB_BONE_WEIGHT) in vec4 iBoneWeight;
 
 out vec4 position;
 
-uniform(mat4x4, modelViewProjection, ModelViewProjection);
+uniform mat4x4 modelViewProjection;
 #ifdef SKINNED
-uniform(mat4x4[64], bones, Bones);
+uniform mat4x4[64] bones;
 #endif
 
 void main()
@@ -43,7 +43,7 @@ void main()
 in vec4 position;
 
 layout(location = 0) out float fragmentdepth;
-uniform(vec2, clipPlane, ClipPlane);
+uniform vec2 clipPlane;
 
 void main()
 {

@@ -21,11 +21,11 @@ in vec2 texCoord;
 
 layout(location = 0) out vec4 oColor;
 
-sampler(2D, samplerLight, LightTexture);
-sampler(2D, samplerSSAO, SSAOTexture);
+uniform sampler2D samplerLight;
+uniform sampler2D samplerSSAO;
 
-uniform(vec3, ambientColor, AmbientColor);
-uniform(vec2, screenSize, ScreenSize);
+uniform vec3 ambientColor;
+uniform vec2 screenSize;
 
 void main()
 {

@@ -13,9 +13,9 @@ out vec2 texCoord;
 out vec2 texCoordDetail;
 out vec4 position;
 
-uniform(mat4x4, world, World);
-uniform(mat4x4, worldView, WorldView);
-uniform(mat4x4, modelViewProjection, ModelViewProjection);
+uniform mat4x4, world;
+uniform mat4x4, worldView;
+uniform mat4x4, modelViewProjection;
 
 void main()
 {
@@ -47,17 +47,17 @@ layout(location = 1) out vec4 oNormal;
 layout(location = 2) out vec4 oPosition;
 layout(location = 3) out vec4 oSpecular;
 
-sampler(2D, samplerSplat, SplatTexture);
-sampler(2D, samplerNormal1, NormalMap1);
-sampler(2D, samplerNormal2, NormalMap2);
-sampler(2D, samplerNormal3, NormalMap3);
-sampler(2D, samplerNormal4, NormalMap4);
-sampler(2D, samplerDiffuse1, Diffuse1);
-sampler(2D, samplerDiffuse2, Diffuse2);
-sampler(2D, samplerDiffuse3, Diffuse3);
-sampler(2D, samplerDiffuse4, Diffuse4);
+uniform sampler2D samplerSplat;
+uniform sampler2D samplerNormal1;
+uniform sampler2D samplerNormal2;
+uniform sampler2D samplerNormal3;
+uniform sampler2D samplerNormal4;
+uniform sampler2D samplerDiffuse1;
+uniform sampler2D samplerDiffuse2;
+uniform sampler2D samplerDiffuse3;
+uniform sampler2D samplerDiffuse4;
 
-uniform(mat4x4, itWorldView, ITWorldView);
+uniform mat4x4 itWorldView;
 
 void main()
 {

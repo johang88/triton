@@ -27,12 +27,7 @@ namespace Triton.Graphics.Shaders
 	class Preprocessor
 	{
 		private readonly Triton.Common.IO.FileSystem FileSystem;
-		private static Regex PreprocessorRegex = new Regex(@"^(attrib|uniform|sampler|out)\(([ \t\w\[\]]*),([ \t\w]*),([ \t\w]*)\);", RegexOptions.Multiline);
 		private static Regex PreprocessorImportRegex = new Regex(@"^import\(([ \t\w /]+)\);", RegexOptions.Multiline);
-
-		private List<Attrib> Attribs;
-		private List<Uniform> Uniforms;
-		private List<FragDataLocation> FragDataLocations;
 
 		public Preprocessor(Triton.Common.IO.FileSystem fileSystem)
 		{
@@ -42,18 +37,9 @@ namespace Triton.Graphics.Shaders
 			FileSystem = fileSystem;
 		}
 
-		public string Process(string source, out Attrib[] attribs, out Uniform[] uniforms, out FragDataLocation[] fragDataLocations)
+		public string Process(string source)
 		{
-			Attribs = new List<Attrib>();
-			Uniforms = new List<Uniform>();
-			FragDataLocations = new List<FragDataLocation>();
-
 			var output = PreprocessorImportRegex.Replace(source, PreprocessorImportReplacer);
-			output = PreprocessorRegex.Replace(output, PreprocessorReplacer);
-
-			attribs = Attribs.ToArray();
-			uniforms = Uniforms.ToArray();
-			fragDataLocations = FragDataLocations.ToArray();
 
 			return output;
 		}
@@ -66,69 +52,6 @@ namespace Triton.Graphics.Shaders
 			{
 				return reader.ReadToEnd();
 			}
-		}
-
-		string PreprocessorReplacer(Match match)
-		{
-			var verb = match.Groups[1].Value;
-
-			if (verb == "attrib")
-			{
-				var type = (Renderer.VertexFormatSemantic)Enum.Parse(typeof(Renderer.VertexFormatSemantic), match.Groups[4].Value, true);
-				Attribs.Add(new Attrib
-				{
-					Name = match.Groups[3].Value.Trim(),
-					Type = type
-				});
-
-				return string.Format("in {0} {1};", match.Groups[2].Value, match.Groups[3].Value);
-			}
-			else if (verb == "uniform")
-			{
-				var type = match.Groups[2].Value;
-
-				Uniforms.Add(new Uniform
-				{
-					Name = match.Groups[3].Value.Trim(),
-					BindName = match.Groups[4].Value.Trim()
-				});
-
-				if (type.Contains('['))
-				{
-					var index = type.IndexOf('[');
-					var size = type.Substring(index).Replace("[", "").Replace("]", "");
-					type = type.Substring(0, index);
-
-					return string.Format("uniform {0} {1}[{2}];", type, match.Groups[3].Value, size);
-				}
-				else
-				{
-					return string.Format("uniform {0} {1};", match.Groups[2].Value, match.Groups[3].Value);
-				}
-			}
-			else if (verb == "sampler")
-			{
-				Uniforms.Add(new Uniform
-				{
-					Name = match.Groups[3].Value.Trim(),
-					BindName = match.Groups[4].Value.Trim()
-				});
-
-				return string.Format("uniform sampler{0} {1};", match.Groups[2].Value, match.Groups[3].Value);
-			}
-			else if (verb == "out")
-			{
-				var type = (Renderer.VertexFormatSemantic)Enum.Parse(typeof(Renderer.VertexFormatSemantic), match.Groups[4].Value, true);
-				FragDataLocations.Add(new FragDataLocation
-				{
-					Name = match.Groups[3].Value.Trim(),
-					Index = Common.StringConverter.Parse<int>(match.Groups[4].Value)
-				});
-
-				return string.Format("out {0} {1};", match.Groups[2].Value, match.Groups[3].Value);
-			}
-
-			return "";
 		}
 	}
 }

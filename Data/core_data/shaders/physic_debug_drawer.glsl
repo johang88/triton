@@ -6,7 +6,7 @@ layout(location = ATTRIB_COLOR) in vec3 iColor;
 
 out vec3 color;
 
-uniform(mat4x4, modelViewProjection, ModelViewProjection);
+uniform mat4x4 modelViewProjection;
 
 void main()
 {

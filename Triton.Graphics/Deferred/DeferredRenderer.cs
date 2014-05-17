@@ -205,8 +205,8 @@ namespace Triton.Graphics.Deferred
 			Backend.BeginPass(Output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 			Backend.BeginInstance(CombineShader.Handle, new int[] { LightAccumulation.Textures[0].Handle, SSAOTarget2.Textures[0].Handle }, LightAccumulatinRenderState);
-			Backend.BindShaderVariable(CombineParams.HandleLightTexture, 0);
-			Backend.BindShaderVariable(CombineParams.HandleSSAOTexture, 1);
+			Backend.BindShaderVariable(CombineParams.SamplerLight, 0);
+			Backend.BindShaderVariable(CombineParams.SamplerSSAO, 1);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 
@@ -222,14 +222,14 @@ namespace Triton.Graphics.Deferred
 
 			var modelViewProjection = Matrix4.Identity;
 			Backend.BeginInstance(SSAOShader.Handle, new int[] { GBuffer.Textures[2].Handle, GBuffer.Textures[1].Handle, RandomNoiseTexture.Handle });
-			Backend.BindShaderVariable(SSAOParams.HandleModelViewProjection, ref modelViewProjection);
+			Backend.BindShaderVariable(SSAOParams.ModelViewProjection, ref modelViewProjection);
 
-			Backend.BindShaderVariable(SSAOParams.HandlePositionTexture, 0);
-			Backend.BindShaderVariable(SSAOParams.HandleNormalTexture, 1);
-			Backend.BindShaderVariable(SSAOParams.HandleRandomTexture, 2);
+			Backend.BindShaderVariable(SSAOParams.SamplerPosition, 0);
+			Backend.BindShaderVariable(SSAOParams.SamplerNormal, 1);
+			Backend.BindShaderVariable(SSAOParams.SamplerRandom, 2);
 
 			var noiseScale = new Vector2(ScreenSize.X / 64, ScreenSize.Y / 64);
-			Backend.BindShaderVariable(SSAOParams.HandleNoiseScale, ref noiseScale);
+			Backend.BindShaderVariable(SSAOParams.NoiseScale, ref noiseScale);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 
@@ -238,10 +238,10 @@ namespace Triton.Graphics.Deferred
 			// Blur 1
 			Backend.BeginPass(SSAOTarget1, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 			Backend.BeginInstance(BlurShader.Handle, new int[] { SSAOTarget2.Textures[0].Handle });
-			Backend.BindShaderVariable(BlurParams.HandleModelViewProjection, ref modelViewProjection);
-			Backend.BindShaderVariable(BlurParams.HandleSceneTexture, 0);
+			Backend.BindShaderVariable(BlurParams.ModelViewProjection, ref modelViewProjection);
+			Backend.BindShaderVariable(BlurParams.SamplerScene, 0);
 			Backend.BindShaderVariable(BlurParams.SampleWeights, ref BlurWeights);
-			Backend.BindShaderVariable(BlurParams.HandleSampleOffsets, ref BlurOffsetsHorz);
+			Backend.BindShaderVariable(BlurParams.SampleOffsets, ref BlurOffsetsHorz);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 			Backend.EndPass();
@@ -249,10 +249,10 @@ namespace Triton.Graphics.Deferred
 			// Blur 2
 			Backend.BeginPass(SSAOTarget2, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 			Backend.BeginInstance(BlurShader.Handle, new int[] { SSAOTarget1.Textures[0].Handle });
-			Backend.BindShaderVariable(BlurParams.HandleModelViewProjection, ref modelViewProjection);
-			Backend.BindShaderVariable(BlurParams.HandleSceneTexture, 0);
+			Backend.BindShaderVariable(BlurParams.ModelViewProjection, ref modelViewProjection);
+			Backend.BindShaderVariable(BlurParams.SamplerScene, 0);
 			Backend.BindShaderVariable(BlurParams.SampleWeights, ref BlurWeights);
-			Backend.BindShaderVariable(BlurParams.HandleSampleOffsets, ref BlurOffsetsVert);
+			Backend.BindShaderVariable(BlurParams.SampleOffsets, ref BlurOffsetsVert);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 			Backend.EndPass();
@@ -287,9 +287,9 @@ namespace Triton.Graphics.Deferred
 			var ambientColor = new Vector3((float)System.Math.Pow(stage.AmbientColor.X, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Y, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Z, 2.2f));
 
 			Backend.BeginInstance(AmbientLightShader.Handle, new int[] { GBuffer.Textures[0].Handle }, AmbientRenderState);
-			Backend.BindShaderVariable(AmbientLightParams.HandleDiffuseTexture, 0);
-			Backend.BindShaderVariable(AmbientLightParams.HandleModelViewProjection, ref modelViewProjection);
-			Backend.BindShaderVariable(AmbientLightParams.HandleAmbientColor, ref ambientColor);
+			Backend.BindShaderVariable(AmbientLightParams.SamplerDiffuse, 0);
+			Backend.BindShaderVariable(AmbientLightParams.ModelViewProjection, ref modelViewProjection);
+			Backend.BindShaderVariable(AmbientLightParams.AmbientColor, ref ambientColor);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 		}
@@ -441,16 +441,16 @@ namespace Triton.Graphics.Deferred
 			Backend.BeginInstance(shader.Handle, textures, renderStateId);
 
 			// Setup texture samplers
-			Backend.BindShaderVariable(shaderParams.HandleNormalTexture, 0);
-			Backend.BindShaderVariable(shaderParams.HandlePositionTexture, 1);
-			Backend.BindShaderVariable(shaderParams.HandleSpecularTexture, 2);
-			Backend.BindShaderVariable(shaderParams.HandleDiffuseTexture, 3);
+			Backend.BindShaderVariable(shaderParams.SamplerNormal, 0);
+			Backend.BindShaderVariable(shaderParams.SamplerPosition, 1);
+			Backend.BindShaderVariable(shaderParams.SamplerSpecular, 2);
+			Backend.BindShaderVariable(shaderParams.SamplerDiffuse, 3);
 
 			// Common uniforms
-			Backend.BindShaderVariable(shaderParams.HandleScreenSize, ref ScreenSize);
-			Backend.BindShaderVariable(shaderParams.HandleModelViewProjection, ref modelViewProjection);
-			Backend.BindShaderVariable(shaderParams.HandleLightColor, ref lightColor);
-			Backend.BindShaderVariable(shaderParams.HandleCameraPosition, ref cameraPositionViewSpace);
+			Backend.BindShaderVariable(shaderParams.ScreenSize, ref ScreenSize);
+			Backend.BindShaderVariable(shaderParams.ModelViewProjection, ref modelViewProjection);
+			Backend.BindShaderVariable(shaderParams.LightColor, ref lightColor);
+			Backend.BindShaderVariable(shaderParams.CameraPosition, ref cameraPositionViewSpace);
 
 			if (light.Type == LighType.Directional || light.Type == LighType.SpotLight)
 			{
@@ -459,7 +459,7 @@ namespace Triton.Graphics.Deferred
 				var lightDirection = Vector3.Transform(light.Direction, Matrix4.Transpose(Matrix4.Invert(view)));
 				lightDirection = lightDirection.Normalize();
 
-				Backend.BindShaderVariable(shaderParams.HandleLightDirection, ref lightDirection);
+				Backend.BindShaderVariable(shaderParams.LightDirection, ref lightDirection);
 			}
 
 			if (light.Type == LighType.PointLight || light.Type == LighType.SpotLight)
@@ -467,28 +467,28 @@ namespace Triton.Graphics.Deferred
 				Vector3 lightPosition;
 				Vector3.Transform(ref light.Position, ref view, out lightPosition);
 
-				Backend.BindShaderVariable(shaderParams.HandleLightPosition, ref lightPosition);
-				Backend.BindShaderVariable(shaderParams.HandleLightRange, light.Range);
+				Backend.BindShaderVariable(shaderParams.LightPosition, ref lightPosition);
+				Backend.BindShaderVariable(shaderParams.LightRange, light.Range);
 			}
 
 			if (light.Type == LighType.SpotLight)
 			{
 				var spotParams = new Vector2((float)System.Math.Cos(light.InnerAngle / 2.0f), (float)System.Math.Cos(light.OuterAngle / 2.0f));
-				Backend.BindShaderVariable(shaderParams.HandleSpotLightParams, ref spotParams);
+				Backend.BindShaderVariable(shaderParams.SpotParams, ref spotParams);
 			}
 
 			if (light.CastShadows)
 			{
 				var inverseViewMatrix = Matrix4.Invert(view);
 
-				Backend.BindShaderVariable(shaderParams.HandleShadowMap, 4);
-				Backend.BindShaderVariable(shaderParams.HandleInverseViewMatrix, ref inverseViewMatrix);
-				Backend.BindShaderVariable(shaderParams.ShadowViewProjection, ref shadowViewProjection);
-				Backend.BindShaderVariable(shaderParams.HandleClipPlane, ref shadowCameraClipPlane);
-				Backend.BindShaderVariable(shaderParams.HandleShadowBias, light.ShadowBias);
+				Backend.BindShaderVariable(shaderParams.SamplerShadow, 4);
+				Backend.BindShaderVariable(shaderParams.InvView, ref inverseViewMatrix);
+				Backend.BindShaderVariable(shaderParams.ShadowViewProj, ref shadowViewProjection);
+				Backend.BindShaderVariable(shaderParams.ClipPlane, ref shadowCameraClipPlane);
+				Backend.BindShaderVariable(shaderParams.ShadowBias, light.ShadowBias);
 
 				var texelSize = 1.0f / (light.Type == LighType.Directional ? DirectionalShadowsRenderTarget.Width : SpotShadowsRenderTarget.Width) ;
-				Backend.BindShaderVariable(shaderParams.HandleShadowMapTexelSize, texelSize);
+				Backend.BindShaderVariable(shaderParams.TexelSize, texelSize);
 			}
 
 			if (light.Type == LighType.Directional)
@@ -561,7 +561,7 @@ namespace Triton.Graphics.Deferred
 				{
 					Backend.BeginInstance(RenderShadowsShader.Handle, new int[] { }, ShadowsRenderState);
 					Backend.BindShaderVariable(RenderShadowsParams.ModelViewProjection, ref modelViewProjection);
-					Backend.BindShaderVariable(RenderShadowsParams.HandleClipPlane, ref clipPlane);
+					Backend.BindShaderVariable(RenderShadowsParams.ClipPlane, ref clipPlane);
 
 					Backend.DrawMesh(subMesh.Handle);
 

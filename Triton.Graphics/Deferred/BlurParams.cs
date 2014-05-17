@@ -8,9 +8,9 @@ namespace Triton.Graphics.Deferred
 {
 	class BlurParams
 	{
-		public int HandleModelViewProjection = 0;
-		public int HandleSceneTexture = 0;
-		public int HandleSampleOffsets = 0;
+		public int ModelViewProjection = 0;
+		public int SamplerScene = 0;
+		public int SampleOffsets = 0;
 		public int SampleWeights = 0;
 	}
 }

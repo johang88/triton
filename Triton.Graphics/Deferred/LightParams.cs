@@ -8,23 +8,23 @@ namespace Triton.Graphics.Deferred
 {
 	class LightParams
 	{
-		public int HandleModelViewProjection = 0;
-		public int HandleNormalTexture = 0;
-		public int HandlePositionTexture = 0;
-		public int HandleSpecularTexture = 0;
-		public int HandleDiffuseTexture = 0;
-		public int HandleShadowMap = 0;
-		public int HandleLightDirection = 0;
-		public int HandleCameraPosition = 0;
-		public int HandleLightPosition = 0;
-		public int HandleLightColor = 0;
-		public int HandleLightRange = 0;
-		public int HandleScreenSize = 0;
-		public int HandleSpotLightParams = 0;
-		public int HandleInverseViewMatrix = 0;
-		public int ShadowViewProjection = 0;
-		public int HandleShadowBias = 0;
-		public int HandleClipPlane = 0;
-		public int HandleShadowMapTexelSize = 0;
+		public int ModelViewProjection = 0;
+		public int SamplerNormal = 0;
+		public int SamplerPosition = 0;
+		public int SamplerSpecular = 0;
+		public int SamplerDiffuse = 0;
+		public int SamplerShadow = 0;
+		public int LightDirection = 0;
+		public int CameraPosition = 0;
+		public int LightPosition = 0;
+		public int LightColor = 0;
+		public int LightRange = 0;
+		public int ScreenSize = 0;
+		public int SpotParams = 0;
+		public int InvView = 0;
+		public int ShadowViewProj = 0;
+		public int ShadowBias = 0;
+		public int ClipPlane = 0;
+		public int TexelSize = 0;
 	}
 }

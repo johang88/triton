@@ -99,10 +99,7 @@
     <Compile Include="Resources\SkeletonLoader.cs" />
     <Compile Include="Resources\Texture.cs" />
     <Compile Include="Resources\TextureLoader.cs" />
-    <Compile Include="Shaders\Attrib.cs" />
-    <Compile Include="Shaders\FragDataLocation.cs" />
     <Compile Include="Shaders\Preprocessor.cs" />
-    <Compile Include="Shaders\Uniform.cs" />
     <Compile Include="SkeletalAnimation\Animation.cs" />
     <Compile Include="SkeletalAnimation\KeyFrame.cs" />
     <Compile Include="SkeletalAnimation\Skeleton.cs" />

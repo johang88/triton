@@ -71,17 +71,8 @@ namespace Triton.Graphics.HDR
 
 		public void InitializeHandles()
 		{
-			TonemapParams.HandleMVP = TonemapShader.GetAliasedUniform("ModelViewProjection");
-			TonemapParams.HandleScene = TonemapShader.GetAliasedUniform("SceneTexture");
-			TonemapParams.HandleBloom = TonemapShader.GetAliasedUniform("BloomTexture");
-			TonemapParams.HandleWhitePoint = TonemapShader.GetAliasedUniform("WhitePoint");
-			TonemapParams.HandleExposure = TonemapShader.GetAliasedUniform("Exposure");
-
-			HighPassParams.HandleMVP = HighPassShader.GetAliasedUniform("ModelViewProjection");
-			HighPassParams.HandleScene = HighPassShader.GetAliasedUniform("SceneTexture");
-			HighPassParams.HandleWhitePoint = HighPassShader.GetAliasedUniform("WhitePoint");
-			HighPassParams.HandleExposure = HighPassShader.GetAliasedUniform("Exposure");
-
+			TonemapShader.GetUniformLocations(TonemapParams);
+			HighPassShader.GetUniformLocations(HighPassParams);
 			BlurShader.GetUniformLocations(BlurParams);
 		}
 
@@ -98,10 +89,10 @@ namespace Triton.Graphics.HDR
 
 			Backend.BeginPass(Blur2Target, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 			Backend.BeginInstance(HighPassShader.Handle, new int[] { inputTarget.Textures[0].Handle });
-			Backend.BindShaderVariable(HighPassParams.HandleMVP, ref modelViewProjection);
-			Backend.BindShaderVariable(HighPassParams.HandleScene, 0);
-			Backend.BindShaderVariable(HighPassParams.HandleWhitePoint, ref WhitePoint);
-			Backend.BindShaderVariable(HighPassParams.HandleExposure, Exposure);
+			Backend.BindShaderVariable(HighPassParams.ModelViewProjection, ref modelViewProjection);
+			Backend.BindShaderVariable(HighPassParams.SamplerScene, 0);
+			Backend.BindShaderVariable(HighPassParams.WhitePoint, ref WhitePoint);
+			Backend.BindShaderVariable(HighPassParams.Exposure, Exposure);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 			Backend.EndPass();
@@ -111,10 +102,10 @@ namespace Triton.Graphics.HDR
 				// Blur 1
 				Backend.BeginPass(Blur1Target, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 				Backend.BeginInstance(BlurShader.Handle, new int[] { Blur2Target.Textures[0].Handle });
-				Backend.BindShaderVariable(BlurParams.HandleModelViewProjection, ref modelViewProjection);
-				Backend.BindShaderVariable(BlurParams.HandleSceneTexture, 0);
+				Backend.BindShaderVariable(BlurParams.ModelViewProjection, ref modelViewProjection);
+				Backend.BindShaderVariable(BlurParams.SamplerScene, 0);
 				Backend.BindShaderVariable(BlurParams.SampleWeights, ref BlurWeights);
-				Backend.BindShaderVariable(BlurParams.HandleSampleOffsets, ref BlurOffsetsHorz);
+				Backend.BindShaderVariable(BlurParams.SampleOffsets, ref BlurOffsetsHorz);
 
 				Backend.DrawMesh(QuadMesh.MeshHandle);
 				Backend.EndPass();
@@ -122,10 +113,10 @@ namespace Triton.Graphics.HDR
 				// Blur 2
 				Backend.BeginPass(Blur2Target, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 				Backend.BeginInstance(BlurShader.Handle, new int[] { Blur1Target.Textures[0].Handle });
-				Backend.BindShaderVariable(BlurParams.HandleModelViewProjection, ref modelViewProjection);
-				Backend.BindShaderVariable(BlurParams.HandleSceneTexture, 0);
+				Backend.BindShaderVariable(BlurParams.ModelViewProjection, ref modelViewProjection);
+				Backend.BindShaderVariable(BlurParams.SamplerScene, 0);
 				Backend.BindShaderVariable(BlurParams.SampleWeights, ref BlurWeights);
-				Backend.BindShaderVariable(BlurParams.HandleSampleOffsets, ref BlurOffsetsVert);
+				Backend.BindShaderVariable(BlurParams.SampleOffsets, ref BlurOffsetsVert);
 
 				Backend.DrawMesh(QuadMesh.MeshHandle);
 				Backend.EndPass();
@@ -134,11 +125,11 @@ namespace Triton.Graphics.HDR
 			// Tonemap and apply glow!
 			Backend.BeginPass(null, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 			Backend.BeginInstance(TonemapShader.Handle, new int[] { inputTarget.Textures[0].Handle, Blur2Target.Textures[0].Handle });
-			Backend.BindShaderVariable(TonemapParams.HandleMVP, ref modelViewProjection);
-			Backend.BindShaderVariable(TonemapParams.HandleScene, 0);
-			Backend.BindShaderVariable(TonemapParams.HandleBloom, 1);
-			Backend.BindShaderVariable(TonemapParams.HandleWhitePoint, ref WhitePoint);
-			Backend.BindShaderVariable(TonemapParams.HandleExposure, Exposure);
+			Backend.BindShaderVariable(TonemapParams.ModelViewProjection, ref modelViewProjection);
+			Backend.BindShaderVariable(TonemapParams.SamplerScene, 0);
+			Backend.BindShaderVariable(TonemapParams.SamplerBloom, 1);
+			Backend.BindShaderVariable(TonemapParams.WhitePoint, ref WhitePoint);
+			Backend.BindShaderVariable(TonemapParams.Exposure, Exposure);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 			Backend.EndPass();

@@ -6,7 +6,7 @@ layout(location = ATTRIB_TEXCOORD_0) in vec2 iTexCoord;
 
 out vec2 texCoord;
 
-uniform(mat4x4, modelViewProjection, ModelViewProjection);
+uniform mat4x4 modelViewProjection;
 
 void main()
 {
@@ -20,11 +20,11 @@ in vec2 texCoord;
 
 layout(location = 0) out vec4 oColor;
 
-sampler(2D, samplerPosition, PositionTexture);
-sampler(2D, samplerNormal, NormalTexture);
-sampler(2D, samplerRandom, RandomTexture);
+uniform sampler2D samplerPosition;
+uniform sampler2D samplerNormal;
+uniform sampler2D samplerRandom;
 
-uniform(vec2, noiseScale, NoiseScale);
+uniform vec2 noiseScale;
 
 float bias = 0.55f;
 float intensity = 30.0f;

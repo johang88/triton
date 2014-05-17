@@ -8,10 +8,10 @@ namespace Triton.Graphics.HDR
 {
 	class TonemapParams
 	{
-		public int HandleMVP;
-		public int HandleScene;
-		public int HandleBloom;
-		public int HandleWhitePoint;
-		public int HandleExposure;
+		public int ModelViewProjection = 0;
+		public int SamplerScene = 0;
+		public int SamplerBloom = 0;
+		public int WhitePoint = 0;
+		public int Exposure = 0;
 	}
 }

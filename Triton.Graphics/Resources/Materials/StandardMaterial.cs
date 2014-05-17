@@ -61,29 +61,29 @@ namespace Triton.Graphics.Resources.Materials
 			backend.BeginInstance(Shader.Handle, new int[] { Diffuse.Handle, Normal.Handle, Specular.Handle });
 
 			backend.BindShaderVariable(Handles.ModelViewProjection, ref modelViewProjection);
-			backend.BindShaderVariable(Handles.HandleWorld, ref world);
-			backend.BindShaderVariable(Handles.HandleWorldView, ref worldView);
-			backend.BindShaderVariable(Handles.HandleITWorldView, ref itWorldView);
-			backend.BindShaderVariable(Handles.HandleDiffuseTexture, 0);
-			backend.BindShaderVariable(Handles.HandleNormalMap, 1);
-			backend.BindShaderVariable(Handles.HandleSpecularMap, 2);
+			backend.BindShaderVariable(Handles.World, ref world);
+			backend.BindShaderVariable(Handles.WorldView, ref worldView);
+			backend.BindShaderVariable(Handles.ItWorldView, ref itWorldView);
+			backend.BindShaderVariable(Handles.SamplerDiffuse, 0);
+			backend.BindShaderVariable(Handles.SamplerNormal, 1);
+			backend.BindShaderVariable(Handles.SamplerSpecular, 2);
 
 			if (skeleton != null)
 			{
-				backend.BindShaderVariable(Handles.HandleBones, ref skeleton.FinalBoneTransforms);
+				backend.BindShaderVariable(Handles.Bones, ref skeleton.FinalBoneTransforms);
 			}
 		}
 
 		class ShaderHandles
 		{
 			public int ModelViewProjection = 0;
-			public int HandleWorld = 0;
-			public int HandleWorldView = 0;
-			public int HandleITWorldView = 0;
-			public int HandleDiffuseTexture = 0;
-			public int HandleNormalMap = 0;
-			public int HandleSpecularMap = 0;
-			public int HandleBones = 0;
+			public int World = 0;
+			public int WorldView = 0;
+			public int ItWorldView = 0;
+			public int SamplerDiffuse = 0;
+			public int SamplerNormal = 0;
+			public int SamplerSpecular = 0;
+			public int Bones = 0;
 		}
 	}
 }

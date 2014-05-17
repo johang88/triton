@@ -17,12 +17,12 @@ out vec3 bitangent;
 out vec2 texCoord;
 out vec4 position;
 
-uniform(mat4x4, world, World);
-uniform(mat4x4, worldView, WorldView);
-uniform(mat4x4, modelViewProjection, ModelViewProjection);
+uniform mat4x4 world;
+uniform mat4x4 worldView;
+uniform mat4x4 modelViewProjection;
 
 #ifdef SKINNED
-uniform(mat4x4[64], bones, Bones);
+uniform mat4x4[64] bones;
 #endif
 
 void main()
@@ -79,11 +79,11 @@ layout(location = 1) out vec4 oNormal;
 layout(location = 2) out vec4 oPosition;
 layout(location = 3) out vec4 oSpecular;
 
-sampler(2D, samplerDiffuse, DiffuseTexture);
-sampler(2D, samplerNormal, NormalMap);
-sampler(2D, samplerSpecular, SpecularMap);
+uniform sampler2D samplerDiffuse;
+uniform sampler2D samplerNormal;
+uniform sampler2D samplerSpecular;
 
-uniform(mat4x4, itWorldView, ITWorldView);
+uniform mat4x4 itWorldView;
 
 void main()
 {

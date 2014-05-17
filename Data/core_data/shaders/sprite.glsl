@@ -5,7 +5,7 @@ layout(location = ATTRIB_POSITION) in vec3 iPosition;
 layout(location = ATTRIB_TEXCOORD_0) in vec2 iTexCoord;
 layout(location = ATTRIB_COLOR) in vec4 iColor;
 
-uniform(mat4x4, modelViewProjection, ModelViewProjection);
+uniform mat4x4 modelViewProjection;
 
 out vec2 texCoord;
 out vec4 color;
@@ -24,7 +24,7 @@ in vec4 color;
 
 layout(location = 0) out vec4 oColor;
 
-sampler(2D, samplerDiffuse, DiffuseTexture);
+uniform sampler2D samplerDiffuse;
 
 void main()
 {

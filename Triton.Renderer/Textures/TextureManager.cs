@@ -151,13 +151,14 @@ namespace Triton.Renderer.Textures
 			{
 				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
 				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+			}
 
-				if (target == TextureTarget.TextureCubeMap)
-				{
-					GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
-				}
+			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+
+			if (target == TextureTarget.TextureCubeMap)
+			{
+				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
 			}
 
 			GL.Finish();

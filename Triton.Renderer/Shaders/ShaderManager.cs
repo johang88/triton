@@ -146,7 +146,7 @@ namespace Triton.Renderer.Shaders
 			Handles[index].Initialized = false;
 		}
 
-		public bool SetShaderData(int handle, string vertexShader, string fragmentShader, string geometryShader, string[] attribs, string[] fragDataLocations, out string errors)
+		public bool SetShaderData(int handle, string vertexShader, string fragmentShader, string geometryShader, out string errors)
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
@@ -212,25 +212,6 @@ namespace Triton.Renderer.Shaders
 			// Link program
 			GL.AttachShader(Handles[index].ProgramHandle, Handles[index].VertexHandle);
 			GL.AttachShader(Handles[index].ProgramHandle, Handles[index].FragmentHandle);
-
-			for (var i = 0; i < attribs.Length; i++)
-			{
-				var attribName = attribs[i];
-				if (string.IsNullOrWhiteSpace(attribName))
-					continue;
-
-				GL.BindAttribLocation(Handles[index].ProgramHandle, i, attribName);
-			}
-
-			for (var i = 0; i < fragDataLocations.Length; i++)
-			{
-				var fragDataLocationName = fragDataLocations[i];
-				if (string.IsNullOrWhiteSpace(fragDataLocationName))
-					continue;
-
-				GL.BindFragDataLocation(Handles[index].ProgramHandle, i, fragDataLocationName);
-			}
-
 			GL.LinkProgram(Handles[index].ProgramHandle);
 
 			// Check for link errors
@@ -254,6 +235,29 @@ namespace Triton.Renderer.Shaders
 			Handles[index].Initialized = true;
 
 			return true;
+		}
+
+		public Dictionary<Common.HashedString, int> GetUniforms(int handle)
+		{
+			var program = GetOpenGLHande(handle);
+			var uniforms = new Dictionary<Common.HashedString, int>();
+
+			int uniformCount;
+			GL.GetProgram(program, GetProgramParameterName.ActiveUniforms, out uniformCount);
+
+			for (var i = 0; i < uniformCount; i++)
+			{
+				int size;
+				ActiveUniformType type;
+				
+				var name = GL.GetActiveUniform(program, i, out size, out type);
+				name = name.Replace("[0]", "");
+				var location = GL.GetUniformLocation(program, name);
+
+				uniforms.Add(name, location);
+			}
+
+			return uniforms;
 		}
 
 		public int GetOpenGLHande(int handle)

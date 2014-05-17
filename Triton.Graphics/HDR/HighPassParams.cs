@@ -8,9 +8,9 @@ namespace Triton.Graphics.HDR
 {
 	class HighPassParams
 	{
-		public int HandleMVP;
-		public int HandleScene;
-		public int HandleWhitePoint;
-		public int HandleExposure;
+		public int ModelViewProjection = 0;
+		public int SamplerScene = 0;
+		public int WhitePoint = 0;
+		public int Exposure = 0;
 	}
 }

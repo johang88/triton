@@ -8,7 +8,7 @@ namespace Triton.Graphics.Deferred
 {
 	class CombineParams
 	{
-		public int HandleLightTexture = 0;
-		public int HandleSSAOTexture = 0;
+		public int SamplerLight = 0;
+		public int SamplerSSAO = 0;
 	}
 }

@@ -203,10 +203,10 @@ namespace Triton.Renderer
 			Context.SwapBuffers();
 		}
 
-		public int CreateShader(string vertexShaderSource, string fragmentShaderSource, string geometryShaderSource, string[] attribs, string[] fragDataLocations, OnLoadedCallback loadedCallback)
+		public int CreateShader(string vertexShaderSource, string fragmentShaderSource, string geometryShaderSource, OnLoadedCallback loadedCallback)
 		{
 			var handle = ShaderManager.Create();
-			SetShaderData(handle, vertexShaderSource, fragmentShaderSource, geometryShaderSource, attribs, fragDataLocations, loadedCallback);
+			SetShaderData(handle, vertexShaderSource, fragmentShaderSource, geometryShaderSource, loadedCallback);
 
 			return handle;
 		}
@@ -216,12 +216,12 @@ namespace Triton.Renderer
 			AddToWorkQueue(() => ShaderManager.Destroy(handle));
 		}
 
-		public void SetShaderData(int handle, string vertexShaderSource, string fragmentShaderSource, string geometryShaderSource, string[] attribs, string[] fragDataLocations, OnLoadedCallback loadedCallback)
+		public void SetShaderData(int handle, string vertexShaderSource, string fragmentShaderSource, string geometryShaderSource, OnLoadedCallback loadedCallback)
 		{
 			AddToWorkQueue(() =>
 			{
 				string errors;
-				bool success = ShaderManager.SetShaderData(handle, vertexShaderSource, fragmentShaderSource, geometryShaderSource, attribs, fragDataLocations, out errors);
+				bool success = ShaderManager.SetShaderData(handle, vertexShaderSource, fragmentShaderSource, geometryShaderSource, out errors);
 
 				if (loadedCallback != null)
 					loadedCallback(handle, success, errors);
@@ -238,6 +238,11 @@ namespace Triton.Renderer
 		{
 			var programHandle = ShaderManager.GetOpenGLHande(handle);
 			return GL.GetUniformLocation(programHandle, name);
+		}
+
+		public Dictionary<Common.HashedString, int> GetUniforms(int handle)
+		{
+			return ShaderManager.GetUniforms(handle);
 		}
 
 		public void SetUniformFloat(int handle, float value)
@@ -317,17 +322,27 @@ namespace Triton.Renderer
 				{
 					if (attachment.AttachmentPoint == RenderTargets.Definition.AttachmentPoint.Color || definition.RenderDepthToTexture)
 					{
-						TextureManager.SetPixelData(attachment.TextureHandle, TextureTarget.Texture2D, definition.Width, definition.Height, null, attachment.PixelFormat, attachment.PixelInternalFormat, attachment.PixelType, false, false);
+						var target = TextureTarget.Texture2D;
+						var glTarget = OGL.TextureTarget.Texture2D;
+
+						if (definition.RenderToCubeMap)
+						{
+							target = TextureTarget.TextureCubeMap;
+							glTarget = OGL.TextureTarget.TextureCubeMap;
+						}
+
+						TextureManager.SetPixelData(attachment.TextureHandle, target, definition.Width, definition.Height, null, attachment.PixelFormat, attachment.PixelInternalFormat, attachment.PixelType, false, false);
+						
 						// Replace with gl handle
 						attachment.TextureHandle = TextureManager.GetOpenGLHande(attachment.TextureHandle);
 
 						if (attachment.AttachmentPoint == RenderTargets.Definition.AttachmentPoint.Depth)
 						{
-							GL.BindTexture(OGL.TextureTarget.Texture2D, attachment.TextureHandle);
-							GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-							GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-							GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, (int)DepthFunction.Lequal);
-							GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
+							GL.BindTexture(glTarget, attachment.TextureHandle);
+							GL.TexParameter(glTarget, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+							GL.TexParameter(glTarget, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+							GL.TexParameter(glTarget, TextureParameterName.TextureCompareFunc, (int)DepthFunction.Lequal);
+							GL.TexParameter(glTarget, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
 						}
 					}
 				}

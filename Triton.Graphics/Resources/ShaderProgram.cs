@@ -10,7 +10,7 @@ namespace Triton.Graphics.Resources
 	public class ShaderProgram : Triton.Common.Resource
 	{
 		public int Handle { get; internal set; }
-		private Dictionary<Common.HashedString, int> Uniforms = new Dictionary<Common.HashedString, int>();
+		public Dictionary<Common.HashedString, int> Uniforms = new Dictionary<Common.HashedString, int>();
 		private Dictionary<Common.HashedString, Common.HashedString> BindNamesToVarNames = new Dictionary<Common.HashedString, Common.HashedString>();
 		private readonly Backend Backend;
 
@@ -32,26 +32,10 @@ namespace Triton.Graphics.Resources
 			int uniformLocation;
 			if (!Uniforms.TryGetValue(name, out uniformLocation))
 			{
-				uniformLocation = Backend.RenderSystem.GetUniformLocation(Handle, Triton.Common.HashedStringTable.GetString(name));
-				Uniforms.Add(name, uniformLocation);
+				return -1;
 			}
 
 			return uniformLocation;
-		}
-
-		public int GetAliasedUniform(Common.HashedString name)
-		{
-			return GetUniform(BindNamesToVarNames[name]);
-		}
-
-		public bool HasAliasedUniform(Common.HashedString name)
-		{
-			return BindNamesToVarNames.ContainsKey(name);
-		}
-
-		public void AddUniform(string bindName, string name)
-		{
-			BindNamesToVarNames.Add(bindName, name);
 		}
 
 		public void GetUniformLocations<T>(T handles)
@@ -64,10 +48,9 @@ namespace Triton.Graphics.Resources
 
 				var fieldName = field.Name;
 				var uniformName = fieldName.Replace("Handle", "");
+				uniformName = char.ToLower(uniformName[0]) + uniformName.Substring(1);
 
-				int uniformLocation = -1;
-				if (HasAliasedUniform(uniformName))
-					uniformLocation = GetAliasedUniform(uniformName);
+				int uniformLocation = GetUniform(uniformName);
 
 				field.SetValue(handles, uniformLocation);
 			}

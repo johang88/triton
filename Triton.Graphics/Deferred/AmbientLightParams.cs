@@ -8,8 +8,8 @@ namespace Triton.Graphics.Deferred
 {
 	class AmbientLightParams
 	{
-		public int HandleModelViewProjection = 0;
-		public int HandleDiffuseTexture = 0;
-		public int HandleAmbientColor = 0;
+		public int ModelViewProjection = 0;
+		public int SamplerDiffuse = 0;
+		public int AmbientColor = 0;
 	}
 }

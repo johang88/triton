@@ -6,7 +6,7 @@ layout(location = ATTRIB_TEXCOORD_0) in vec2 iTexCoord;
 
 out vec2 texCoord;
 
-uniform(mat4x4, modelViewProjection, ModelViewProjection);
+uniform mat4x4 modelViewProjection;
 
 void main()
 {
@@ -22,10 +22,10 @@ in vec2 texCoord;
 
 layout(location = 0) out vec4 oColor;
 
-sampler(2D, samplerScene, SceneTexture);
+uniform sampler2D samplerScene;
 
-uniform(vec3, whitePoint, WhitePoint);
-uniform(float, exposure, Exposure);
+uniform vec3 whitePoint;
+uniform float exposure;
 
 void main()
 {

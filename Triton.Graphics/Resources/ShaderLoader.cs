@@ -74,10 +74,7 @@ namespace Triton.Graphics.Resources
 
 			var preProcessor = new Shaders.Preprocessor(FileSystem);
 
-			Shaders.Attrib[] shaderAttribs;
-			Shaders.Uniform[] uniforms;
-			Shaders.FragDataLocation[] shaderFragDataLocations;
-			shaderSource = preProcessor.Process(shaderSource, out shaderAttribs, out uniforms, out shaderFragDataLocations);
+			shaderSource = preProcessor.Process(shaderSource);
 
 			var defines = "";
 
@@ -101,40 +98,13 @@ namespace Triton.Graphics.Resources
 				geometryShaderSource = "#version 330 core\n#define GEOMETRY_SHADER\n" + defines + "\n" + shaderSource;
 			}
 
-			// Convert attribs to the correct format
-			// The format is attribIndex => name
-			var attribs = new string[(int)Renderer.VertexFormatSemantic.Last];
-			for (var i = 0; i < shaderAttribs.Length; i++)
-			{
-				var attrib = shaderAttribs[i];
-				attribs[(int)attrib.Type] = attrib.Name.Trim();
-			}
-
-			// Convert frag data locations to the correct format
-			var fragDataLocations = new string[shaderFragDataLocations.Length];
-			for (var i = 0; i < shaderFragDataLocations.Length; i++)
-			{
-				var fragDataLocation = shaderFragDataLocations[i];
-				fragDataLocations[fragDataLocation.Index] = fragDataLocation.Name.Trim();
-			}
-
-			// Setup uniforms, the bind locations wont be resolved until they are used
-			for (var i = 0; i < uniforms.Length; i++)
-			{
-				shader.AddUniform(uniforms[i].BindName, uniforms[i].Name.Trim());
-			}
-
 			resource.Parameters = parameters;
 
 			Renderer.RenderSystem.OnLoadedCallback onResourceLoaded = (handle, success, errors) =>
 			{
 				if (success)
 				{
-					// Cache uniform locations
-					for (var i = 0; i < uniforms.Length; i++)
-					{
-						shader.GetUniform(uniforms[i].Name.Trim());
-					}
+					shader.Uniforms = Backend.RenderSystem.GetUniforms(shader.Handle);
 				}
 
 				if (!string.IsNullOrWhiteSpace(errors))
@@ -148,9 +118,9 @@ namespace Triton.Graphics.Resources
 			};
 
 			if (shader.Handle == -1)
-				shader.Handle = Backend.RenderSystem.CreateShader(vertexShaderSource, fragmentShaderSource, geometryShaderSource, attribs, fragDataLocations, onResourceLoaded);
+				shader.Handle = Backend.RenderSystem.CreateShader(vertexShaderSource, fragmentShaderSource, geometryShaderSource, onResourceLoaded);
 			else
-				Backend.RenderSystem.SetShaderData(shader.Handle, vertexShaderSource, fragmentShaderSource, geometryShaderSource, attribs, fragDataLocations, onResourceLoaded);
+				Backend.RenderSystem.SetShaderData(shader.Handle, vertexShaderSource, fragmentShaderSource, geometryShaderSource, onResourceLoaded);
 		}
 
 		public void Unload(Common.Resource resource)

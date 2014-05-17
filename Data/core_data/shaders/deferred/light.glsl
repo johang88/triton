@@ -6,7 +6,7 @@ layout(location = ATTRIB_TEXCOORD_0) in vec2 iTexCoord;
 
 out vec2 texCoord;
 
-uniform(mat4x4, modelViewProjection, ModelViewProjection);
+uniform mat4x4 modelViewProjection;
 
 void main()
 {
@@ -32,26 +32,26 @@ in vec2 texCoord;
 
 layout(location = 0) out vec4 oColor;
 
-sampler(2D, samplerNormal, NormalTexture);
-sampler(2D, samplerPosition, PositionTexture);
-sampler(2D, samplerSpecular, SpecularTexture);
-sampler(2D, samplerDiffuse, DiffuseTexture);
+uniform sampler2D samplerNormal;
+uniform sampler2D samplerPosition;
+uniform sampler2D samplerSpecular;
+uniform sampler2D samplerDiffuse;
 
-uniform(vec3, lightPosition, LightPosition);
-uniform(vec3, lightColor, LightColor);
-uniform(vec2, spotParams, SpotLightParams);
-uniform(float, lightRange, LightRange);
-uniform(vec2, screenSize, ScreenSize);
-uniform(vec3, cameraPosition, CameraPosition);
-uniform(vec3, lightDirection, LightDirection);
+uniform vec3 lightPosition;
+uniform vec3 lightColor;
+uniform vec2 spotParams;
+uniform float lightRange;
+uniform vec2 screenSize;
+uniform vec3 cameraPosition;
+uniform vec3 lightDirection;
 
 #ifdef SHADOWS
-uniform(mat4x4, invView, InverseViewMatrix);
-sampler(2DShadow, samplerShadow, ShadowMap);
-uniform(mat4x4, shadowViewProj, ShadowViewProjection);
-uniform(vec2, clipPlane, ClipPlane);
-uniform(float, shadowBias, ShadowBias);
-uniform(float, texelSize, ShadowMapTexelSize);
+uniform mat4x4, invView;
+uniform sampler2DShadow samplerShadow;
+uniform mat4x4 shadowViewProj;
+uniform vec2 clipPlane;
+uniform float shadowBias;
+uniform float texelSize;
 #endif
 
 void main()
