@@ -83,6 +83,8 @@ namespace Triton.Samples
 			// Setup the camera
 			Camera.Position = new Triton.Vector3(0, 2, 0);
 			Camera.Pitch(0.7f);
+
+			DebugFlags = Game.DebugFlags.RenderStats;
 		}
 
 		protected override void Update(float frameTime)
