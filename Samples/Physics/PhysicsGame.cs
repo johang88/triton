@@ -71,7 +71,7 @@ namespace Triton.Samples
 				position: new Vector3(2, 3, 0),
 				range: 6.0f,
 				color: new Vector3(0.4f, 0.3f, 0.9f),
-				castShadows: false,
+				castShadows: true,
 				intensity: 2
 				);
 
@@ -79,7 +79,7 @@ namespace Triton.Samples
 				position: new Vector3(-2, 3, 0),
 				range: 6.0f,
 				color: new Vector3(0.4f, 0.9f, 0.3f),
-				castShadows: false,
+				castShadows: true,
 				intensity: 2
 				);
 
