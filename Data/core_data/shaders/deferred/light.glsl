@@ -41,8 +41,9 @@ uniform float lightRange;
 uniform vec2 screenSize;
 uniform vec3 cameraPosition;
 uniform vec3 lightDirection;
-uniform mat4x4, invView;
+uniform mat4x4 invView;
 uniform sampler2DShadow samplerShadow;
+uniform samplerCubeShadow samplerShadowCube;
 uniform mat4x4 shadowViewProj;
 uniform vec2 clipPlane;
 uniform float shadowBias;
@@ -86,18 +87,33 @@ void main()
 #endif
 
 	float nDotL = saturate(dot(normal, lightDir));
+	vec3 lighting = vec3(0, 0, 0);
 
-	float shadow = 1.0;
+	if (attenuation > 0 && nDotL > 0) {
 #ifdef SHADOWS
-	shadow = get_shadows(samplerShadow, nDotL, position, invView, shadowViewProj, clipPlane, shadowBias, texelSize);
+#ifdef SHADOWS_CUBE
+		float shadow = get_shadows_cube(samplerShadowCube, nDotL, position, invView, clipPlane, shadowBias, texelSize, lightPosition);
+#else
+		float shadow = get_shadows(samplerShadow, nDotL, position, invView, shadowViewProj, clipPlane, shadowBias, texelSize);
+#endif
+		attenuation *= shadow;
 #endif
 
-	diffuseColor = get_diffuse(diffuseColor);
-	float specularValue = get_specular(normal, eyeDir, lightDir, specularPower);
+		float metallic = 0.1;
+		float roughness = 0.6;
+		
+		diffuseColor = diffuseColor - diffuseColor * metallic;
+		
+		float baseSpec = 0.08;
+		specularColor = (baseSpec - baseSpec * metallic) + diffuseColor * metallic;
+
+		vec3 diffuseLighting = get_diffuse(diffuseColor);
+		vec3 specularLighting = get_specular(normal, eyeDir, lightDir, roughness, specularColor);
 	
-	vec3 finalColor = (nDotL * diffuseColor + specularColor * specularValue) * lightColor * attenuation * shadow;
-	
-	oColor.xyz = finalColor.xyz;
+		lighting = lightColor * nDotL * attenuation * (diffuseLighting + specularLighting);
+	}
+
+	oColor.xyz = lighting.xyz;
 	oColor.w = 1.0f;
 }
 #endif

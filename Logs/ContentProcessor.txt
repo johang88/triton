@@ -1,2 +1,4 @@
-Log file created: 2014-05-11 13:39:51
-<-> Processed ContentSource\samples_data\models\floor.mesh.xml
+Log file created: 2014-05-17 17:57:22
+<-> Processed ContentSource\samples_data\textures\Metal_BrushedMetalTiles_1k_d3.tga
+<-> Processed ContentSource\samples_data\textures\Metal_BrushedMetalTiles_1k_n.tga
+<-> Processed ContentSource\samples_data\textures\Metal_BrushedMetalTiles_1k_s.tga

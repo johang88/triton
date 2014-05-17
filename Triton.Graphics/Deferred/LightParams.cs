@@ -14,6 +14,7 @@ namespace Triton.Graphics.Deferred
 		public int SamplerSpecular = 0;
 		public int SamplerDiffuse = 0;
 		public int SamplerShadow = 0;
+		public int SamplerShadowCube = 0;
 		public int LightDirection = 0;
 		public int CameraPosition = 0;
 		public int LightPosition = 0;

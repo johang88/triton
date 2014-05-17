@@ -177,11 +177,15 @@ namespace Triton.Renderer.Shaders
 
 			if (!string.IsNullOrEmpty(geometryShader))
 			{
-				GL.ShaderSource(Handles[index].GeometryHandle, fragmentShader);
+				GL.ShaderSource(Handles[index].GeometryHandle, geometryShader);
 			}
 
 			GL.CompileShader(Handles[index].VertexHandle);
 			GL.CompileShader(Handles[index].FragmentHandle);
+			if (Handles[index].GeometryHandle != 0)
+			{
+				GL.CompileShader(Handles[index].GeometryHandle);
+			}
 
 			// Check for compilation errors
 			int errorCode;
@@ -193,6 +197,12 @@ namespace Triton.Renderer.Shaders
 			{
 				GL.GetShader(Handles[index].FragmentHandle, ShaderParameter.CompileStatus, out errorCode);
 				GL.GetShaderInfoLog(Handles[index].FragmentHandle, out errors);
+			}
+
+			if (errorCode == 1 && Handles[index].GeometryHandle != 0)
+			{
+				GL.GetShader(Handles[index].GeometryHandle, ShaderParameter.CompileStatus, out errorCode);
+				GL.GetShaderInfoLog(Handles[index].GeometryHandle, out errors);
 			}
 
 			if (errorCode != 1)
@@ -212,6 +222,8 @@ namespace Triton.Renderer.Shaders
 			// Link program
 			GL.AttachShader(Handles[index].ProgramHandle, Handles[index].VertexHandle);
 			GL.AttachShader(Handles[index].ProgramHandle, Handles[index].FragmentHandle);
+			if (errorCode == 1 && Handles[index].GeometryHandle != 0)
+				GL.AttachShader(Handles[index].ProgramHandle, Handles[index].GeometryHandle);
 			GL.LinkProgram(Handles[index].ProgramHandle);
 
 			// Check for link errors
@@ -233,6 +245,8 @@ namespace Triton.Renderer.Shaders
 
 			// The shader program can now be used
 			Handles[index].Initialized = true;
+
+			RenderSystem.CheckGLError();
 
 			return true;
 		}

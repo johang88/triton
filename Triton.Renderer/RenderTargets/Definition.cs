@@ -14,12 +14,13 @@ namespace Triton.Renderer.RenderTargets
 		public readonly bool RenderDepthToTexture;
 		public readonly bool RenderToCubeMap = false;
 
-		public Definition(int width, int height, bool renderDepthToTexture, List<Attachment> attachments)
+		public Definition(int width, int height, bool renderDepthToTexture, List<Attachment> attachments, bool renderToCubeMap = false)
 		{
 			Width = width;
 			Height = height;
 			Attachments = attachments;
 			RenderDepthToTexture = renderDepthToTexture;
+			RenderToCubeMap = renderToCubeMap;
 		}
 
 		public class Attachment

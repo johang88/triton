@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Triton.Audio", "Triton.Audi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Physics", "Samples\Physics\Physics.csproj", "{A6881C41-6C68-4339-BC91-B14B32F621E9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Materials", "Samples\Materials\Materials.csproj", "{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -181,6 +183,16 @@ Global
 		{A6881C41-6C68-4339-BC91-B14B32F621E9}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{A6881C41-6C68-4339-BC91-B14B32F621E9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A6881C41-6C68-4339-BC91-B14B32F621E9}.Release|x86.ActiveCfg = Release|Any CPU
+		{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -189,5 +201,6 @@ Global
 		{560532CC-9C04-43B5-BB8F-3A685C348D7E} = {0CFDCBD0-BA7D-4164-BD41-7809AE5E289B}
 		{0556C253-F926-48BE-BC3E-801ABB39DC4C} = {0CFDCBD0-BA7D-4164-BD41-7809AE5E289B}
 		{A6881C41-6C68-4339-BC91-B14B32F621E9} = {0CFDCBD0-BA7D-4164-BD41-7809AE5E289B}
+		{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48} = {0CFDCBD0-BA7D-4164-BD41-7809AE5E289B}
 	EndGlobalSection
 EndGlobal

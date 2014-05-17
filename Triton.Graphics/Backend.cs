@@ -64,6 +64,8 @@ namespace Triton.Graphics
 		public bool HasFocus { get { return Window.Focused; } }
 		public bool CursorVisible { get; set; }
 
+		public float FrameTime { get; private set; }
+
 		// Used as a cache to prevent generation of garabage during deserialization of the OpCode stream
 		private Matrix4[] MatrixDeserializationCache = new Matrix4[64];
 
@@ -160,6 +162,7 @@ namespace Triton.Graphics
 				DoubleBufferSynchronizer.Release();
 			}
 
+			FrameTime = (float)Watch.Elapsed.TotalSeconds;
 			Watch.Restart();
 			return true;
 		}
