@@ -10,12 +10,17 @@ namespace Triton.Graphics.Resources.Materials
 	{
 		public Texture Diffuse;
 		public Texture Normal;
-		public Texture Gloss;
-		public Texture Specular;
+		public Vector3 DiffuseColor;
+		public float MetallicValue;
+		public float SpecularValue;
+		public float RoughnessValue;
+
 		public ShaderProgram Shader;
 		private ShaderHandles Handles;
 		private Common.ResourceManager ResourceManager;
 		public bool IsSkinned;
+
+		private int[] Textures;
 
 		public StandardMaterial(string name, string parameters, Common.ResourceManager resourceManager, bool isSkinned)
 			: base(name, parameters)
@@ -30,6 +35,14 @@ namespace Triton.Graphics.Resources.Materials
 
 			Handles = new ShaderHandles();
 			Shader.GetUniformLocations(Handles);
+
+			var textures = new List<int>();
+			if (Diffuse != null)
+				textures.Add(Diffuse.Handle);
+			if (Normal != null)
+				textures.Add(Normal.Handle);
+
+			Textures = textures.ToArray();
 		}
 
 		public override void Unload()
@@ -40,17 +53,11 @@ namespace Triton.Graphics.Resources.Materials
 				ResourceManager.Unload(Diffuse);
 			if (Normal != null)
 				ResourceManager.Unload(Normal);
-			if (Gloss != null)
-				ResourceManager.Unload(Gloss);
-			if (Specular != null)
-				ResourceManager.Unload(Specular);
 			if (Shader != null)
 				ResourceManager.Unload(Shader);
 
 			Diffuse = null;
 			Normal = null;
-			Gloss = null;
-			Specular = null;
 			Shader = null;
 		}
 
@@ -58,15 +65,23 @@ namespace Triton.Graphics.Resources.Materials
 		{
 			base.BindMaterial(backend, ref world, ref worldView, ref itWorldView, ref modelViewProjection, skeleton);
 
-			backend.BeginInstance(Shader.Handle, new int[] { Diffuse.Handle, Normal.Handle, Specular.Handle });
+			backend.BeginInstance(Shader.Handle, Textures);
 
 			backend.BindShaderVariable(Handles.ModelViewProjection, ref modelViewProjection);
 			backend.BindShaderVariable(Handles.World, ref world);
 			backend.BindShaderVariable(Handles.WorldView, ref worldView);
 			backend.BindShaderVariable(Handles.ItWorldView, ref itWorldView);
-			backend.BindShaderVariable(Handles.SamplerDiffuse, 0);
-			backend.BindShaderVariable(Handles.SamplerNormal, 1);
-			backend.BindShaderVariable(Handles.SamplerSpecular, 2);
+
+			var textureUnit = 0;
+			if (Diffuse != null)
+				backend.BindShaderVariable(Handles.SamplerDiffuse, textureUnit++);
+			if (Normal != null)
+				backend.BindShaderVariable(Handles.SamplerNormal, textureUnit++);
+
+			backend.BindShaderVariable(Handles.MaterialDiffuseColor, ref DiffuseColor);
+			backend.BindShaderVariable(Handles.MaterialMetallicValue, MetallicValue);
+			backend.BindShaderVariable(Handles.MaterialSpecularValue, SpecularValue);
+			backend.BindShaderVariable(Handles.MaterialRoughnessValue, RoughnessValue);
 
 			if (skeleton != null)
 			{
@@ -84,6 +99,10 @@ namespace Triton.Graphics.Resources.Materials
 			public int SamplerNormal = 0;
 			public int SamplerSpecular = 0;
 			public int Bones = 0;
+			public int MaterialDiffuseColor = 0;
+			public int MaterialMetallicValue = 0;
+			public int MaterialSpecularValue = 0;
+			public int MaterialRoughnessValue = 0;
 		}
 	}
 }

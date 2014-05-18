@@ -54,28 +54,26 @@ void main()
 	vec2 project = gl_FragCoord.xy / screenSize.xy;
 	
 	vec3 normal = normalize(texture2D(samplerNormal, project).xyz);
-	vec4 specularData = texture2D(samplerSpecular, project);
-	vec3 diffuseColor = texture2D(samplerDiffuse, project).xyz;
 	vec3 position = texture2D(samplerPosition, project).xyz;
 	
-	vec3 specularColor = specularData.xyz;
-	float specularPower = 128 * specularData.w;
-	
 #if defined(SPOT_LIGHT) || defined(POINT_LIGHT)
-	vec3 lightDir = lightPosition - position;
-	float dist = length(lightDir);
-	lightDir = lightDir / dist;
+	vec3 lightVec = lightPosition - position;
+	float dist = length(lightVec);
+	vec3 lightDir = lightVec / dist;
 #else
 	vec3 lightDir = -normalize(lightDirection);
+	vec3 lightVec = lightDirection;
 #endif
 	
 	vec3 eyeDir = normalize(cameraPosition - position);
 	
 #if defined(SPOT_LIGHT) || defined(POINT_LIGHT)
-	float attenuation= saturate(1.0f - ((dist * dist) / (lightRange * lightRange)));
+	float attenuation = saturate(1.0f - ((dist * dist) / (lightRange * lightRange)));
 	attenuation = attenuation * attenuation;
+	float radius = lightRange;
 #else
 	float attenuation = 1.0f;
+	float radius = 1;
 #endif
 	
 #ifdef SPOT_LIGHT
@@ -98,17 +96,18 @@ void main()
 #endif
 		attenuation *= shadow;
 #endif
-
-		float metallic = 0.1;
-		float roughness = 0.6;
+		vec3 gbuffer0 = texture2D(samplerDiffuse, project).xyz;
+		vec4 gbuffer3 = texture2D(samplerSpecular, project);
 		
-		diffuseColor = diffuseColor - diffuseColor * metallic;
+		float metallic = gbuffer3.x;
+		float roughness = gbuffer3.y;
+		float specular = gbuffer3.z;
 		
-		float baseSpec = 0.08;
-		specularColor = (baseSpec - baseSpec * metallic) + diffuseColor * metallic;
-
+		vec3 diffuseColor = gbuffer0.xyz - gbuffer0.xyz * metallic;
+		vec3 specularColor = mix(0.08 * vec3(specular), gbuffer0.xyz, metallic);
+		
 		vec3 diffuseLighting = get_diffuse(diffuseColor);
-		vec3 specularLighting = get_specular(normal, eyeDir, lightDir, roughness, specularColor);
+		vec3 specularLighting = get_specular(normal, eyeDir, lightVec, roughness, specularColor, lightRange);
 	
 		lighting = lightColor * nDotL * attenuation * (diffuseLighting + specularLighting);
 	}

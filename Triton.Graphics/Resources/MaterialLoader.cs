@@ -97,21 +97,51 @@ namespace Triton.Graphics.Resources
 				var filename = resource.Name + ".mat.v";
 
 				var definition = material.Definition;
+				var shaderOptions = new List<string>();
 
-				if (!string.IsNullOrWhiteSpace(definition.Get("diffuse")))
-					material.Diffuse = ResourceManager.Load<Texture>(definition.Get("diffuse"), "srgb");
-				if (!string.IsNullOrWhiteSpace(definition.Get("normal")))
-					material.Normal = ResourceManager.Load<Texture>(definition.Get("normal"));
-				if (!string.IsNullOrWhiteSpace(definition.Get("gloss")))
-					material.Gloss = ResourceManager.Load<Texture>(definition.Get("gloss"));
+				if (material.IsSkinned)
+					shaderOptions.Add("SKINNED");
+
+				if (!string.IsNullOrWhiteSpace(definition.Get("diffuse-map")))
+				{
+					shaderOptions.Add("DIFFUSE_MAP");
+					material.Diffuse = ResourceManager.Load<Texture>(definition.Get("diffuse-map"), "srgb");
+				}
+				else if (!string.IsNullOrWhiteSpace(definition.Get("diffuse-color")))
+				{
+					shaderOptions.Add("MATERIAL_DIFFUSE_COLOR");
+					material.DiffuseColor = Common.StringConverter.Parse<Vector3>(definition.Get("diffuse-color"));
+				}
+
+				if (!string.IsNullOrWhiteSpace(definition.Get("normal-map")))
+				{
+					shaderOptions.Add("NORMAL_MAP");
+					material.Normal = ResourceManager.Load<Texture>(definition.Get("normal-map"), "srgb");
+				}
+
+				if (!string.IsNullOrWhiteSpace(definition.Get("metallic")))
+				{
+					shaderOptions.Add("MATERIAL_METALLIC_VALUE");
+					material.MetallicValue = Common.StringConverter.Parse<float>(definition.Get("metallic"));
+				}
+
+				if (!string.IsNullOrWhiteSpace(definition.Get("roughness")))
+				{
+					shaderOptions.Add("MATERIAL_ROUGHNESS_VALUE");
+					material.RoughnessValue = Common.StringConverter.Parse<float>(definition.Get("roughness"));
+				}
+
 				if (!string.IsNullOrWhiteSpace(definition.Get("specular")))
-					material.Specular = ResourceManager.Load<Texture>(definition.Get("specular"));
+				{
+					shaderOptions.Add("MATERIAL_SPECULAR_VALUE");
+					material.SpecularValue = Common.StringConverter.Parse<float>(definition.Get("specular"));
+				}
 
 				var shader = DefaultShader;
 				if (!string.IsNullOrEmpty(definition.Get("shader")))
 					shader = definition.Get("shader");
 
-				material.Shader = ResourceManager.Load<ShaderProgram>(shader, material.IsSkinned ? "SKINNED" : "");
+				material.Shader = ResourceManager.Load<ShaderProgram>(shader, shaderOptions.Join(","));
 
 				onLoaded(material);
 			}

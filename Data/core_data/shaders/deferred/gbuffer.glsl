@@ -66,8 +66,6 @@ void main()
 
 #else
 
-import(shaders/utility/utils);
-
 in vec3 normal;
 in vec3 tangent;
 in vec3 bitangent;
@@ -81,29 +79,76 @@ layout(location = 3) out vec4 oSpecular;
 
 uniform sampler2D samplerDiffuse;
 uniform sampler2D samplerNormal;
-uniform sampler2D samplerSpecular;
 
 uniform mat4x4 itWorldView;
 
-void main()
-{
+uniform vec3 materialDiffuseColor;
+uniform float materialMetallicValue;
+uniform float materialSpecularValue;
+uniform float materialRoughnessValue;
+
+vec3 get_normals() {
+#ifdef NORMAL_MAP
 	mat3x3 rot = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
 
 	vec3 N = normalize(texture2D(samplerNormal, texCoord).xyz * 2.0f - 1.0f);
 	vec3 N2 = normalize(rot * N);
-	N2 = normalize(mat3x3(itWorldView) * N2);
+	
+	return N2;
+#else
+	return normal;
+#endif
+}
 
-	vec4 diffuse = texture2D(samplerDiffuse, texCoord);
+vec3 get_diffuse() {
+#ifdef DIFFUSE_MAP
+	vec3 diffuse =  texture2D(samplerDiffuse, texCoord).xyz;
+#elif defined(MATERIAL_DIFFUSE_COLOR)
+	vec3 diffuse = materialDiffuseColor;
+#else
+	vec3 diffuse = vec3(0.8, 0.8, 0.8);
+#endif
+	return pow(diffuse, vec3(2.2));
+}
+
+float get_metallic() {
+#ifdef MATERIAL_METALLIC_VALUE
+	return materialMetallicValue;
+#else
+	return 0.1;
+#endif
+}
+
+float get_specular() {
+#ifdef MATERIAL_SPECULAR_VALUE
+	return materialSpecularValue;
+#else
+	return 0;
+#endif
+}
+
+float get_roughness() {
+#ifdef MATERIAL_ROUGHNESS_VALUE
+	return materialRoughnessValue;
+#else
+	return 0.6;
+#endif
+}
+
+void main() {
+	vec3 normals = get_normals();
+	normals = normalize(mat3x3(itWorldView) * normals);
 	
-	vec4 specular = texture2D(samplerSpecular, texCoord);
+	vec3 diffuse = get_diffuse();
 	
-	vec3 gamma = (2.2f).xxx;
-	diffuse.xyz = pow(diffuse.xyz, gamma);
-	specular.xyz = pow(specular.xyz, gamma);
-	
-	oColor = vec4(diffuse.xyz, 1.0f);
-	oNormal = vec4(N2.xyz, 1.0f);
-	oSpecular = specular;
+	float metallic = get_metallic();
+	float specular = get_specular();
+
+	float roughness = get_roughness();
+
+	oColor = vec4(diffuse, 1.0f);
+	oNormal = vec4(normals, 1.0f);
+	oSpecular = vec4(metallic, roughness, specular, 1);
 	oPosition = position;
 }
 #endif

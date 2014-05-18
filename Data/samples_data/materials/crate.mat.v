@@ -1,5 +1,4 @@
 {
-	"diffuse": "textures/crate_d",
-	"normal": "textures/crate_n",
-	"specular": "textures/crate_s"
+	"diffuse-map": "textures/crate_d",
+	"normal-map": "textures/crate_n"
 }

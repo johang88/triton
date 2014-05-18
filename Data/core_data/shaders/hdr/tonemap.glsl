@@ -51,7 +51,7 @@ void main()
 	vec3 final = scene * whiteScale;
 	final += bloom;
 	
-	final = pow(final, (1.0f / 2.2f).xxx);
+	final = pow(final, vec3(1.0 / 2.2));
 	
 	oColor = vec4(final, 1.0f);
 }

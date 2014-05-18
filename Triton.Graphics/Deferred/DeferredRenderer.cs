@@ -201,7 +201,7 @@ namespace Triton.Graphics.Deferred
 			Backend.EndPass();
 
 			// SSAO
-			RenderSSAO(ref view, ref projection);
+			//RenderSSAO(ref view, ref projection);
 
 			// Render light accumulation
 			Backend.BeginPass(LightAccumulation, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);

@@ -34,6 +34,6 @@ void main()
 	vec3 light = texture2D(samplerLight, texCoord).xyz;
 	float ssao = texture2D(samplerSSAO, texCoord).z;
 	
-	oColor = vec4(light * ssao, 1.0f);
+	oColor = vec4(light, 1.0f);
 }
 #endif

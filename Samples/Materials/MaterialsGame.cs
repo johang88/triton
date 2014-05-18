@@ -72,14 +72,15 @@ namespace Triton.Samples
 			}
 
 			Stage.CreatePointLight(
-					position: new Vector3(0, 4, 0),
+					position: new Vector3(0, 2, 0),
 					range: 8.0f,
 					color: new Vector3(0.8f, 0.8f, 0.83f),
 					castShadows: true,
-					intensity: 2
+					intensity: 5
 				);
 
 			DebugFlags |= Game.DebugFlags.RenderStats;
+			//HDRRenderer.WhitePoint = new Vector3(1, 1, 1) * 300;
 		}
 
 		protected override void Update(float frameTime)
