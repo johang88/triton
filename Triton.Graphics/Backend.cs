@@ -69,6 +69,9 @@ namespace Triton.Graphics
 		// Used as a cache to prevent generation of garabage during deserialization of the OpCode stream
 		private Matrix4[] MatrixDeserializationCache = new Matrix4[64];
 
+		public readonly int DefaultSampler;
+		public readonly int DefaultSamplerNoFiltering;
+
 		public Backend(ResourceManager resourceManager, int width, int height, string title, bool fullscreen)
 		{
 			if (resourceManager == null)
@@ -93,6 +96,23 @@ namespace Triton.Graphics
 			{
 				MatrixDeserializationCache[i] = Matrix4.Identity;
 			}
+
+			DefaultSampler = RenderSystem.CreateSampler(new Dictionary<SamplerParameterName, int>
+			{
+				{ SamplerParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear },
+				{ SamplerParameterName.TextureMagFilter, (int)TextureMagFilter.Linear },
+				{ SamplerParameterName.TextureMaxAnisotropyExt, 8 },
+				{ SamplerParameterName.TextureWrapS, (int)TextureWrapMode.Repeat },
+				{ SamplerParameterName.TextureWrapT, (int)TextureWrapMode.Repeat }
+			});
+
+			DefaultSamplerNoFiltering = RenderSystem.CreateSampler(new Dictionary<SamplerParameterName, int>
+			{
+				{ SamplerParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest },
+				{ SamplerParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest },
+				{ SamplerParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge },
+				{ SamplerParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge }
+			});
 		}
 
 		public void Dispose()
@@ -221,6 +241,19 @@ namespace Triton.Graphics
 							var renderStateId = reader.ReadInt32();
 
 							RenderSystem.SetRenderState(renderStateId);
+
+							var numSamplers = reader.ReadInt32();
+							var texUnit = 0;
+							for (int i = 0; i < numSamplers; i++)
+							{
+								var samplerHandle = reader.ReadInt32();
+								RenderSystem.BindSampler(texUnit++, samplerHandle);
+							}
+
+							//for (; texUnit < numTextures; texUnit++)
+							//{
+							//	RenderSystem.BindSampler(texUnit, DefaultSampler);
+							//}
 						}
 						break;
 					case OpCode.EndInstance:
@@ -418,7 +451,7 @@ namespace Triton.Graphics
 		/// </summary>
 		/// <param name="shaderHandle"></param>
 		/// <param name="textures"></param>
-		public void BeginInstance(int shaderHandle, int[] textures, int renderStateId = 0)
+		public void BeginInstance(int shaderHandle, int[] textures, int[] samplers, int renderStateId = 0)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BeginInstance);
 
@@ -431,6 +464,19 @@ namespace Triton.Graphics
 			}
 
 			PrimaryBuffer.Writer.Write(renderStateId);
+
+			if (samplers != null)
+			{
+				PrimaryBuffer.Writer.Write(samplers.Length);
+				foreach (var sampler in samplers)
+				{
+					PrimaryBuffer.Writer.Write(sampler);
+				}
+			}
+			else
+			{
+				PrimaryBuffer.Writer.Write(0);
+			}
 		}
 
 		public void EndInstance()

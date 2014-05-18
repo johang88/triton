@@ -88,7 +88,8 @@ namespace Triton.Graphics.HDR
 			var modelViewProjection = Matrix4.Identity;
 
 			Backend.BeginPass(Blur2Target, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-			Backend.BeginInstance(HighPassShader.Handle, new int[] { inputTarget.Textures[0].Handle });
+			Backend.BeginInstance(HighPassShader.Handle, new int[] { inputTarget.Textures[0].Handle },
+				samplers: new int[] { Backend.DefaultSamplerNoFiltering });
 			Backend.BindShaderVariable(HighPassParams.ModelViewProjection, ref modelViewProjection);
 			Backend.BindShaderVariable(HighPassParams.SamplerScene, 0);
 			Backend.BindShaderVariable(HighPassParams.WhitePoint, ref WhitePoint);
@@ -101,7 +102,8 @@ namespace Triton.Graphics.HDR
 			{
 				// Blur 1
 				Backend.BeginPass(Blur1Target, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-				Backend.BeginInstance(BlurShader.Handle, new int[] { Blur2Target.Textures[0].Handle });
+				Backend.BeginInstance(BlurShader.Handle, new int[] { Blur2Target.Textures[0].Handle },
+					samplers: new int[] { Backend.DefaultSamplerNoFiltering });
 				Backend.BindShaderVariable(BlurParams.ModelViewProjection, ref modelViewProjection);
 				Backend.BindShaderVariable(BlurParams.SamplerScene, 0);
 				Backend.BindShaderVariable(BlurParams.SampleWeights, ref BlurWeights);
@@ -112,7 +114,8 @@ namespace Triton.Graphics.HDR
 
 				// Blur 2
 				Backend.BeginPass(Blur2Target, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-				Backend.BeginInstance(BlurShader.Handle, new int[] { Blur1Target.Textures[0].Handle });
+				Backend.BeginInstance(BlurShader.Handle, new int[] { Blur1Target.Textures[0].Handle },
+					samplers: new int[] { Backend.DefaultSamplerNoFiltering });
 				Backend.BindShaderVariable(BlurParams.ModelViewProjection, ref modelViewProjection);
 				Backend.BindShaderVariable(BlurParams.SamplerScene, 0);
 				Backend.BindShaderVariable(BlurParams.SampleWeights, ref BlurWeights);
@@ -124,7 +127,8 @@ namespace Triton.Graphics.HDR
 
 			// Tonemap and apply glow!
 			Backend.BeginPass(null, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-			Backend.BeginInstance(TonemapShader.Handle, new int[] { inputTarget.Textures[0].Handle, Blur2Target.Textures[0].Handle });
+			Backend.BeginInstance(TonemapShader.Handle, new int[] { inputTarget.Textures[0].Handle, Blur2Target.Textures[0].Handle },
+				samplers: new int[] { Backend.DefaultSamplerNoFiltering });
 			Backend.BindShaderVariable(TonemapParams.ModelViewProjection, ref modelViewProjection);
 			Backend.BindShaderVariable(TonemapParams.SamplerScene, 0);
 			Backend.BindShaderVariable(TonemapParams.SamplerBloom, 1);

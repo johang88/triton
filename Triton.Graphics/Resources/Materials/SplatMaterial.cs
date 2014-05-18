@@ -74,7 +74,9 @@ namespace Triton.Graphics.Resources.Materials
 		{
 			base.BindMaterial(backend, ref world, ref worldView, ref itWorldView, ref modelViewProjection, skeleton);
 
-			backend.BeginInstance(Shader.Handle, new int[] { Splat.Handle, Diffuse1.Handle, Diffuse2.Handle, Diffuse3.Handle, Diffuse4.Handle, Normal1.Handle, Normal3.Handle, Normal3.Handle, Normal4.Handle });
+			backend.BeginInstance(Shader.Handle, 
+				new int[] { Splat.Handle, Diffuse1.Handle, Diffuse2.Handle, Diffuse3.Handle, Diffuse4.Handle, Normal1.Handle, Normal3.Handle, Normal3.Handle, Normal4.Handle }, 
+				null);
 
 			backend.BindShaderVariable(Handles.ModelViewProjection, ref modelViewProjection);
 			backend.BindShaderVariable(Handles.HandleWorld, ref world);

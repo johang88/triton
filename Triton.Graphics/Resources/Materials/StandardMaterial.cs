@@ -21,6 +21,7 @@ namespace Triton.Graphics.Resources.Materials
 		public bool IsSkinned;
 
 		private int[] Textures;
+		private int[] Samplers;
 
 		public StandardMaterial(string name, string parameters, Common.ResourceManager resourceManager, bool isSkinned)
 			: base(name, parameters)
@@ -65,7 +66,10 @@ namespace Triton.Graphics.Resources.Materials
 		{
 			base.BindMaterial(backend, ref world, ref worldView, ref itWorldView, ref modelViewProjection, skeleton);
 
-			backend.BeginInstance(Shader.Handle, Textures);
+			if (Samplers == null)
+				Samplers = new int[] { backend.DefaultSampler, backend.DefaultSampler };
+
+			backend.BeginInstance(Shader.Handle, Textures, samplers: Samplers);
 
 			backend.BindShaderVariable(Handles.ModelViewProjection, ref modelViewProjection);
 			backend.BindShaderVariable(Handles.World, ref world);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Renderer;
 using Triton.Renderer.RenderTargets;
 
 namespace Triton.Graphics.Deferred
@@ -74,6 +75,8 @@ namespace Triton.Graphics.Deferred
 		private int LightInsideRenderState;
 		private int LightOutsideRenderState;
 
+		private int ShadowSampler;
+		
 		public DeferredRenderer(Common.ResourceManager resourceManager, Backend backend, int width, int height)
 		{
 			if (resourceManager == null)
@@ -163,6 +166,16 @@ namespace Triton.Graphics.Deferred
 			DirectionalRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Back, true, Triton.Renderer.DepthFunction.Lequal);
 			LightInsideRenderState = Backend.CreateRenderState(true, false, true, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, Triton.Renderer.CullFaceMode.Front, true, Renderer.DepthFunction.Gequal);
 			LightOutsideRenderState = Backend.CreateRenderState(true, false, true, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Back, true, Triton.Renderer.DepthFunction.Lequal);
+
+			ShadowSampler = Backend.RenderSystem.CreateSampler(new Dictionary<Renderer.SamplerParameterName, int>
+			{
+				{ SamplerParameterName.TextureMinFilter, (int)TextureMinFilter.Linear },
+				{ SamplerParameterName.TextureMagFilter, (int)TextureMinFilter.Linear },
+				{ SamplerParameterName.TextureCompareFunc, (int)DepthFunction.Lequal },
+				{ SamplerParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture },
+				{ SamplerParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge },
+				{ SamplerParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge }
+			});
 		}
 
 		public void InitializeHandles()
@@ -214,7 +227,7 @@ namespace Triton.Graphics.Deferred
 			// Combine final pass
 			Backend.BeginPass(Output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
 
-			Backend.BeginInstance(CombineShader.Handle, new int[] { LightAccumulation.Textures[0].Handle, SSAOTarget2.Textures[0].Handle }, LightAccumulatinRenderState);
+			Backend.BeginInstance(CombineShader.Handle, new int[] { LightAccumulation.Textures[0].Handle, SSAOTarget2.Textures[0].Handle }, new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering }, LightAccumulatinRenderState);
 			Backend.BindShaderVariable(CombineParams.SamplerLight, 0);
 			Backend.BindShaderVariable(CombineParams.SamplerSSAO, 1);
 
@@ -231,7 +244,8 @@ namespace Triton.Graphics.Deferred
 			Backend.BeginPass(SSAOTarget2, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 
 			var modelViewProjection = Matrix4.Identity;
-			Backend.BeginInstance(SSAOShader.Handle, new int[] { GBuffer.Textures[2].Handle, GBuffer.Textures[1].Handle, RandomNoiseTexture.Handle });
+			Backend.BeginInstance(SSAOShader.Handle, new int[] { GBuffer.Textures[2].Handle, GBuffer.Textures[1].Handle, RandomNoiseTexture.Handle },
+				samplers: new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSampler });
 			Backend.BindShaderVariable(SSAOParams.ModelViewProjection, ref modelViewProjection);
 
 			Backend.BindShaderVariable(SSAOParams.SamplerPosition, 0);
@@ -247,7 +261,8 @@ namespace Triton.Graphics.Deferred
 
 			// Blur 1
 			Backend.BeginPass(SSAOTarget1, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-			Backend.BeginInstance(BlurShader.Handle, new int[] { SSAOTarget2.Textures[0].Handle });
+			Backend.BeginInstance(BlurShader.Handle, new int[] { SSAOTarget2.Textures[0].Handle },
+				samplers: new int[] { Backend.DefaultSamplerNoFiltering });
 			Backend.BindShaderVariable(BlurParams.ModelViewProjection, ref modelViewProjection);
 			Backend.BindShaderVariable(BlurParams.SamplerScene, 0);
 			Backend.BindShaderVariable(BlurParams.SampleWeights, ref BlurWeights);
@@ -258,7 +273,8 @@ namespace Triton.Graphics.Deferred
 
 			// Blur 2
 			Backend.BeginPass(SSAOTarget2, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-			Backend.BeginInstance(BlurShader.Handle, new int[] { SSAOTarget1.Textures[0].Handle });
+			Backend.BeginInstance(BlurShader.Handle, new int[] { SSAOTarget1.Textures[0].Handle },
+				samplers: new int[] { Backend.DefaultSamplerNoFiltering });
 			Backend.BindShaderVariable(BlurParams.ModelViewProjection, ref modelViewProjection);
 			Backend.BindShaderVariable(BlurParams.SamplerScene, 0);
 			Backend.BindShaderVariable(BlurParams.SampleWeights, ref BlurWeights);
@@ -296,7 +312,7 @@ namespace Triton.Graphics.Deferred
 
 			var ambientColor = new Vector3((float)System.Math.Pow(stage.AmbientColor.X, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Y, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Z, 2.2f));
 
-			Backend.BeginInstance(AmbientLightShader.Handle, new int[] { GBuffer.Textures[0].Handle }, AmbientRenderState);
+			Backend.BeginInstance(AmbientLightShader.Handle, new int[] { GBuffer.Textures[0].Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, AmbientRenderState);
 			Backend.BindShaderVariable(AmbientLightParams.SamplerDiffuse, 0);
 			Backend.BindShaderVariable(AmbientLightParams.ModelViewProjection, ref modelViewProjection);
 			Backend.BindShaderVariable(AmbientLightParams.AmbientColor, ref ambientColor);
@@ -411,6 +427,7 @@ namespace Triton.Graphics.Deferred
 
 			// Setup textures and begin rendering with the chosen shader
 			int[] textures;
+			int[] samplers;
 			if (light.CastShadows)
 			{
 				var shadowMapHandle = SpotShadowsRenderTarget.Textures[0].Handle;
@@ -419,13 +436,15 @@ namespace Triton.Graphics.Deferred
 				else if (light.Type == LighType.PointLight)
 					shadowMapHandle = PointShadowsRenderTarget.Textures[0].Handle;
 				textures = new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle, shadowMapHandle };
+				samplers = new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, ShadowSampler };
 			}
 			else
 			{
 				textures = new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle };
+				samplers = new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering };
 			}
 
-			Backend.BeginInstance(shader.Handle, textures, renderStateId);
+			Backend.BeginInstance(shader.Handle, textures, samplers, renderStateId);
 
 			// Setup texture samplers
 			Backend.BindShaderVariable(shaderParams.SamplerNormal, 0);
@@ -478,7 +497,7 @@ namespace Triton.Graphics.Deferred
 				if (light.Type == LighType.PointLight)
 				{
 					Backend.BindShaderVariable(shaderParams.SamplerShadowCube, 4);
-					
+
 				}
 				else
 				{
@@ -555,7 +574,7 @@ namespace Triton.Graphics.Deferred
 
 				foreach (var subMesh in mesh.Mesh.SubMeshes)
 				{
-					Backend.BeginInstance(RenderShadowsShader.Handle, new int[] { }, ShadowsRenderState);
+					Backend.BeginInstance(RenderShadowsShader.Handle, new int[] { }, null, ShadowsRenderState);
 					Backend.BindShaderVariable(RenderShadowsParams.ModelViewProjection, ref modelViewProjection);
 					Backend.BindShaderVariable(RenderShadowsParams.ClipPlane, ref clipPlane);
 
@@ -613,7 +632,7 @@ namespace Triton.Graphics.Deferred
 
 				foreach (var subMesh in mesh.Mesh.SubMeshes)
 				{
-					Backend.BeginInstance(RenderShadowsCubeShader.Handle, new int[] { }, ShadowsRenderState);
+					Backend.BeginInstance(RenderShadowsCubeShader.Handle, new int[] { }, null, ShadowsRenderState);
 					Backend.BindShaderVariable(RenderShadowsCubeParams.Model, ref world);
 					Backend.BindShaderVariable(RenderShadowsCubeParams.ClipPlane, ref clipPlane);
 					Backend.BindShaderVariable(RenderShadowsCubeParams.ViewProjectionMatrices, ref viewProjectionMatrices);

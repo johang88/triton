@@ -141,26 +141,6 @@ namespace Triton.Renderer.Textures
 					GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 			}
 
-			if (enableFiltering)
-			{
-				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, (TextureParameterName)ExtTextureFilterAnisotropic.TextureMaxAnisotropyExt, 4);
-			}
-			else
-			{
-				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-			}
-
-			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-
-			if (target == TextureTarget.TextureCubeMap)
-			{
-				GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
-			}
-
 			GL.Finish();
 
 			RenderSystem.CheckGLError();
@@ -186,10 +166,6 @@ namespace Triton.Renderer.Textures
 
 			Handles[index].Target = (TextureTarget)(int)target;
 
-			GL.BindTexture((OGL.TextureTarget)(int)Handles[index].Target, Handles[index].OpenGLHandle);
-			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-			GL.TexParameter((OGL.TextureTarget)(int)Handles[index].Target, (TextureParameterName)ExtTextureFilterAnisotropic.TextureMaxAnisotropyExt, 4);
 			GL.Finish();
 
 			Handles[index].Initialized = true;

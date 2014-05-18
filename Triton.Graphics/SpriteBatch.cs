@@ -119,7 +119,7 @@ namespace Triton.Graphics
 					{
 						Buffer.EndInline(Backend);
 
-						Backend.BeginInstance(lastSRGB ? ShaderSRGB.Handle : Shader.Handle, new int[] { lastTexture.Handle }, lastAlpha ? RenderStateAlphaBlend : RenderStateNoAlphaBlend);
+						Backend.BeginInstance(lastSRGB ? ShaderSRGB.Handle : Shader.Handle, new int[] { lastTexture.Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, lastAlpha ? RenderStateAlphaBlend : RenderStateNoAlphaBlend);
 						Backend.BindShaderVariable(Params.HandleDiffuseTexture, 0);
 						Backend.BindShaderVariable(Params.HandleModelViewProjection, ref projectionMatrix);
 						Backend.DrawMesh(Buffer.MeshHandle);
@@ -138,7 +138,7 @@ namespace Triton.Graphics
 			Buffer.EndInline(Backend);
 
 			// Render final batch
-			Backend.BeginInstance(lastSRGB ? ShaderSRGB.Handle : Shader.Handle, new int[] { lastTexture.Handle }, lastAlpha ? RenderStateAlphaBlend : RenderStateNoAlphaBlend);
+			Backend.BeginInstance(lastSRGB ? ShaderSRGB.Handle : Shader.Handle, new int[] { lastTexture.Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, lastAlpha ? RenderStateAlphaBlend : RenderStateNoAlphaBlend);
 			Backend.BindShaderVariable(Params.HandleDiffuseTexture, 0);
 			Backend.BindShaderVariable(Params.HandleModelViewProjection, ref projectionMatrix);
 			Backend.DrawMesh(Buffer.MeshHandle);

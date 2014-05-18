@@ -34,6 +34,7 @@ namespace Triton.Renderer
 		private readonly Shaders.ShaderManager ShaderManager;
 		private readonly RenderTargets.RenderTargetManager RenderTargetManager;
 		private readonly RenderStates.RenderStateManager RenderStateManager;
+		private readonly Samplers.SamplerManager SamplerManager;
 
 		private bool Disposed = false;
 		private readonly Action<Action> AddToWorkQueue;
@@ -66,6 +67,7 @@ namespace Triton.Renderer
 			ShaderManager = new Shaders.ShaderManager();
 			RenderTargetManager = new RenderTargets.RenderTargetManager();
 			RenderStateManager = new RenderStates.RenderStateManager();
+			SamplerManager = new Samplers.SamplerManager();
 
 			var initialRenderState = RenderStateManager.CreateRenderState(false, true, true, BlendingFactorSrc.Zero, BlendingFactorDest.One, CullFaceMode.Back, true, DepthFunction.Less);
 			RenderStateManager.ApplyRenderState(initialRenderState);
@@ -84,6 +86,7 @@ namespace Triton.Renderer
 			if (!isDisposing || Disposed)
 				return;
 
+			SamplerManager.Dispose();
 			TextureManager.Dispose();
 			MeshManager.Dispose();
 			ShaderManager.Dispose();
@@ -335,15 +338,6 @@ namespace Triton.Renderer
 						
 						// Replace with gl handle
 						attachment.TextureHandle = TextureManager.GetOpenGLHande(attachment.TextureHandle);
-
-						if (attachment.AttachmentPoint == RenderTargets.Definition.AttachmentPoint.Depth)
-						{
-							GL.BindTexture(glTarget, attachment.TextureHandle);
-							GL.TexParameter(glTarget, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-							GL.TexParameter(glTarget, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-							GL.TexParameter(glTarget, TextureParameterName.TextureCompareFunc, (int)DepthFunction.Lequal);
-							GL.TexParameter(glTarget, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
-						}
 					}
 				}
 
@@ -375,6 +369,24 @@ namespace Triton.Renderer
 				GL.DrawBuffers(drawBuffers.Length, drawBuffers);
 
 			CheckGLError();
+		}
+
+		public int CreateSampler(Dictionary<SamplerParameterName, int> settings)
+		{
+			var handle = SamplerManager.Create();
+
+			AddToWorkQueue(() =>
+			{
+				SamplerManager.Init(handle, settings);
+			});
+
+			return handle;
+		}
+
+		public void BindSampler(int textureUnit, int handle)
+		{
+			int sampler = SamplerManager.GetOpenGLHande(handle);
+			GL.BindSampler(textureUnit, sampler);
 		}
 
 		internal static void CheckGLError()

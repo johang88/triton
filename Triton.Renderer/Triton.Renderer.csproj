@@ -74,9 +74,15 @@
     <Compile Include="PixelFormat.cs" />
     <Compile Include="RenderTargets\Definition.cs" />
     <Compile Include="RenderTargets\RenderTargetManager.cs" />
+    <Compile Include="SamplerParameterName.cs" />
+    <Compile Include="Samplers\SamplerManager.cs" />
     <Compile Include="Shaders\ShaderManager.cs" />
+    <Compile Include="TextureCompareMode.cs" />
+    <Compile Include="TextureMagFilter.cs" />
+    <Compile Include="TextureMinFilter.cs" />
     <Compile Include="Textures\TextureManager.cs" />
     <Compile Include="TextureTarget.cs" />
+    <Compile Include="TextureWrapMode.cs" />
     <Compile Include="VertexPointerType.cs" />
     <Compile Include="VertexFormat.cs" />
     <Compile Include="VertexFormatElement.cs" />
