@@ -62,9 +62,9 @@ namespace Triton.Samples
 			base.RenderUI(deltaTime);
 
 			var offsetY = 2;
-			DebugFont.DrawText(DebugSprite, new Vector2(4, Height - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] FXAA: {0}", DeferredRenderer.EnableFXAA);
+			DebugFont.DrawText(DebugSprite, new Vector2(4, Height - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] FXAA: {0}", DeferredRenderer.EnableFXAA ? "Enabled" : "Disabled");
 			DebugFont.DrawText(DebugSprite, new Vector2(4, Height - DebugFont.LineHeight * offsetY++), Vector4.One, "[c] Shadow Quality: {0}", DeferredRenderer.ShadowQuality);
-			DebugFont.DrawText(DebugSprite, new Vector2(4, Height - DebugFont.LineHeight * offsetY++), Vector4.One, "[v] Shadows: {0}", DeferredRenderer.EnableShadows);
+			DebugFont.DrawText(DebugSprite, new Vector2(4, Height - DebugFont.LineHeight * offsetY++), Vector4.One, "[v] Shadows: {0}", DeferredRenderer.EnableShadows ? "Enabled" : "Disabled");
 		}
 	}
 }
