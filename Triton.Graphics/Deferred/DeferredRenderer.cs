@@ -120,7 +120,7 @@ namespace Triton.Graphics.Deferred
 
 			// Init light shaders
 			var lightTypes = new string[] { "DIRECTIONAL_LIGHT", "POINT_LIGHT", "SPOT_LIGHT" };
-			var lightPermutations = new string[] { "NO_SHADOWS", "SHADOWS,SHADOW_QUALITY_LOW", "SHADOWS,SHADOW_QUALITY_MEDIUM", "SHADOWS,SHADOW_QUALITY_HIGH" };
+			var lightPermutations = new string[] { "NO_SHADOWS", "SHADOWS,SHADOW_QUALITY_LOWEST", "SHADOWS,SHADOW_QUALITY_LOW", "SHADOWS,SHADOW_QUALITY_MEDIUM", "SHADOWS,SHADOW_QUALITY_HIGH" };
 			
 			LightShaders = new Resources.ShaderProgram[lightTypes.Length * lightPermutations.Length];
 			LightParams = new LightParams[lightTypes.Length * lightPermutations.Length];

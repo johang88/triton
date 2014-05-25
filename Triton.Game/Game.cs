@@ -166,6 +166,7 @@ namespace Triton.Game
 
 			var lightOutput = DeferredRenderer.Render(Stage, Camera);
 			HDRRenderer.Render(Camera, lightOutput, deltaTime);
+			RenderUI(deltaTime);
 
 			if ((DebugFlags & DebugFlags.Physics) == DebugFlags.Physics)
 			{
@@ -211,6 +212,11 @@ namespace Triton.Game
 			}
 
 			GraphicsBackend.EndScene();
+		}
+
+		protected virtual void RenderUI(float deltaTime)
+		{
+
 		}
 
 		/// <summary>

@@ -10,6 +10,8 @@ namespace Triton.Samples
 {
 	public abstract class BaseGame : Triton.Game.Game
 	{
+
+
 		public BaseGame(string name)
 			: base(name)
 		{
@@ -31,6 +33,38 @@ namespace Triton.Samples
 					new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/samples_data/"))
 					))
 				);
+		}
+
+		protected override void Update(float frameTime)
+		{
+			base.Update(frameTime);
+
+			if (InputManager.WasKeyPressed(Input.Key.F))
+			{
+				DeferredRenderer.EnableFXAA = !DeferredRenderer.EnableFXAA;
+			}
+
+			if (InputManager.WasKeyPressed(Input.Key.C))
+			{
+				var shadowQuality = (int)DeferredRenderer.ShadowQuality;
+				shadowQuality = (shadowQuality + 1) % ((int)Graphics.Deferred.ShadowQuality.High + 1);
+				DeferredRenderer.ShadowQuality = (Graphics.Deferred.ShadowQuality)shadowQuality;
+			}
+
+			if (InputManager.WasKeyPressed(Input.Key.V))
+			{
+				DeferredRenderer.EnableShadows = !DeferredRenderer.EnableShadows;
+			}
+		}
+
+		protected override void RenderUI(float deltaTime)
+		{
+			base.RenderUI(deltaTime);
+
+			var offsetY = 2;
+			DebugFont.DrawText(DebugSprite, new Vector2(4, Height - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] FXAA: {0}", DeferredRenderer.EnableFXAA);
+			DebugFont.DrawText(DebugSprite, new Vector2(4, Height - DebugFont.LineHeight * offsetY++), Vector4.One, "[c] Shadow Quality: {0}", DeferredRenderer.ShadowQuality);
+			DebugFont.DrawText(DebugSprite, new Vector2(4, Height - DebugFont.LineHeight * offsetY++), Vector4.One, "[v] Shadows: {0}", DeferredRenderer.EnableShadows);
 		}
 	}
 }

@@ -8,8 +8,9 @@ namespace Triton.Graphics.Deferred
 {
 	public enum ShadowQuality
 	{
-		Low = 0,
-		Medium = 1,
-		High = 2
+		Lowest = 0,
+		Low = 1,
+		Medium = 2,
+		High = 3
 	}
 }

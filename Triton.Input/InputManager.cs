@@ -14,12 +14,21 @@ namespace Triton.Input
 		private Vector2 _MouseDelta;
 		public Vector2 MouseDelta { get { return _MouseDelta; } }
 
+		private bool[] PreviousState = new bool[(int)Key.LastKey];
+		private bool[] WasPressedState = new bool[(int)Key.LastKey];
+
 		public InputManager(Rectangle bounds)
 		{
 			Bounds = bounds;
 
 			Mouse.SetPosition(0, 0);
 			OldMousePosition = new Vector2(0, 0);
+
+			for (int i = 0; i < PreviousState.Length; i++)
+			{
+				PreviousState[i] = false;
+				WasPressedState[i] = false;
+			}
 		}
 
 		public void Update()
@@ -30,11 +39,30 @@ namespace Triton.Input
 
 			OldMousePosition.X = state.X;
 			OldMousePosition.Y = state.Y;
+
+			for (int i = 0; i < PreviousState.Length; i++)
+			{
+				if (PreviousState[i] && !Keyboard.GetState().IsKeyDown((OpenTK.Input.Key)i))
+				{
+					WasPressedState[i] = true;
+					PreviousState[i] = false;
+				}
+				else
+				{
+					WasPressedState[i] = false;
+					PreviousState[i] = Keyboard.GetState().IsKeyDown((OpenTK.Input.Key)i);
+				}
+			}
 		}
 
 		public bool IsKeyDown(Key key)
 		{
 			return Keyboard.GetState().IsKeyDown((OpenTK.Input.Key)(int)key);
+		}
+
+		public bool WasKeyPressed(Key key)
+		{
+			return WasPressedState[(int)key];
 		}
 
 		public bool IsMouseButtonDown(MouseButton button)
