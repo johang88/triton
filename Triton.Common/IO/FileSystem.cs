@@ -41,6 +41,11 @@ namespace Triton.Common.IO
 			return FileSystemImpl.Exists(GetPath(filename));
 		}
 
+		public bool DirectoryExists(string filename)
+		{
+			return FileSystemImpl.Exists(GetPath(filename));
+		}
+
 		public Stream OpenRead(string filename)
 		{
 			return FileSystemImpl.OpenFile(GetPath(filename), FileAccess.Read);
@@ -48,7 +53,11 @@ namespace Triton.Common.IO
 
 		public Stream OpenWrite(string filename)
 		{
-			return FileSystemImpl.OpenFile(GetPath(filename), FileAccess.Write);
+			var path = GetPath(filename);
+			if (!FileSystemImpl.Exists(path))
+				return FileSystemImpl.CreateFile(path);
+			else
+				return FileSystemImpl.OpenFile(path, FileAccess.Write);
 		}
 	}
 }

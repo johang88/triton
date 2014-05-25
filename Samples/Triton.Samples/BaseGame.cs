@@ -24,11 +24,12 @@ namespace Triton.Samples
 
 		protected override SharpFileSystem.IFileSystem MountFileSystem()
 		{
-			return new MergedFileSystem(
-				new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/core_data/")),
-				new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/samples_data/")),
-				// /tmp mount
-				new FileSystemMounter(CreateMount("/tmp/", new PhysicalFileSystem("./tmp")))
+			return new FileSystemMounter(
+				CreateMount("/tmp/", new PhysicalFileSystem("./tmp")),
+				CreateMount("/", new MergedFileSystem(
+					new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/core_data/")),
+					new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/samples_data/"))
+					))
 				);
 		}
 	}

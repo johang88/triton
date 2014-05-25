@@ -49,6 +49,22 @@ namespace Triton.Graphics.Resources
 			}
 		}
 
+		private void OutputShader(string name, string type, string parameters, string content)
+		{
+			if (!string.IsNullOrWhiteSpace(content) && FileSystem.DirectoryExists("/tmp/"))
+			{
+				parameters = parameters.Replace(',', '_');
+				if (!string.IsNullOrWhiteSpace(parameters))
+					parameters = '-' + parameters;
+				var filename = name.Replace('/', '_') + parameters + '.' + type;
+				using (var stream = FileSystem.OpenWrite("/tmp/" + filename))
+				using (var writer = new System.IO.StreamWriter(stream))
+				{
+					writer.Write(content);
+				}
+			}
+		}
+
 		public Common.Resource Create(string name, string parameters)
 		{
 			return new ShaderProgram(name, parameters, Backend);
@@ -96,6 +112,10 @@ namespace Triton.Graphics.Resources
 			{
 				geometryShaderSource = "#version 330 core\n#define GEOMETRY_SHADER\n" + defines + "\n" + shaderSource;
 			}
+
+			OutputShader(resource.Name, "vert", parameters, vertexShaderSource);
+			OutputShader(resource.Name, "frag", parameters, fragmentShaderSource);
+			OutputShader(resource.Name, "geo", parameters, geometryShaderSource);
 
 			resource.Parameters = parameters;
 
