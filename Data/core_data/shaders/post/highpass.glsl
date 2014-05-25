@@ -36,6 +36,6 @@ void main()
 	if (dot(color, vec3(0.333)) <= 0.001)
 		color = vec3(0);
 	
-	oColor = vec4(color, 1.0);
+	oColor = vec4(max(color, vec3(0)), 1.0);
 }
 #endif
