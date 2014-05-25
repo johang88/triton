@@ -21,7 +21,6 @@ void main()
 
 #else
 
-import(shaders/utility/utils);
 import(shaders/deferred/brdf);
 import(shaders/deferred/shadows);
 
@@ -29,10 +28,10 @@ in vec2 texCoord;
 
 layout(location = 0) out vec4 oColor;
 
-uniform sampler2D samplerNormal;
-uniform sampler2D samplerPosition;
-uniform sampler2D samplerSpecular;
-uniform sampler2D samplerDiffuse;
+uniform sampler2D samplerGBuffer0;
+uniform sampler2D samplerGBuffer1;
+uniform sampler2D samplerGBuffer2;
+uniform sampler2D samplerGBuffer3;
 
 uniform vec3 lightPosition;
 uniform vec3 lightColor;
@@ -53,8 +52,16 @@ void main()
 {
 	vec2 project = gl_FragCoord.xy / screenSize.xy;
 	
-	vec3 normal = normalize(texture2D(samplerNormal, project).xyz);
-	vec3 position = texture2D(samplerPosition, project).xyz;
+	vec4 gbuffer0 = texture2D(samplerGBuffer0, project); // color
+	vec4 gbuffer1 = texture2D(samplerGBuffer1, project); // normal
+	vec4 gbuffer2 = texture2D(samplerGBuffer2, project); // position
+	vec4 gbuffer3 = texture2D(samplerGBuffer3, project); // specular stuff
+	
+	if (gbuffer1.w == 0)
+		discard;
+	
+	vec3 normal = normalize(gbuffer1.xyz);
+	vec3 position = gbuffer2.xyz;
 	
 #if defined(SPOT_LIGHT) || defined(POINT_LIGHT)
 	vec3 lightVec = lightPosition - position;
@@ -68,11 +75,11 @@ void main()
 	vec3 eyeDir = normalize(cameraPosition - position);
 	
 #if defined(SPOT_LIGHT) || defined(POINT_LIGHT)
-	float attenuation = saturate(1.0f - ((dist * dist) / (lightRange * lightRange)));
+	float attenuation = saturate(1.0 - ((dist * dist) / (lightRange * lightRange)));
 	attenuation = attenuation * attenuation;
 	float radius = lightRange;
 #else
-	float attenuation = 1.0f;
+	float attenuation = 1.0;
 	float radius = 1;
 #endif
 	
@@ -84,7 +91,7 @@ void main()
 	attenuation *= spotFallof;
 #endif
 
-	float nDotL = saturate(dot(normal, lightDir));
+	float nDotL = saturate(dot(normal, lightDir) * 1.08 - 0.08);
 	vec3 lighting = vec3(0, 0, 0);
 
 	if (attenuation > 0 && nDotL > 0) {
@@ -96,9 +103,6 @@ void main()
 #endif
 		attenuation *= shadow;
 #endif
-		vec3 gbuffer0 = texture2D(samplerDiffuse, project).xyz;
-		vec4 gbuffer3 = texture2D(samplerSpecular, project);
-		
 		float metallic = gbuffer3.x;
 		float roughness = gbuffer3.y;
 		float specular = gbuffer3.z;
@@ -108,11 +112,11 @@ void main()
 		
 		vec3 diffuseLighting = get_diffuse(diffuseColor);
 		vec3 specularLighting = get_specular(normal, eyeDir, lightVec, roughness, specularColor, lightRange);
-	
+		
 		lighting = lightColor * nDotL * attenuation * (diffuseLighting + specularLighting);
 	}
 
 	oColor.xyz = lighting.xyz;
-	oColor.w = 1.0f;
+	oColor.w = 1.0;
 }
 #endif

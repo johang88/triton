@@ -14,7 +14,7 @@ namespace Triton.Samples
 		private Triton.Graphics.Light Light;
 
 		private float LightFlickerDirection = 1.0f;
-		private float LightBaseIntensity = 1.4f;
+		private float LightBaseIntensity = 8.4f;
 		private float LightFlickerCutoff = 0.3f;
 
 		private Random RNG = new Random();
@@ -43,7 +43,7 @@ namespace Triton.Samples
 		{
 			base.LoadResources();
 
-			Stage.ClearColor = new Triton.Vector4(0.5f, 0.5f, 0.7f, 0);
+			Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0);
 
 			// Create our awesome main actor :)
 			Crate = Stage.AddMesh("models/crate");
@@ -69,7 +69,7 @@ namespace Triton.Samples
 				range: 2.0f,
 				color: new Vector3(0.4f, 0.3f, 0.9f),
 				castShadows: false,
-				intensity: 2
+				intensity: 6
 				);
 
 			Stage.CreatePointLight(
@@ -77,7 +77,7 @@ namespace Triton.Samples
 				range: 2.0f,
 				color: new Vector3(0.4f, 0.9f, 0.3f),
 				castShadows: false,
-				intensity: 2
+				intensity: 6
 				);
 
 			// Setup the camera

@@ -9,7 +9,9 @@ namespace Triton.Graphics.Deferred
 	class AmbientLightParams
 	{
 		public int ModelViewProjection = 0;
-		public int SamplerDiffuse = 0;
+		public int SamplerGBuffer0 = 0;
+		public int SamplerGBuffer1 = 0;
+		public int SamplerGBuffer3 = 0;
 		public int AmbientColor = 0;
 	}
 }

@@ -68,18 +68,19 @@
   <ItemGroup>
     <Compile Include="Backend.cs" />
     <Compile Include="BatchBuffer.cs" />
-    <Compile Include="BlurHelper.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Deferred\AmbientLightParams.cs" />
-    <Compile Include="Deferred\BlurParams.cs" />
     <Compile Include="Deferred\CombineParams.cs" />
     <Compile Include="Deferred\DeferredRenderer.cs" />
+    <Compile Include="Deferred\FXAAParams.cs" />
     <Compile Include="Deferred\RenderShadowsParams.cs" />
     <Compile Include="Deferred\LightParams.cs" />
-    <Compile Include="Deferred\SSAOParams.cs" />
+    <Compile Include="HDR\AdaptLuminanceParams.cs" />
     <Compile Include="HDR\BlurParams.cs" />
     <Compile Include="HDR\HighPassParams.cs" />
     <Compile Include="HDR\HDRRenderer.cs" />
+    <Compile Include="HDR\LuminanceMapParams.cs" />
+    <Compile Include="HDR\QuadParams.cs" />
     <Compile Include="HDR\TonemapParams.cs" />
     <Compile Include="Light.cs" />
     <Compile Include="MeshInstance.cs" />

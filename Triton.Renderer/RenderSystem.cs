@@ -73,6 +73,7 @@ namespace Triton.Renderer
 			RenderStateManager.ApplyRenderState(initialRenderState);
 
 			GL.FrontFace(FrontFaceDirection.Ccw);
+			GL.Enable(EnableCap.TextureCubeMapSeamless);
 		}
 
 		public void Dispose()
@@ -147,6 +148,15 @@ namespace Triton.Renderer
 
 			GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
 			GL.BindTexture((OpenTK.Graphics.OpenGL.TextureTarget)(int)target, openGLHandle);
+		}
+
+		public void GenreateMips(int handle)
+		{
+			TextureTarget target;
+			var openGLHandle = TextureManager.GetOpenGLHande(handle, out target);
+
+			GL.BindTexture((OpenTK.Graphics.OpenGL.TextureTarget)(int)target, openGLHandle);
+			GL.GenerateMipmap((GenerateMipmapTarget)(int)target);
 		}
 
 		public int CreateMesh<T, T2>(int triangleCount, VertexFormat vertexFormat, T[] vertexData, T2[] indexData, bool stream, OnLoadedCallback loadedCallback)
@@ -326,16 +336,13 @@ namespace Triton.Renderer
 					if (attachment.AttachmentPoint == RenderTargets.Definition.AttachmentPoint.Color || definition.RenderDepthToTexture)
 					{
 						var target = TextureTarget.Texture2D;
-						var glTarget = OGL.TextureTarget.Texture2D;
-
+						
 						if (definition.RenderToCubeMap)
 						{
 							target = TextureTarget.TextureCubeMap;
-							glTarget = OGL.TextureTarget.TextureCubeMap;
 						}
 
-						TextureManager.SetPixelData(attachment.TextureHandle, target, definition.Width, definition.Height, null, attachment.PixelFormat, attachment.PixelInternalFormat, attachment.PixelType, false, false);
-						
+						TextureManager.SetPixelData(attachment.TextureHandle, target, definition.Width, definition.Height, null, attachment.PixelFormat, attachment.PixelInternalFormat, attachment.PixelType, attachment.MipMaps);
 						// Replace with gl handle
 						attachment.TextureHandle = TextureManager.GetOpenGLHande(attachment.TextureHandle);
 					}

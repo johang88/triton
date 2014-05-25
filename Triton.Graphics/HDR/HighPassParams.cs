@@ -10,7 +10,7 @@ namespace Triton.Graphics.HDR
 	{
 		public int ModelViewProjection = 0;
 		public int SamplerScene = 0;
-		public int WhitePoint = 0;
-		public int Exposure = 0;
+		public int SamplerLuminance = 0;
+		public int BloomThreshold = 0;
 	}
 }

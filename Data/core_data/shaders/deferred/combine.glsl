@@ -15,15 +15,11 @@ void main()
 
 #else
 
-import(shaders/utility/utils);
-
 in vec2 texCoord;
 
 layout(location = 0) out vec4 oColor;
 
 uniform sampler2D samplerLight;
-uniform sampler2D samplerSSAO;
-
 uniform vec3 ambientColor;
 uniform vec2 screenSize;
 
@@ -31,9 +27,7 @@ void main()
 {
 	vec2 project = gl_FragCoord.xy / screenSize.xy;
 	
-	vec3 light = texture2D(samplerLight, texCoord).xyz;
-	float ssao = texture2D(samplerSSAO, texCoord).z;
-	
-	oColor = vec4(light, 1.0f);
+	vec3 light = texture(samplerLight, texCoord).xyz;
+	oColor = vec4(light, 1.0);
 }
 #endif

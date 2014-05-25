@@ -36,6 +36,14 @@ namespace Triton.Graphics.Resources
 			var filename = resource.Name + ".dds";
 			bool srgb = parameters.Contains("srgb");
 
+			if (!FileSystem.FileExists(filename))
+			{
+				if (resource.Name.EndsWith("_n"))
+					filename = "textures/missing_n.dds";
+				else
+					filename = "textures/missing.dds";
+			}
+
 			using (var stream = FileSystem.OpenRead(filename))
 			using (var data = new System.IO.MemoryStream(1024 * 1024))
 			{

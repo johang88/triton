@@ -31,7 +31,7 @@ void main()
 	vec4 diffuse = texture2D(samplerDiffuse, texCoord) * color;
 	
 #ifdef SRGB
-	oColor.xyz = pow(diffuse.xyz, (1.0f / 2.2f).xxx);
+	oColor.xyz = pow(diffuse.xyz, vec3(1.0 / 2.2));
 	oColor.a = diffuse.a;
 #else
 	oColor = diffuse;

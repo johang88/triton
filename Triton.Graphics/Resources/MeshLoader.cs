@@ -66,6 +66,8 @@ namespace Triton.Graphics.Resources
 
 			var filename = resource.Name + ".mesh";
 
+			var overrideMaterial = parameters;
+
 			using (var stream = FileSystem.OpenRead(filename))
 			using (var reader = new System.IO.BinaryReader(stream))
 			{
@@ -102,6 +104,9 @@ namespace Triton.Graphics.Resources
 				for (var i = 0; i < meshCount; i++)
 				{
 					var materialName = reader.ReadString();
+
+					if (!string.IsNullOrWhiteSpace(overrideMaterial))
+						materialName = overrideMaterial;
 
 					Material material = null;
 					if (materialName != "no_material")

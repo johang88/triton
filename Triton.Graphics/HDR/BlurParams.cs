@@ -10,7 +10,7 @@ namespace Triton.Graphics.HDR
 	{
 		public int ModelViewProjection = 0;
 		public int SamplerScene = 0;
-		public int SampleOffsets = 0;
-		public int SampleWeights = 0;
+		public int TextureSize = 0;
+		public int BlurSigma = 0;
 	}
 }

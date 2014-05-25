@@ -16,20 +16,29 @@ void main()
 }
 
 #else
-
-import(shaders/utility/utils);
-
 in vec2 texCoord;
 
 layout(location = 0) out vec4 oColor;
 
-uniform sampler2D samplerDiffuse;
+uniform sampler2D samplerGBuffer0;
+uniform sampler2D samplerGBuffer1;
+uniform sampler2D samplerGBuffer3;
 uniform vec3 ambientColor;
 
 void main()
 {
-	vec3 diffuse = texture2D(samplerDiffuse, texCoord).xyz;
-
-	oColor = vec4(diffuse * ambientColor, 1.0f);
+	vec4 gbuffer0 = texture2D(samplerGBuffer0, texCoord);
+	vec4 gbuffer1 = texture2D(samplerGBuffer1, texCoord);
+	vec4 gbuffer2 = texture2D(samplerGBuffer3, texCoord);
+	
+	vec3 ambient = ambientColor;
+	if (gbuffer1.w == 0)
+		ambient = vec3(1, 1, 1);
+	
+	vec3 diffuse = gbuffer0.xyz;
+	
+	vec3 normal = normalize(gbuffer1.xyz);
+	
+	oColor = vec4((diffuse) * ambient, 1.0);
 }
 #endif

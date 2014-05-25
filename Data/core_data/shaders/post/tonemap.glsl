@@ -1,4 +1,5 @@
 import(shaders/core);
+import(shaders/post/postcommon);
 #ifdef VERTEX_SHADER
 
 layout(location = ATTRIB_POSITION) in vec3 iPosition;
@@ -16,43 +17,38 @@ void main()
 
 #else
 
-import(shaders/utility/utils);
-
 in vec2 texCoord;
 
 layout(location = 0) out vec4 oColor;
 
 uniform sampler2D samplerScene;
 uniform sampler2D samplerBloom;
-
-uniform float exposure;
-uniform vec3 whitePoint;
+uniform sampler2D samplerLuminance;
 
 vec3 tonemap(vec3 x)
 {
-	float A = 0.15f;
-	float B = 0.50f;
-	float C = 0.10f;
-	float D = 0.20f;
-	float E = 0.02f;
-	float F = 0.30f;
+	float A = 0.15;
+	float B = 0.50;
+	float C = 0.10;
+	float D = 0.20;
+	float E = 0.02;
+	float F = 0.30;
 	
 	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
 }
 
 void main()
 {
-	vec3 scene = texture2D(samplerScene, texCoord).xyz;
-	vec3 bloom = texture2D(samplerBloom, texCoord).xyz;
+	float averageLuminance = get_average_luminance(samplerLuminance);
+	vec3 color = texture2D(samplerScene, texCoord).xyz;
 
-	scene = tonemap(scene * exposure);
-	vec3 whiteScale = 1.0f / tonemap(whitePoint);
+	color = calc_exposed_color(color, averageLuminance, 0);
+	color = tonemap(color);
+
+	vec3 bloom = texture2D(samplerBloom, texCoord).xyz;
 	
-	vec3 final = scene * whiteScale;
-	final += bloom;
-	
+	vec3 final = color + bloom;
 	final = pow(final, vec3(1.0 / 2.2));
-	
-	oColor = vec4(final, 1.0f);
+	oColor = vec4(final, 1);
 }
 #endif

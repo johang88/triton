@@ -20,20 +20,17 @@ namespace Triton.Graphics.Deferred
 		private LightParams DirectionalLightShadowParams = new LightParams();
 		private LightParams SpotLightParams = new LightParams();
 		private LightParams SpotLightShadowParams = new LightParams();
-		private SSAOParams SSAOParams = new SSAOParams();
-		private BlurParams BlurParams = new BlurParams();
 		private CombineParams CombineParams = new CombineParams();
 		private RenderShadowsParams RenderShadowsParams = new RenderShadowsParams();
 		private RenderShadowsParams RenderShadowsCubeParams = new RenderShadowsParams();
 		private RenderShadowsParams RenderShadowsSkinnedParams = new RenderShadowsParams();
+		private FXAAParams FXAAParams = new FXAAParams();
 
 		private Vector2 ScreenSize;
 
 		public readonly RenderTarget GBuffer;
 		private readonly RenderTarget LightAccumulation;
 		private readonly RenderTarget Output;
-		private readonly RenderTarget SSAOTarget1;
-		private readonly RenderTarget SSAOTarget2;
 		private readonly RenderTarget SpotShadowsRenderTarget;
 		private readonly RenderTarget PointShadowsRenderTarget;
 		public readonly RenderTarget DirectionalShadowsRenderTarget;
@@ -49,12 +46,11 @@ namespace Triton.Graphics.Deferred
 		private Resources.ShaderProgram PointLightShadowShader;
 		private Resources.ShaderProgram SpotLightShader;
 		private Resources.ShaderProgram SpotLightShadowShader;
-		private Resources.ShaderProgram SSAOShader;
-		private Resources.ShaderProgram BlurShader;
 		private Resources.ShaderProgram CombineShader;
 		private Resources.ShaderProgram RenderShadowsShader;
 		private Resources.ShaderProgram RenderShadowsCubeShader;
 		private Resources.ShaderProgram RenderShadowsSkinnedShader;
+		private Resources.ShaderProgram FXAAShader;
 
 		// Used for point light shadows
 		private Light ShadowSpotLight = new Light();
@@ -110,16 +106,6 @@ namespace Triton.Graphics.Deferred
 				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.Depth24Stencil8, Renderer.PixelType.Float, GBuffer.Handle)
 			}));
 
-			int ssaoScale = 1;
-			SSAOTarget1 = Backend.CreateRenderTarget("ssao1", new Definition(width / ssaoScale, height / ssaoScale, false, new List<Definition.Attachment>()
-			{
-				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba32f, Renderer.PixelType.Float, 0),
-			}));
-			SSAOTarget2 = Backend.CreateRenderTarget("ssao2", new Definition(width / ssaoScale, height / ssaoScale, false, new List<Definition.Attachment>()
-			{
-				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba32f, Renderer.PixelType.Float, 0),
-			}));
-
 			SpotShadowsRenderTarget = Backend.CreateRenderTarget("spot_shadows", new Definition(512, 512, true, new List<Definition.Attachment>()
 			{
 				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent16, Renderer.PixelType.Float, 0),
@@ -142,12 +128,11 @@ namespace Triton.Graphics.Deferred
 			PointLightShadowShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "POINT_LIGHT,SHADOWS,SHADOWS_CUBE");
 			SpotLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "SPOT_LIGHT");
 			SpotLightShadowShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "SPOT_LIGHT,SHADOWS");
-			SSAOShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ssao");
-			BlurShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/blur");
 			CombineShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/combine");
 			RenderShadowsShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/render_shadows");
 			RenderShadowsSkinnedShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/render_shadows", "SKINNED");
 			RenderShadowsCubeShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/render_shadows_cube");
+			FXAAShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/post/fxaa");
 
 			RandomNoiseTexture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/random_n");
 
@@ -158,8 +143,7 @@ namespace Triton.Graphics.Deferred
 
 			UnitSphere = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/unit_sphere");
 			UnitCone = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/unit_cone");
-			BlurHelper.Init(ref BlurWeights, ref BlurOffsetsHorz, ref BlurOffsetsVert, new Vector2(1.0f / (float)SSAOTarget1.Width, 1.0f / (float)SSAOTarget1.Height));
-
+			
 			AmbientRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
 			LightAccumulatinRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
 			ShadowsRenderState = Backend.CreateRenderState(false, true, true);
@@ -188,11 +172,10 @@ namespace Triton.Graphics.Deferred
 			PointLightShadowShader.GetUniformLocations(PointLightShadowParams);
 			SpotLightShader.GetUniformLocations(SpotLightParams);
 			SpotLightShadowShader.GetUniformLocations(SpotLightShadowParams);
-			SSAOShader.GetUniformLocations(SSAOParams);
-			BlurShader.GetUniformLocations(BlurParams);
 			RenderShadowsShader.GetUniformLocations(RenderShadowsParams);
 			RenderShadowsSkinnedShader.GetUniformLocations(RenderShadowsSkinnedParams);
 			RenderShadowsCubeShader.GetUniformLocations(RenderShadowsCubeParams);
+			FXAAShader.GetUniformLocations(FXAAParams);
 		}
 
 		public RenderTarget Render(Stage stage, Camera camera)
@@ -209,7 +192,9 @@ namespace Triton.Graphics.Deferred
 			camera.GetProjectionMatrix(out projection);
 
 			// Render scene to GBuffer
-			Backend.BeginPass(GBuffer, stage.ClearColor, true);
+			var clearColor = stage.ClearColor;
+			clearColor.W = 0;
+			Backend.BeginPass(GBuffer, clearColor, true);
 			RenderScene(stage, ref view, ref projection);
 			Backend.EndPass();
 
@@ -224,64 +209,20 @@ namespace Triton.Graphics.Deferred
 
 			Backend.EndPass();
 
-			// Combine final pass
+			// FXAA
 			Backend.BeginPass(Output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
 
-			Backend.BeginInstance(CombineShader.Handle, new int[] { LightAccumulation.Textures[0].Handle, SSAOTarget2.Textures[0].Handle }, new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering }, LightAccumulatinRenderState);
-			Backend.BindShaderVariable(CombineParams.SamplerLight, 0);
-			Backend.BindShaderVariable(CombineParams.SamplerSSAO, 1);
+			Backend.BeginInstance(FXAAShader.Handle, new int[] { LightAccumulation.Textures[0].Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, LightAccumulatinRenderState);
+			Backend.BindShaderVariable(FXAAParams.SamplerScene, 0);
+
+			Vector2 screenSize = new Vector2(LightAccumulation.Width, LightAccumulation.Height);
+			Backend.BindShaderVariable(FXAAParams.TextureSize, ref screenSize);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 
 			Backend.EndPass();
 
 			return Output;
-		}
-
-		private void RenderSSAO(ref Matrix4 view, ref Matrix4 projection)
-		{
-			// SSAO
-			Backend.BeginPass(SSAOTarget2, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-
-			var modelViewProjection = Matrix4.Identity;
-			Backend.BeginInstance(SSAOShader.Handle, new int[] { GBuffer.Textures[2].Handle, GBuffer.Textures[1].Handle, RandomNoiseTexture.Handle },
-				samplers: new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSampler });
-			Backend.BindShaderVariable(SSAOParams.ModelViewProjection, ref modelViewProjection);
-
-			Backend.BindShaderVariable(SSAOParams.SamplerPosition, 0);
-			Backend.BindShaderVariable(SSAOParams.SamplerNormal, 1);
-			Backend.BindShaderVariable(SSAOParams.SamplerRandom, 2);
-
-			var noiseScale = new Vector2(ScreenSize.X / 64, ScreenSize.Y / 64);
-			Backend.BindShaderVariable(SSAOParams.NoiseScale, ref noiseScale);
-
-			Backend.DrawMesh(QuadMesh.MeshHandle);
-
-			Backend.EndPass();
-
-			// Blur 1
-			Backend.BeginPass(SSAOTarget1, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-			Backend.BeginInstance(BlurShader.Handle, new int[] { SSAOTarget2.Textures[0].Handle },
-				samplers: new int[] { Backend.DefaultSamplerNoFiltering });
-			Backend.BindShaderVariable(BlurParams.ModelViewProjection, ref modelViewProjection);
-			Backend.BindShaderVariable(BlurParams.SamplerScene, 0);
-			Backend.BindShaderVariable(BlurParams.SampleWeights, ref BlurWeights);
-			Backend.BindShaderVariable(BlurParams.SampleOffsets, ref BlurOffsetsHorz);
-
-			Backend.DrawMesh(QuadMesh.MeshHandle);
-			Backend.EndPass();
-
-			// Blur 2
-			Backend.BeginPass(SSAOTarget2, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-			Backend.BeginInstance(BlurShader.Handle, new int[] { SSAOTarget1.Textures[0].Handle },
-				samplers: new int[] { Backend.DefaultSamplerNoFiltering });
-			Backend.BindShaderVariable(BlurParams.ModelViewProjection, ref modelViewProjection);
-			Backend.BindShaderVariable(BlurParams.SamplerScene, 0);
-			Backend.BindShaderVariable(BlurParams.SampleWeights, ref BlurWeights);
-			Backend.BindShaderVariable(BlurParams.SampleOffsets, ref BlurOffsetsVert);
-
-			Backend.DrawMesh(QuadMesh.MeshHandle);
-			Backend.EndPass();
 		}
 
 		private void RenderScene(Stage stage, ref Matrix4 view, ref Matrix4 projection)
@@ -312,8 +253,13 @@ namespace Triton.Graphics.Deferred
 
 			var ambientColor = new Vector3((float)System.Math.Pow(stage.AmbientColor.X, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Y, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Z, 2.2f));
 
-			Backend.BeginInstance(AmbientLightShader.Handle, new int[] { GBuffer.Textures[0].Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, AmbientRenderState);
-			Backend.BindShaderVariable(AmbientLightParams.SamplerDiffuse, 0);
+			Backend.BeginInstance(AmbientLightShader.Handle,
+				new int[] { GBuffer.Textures[0].Handle, GBuffer.Textures[1].Handle, GBuffer.Textures[3].Handle },
+				new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering }, 
+				AmbientRenderState);
+			Backend.BindShaderVariable(AmbientLightParams.SamplerGBuffer0, 0);
+			Backend.BindShaderVariable(AmbientLightParams.SamplerGBuffer1, 1);
+			Backend.BindShaderVariable(AmbientLightParams.SamplerGBuffer3, 2);
 			Backend.BindShaderVariable(AmbientLightParams.ModelViewProjection, ref modelViewProjection);
 			Backend.BindShaderVariable(AmbientLightParams.AmbientColor, ref ambientColor);
 
@@ -435,22 +381,22 @@ namespace Triton.Graphics.Deferred
 					shadowMapHandle = DirectionalShadowsRenderTarget.Textures[0].Handle;
 				else if (light.Type == LighType.PointLight)
 					shadowMapHandle = PointShadowsRenderTarget.Textures[0].Handle;
-				textures = new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle, shadowMapHandle };
+				textures = new int[] { GBuffer.Textures[0].Handle, GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, shadowMapHandle };
 				samplers = new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, ShadowSampler };
 			}
 			else
 			{
-				textures = new int[] { GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[0].Handle };
+				textures = new int[] { GBuffer.Textures[0].Handle, GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle };
 				samplers = new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering };
 			}
 
 			Backend.BeginInstance(shader.Handle, textures, samplers, renderStateId);
 
 			// Setup texture samplers
-			Backend.BindShaderVariable(shaderParams.SamplerNormal, 0);
-			Backend.BindShaderVariable(shaderParams.SamplerPosition, 1);
-			Backend.BindShaderVariable(shaderParams.SamplerSpecular, 2);
-			Backend.BindShaderVariable(shaderParams.SamplerDiffuse, 3);
+			Backend.BindShaderVariable(shaderParams.SamplerGBuffer0, 0);
+			Backend.BindShaderVariable(shaderParams.SamplerGBuffer1, 1);
+			Backend.BindShaderVariable(shaderParams.SamplerGBuffer2, 2);
+			Backend.BindShaderVariable(shaderParams.SamplerGBuffer3, 3);
 
 			// Common uniforms
 			Backend.BindShaderVariable(shaderParams.ScreenSize, ref ScreenSize);

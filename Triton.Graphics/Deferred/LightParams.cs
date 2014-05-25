@@ -9,10 +9,10 @@ namespace Triton.Graphics.Deferred
 	class LightParams
 	{
 		public int ModelViewProjection = 0;
-		public int SamplerNormal = 0;
-		public int SamplerPosition = 0;
-		public int SamplerSpecular = 0;
-		public int SamplerDiffuse = 0;
+		public int SamplerGBuffer1 = 0;
+		public int SamplerGBuffer2 = 0;
+		public int SamplerGBuffer3 = 0;
+		public int SamplerGBuffer0 = 0;
 		public int SamplerShadow = 0;
 		public int SamplerShadowCube = 0;
 		public int LightDirection = 0;

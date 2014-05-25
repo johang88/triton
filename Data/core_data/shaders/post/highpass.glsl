@@ -1,4 +1,5 @@
 import(shaders/core);
+import(shaders/post/postcommon);
 #ifdef VERTEX_SHADER
 
 layout(location = ATTRIB_POSITION) in vec3 iPosition;
@@ -16,23 +17,25 @@ void main()
 
 #else
 
-import(shaders/utility/utils);
-
 in vec2 texCoord;
 
 layout(location = 0) out vec4 oColor;
 
 uniform sampler2D samplerScene;
-
-uniform vec3 whitePoint;
-uniform float exposure;
+uniform sampler2D samplerLuminance;
+uniform float bloomThreshold;
 
 void main()
 {
-	vec3 scene = texture2D(samplerScene, texCoord).xyz * exposure;
-
-	vec3 final = max(scene - whitePoint, vec3(0, 0, 0));
+	vec3 color = texture2D(samplerScene, texCoord).xyz;
 	
-	oColor = vec4(final, 1.0f);
+	float averageLuminance = get_average_luminance(samplerLuminance);
+
+	color = calc_exposed_color(color, averageLuminance, bloomThreshold);
+	
+	if (dot(color, vec3(0.333)) <= 0.001)
+		color = vec3(0);
+	
+	oColor = vec4(color, 1.0);
 }
 #endif

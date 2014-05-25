@@ -33,8 +33,6 @@ void main()
 
 #else
 
-import(shaders/utility/utils);
-
 in vec3 normal;
 in vec3 tangent;
 in vec3 bitangent;
@@ -69,7 +67,7 @@ void main()
 	vec4 n4 = texture2D(samplerNormal4, texCoordDetail);
 	
 	vec4 normalSpecular = n1 * splat.x + n2 * splat.y + n3 * splat.z + n4 * splat.w;
-	vec3 N = normalize(normalSpecular.xyz * 2.0f - 1.0f);
+	vec3 N = normalize(normalSpecular.xyz * 2.0 - 1.0;
 
 	mat3x3 rot = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
 
@@ -91,8 +89,8 @@ void main()
 	specular.xyz = pow(specular.xyz, gamma);
 	specular.xyz = vec3(0, 0, 0);
 	
-	oColor = vec4(diffuse.xyz, 1.0f);
-	oNormal = vec4(N2.xyz, 1.0f);
+	oColor = vec4(diffuse.xyz, 1.0);
+	oNormal = vec4(N2.xyz, 1.0);
 	oSpecular = specular;
 	oPosition = position;
 }

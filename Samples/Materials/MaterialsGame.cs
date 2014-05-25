@@ -20,6 +20,8 @@ namespace Triton.Samples
 		private float CameraYaw = 0;
 		private float CameraPitch = 0;
 
+		private Triton.Graphics.Light Light;
+
 		public MaterialsGame()
 			: base("Materials")
 		{
@@ -42,7 +44,7 @@ namespace Triton.Samples
 		{
 			base.LoadResources();
 
-			Stage.ClearColor = new Triton.Vector4(0.5f, 0.5f, 0.7f, 0);
+			Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0);
 
 			var floor = GameWorld.CreateGameObject();
 			floor.AddComponent(new Mesh { Filename = "models/floor" });
@@ -55,11 +57,21 @@ namespace Triton.Samples
 			Player.AddComponent(PlayerCharacter);
 			GameWorld.Add(Player);
 
+			var materials = new string[]
+			{
+				"materials/sphere",
+				"materials/gold",
+				"materials/iron",
+				"materials/wood",
+			};
+
 			for (int i = 0; i < 5; i++)
 			{
+				var materialName = materials[i % materials.Length];
+
 				var sphere = GameWorld.CreateGameObject();
 				sphere.Position = new Vector3(-3 + i * 1.5f, 1.0f, 2);
-				sphere.AddComponent(new Mesh { Filename = "models/sphere" });
+				sphere.AddComponent(new Mesh { Filename = "models/sphere", MeshParameters = materialName });
 				GameWorld.Add(sphere);
 			}
 
@@ -71,13 +83,21 @@ namespace Triton.Samples
 				GameWorld.Add(sphere);
 			}
 
-			Stage.CreatePointLight(
+			Light = Stage.CreatePointLight(
 					position: new Vector3(0, 2, 0),
-					range: 8.0f,
-					color: new Vector3(0.8f, 0.8f, 0.83f),
+					range: 16.0f,
+					color: new Vector3(1f, 0.8f, 0.5f),
 					castShadows: true,
-					intensity: 5
+					intensity: 10,
+					shadowBias: 0.005f
 				);
+
+			//Stage.CreateDirectionalLight(
+			//	new Vector3(0.3f, -0.7f, 0.2f),
+			//	new Vector3(1f, 0.8f, 0.5f),
+			//	true,
+			//	intensity: 10
+			//	);
 
 			DebugFlags |= Game.DebugFlags.RenderStats;
 			//HDRRenderer.WhitePoint = new Vector3(1, 1, 1) * 300;
@@ -121,6 +141,8 @@ namespace Triton.Samples
 
 			PlayerCharacter.Move(movement, InputManager.IsKeyDown(Key.Space));
 			Camera.Position = Player.Position;
+
+			Light.Position.X = 1.2f + (float)(System.Math.Sin(ElapsedTime * 2) * 0.5);
 		}
 	}
 }

@@ -44,7 +44,7 @@ namespace Triton.Samples
 		{
 			base.LoadResources();
 
-			Stage.ClearColor = new Triton.Vector4(0.5f, 0.5f, 0.7f, 0);
+			Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0);
 
 			var floor = GameWorld.CreateGameObject();
 			floor.AddComponent(new Mesh { Filename = "models/floor" });
@@ -72,7 +72,7 @@ namespace Triton.Samples
 				range: 6.0f,
 				color: new Vector3(0.4f, 0.3f, 0.9f),
 				castShadows: true,
-				intensity: 2
+				intensity: 6
 				);
 
 			Stage.CreatePointLight(
@@ -80,7 +80,7 @@ namespace Triton.Samples
 				range: 6.0f,
 				color: new Vector3(0.4f, 0.9f, 0.3f),
 				castShadows: true,
-				intensity: 2
+				intensity: 6
 				);
 
 			DebugFlags |= Game.DebugFlags.RenderStats;

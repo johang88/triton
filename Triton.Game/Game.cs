@@ -152,7 +152,7 @@ namespace Triton.Game
 
 				Update(FrameTime);
 
-				RenderScene();
+				RenderScene(FrameTime);
 				Thread.Sleep(1);
 			}
 		}
@@ -161,12 +161,12 @@ namespace Triton.Game
 		/// Feed render commands to the graphics backend.
 		/// Only override this method if you wish to customize the rendering pipeline.
 		/// </summary>
-		protected virtual void RenderScene()
+		protected virtual void RenderScene(float deltaTime)
 		{
 			GraphicsBackend.BeginScene();
 
 			var lightOutput = DeferredRenderer.Render(Stage, Camera);
-			HDRRenderer.Render(Camera, lightOutput);
+			HDRRenderer.Render(Camera, lightOutput, deltaTime);
 
 			if ((DebugFlags & DebugFlags.Physics) == DebugFlags.Physics)
 			{

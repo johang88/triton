@@ -26,10 +26,10 @@ uniform sampler2D samplerRandom;
 
 uniform vec2 noiseScale;
 
-float bias = 0.55f;
-float intensity = 30.0f;
-float scale = 5.0f;
-float radius = 0.1f;
+float bias = 0.55;
+float intensity = 30.0;
+float scale = 5.0;
+float radius = 0.1;
 
 float ambientOcclusion(vec2 tc, vec2 uv, vec3 p, vec3 norm) {
 	vec3 diff = texture2D(samplerPosition, tc + uv).xyz - p;
@@ -44,26 +44,26 @@ void main()
 	vec3 position = texture2D(samplerPosition, texCoord).xyz;
 	vec3 normal = normalize(texture2D(samplerNormal, texCoord).xyz);
 	
-	vec3 rand = texture2D(samplerRandom, texCoord * noiseScale).xyz * 2.0f - 1.0f;
+	vec3 rand = texture2D(samplerRandom, texCoord * noiseScale).xyz * 2.0 - 1.0;
 	
 	float rad = radius / position.z;
 
 	const vec2 vec[4] = { vec2(1, 0), vec2(-1, 0), vec2(0, 1), vec2(0, -1) };
 
-	float occlusion = 0.0f;
+	float occlusion = 0.0;
 	int iterations = 4;
 	for (int i = 0; i < iterations; i++) {
 		vec2 coord1 = (reflect(vec3(vec[i], 0), rand) * rad).xy;
-		vec2 coord2 = vec2(coord1.x * 0.707f - coord1.y * 0.707f, coord1.x * 0.707f + coord1.y * 0.707f);
+		vec2 coord2 = vec2(coord1.x * 0.707 - coord1.y * 0.707, coord1.x * 0.707 + coord1.y * 0.707);
 		
-		occlusion += ambientOcclusion(texCoord, coord1 * 0.25f, position, normal);
-		occlusion += ambientOcclusion(texCoord, coord2 * 0.5f, position, normal);
-		occlusion += ambientOcclusion(texCoord, coord1 * 0.75f, position, normal);
-		occlusion += ambientOcclusion(texCoord, coord2 * 1.0f, position, normal);
+		occlusion += ambientOcclusion(texCoord, coord1 * 0.25, position, normal);
+		occlusion += ambientOcclusion(texCoord, coord2 * 0.5, position, normal);
+		occlusion += ambientOcclusion(texCoord, coord1 * 0.75, position, normal);
+		occlusion += ambientOcclusion(texCoord, coord2 * 1.0, position, normal);
 	}
 	
-	occlusion = max(0, 1.0f - occlusion / (iterations * 4.0f));
+	occlusion = max(0, 1.0 - occlusion / (iterations * 4.0));
 	
-	oColor = vec4(occlusion.xxx, 1.0f);
+	oColor = vec4(vec3(occlusion), 1.0);
 }
 #endif

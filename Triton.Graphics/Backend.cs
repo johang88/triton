@@ -71,6 +71,7 @@ namespace Triton.Graphics
 
 		public readonly int DefaultSampler;
 		public readonly int DefaultSamplerNoFiltering;
+		public readonly int DefaultSamplerMipMapNearest;
 
 		public Backend(ResourceManager resourceManager, int width, int height, string title, bool fullscreen)
 		{
@@ -103,12 +104,21 @@ namespace Triton.Graphics
 				{ SamplerParameterName.TextureMagFilter, (int)TextureMagFilter.Linear },
 				{ SamplerParameterName.TextureMaxAnisotropyExt, 8 },
 				{ SamplerParameterName.TextureWrapS, (int)TextureWrapMode.Repeat },
-				{ SamplerParameterName.TextureWrapT, (int)TextureWrapMode.Repeat }
+				{ SamplerParameterName.TextureWrapT, (int)TextureWrapMode.Repeat },
+				{ SamplerParameterName.TextureWrapR, (int)TextureWrapMode.Repeat }
 			});
 
 			DefaultSamplerNoFiltering = RenderSystem.CreateSampler(new Dictionary<SamplerParameterName, int>
 			{
 				{ SamplerParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest },
+				{ SamplerParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest },
+				{ SamplerParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge },
+				{ SamplerParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge }
+			});
+
+			DefaultSamplerMipMapNearest = RenderSystem.CreateSampler(new Dictionary<SamplerParameterName, int>
+			{
+				{ SamplerParameterName.TextureMinFilter, (int)TextureMinFilter.NearestMipmapNearest },
 				{ SamplerParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest },
 				{ SamplerParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge },
 				{ SamplerParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge }
@@ -369,6 +379,10 @@ namespace Triton.Graphics
 							reader.BaseStream.Position += vertexLength + indexLength;
 						}
 						break;
+					case OpCode.GenerateMips:
+						var textureHandle = reader.ReadInt32();
+						RenderSystem.GenreateMips(textureHandle);
+						break;
 				}
 			}
 		}
@@ -622,6 +636,12 @@ namespace Triton.Graphics
 			}
 		}
 
+		public void GenerateMips(int textureHandle)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.GenerateMips);
+			PrimaryBuffer.Writer.Write(textureHandle);
+		}
+
 		public RenderTarget CreateRenderTarget(string name, Renderer.RenderTargets.Definition definition)
 		{
 			if (string.IsNullOrWhiteSpace(name))
@@ -724,7 +744,8 @@ namespace Triton.Graphics
 			BindShaderVariableVector4,
 			BindShaderVariableVector4Array,
 			UpdateMesh,
-			DrawMesh
+			DrawMesh,
+			GenerateMips
 		}
 
 		/// <summary>

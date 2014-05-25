@@ -4,13 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Triton.Graphics.Deferred
+namespace Triton.Graphics.HDR
 {
-	class BlurParams
+	class QuadParams
 	{
 		public int ModelViewProjection = 0;
 		public int SamplerScene = 0;
-		public int SampleOffsets = 0;
-		public int SampleWeights = 0;
 	}
 }

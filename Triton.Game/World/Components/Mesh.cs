@@ -9,14 +9,15 @@ namespace Triton.Game.World.Components
 	public class Mesh : Component
 	{
 		public string Filename;
+		public string MeshParameters;
 
-		private Graphics.MeshInstance MeshInstance;
+		public Graphics.MeshInstance MeshInstance;
 
 		public override void OnAttached(GameObject owner)
 		{
 			base.OnAttached(owner);
 
-			MeshInstance = World.Stage.AddMesh(Filename);
+			MeshInstance = World.Stage.AddMesh(Filename, MeshParameters);
 		}
 
 		public override void OnDetached()

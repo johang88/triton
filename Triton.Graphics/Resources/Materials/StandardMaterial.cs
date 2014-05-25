@@ -66,8 +66,9 @@ namespace Triton.Graphics.Resources.Materials
 		{
 			base.BindMaterial(backend, ref world, ref worldView, ref itWorldView, ref modelViewProjection, skeleton);
 
+
 			if (Samplers == null)
-				Samplers = new int[] { backend.DefaultSampler, backend.DefaultSampler };
+				Samplers = new int[] { backend.DefaultSampler, backend.DefaultSampler, backend.DefaultSampler };
 
 			backend.BeginInstance(Shader.Handle, Textures, samplers: Samplers);
 
@@ -81,6 +82,7 @@ namespace Triton.Graphics.Resources.Materials
 				backend.BindShaderVariable(Handles.SamplerDiffuse, textureUnit++);
 			if (Normal != null)
 				backend.BindShaderVariable(Handles.SamplerNormal, textureUnit++);
+			backend.BindShaderVariable(Handles.SamplerEnvironment, textureUnit++);
 
 			backend.BindShaderVariable(Handles.MaterialDiffuseColor, ref DiffuseColor);
 			backend.BindShaderVariable(Handles.MaterialMetallicValue, MetallicValue);
@@ -101,7 +103,7 @@ namespace Triton.Graphics.Resources.Materials
 			public int ItWorldView = 0;
 			public int SamplerDiffuse = 0;
 			public int SamplerNormal = 0;
-			public int SamplerSpecular = 0;
+			public int SamplerEnvironment = 0;
 			public int Bones = 0;
 			public int MaterialDiffuseColor = 0;
 			public int MaterialMetallicValue = 0;

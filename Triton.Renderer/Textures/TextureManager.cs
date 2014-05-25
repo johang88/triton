@@ -111,7 +111,7 @@ namespace Triton.Renderer.Textures
 			Handles[index].Initialized = false;
 		}
 
-		public void SetPixelData(int handle, TextureTarget target, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap = true, bool enableFiltering = true)
+		public void SetPixelData(int handle, TextureTarget target, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap = true)
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
@@ -133,6 +133,8 @@ namespace Triton.Renderer.Textures
 				{
 					GL.TexImage2D(OGL.TextureTarget.TextureCubeMapPositiveX + i, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
 				}
+				if (mipmap)
+					GL.GenerateMipmap(GenerateMipmapTarget.TextureCubeMap);
 			}
 			else
 			{

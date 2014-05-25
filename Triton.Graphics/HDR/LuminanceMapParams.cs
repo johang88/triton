@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.HDR
 {
-	class TonemapParams
+	class LuminanceMapParams
 	{
 		public int ModelViewProjection = 0;
 		public int SamplerScene = 0;
-		public int SamplerBloom = 0;
-		public int SamplerLuminance = 0;
 	}
 }

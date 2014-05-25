@@ -31,14 +31,16 @@ namespace Triton.Renderer.RenderTargets
 			public PixelType PixelType;
 			public int Index = 0;
 			internal int TextureHandle = 0;
+			public bool MipMaps = false;
 
-			public Attachment(AttachmentPoint attachmentPoint, PixelFormat pixelFormat, PixelInternalFormat pixelInternalFormat, PixelType pixelType, int index = 0)
+			public Attachment(AttachmentPoint attachmentPoint, PixelFormat pixelFormat, PixelInternalFormat pixelInternalFormat, PixelType pixelType, int index = 0, bool mipmaps = false)
 			{
 				AttachmentPoint = attachmentPoint;
 				PixelFormat = pixelFormat;
 				PixelInternalFormat = pixelInternalFormat;
 				PixelType = pixelType;
 				Index = index;
+				MipMaps = mipmaps;
 			}
 		}
 

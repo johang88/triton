@@ -24,9 +24,9 @@ namespace Triton.Graphics
 			ResourceManager = resourceManager;
 		}
 
-		public MeshInstance AddMesh(string mesh)
+		public MeshInstance AddMesh(string mesh, string parameters = "")
 		{
-			return AddMesh(ResourceManager.Load<Resources.Mesh>(mesh));
+			return AddMesh(ResourceManager.Load<Resources.Mesh>(mesh, parameters));
 		}
 
 		public MeshInstance AddMesh(Resources.Mesh mesh)

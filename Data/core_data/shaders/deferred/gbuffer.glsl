@@ -79,6 +79,7 @@ layout(location = 3) out vec4 oSpecular;
 
 uniform sampler2D samplerDiffuse;
 uniform sampler2D samplerNormal;
+uniform samplerCube samplerEnvironment;
 
 uniform mat4x4 itWorldView;
 
@@ -91,12 +92,12 @@ vec3 get_normals() {
 #ifdef NORMAL_MAP
 	mat3x3 rot = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
 
-	vec3 N = normalize(texture2D(samplerNormal, texCoord).xyz * 2.0f - 1.0f);
+	vec3 N = normalize(texture2D(samplerNormal, texCoord).xyz * 2.0 - 1.0);
 	vec3 N2 = normalize(rot * N);
 	
 	return N2;
 #else
-	return normal;
+	return normalize(normal);
 #endif
 }
 
@@ -115,7 +116,7 @@ float get_metallic() {
 #ifdef MATERIAL_METALLIC_VALUE
 	return materialMetallicValue;
 #else
-	return 0.1;
+	return 0;
 #endif
 }
 
@@ -123,7 +124,7 @@ float get_specular() {
 #ifdef MATERIAL_SPECULAR_VALUE
 	return materialSpecularValue;
 #else
-	return 0;
+	return 0.5;
 #endif
 }
 
@@ -131,7 +132,7 @@ float get_roughness() {
 #ifdef MATERIAL_ROUGHNESS_VALUE
 	return materialRoughnessValue;
 #else
-	return 0.6;
+	return 0.8;
 #endif
 }
 
@@ -146,9 +147,9 @@ void main() {
 
 	float roughness = get_roughness();
 
-	oColor = vec4(diffuse, 1.0f);
-	oNormal = vec4(normals, 1.0f);
-	oSpecular = vec4(metallic, roughness, specular, 1);
+	oColor = vec4(diffuse, 0);
+	oNormal = vec4(normals, 1);
+	oSpecular = vec4(metallic, roughness, specular, 0);
 	oPosition = position;
 }
 #endif

@@ -1,4 +1,5 @@
 import(shaders/core);
+import(shaders/post/postcommon);
 #ifdef VERTEX_SHADER
 
 layout(location = ATTRIB_POSITION) in vec3 iPosition;
@@ -16,27 +17,16 @@ void main()
 
 #else
 
-import(shaders/utility/utils);
-
 in vec2 texCoord;
 
 layout(location = 0) out vec4 oColor;
 
 uniform sampler2D samplerScene;
-uniform vec4[15] sampleOffsets;
-uniform vec4[15] sampleWeights;
 
 void main()
 {
-	vec4 sum = vec4(0.0);
-
-	for (int i = 0; i < 15; i++)
-	{
-		vec2 uv = texCoord + sampleOffsets[i].xy;
-		sum += sampleWeights[i] * texture2D(samplerScene, uv); 
-	}
-	
-	oColor = sum;
-	oColor.a = 1.0f;
+	vec3 color = texture(samplerScene, texCoord).xyz;
+	float luminance = log(max(calc_luminance(color), 0.00001));
+	oColor = vec4(luminance, 1, 1, 1);
 }
 #endif

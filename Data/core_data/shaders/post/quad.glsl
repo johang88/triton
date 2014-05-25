@@ -2,26 +2,27 @@ import(shaders/core);
 #ifdef VERTEX_SHADER
 
 layout(location = ATTRIB_POSITION) in vec3 iPosition;
-layout(location = ATTRIB_COLOR) in vec3 iColor;
+layout(location = ATTRIB_TEXCOORD_0) in vec2 iTexCoord;
 
-out vec3 color;
+out vec2 texCoord;
 
 uniform mat4x4 modelViewProjection;
 
 void main()
 {
-	color = iColor;
+	texCoord = iTexCoord;
 	gl_Position = modelViewProjection * vec4(iPosition, 1);
 }
 
 #else
 
-in vec3 color;
+in vec2 texCoord;
 
 layout(location = 0) out vec4 oColor;
+uniform sampler2D samplerScene;
 
 void main()
 {
-	oColor = vec4(color, 1.0);
+	oColor = texture(samplerScene, texCoord);
 }
 #endif
