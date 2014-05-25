@@ -73,6 +73,7 @@
     <Compile Include="Deferred\CombineParams.cs" />
     <Compile Include="Deferred\DeferredRenderer.cs" />
     <Compile Include="Deferred\FXAAParams.cs" />
+    <Compile Include="Deferred\ShadowQuality.cs" />
     <Compile Include="Deferred\RenderShadowsParams.cs" />
     <Compile Include="Deferred\LightParams.cs" />
     <Compile Include="HDR\AdaptLuminanceParams.cs" />

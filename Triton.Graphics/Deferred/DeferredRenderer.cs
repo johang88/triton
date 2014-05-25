@@ -14,12 +14,7 @@ namespace Triton.Graphics.Deferred
 		private readonly Backend Backend;
 
 		private AmbientLightParams AmbientLightParams = new AmbientLightParams();
-		private LightParams PointLightParams = new LightParams();
-		private LightParams PointLightShadowParams = new LightParams();
-		private LightParams DirectionalLightParams = new LightParams();
-		private LightParams DirectionalLightShadowParams = new LightParams();
-		private LightParams SpotLightParams = new LightParams();
-		private LightParams SpotLightShadowParams = new LightParams();
+		private LightParams[] LightParams;
 		private CombineParams CombineParams = new CombineParams();
 		private RenderShadowsParams RenderShadowsParams = new RenderShadowsParams();
 		private RenderShadowsParams RenderShadowsCubeParams = new RenderShadowsParams();
@@ -40,12 +35,7 @@ namespace Triton.Graphics.Deferred
 		private Resources.Mesh UnitCone;
 
 		private Resources.ShaderProgram AmbientLightShader;
-		private Resources.ShaderProgram DirectionalLightShader;
-		private Resources.ShaderProgram DirectionalLightShadowShader;
-		private Resources.ShaderProgram PointLightShader;
-		private Resources.ShaderProgram PointLightShadowShader;
-		private Resources.ShaderProgram SpotLightShader;
-		private Resources.ShaderProgram SpotLightShadowShader;
+		private Resources.ShaderProgram[] LightShaders;
 		private Resources.ShaderProgram CombineShader;
 		private Resources.ShaderProgram RenderShadowsShader;
 		private Resources.ShaderProgram RenderShadowsCubeShader;
@@ -59,10 +49,6 @@ namespace Triton.Graphics.Deferred
 
 		private bool HandlesInitialized = false;
 
-		private Vector4[] BlurWeights = new Vector4[15];
-		private Vector4[] BlurOffsetsHorz = new Vector4[15];
-		private Vector4[] BlurOffsetsVert = new Vector4[15];
-
 		private int AmbientRenderState;
 		private int LightAccumulatinRenderState;
 		private int ShadowsRenderState;
@@ -72,6 +58,15 @@ namespace Triton.Graphics.Deferred
 		private int LightOutsideRenderState;
 
 		private int ShadowSampler;
+
+		public bool EnableFXAA = true;
+		public bool EnableShadows = true;
+
+		public int DirectionalShaderOffset = 0;
+		public int PointLightShaderOffset = 0;
+		public int SpotLightShaderOffset = 0;
+
+		public ShadowQuality ShadowQuality = ShadowQuality.High;
 		
 		public DeferredRenderer(Common.ResourceManager resourceManager, Backend backend, int width, int height)
 		{
@@ -122,12 +117,34 @@ namespace Triton.Graphics.Deferred
 			}));
 
 			AmbientLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ambient");
-			DirectionalLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light");
-			DirectionalLightShadowShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "SHADOWS");
-			PointLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "POINT_LIGHT");
-			PointLightShadowShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "POINT_LIGHT,SHADOWS,SHADOWS_CUBE");
-			SpotLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "SPOT_LIGHT");
-			SpotLightShadowShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", "SPOT_LIGHT,SHADOWS");
+
+			// Init light shaders
+			var lightTypes = new string[] { "DIRECTIONAL_LIGHT", "POINT_LIGHT", "SPOT_LIGHT" };
+			var lightPermutations = new string[] { "NO_SHADOWS", "SHADOWS,SHADOW_QUALITY_LOW", "SHADOWS,SHADOW_QUALITY_MEDIUM", "SHADOWS,SHADOW_QUALITY_HIGH" };
+			
+			LightShaders = new Resources.ShaderProgram[lightTypes.Length * lightPermutations.Length];
+			LightParams = new LightParams[lightTypes.Length * lightPermutations.Length];
+
+			for (var l = 0; l < lightTypes.Length; l++ )
+			{
+				var lightType = lightTypes[l];
+				for (var p = 0; p < lightPermutations.Length; p++)
+				{
+					var index = l * lightPermutations.Length + p;
+					var defines = lightType + "," + lightPermutations[p];
+
+					if (lightType == "POINT_LIGHT")
+						defines += ",SHADOWS_CUBE";
+
+					LightShaders[index] = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", defines);
+					LightParams[index] = new LightParams();
+				}
+			}
+
+			DirectionalShaderOffset = 0;
+			PointLightShaderOffset = 1 * lightPermutations.Length;
+			SpotLightShaderOffset = 2 * lightPermutations.Length;
+
 			CombineShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/combine");
 			RenderShadowsShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/render_shadows");
 			RenderShadowsSkinnedShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/render_shadows", "SKINNED");
@@ -166,12 +183,10 @@ namespace Triton.Graphics.Deferred
 		{
 			CombineShader.GetUniformLocations(CombineParams);
 			AmbientLightShader.GetUniformLocations(AmbientLightParams);
-			DirectionalLightShader.GetUniformLocations(DirectionalLightParams);
-			DirectionalLightShadowShader.GetUniformLocations(DirectionalLightShadowParams);
-			PointLightShader.GetUniformLocations(PointLightParams);
-			PointLightShadowShader.GetUniformLocations(PointLightShadowParams);
-			SpotLightShader.GetUniformLocations(SpotLightParams);
-			SpotLightShadowShader.GetUniformLocations(SpotLightShadowParams);
+			for (var i = 0; i < LightParams.Length; i++)
+			{
+				LightShaders[i].GetUniformLocations(LightParams[i]);
+			}
 			RenderShadowsShader.GetUniformLocations(RenderShadowsParams);
 			RenderShadowsSkinnedShader.GetUniformLocations(RenderShadowsSkinnedParams);
 			RenderShadowsCubeShader.GetUniformLocations(RenderShadowsCubeParams);
@@ -198,9 +213,6 @@ namespace Triton.Graphics.Deferred
 			RenderScene(stage, ref view, ref projection);
 			Backend.EndPass();
 
-			// SSAO
-			//RenderSSAO(ref view, ref projection);
-
 			// Render light accumulation
 			Backend.BeginPass(LightAccumulation, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
 
@@ -209,18 +221,30 @@ namespace Triton.Graphics.Deferred
 
 			Backend.EndPass();
 
-			// FXAA
-			Backend.BeginPass(Output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
+			if (EnableFXAA)
+			{
+				Backend.BeginPass(Output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
 
-			Backend.BeginInstance(FXAAShader.Handle, new int[] { LightAccumulation.Textures[0].Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, LightAccumulatinRenderState);
-			Backend.BindShaderVariable(FXAAParams.SamplerScene, 0);
+				Backend.BeginInstance(FXAAShader.Handle, new int[] { LightAccumulation.Textures[0].Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, LightAccumulatinRenderState);
+				Backend.BindShaderVariable(FXAAParams.SamplerScene, 0);
 
-			Vector2 screenSize = new Vector2(LightAccumulation.Width, LightAccumulation.Height);
-			Backend.BindShaderVariable(FXAAParams.TextureSize, ref screenSize);
+				Vector2 screenSize = new Vector2(LightAccumulation.Width, LightAccumulation.Height);
+				Backend.BindShaderVariable(FXAAParams.TextureSize, ref screenSize);
 
-			Backend.DrawMesh(QuadMesh.MeshHandle);
+				Backend.DrawMesh(QuadMesh.MeshHandle);
 
-			Backend.EndPass();
+				Backend.EndPass();
+			}
+			else
+			{
+				Backend.BeginPass(Output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
+
+				Backend.BeginInstance(CombineShader.Handle, new int[] { LightAccumulation.Textures[0].Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, LightAccumulatinRenderState);
+				Backend.BindShaderVariable(CombineParams.SamplerLight, 0);
+				Backend.DrawMesh(QuadMesh.MeshHandle);
+
+				Backend.EndPass();
+			}
 
 			return Output;
 		}
@@ -357,19 +381,18 @@ namespace Triton.Graphics.Deferred
 			lightColor = new Vector3((float)System.Math.Pow(lightColor.X, 2.2f), (float)System.Math.Pow(lightColor.Y, 2.2f), (float)System.Math.Pow(lightColor.Z, 2.2f));
 
 			// Select the correct shader
-			var shader = light.CastShadows ? DirectionalLightShadowShader : DirectionalLightShader;
-			var shaderParams = light.CastShadows ? DirectionalLightShadowParams : DirectionalLightParams;
+			var lightTypeOffset = 0;
 
 			if (light.Type == LighType.PointLight)
-			{
-				shader = light.CastShadows ? PointLightShadowShader : PointLightShader;
-				shaderParams = light.CastShadows ? PointLightShadowParams : PointLightParams;
-			}
+				lightTypeOffset = PointLightShaderOffset;
 			else if (light.Type == LighType.SpotLight)
-			{
-				shader = light.CastShadows ? SpotLightShadowShader : SpotLightShader;
-				shaderParams = light.CastShadows ? SpotLightShadowParams : SpotLightParams;
-			}
+				lightTypeOffset = SpotLightShaderOffset;
+
+			if (light.CastShadows && EnableShadows)
+				lightTypeOffset += 1 + (int)ShadowQuality;
+
+			var shader = LightShaders[lightTypeOffset];
+			var shaderParams = LightParams[lightTypeOffset];
 
 			// Setup textures and begin rendering with the chosen shader
 			int[] textures;
@@ -556,18 +579,6 @@ namespace Triton.Graphics.Deferred
 				(Matrix4.CreateTranslation(-light.Position) * new Matrix4(1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1)) * projection,
 				(Matrix4.CreateTranslation(-light.Position) * new Matrix4(-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)) * projection
 			};
-
-			//var viewProjectionMatrices = new Matrix4[]
-			//{
-			//	Matrix4.LookAt(light.Position, light.Position + Vector3.UnitX, Vector3.UnitY) * projection,
-			//	Matrix4.LookAt(light.Position, light.Position + -Vector3.UnitX, Vector3.UnitY) * projection,
-
-			//	Matrix4.LookAt(light.Position, light.Position + Vector3.UnitY, Vector3.UnitX) * projection,
-			//	Matrix4.LookAt(light.Position, light.Position + -Vector3.UnitY, Vector3.UnitX) * projection,
-
-			//	Matrix4.LookAt(light.Position, light.Position + Vector3.UnitZ, Vector3.UnitY) * projection,
-			//	Matrix4.LookAt(light.Position, light.Position + -Vector3.UnitZ, Vector3.UnitY) * projection,
-			//};
 
 			viewProjection = projection;
 

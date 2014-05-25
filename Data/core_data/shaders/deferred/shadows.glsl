@@ -1,9 +1,9 @@
-#define SHADOW_QUALITY_LOW 0
-#define SHADOW_QUALITY_MEDIUM 1
-#define SHADOW_QUALITY_HIGH 2
-
-#ifndef SHADOW_QUAILTY
+#ifdef SHADOW_QUALITY_HIGH
 #define SHADOW_QUALITY 2
+#elif defined(SHADOW_QUALITY_MEDIUM)
+#define SHADOW_QUALITY 1
+#else
+#define SHADOW_QUALITY 0
 #endif
 
 vec2 poisson_disc_samples_5[5] = vec2[](
@@ -105,9 +105,9 @@ float check_shadow(sampler2DShadow shadowMap, vec3 viewPos, mat4x4 invView, mat4
 	
 	float distance = (shadowUv.z / (clipPlane.y - clipPlane.x));
 	
-#if SHADOW_QUALITY == SHADOW_QUALITY_HIGH
+#if SHADOW_QUALITY == 2
 	return sample_shadow_29(shadowMap, uv, worldPos, texelSize, distance, shadowBias);
-#elif SHADOW_QUALITY == SHADOW_QUALITY_MEDIUM
+#elif SHADOW_QUALITY == 1
 	return sample_shadow_12(shadowMap, uv, worldPos, texelSize, distance, shadowBias);
 #else
 	return sample_shadow_5(shadowMap, uv, worldPos, texelSize, distance, shadowBias);
@@ -129,7 +129,7 @@ float check_shadow_cube(samplerCubeShadow shadowMap, vec3 viewPos, mat4x4 invVie
 	sideVector *= texelSize;
 	upVector *= texelSize;
 
-#if SHADOW_QUALITY == SHADOW_QUALITY_HIGH
+#if SHADOW_QUALITY == 2
 	float result = 0;
 	for (int i = 0; i < 29; i++) {
 		int index = int(16.0 * random(floor(worldPos.xyz * 1000.0), i)) % 16;
@@ -141,7 +141,7 @@ float check_shadow_cube(samplerCubeShadow shadowMap, vec3 viewPos, mat4x4 invVie
 	}
 	
 	return result / 29;
-#elif SHADOW_QUALITY == SHADOW_QUALITY_MEDIUM
+#elif SHADOW_QUALITY == 1
 	float result = 0;
 	for (int i = 0; i < 12; i++) {
 		int index = int(16.0 * random(floor(worldPos.xyz * 1000.0), i)) % 16;
