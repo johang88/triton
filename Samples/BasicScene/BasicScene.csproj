@@ -101,6 +101,10 @@
       <Project>{d8da8b59-a4b9-4de1-920e-5d056375c71e}</Project>
       <Name>Triton.Renderer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Triton.Samples\Triton.Samples.csproj">
+      <Project>{1535b7c5-4557-46fb-ab18-668dc8b0686b}</Project>
+      <Name>Triton.Samples</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

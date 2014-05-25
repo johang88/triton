@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{1535B7C5-4557-46FB-AB18-668DC8B0686B}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Triton.Samples</RootNamespace>
-    <AssemblyName>Materials</AssemblyName>
+    <AssemblyName>Triton.Samples</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -33,13 +31,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\..\Build\</OutputPath>
+    <OutputPath>bin\x86\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -49,7 +46,6 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -61,14 +57,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MaterialsGame.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="BaseGame.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="..\..\ThirdParty\sharpfilesystem\SharpFileSystem\SharpFileSystem.csproj">
+      <Project>{3c4d07ba-23b5-4a63-92cf-f3bf892b7329}</Project>
+      <Name>SharpFileSystem</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Triton.Audio\Triton.Audio.csproj">
       <Project>{ae39d529-64e2-476d-b99a-91d79dadda63}</Project>
       <Name>Triton.Audio</Name>
@@ -100,10 +96,6 @@
     <ProjectReference Include="..\..\Triton.Renderer\Triton.Renderer.csproj">
       <Project>{d8da8b59-a4b9-4de1-920e-5d056375c71e}</Project>
       <Name>Triton.Renderer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Triton.Samples\Triton.Samples.csproj">
-      <Project>{1535b7c5-4557-46fb-ab18-668dc8b0686b}</Project>
-      <Name>Triton.Samples</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

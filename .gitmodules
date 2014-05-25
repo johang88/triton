@@ -1,0 +1,3 @@
+[submodule "ThirdParty/sharpfilesystem"]
+	path = ThirdParty/sharpfilesystem
+	url = https://github.com/FrozenCow/sharpfilesystem

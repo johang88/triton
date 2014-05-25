@@ -30,7 +30,6 @@ namespace Triton.Graphics.Resources
 
 			Backend = backend;
 			FileSystem = fileSystem;
-			FileSystem.AddFileChangedListener(OnFileChanged);
 		}
 
 		private void OnFileChanged(string path)

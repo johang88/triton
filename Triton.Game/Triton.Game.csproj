@@ -73,6 +73,10 @@
     <Compile Include="World\RequiresComponentAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ThirdParty\sharpfilesystem\SharpFileSystem\SharpFileSystem.csproj">
+      <Project>{3c4d07ba-23b5-4a63-92cf-f3bf892b7329}</Project>
+      <Name>SharpFileSystem</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Triton.Audio\Triton.Audio.csproj">
       <Project>{ae39d529-64e2-476d-b99a-91d79dadda63}</Project>
       <Name>Triton.Audio</Name>

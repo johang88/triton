@@ -9,7 +9,7 @@ using Triton.Input;
 
 namespace Triton.Samples
 {
-	class MaterialsGame : Triton.Game.Game
+	class MaterialsGame : Triton.Samples.BaseGame
 	{
 		private GameObject Player;
 		private CharacterController PlayerCharacter;
@@ -25,19 +25,6 @@ namespace Triton.Samples
 		public MaterialsGame()
 			: base("Materials")
 		{
-			Width = 1280;
-			Height = 720;
-		}
-
-		protected override void MountFileSystem()
-		{
-			base.MountFileSystem();
-
-			// Mount the core resource package, this is required
-			FileSystem.AddPackage("FileSystem", "../Data/core_data");
-
-			// Mount the sample data
-			FileSystem.AddPackage("FileSystem", "../Data/samples_data");
 		}
 
 		protected override void LoadResources()

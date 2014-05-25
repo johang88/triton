@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Triton.Samples
 {
-	class BasicSceneGame : Triton.Game.Game
+	class BasicSceneGame : Triton.Samples.BaseGame
 	{
 		private const float CrateRotationSpeed = 1.23f;
 		private Triton.Graphics.MeshInstance Crate;
@@ -24,19 +24,6 @@ namespace Triton.Samples
 		public BasicSceneGame()
 			: base("BasicScene")
 		{
-			Width = 1280;
-			Height = 720;
-		}
-
-		protected override void MountFileSystem()
-		{
-			base.MountFileSystem();
-
-			// Mount the core resource package, this is required
-			FileSystem.AddPackage("FileSystem", "../Data/core_data");
-
-			// Mount the sample data
-			FileSystem.AddPackage("FileSystem", "../Data/samples_data");
 		}
 
 		protected override void LoadResources()

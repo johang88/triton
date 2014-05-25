@@ -29,15 +29,12 @@ namespace Triton.Samples
 			Height = 720;
 		}
 
-		protected override void MountFileSystem()
+		protected override SharpFileSystem.IFileSystem MountFileSystem()
 		{
-			base.MountFileSystem();
-
-			// Mount the core resource package, this is required
-			FileSystem.AddPackage("FileSystem", "../Data/core_data");
-
-			// Mount the sample data
-			FileSystem.AddPackage("FileSystem", "../Data/samples_data");
+			return new SharpFileSystem.FileSystems.MergedFileSystem(
+				new SharpFileSystem.FileSystems.PhysicalFileSystem("../Data/core_data/"),
+				new SharpFileSystem.FileSystems.PhysicalFileSystem("../Data/samples_data/")
+				);
 		}
 
 		protected override void LoadResources()

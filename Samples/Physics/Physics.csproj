@@ -69,6 +69,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ThirdParty\sharpfilesystem\SharpFileSystem\SharpFileSystem.csproj">
+      <Project>{3c4d07ba-23b5-4a63-92cf-f3bf892b7329}</Project>
+      <Name>SharpFileSystem</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Triton.Audio\Triton.Audio.csproj">
       <Project>{ae39d529-64e2-476d-b99a-91d79dadda63}</Project>
       <Name>Triton.Audio</Name>
@@ -100,6 +104,10 @@
     <ProjectReference Include="..\..\Triton.Renderer\Triton.Renderer.csproj">
       <Project>{d8da8b59-a4b9-4de1-920e-5d056375c71e}</Project>
       <Name>Triton.Renderer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Triton.Samples\Triton.Samples.csproj">
+      <Project>{1535b7c5-4557-46fb-ab18-668dc8b0686b}</Project>
+      <Name>Triton.Samples</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Triton.Game
 {
-	public class Game : IDisposable
+	public abstract class Game : IDisposable
 	{
 		public Triton.Graphics.Backend GraphicsBackend { get; private set; }
 		public Triton.Common.IO.FileSystem FileSystem { get; private set; }
@@ -56,10 +56,9 @@ namespace Triton.Game
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File(string.Format("{0}/{1}.txt", logPath, name)));
 
-			FileSystem = new Triton.Common.IO.FileSystem();
 			ResourceManager = new Triton.Common.ResourceManager();
 
-			MountFileSystem();
+			FileSystem = new Common.IO.FileSystem(MountFileSystem());
 		}
 
 		public virtual void Dispose()
@@ -218,9 +217,7 @@ namespace Triton.Game
 		/// Mount packages to the file system
 		/// <see cref="Triton.Common.IO.FileSystem.AddPackage"/>
 		/// </summary>
-		protected virtual void MountFileSystem()
-		{
-		}
+		protected abstract SharpFileSystem.IFileSystem MountFileSystem();
 
 		/// <summary>
 		/// Preload resources before the main loop is started

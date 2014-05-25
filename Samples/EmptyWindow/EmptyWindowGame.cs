@@ -6,24 +6,11 @@ using System.Threading.Tasks;
 
 namespace Triton.Samples
 {
-	class EmptyWindowGame : Triton.Game.Game
+	class EmptyWindowGame : Triton.Samples.BaseGame
 	{
 		public EmptyWindowGame()
 			: base("EmptyWindow")
 		{
-			Width = 1280;
-			Height = 720;
-		}
-
-		protected override void MountFileSystem()
-		{
-			base.MountFileSystem();
-
-			// Mount the core resource package, this is required
-			FileSystem.AddPackage("FileSystem", "../Data/core_data");
-
-			// Mount the sample data
-			FileSystem.AddPackage("FileSystem", "../Data/samples_data");
 		}
 
 		protected override void LoadResources()

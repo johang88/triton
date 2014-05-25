@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Triton.Game", "Triton.Game\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Triton.Physics", "Triton.Physics\Triton.Physics.csproj", "{E53CFDCA-096B-4298-906F-4C0300B21297}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ThirdParty", "ThirdParty", "{0CFDCBD0-BA7D-4164-BD41-6299401EDD0B}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{0CFDCBD0-BA7D-4164-BD41-7809AE5E289B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmptyWindow", "Samples\EmptyWindow\EmptyWindow.csproj", "{560532CC-9C04-43B5-BB8F-3A685C348D7E}"
@@ -32,6 +34,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Physics", "Samples\Physics\Physics.csproj", "{A6881C41-6C68-4339-BC91-B14B32F621E9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Materials", "Samples\Materials\Materials.csproj", "{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpFileSystem", "ThirdParty\sharpfilesystem\SharpFileSystem\SharpFileSystem.csproj", "{3C4D07BA-23B5-4A63-92CF-F3BF892B7329}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Triton.Samples", "Samples\Triton.Samples\Triton.Samples.csproj", "{1535B7C5-4557-46FB-AB18-668DC8B0686B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -193,14 +199,36 @@ Global
 		{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48}.Release|x86.ActiveCfg = Release|Any CPU
+		{3C4D07BA-23B5-4A63-92CF-F3BF892B7329}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C4D07BA-23B5-4A63-92CF-F3BF892B7329}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C4D07BA-23B5-4A63-92CF-F3BF892B7329}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{3C4D07BA-23B5-4A63-92CF-F3BF892B7329}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{3C4D07BA-23B5-4A63-92CF-F3BF892B7329}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3C4D07BA-23B5-4A63-92CF-F3BF892B7329}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C4D07BA-23B5-4A63-92CF-F3BF892B7329}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C4D07BA-23B5-4A63-92CF-F3BF892B7329}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{3C4D07BA-23B5-4A63-92CF-F3BF892B7329}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{3C4D07BA-23B5-4A63-92CF-F3BF892B7329}.Release|x86.ActiveCfg = Release|Any CPU
+		{1535B7C5-4557-46FB-AB18-668DC8B0686B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1535B7C5-4557-46FB-AB18-668DC8B0686B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1535B7C5-4557-46FB-AB18-668DC8B0686B}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{1535B7C5-4557-46FB-AB18-668DC8B0686B}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{1535B7C5-4557-46FB-AB18-668DC8B0686B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1535B7C5-4557-46FB-AB18-668DC8B0686B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1535B7C5-4557-46FB-AB18-668DC8B0686B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1535B7C5-4557-46FB-AB18-668DC8B0686B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{1535B7C5-4557-46FB-AB18-668DC8B0686B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{1535B7C5-4557-46FB-AB18-668DC8B0686B}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{3C4D07BA-23B5-4A63-92CF-F3BF892B7329} = {0CFDCBD0-BA7D-4164-BD41-6299401EDD0B}
 		{560532CC-9C04-43B5-BB8F-3A685C348D7E} = {0CFDCBD0-BA7D-4164-BD41-7809AE5E289B}
 		{0556C253-F926-48BE-BC3E-801ABB39DC4C} = {0CFDCBD0-BA7D-4164-BD41-7809AE5E289B}
 		{A6881C41-6C68-4339-BC91-B14B32F621E9} = {0CFDCBD0-BA7D-4164-BD41-7809AE5E289B}
 		{DF7DA812-3286-4F8A-B6B6-B5F01E68DF48} = {0CFDCBD0-BA7D-4164-BD41-7809AE5E289B}
+		{1535B7C5-4557-46FB-AB18-668DC8B0686B} = {0CFDCBD0-BA7D-4164-BD41-7809AE5E289B}
 	EndGlobalSection
 EndGlobal

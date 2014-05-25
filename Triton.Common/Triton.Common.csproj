@@ -70,15 +70,11 @@
     <Compile Include="Config.cs" />
     <Compile Include="ConfigSection.cs" />
     <Compile Include="ILogOutputHandler.cs" />
-    <Compile Include="IO\ZipPackage.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Factory.cs" />
     <Compile Include="HashedString.cs" />
     <Compile Include="HashedStringTable.cs" />
     <Compile Include="IO\FileSystem.cs" />
-    <Compile Include="IO\FileSystemPackage.cs" />
-    <Compile Include="IO\IPackage.cs" />
-    <Compile Include="IO\PackagePriority.cs" />
     <Compile Include="IResourceLoader.cs" />
     <Compile Include="LogLevel.cs" />
     <Compile Include="LogOutputHandlers\Console.cs" />
@@ -93,6 +89,10 @@
     <Compile Include="WorkerThread.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ThirdParty\sharpfilesystem\SharpFileSystem\SharpFileSystem.csproj">
+      <Project>{3c4d07ba-23b5-4a63-92cf-f3bf892b7329}</Project>
+      <Name>SharpFileSystem</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">
       <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>
       <Name>Triton.Math</Name>
