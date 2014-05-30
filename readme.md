@@ -7,6 +7,7 @@ This might become a game engine sometime in the future, but right now a lot of c
 * nVidia dds command lines tools
 * ServiceStack.Text
 * JitterPhysics
+* SharpFileSystem
 
 ## Building
 Open up `Triton.sln` and hit compile.
