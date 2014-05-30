@@ -122,5 +122,5 @@ vec3 get_specular(vec3 normal, vec3 viewer, vec3 lightVec, float roughness, vec3
 	
 	lightVec = normalize(lightVec);
 	
-	return brdf_stuff(normal, viewer, lightVec, roughness, specularColor, energy);
+	return brdf_stuff2(normal, viewer, lightVec, roughness, specularColor, energy);
 }

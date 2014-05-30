@@ -27,11 +27,11 @@ uniform sampler2D samplerLuminance;
 
 vec3 tonemap(vec3 x)
 {
-	float A = 0.15;
-	float B = 0.50;
+	float A = 0.22;
+	float B = 0.30;
 	float C = 0.10;
 	float D = 0.20;
-	float E = 0.02;
+	float E = 0.01;
 	float F = 0.30;
 	
 	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
@@ -44,6 +44,9 @@ void main()
 
 	color = calc_exposed_color(color, averageLuminance, 0);
 	color = tonemap(color);
+	
+	vec3 whiteScale = vec3(1.0) / tonemap(vec3(11.2));
+	color = color * whiteScale;
 
 	vec3 bloom = texture2D(samplerBloom, texCoord).xyz;
 	
