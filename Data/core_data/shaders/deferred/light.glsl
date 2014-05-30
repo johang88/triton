@@ -107,7 +107,7 @@ void main()
 		float roughness = gbuffer3.y;
 		float specular = gbuffer3.z;
 		
-		vec3 diffuseColor = gbuffer0.xyz - gbuffer0.xyz * metallic;
+		vec3 diffuseColor = mix(gbuffer0.xyz, vec3(0), metallic);
 		vec3 specularColor = mix(0.08 * vec3(specular), gbuffer0.xyz, metallic);
 		
 		vec3 diffuseLighting = get_diffuse(diffuseColor);

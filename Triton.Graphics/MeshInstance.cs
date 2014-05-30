@@ -11,5 +11,6 @@ namespace Triton.Graphics
 		public Resources.Mesh Mesh;
 		public SkeletalAnimation.SkeletonInstance Skeleton;
 		public Matrix4 World = Matrix4.Identity;
+		public bool CastShadows = true;
 	}
 }

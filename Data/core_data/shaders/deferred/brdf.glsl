@@ -112,7 +112,7 @@ vec3 brdf_stuff2(vec3 normal, vec3 viewer, vec3 lightDir, float roughness, vec3 
 	
 	vec3 F = specularColor + (saturate(50.0 * specularColor.y) - specularColor) * exp2((-5.55473 * vDotH - 6.98316) * vDotH);
 	
-	return(D * G) * F;
+	return (D * G) * F;
 }
 
 vec3 get_specular(vec3 normal, vec3 viewer, vec3 lightVec, float roughness, vec3 specularColor, float radius) {

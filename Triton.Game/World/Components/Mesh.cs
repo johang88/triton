@@ -12,6 +12,7 @@ namespace Triton.Game.World.Components
 		public string MeshParameters;
 
 		public Graphics.MeshInstance MeshInstance;
+		public bool CastShadows = true;
 
 		public override void OnAttached(GameObject owner)
 		{
@@ -31,7 +32,8 @@ namespace Triton.Game.World.Components
 		{
 			base.Update(stepSize);
 
-			MeshInstance.World = Owner.Orientation * Matrix4.CreateTranslation(Owner.Position);
+			MeshInstance.World = Matrix4.Scale(Owner.Scale) * Owner.Orientation * Matrix4.CreateTranslation(Owner.Position);
+			MeshInstance.CastShadows = CastShadows;
 		}
 	}
 }

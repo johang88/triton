@@ -67,7 +67,7 @@ namespace Triton.Graphics.Deferred
 		public int SpotLightShaderOffset = 0;
 
 		public ShadowQuality ShadowQuality = ShadowQuality.High;
-		
+
 		public DeferredRenderer(Common.ResourceManager resourceManager, Backend backend, int width, int height)
 		{
 			if (resourceManager == null)
@@ -121,11 +121,11 @@ namespace Triton.Graphics.Deferred
 			// Init light shaders
 			var lightTypes = new string[] { "DIRECTIONAL_LIGHT", "POINT_LIGHT", "SPOT_LIGHT" };
 			var lightPermutations = new string[] { "NO_SHADOWS", "SHADOWS,SHADOW_QUALITY_LOWEST", "SHADOWS,SHADOW_QUALITY_LOW", "SHADOWS,SHADOW_QUALITY_MEDIUM", "SHADOWS,SHADOW_QUALITY_HIGH" };
-			
+
 			LightShaders = new Resources.ShaderProgram[lightTypes.Length * lightPermutations.Length];
 			LightParams = new LightParams[lightTypes.Length * lightPermutations.Length];
 
-			for (var l = 0; l < lightTypes.Length; l++ )
+			for (var l = 0; l < lightTypes.Length; l++)
 			{
 				var lightType = lightTypes[l];
 				for (var p = 0; p < lightPermutations.Length; p++)
@@ -160,7 +160,7 @@ namespace Triton.Graphics.Deferred
 
 			UnitSphere = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("/models/unit_sphere");
 			UnitCone = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("/models/unit_cone");
-			
+
 			AmbientRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
 			LightAccumulatinRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
 			ShadowsRenderState = Backend.CreateRenderState(false, true, true);
@@ -279,7 +279,7 @@ namespace Triton.Graphics.Deferred
 
 			Backend.BeginInstance(AmbientLightShader.Handle,
 				new int[] { GBuffer.Textures[0].Handle, GBuffer.Textures[1].Handle, GBuffer.Textures[3].Handle },
-				new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering }, 
+				new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering },
 				AmbientRenderState);
 			Backend.BindShaderVariable(AmbientLightParams.SamplerGBuffer0, 0);
 			Backend.BindShaderVariable(AmbientLightParams.SamplerGBuffer1, 1);
@@ -537,6 +537,9 @@ namespace Triton.Graphics.Deferred
 			var meshes = stage.GetMeshes();
 			foreach (var mesh in meshes)
 			{
+				if (!mesh.CastShadows)
+					continue;
+
 				var world = mesh.World;
 
 				modelViewProjection = world * view * projection;
@@ -585,6 +588,9 @@ namespace Triton.Graphics.Deferred
 			var meshes = stage.GetMeshes();
 			foreach (var mesh in meshes)
 			{
+				if (!mesh.CastShadows)
+					continue;
+
 				var world = mesh.World;
 
 				foreach (var subMesh in mesh.Mesh.SubMeshes)

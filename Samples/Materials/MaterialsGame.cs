@@ -71,13 +71,47 @@ namespace Triton.Samples
 			}
 
 			Light = Stage.CreatePointLight(
-					position: new Vector3(0, 2, 0),
+					position: new Vector3(0, 2.5f, 0),
 					range: 16.0f,
 					color: new Vector3(1f, 0.8f, 0.5f),
 					castShadows: true,
 					intensity: 10,
 					shadowBias: 0.005f
 				);
+
+			{
+				var torus = GameWorld.CreateGameObject();
+				torus.Position = new Vector3(0, 2.5f, 0);
+				torus.AddComponent(new Mesh { Filename = "/models/torus" });
+				torus.AddComponent(new RotationComponent { Rotation = new Vector3(1, 0, 0) });
+				GameWorld.Add(torus);
+			}
+
+			{
+				var torus = GameWorld.CreateGameObject();
+				torus.Position = new Vector3(0, 2.5f, 0);
+				torus.Scale = new Vector3(1, 1, 1) * 0.9f;
+				torus.AddComponent(new Mesh { Filename = "/models/torus" });
+				torus.AddComponent(new RotationComponent { Rotation = new Vector3(0, 0, 1) });
+				GameWorld.Add(torus);
+			}
+
+			{
+				var torus = GameWorld.CreateGameObject();
+				torus.Position = new Vector3(0, 2.5f, 0);
+				torus.Scale = new Vector3(1, 1, 1) * 0.8f;
+				torus.AddComponent(new Mesh { Filename = "/models/torus" });
+				torus.AddComponent(new RotationComponent { Rotation = new Vector3(1, 0, 1) });
+				GameWorld.Add(torus);
+			}
+
+			{
+				var sphere = GameWorld.CreateGameObject();
+				sphere.Position = new Vector3(0, 2.5f, 0);
+				sphere.Scale = new Vector3(1, 1, 1) * 0.25f;
+				sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = "/materials/light_sphere", CastShadows = false });
+				GameWorld.Add(sphere);
+			}
 
 			//Stage.CreateDirectionalLight(
 			//	new Vector3(0.3f, -0.7f, 0.2f),
@@ -129,7 +163,7 @@ namespace Triton.Samples
 			PlayerCharacter.Move(movement, InputManager.IsKeyDown(Key.Space));
 			Camera.Position = Player.Position;
 
-			Light.Position.X = 1.2f + (float)(System.Math.Sin(ElapsedTime * 2) * 0.5);
+			//Light.Position.X = 1.2f + (float)(System.Math.Sin(ElapsedTime * 2) * 0.5);
 		}
 	}
 }
