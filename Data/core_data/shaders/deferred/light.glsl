@@ -1,4 +1,4 @@
-import(shaders/core);
+import(/shaders/core);
 #ifdef VERTEX_SHADER
 
 layout(location = ATTRIB_POSITION) in vec3 iPosition;
@@ -21,8 +21,8 @@ void main()
 
 #else
 
-import(shaders/deferred/brdf);
-import(shaders/deferred/shadows);
+import(/shaders/deferred/brdf);
+import(/shaders/deferred/shadows);
 
 in vec2 texCoord;
 

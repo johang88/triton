@@ -32,7 +32,7 @@ namespace Triton.Physics
 				}));
 			Batch.Begin();
 
-			Shader = resourceManager.Load<Graphics.Resources.ShaderProgram>("shaders/physic_debug_drawer");
+			Shader = resourceManager.Load<Graphics.Resources.ShaderProgram>("/shaders/physic_debug_drawer");
 			RenderStateId = backend.CreateRenderState(false, true, true, BlendingFactorSrc.One, BlendingFactorDest.One);
 		}
 

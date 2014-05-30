@@ -34,7 +34,7 @@ namespace Triton.Samples
 			Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0);
 
 			var floor = GameWorld.CreateGameObject();
-			floor.AddComponent(new Mesh { Filename = "models/floor" });
+			floor.AddComponent(new Mesh { Filename = "/models/floor" });
 			floor.AddComponent(new BoxRigidBody { Height = 0.01f, Width = 40.0f, Length = 40.0f, IsStatic = true });
 			GameWorld.Add(floor);
 
@@ -46,10 +46,10 @@ namespace Triton.Samples
 
 			var materials = new string[]
 			{
-				"materials/sphere",
-				"materials/gold",
-				"materials/iron",
-				"materials/wood",
+				"/materials/sphere",
+				"/materials/gold",
+				"/materials/iron",
+				"/materials/wood",
 			};
 
 			for (int i = 0; i < 5; i++)
@@ -58,7 +58,7 @@ namespace Triton.Samples
 
 				var sphere = GameWorld.CreateGameObject();
 				sphere.Position = new Vector3(-3 + i * 1.5f, 1.0f, 2);
-				sphere.AddComponent(new Mesh { Filename = "models/sphere", MeshParameters = materialName });
+				sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = materialName });
 				GameWorld.Add(sphere);
 			}
 
@@ -66,7 +66,7 @@ namespace Triton.Samples
 			{
 				var sphere = GameWorld.CreateGameObject();
 				sphere.Position = new Vector3(-3 + i * 1.5f, 1.0f, -2);
-				sphere.AddComponent(new Mesh { Filename = "models/sphere" });
+				sphere.AddComponent(new Mesh { Filename = "/models/sphere" });
 				GameWorld.Add(sphere);
 			}
 

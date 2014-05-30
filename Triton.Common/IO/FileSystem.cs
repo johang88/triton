@@ -27,12 +27,6 @@ namespace Triton.Common.IO
 
 		private SharpFileSystem.FileSystemPath GetPath(string path)
 		{
-			if (!path.StartsWith("/"))
-			{
-				Log.WriteLine(string.Format("path is not rooted: {0}", path), LogLevel.Debug);
-				path = '/' + path;
-			}
-
 			return SharpFileSystem.FileSystemPath.Parse(path);
 		}
 

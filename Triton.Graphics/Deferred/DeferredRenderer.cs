@@ -116,7 +116,7 @@ namespace Triton.Graphics.Deferred
 				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent16, Renderer.PixelType.Float, 0),
 			}));
 
-			AmbientLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/ambient");
+			AmbientLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("/shaders/deferred/ambient");
 
 			// Init light shaders
 			var lightTypes = new string[] { "DIRECTIONAL_LIGHT", "POINT_LIGHT", "SPOT_LIGHT" };
@@ -136,7 +136,7 @@ namespace Triton.Graphics.Deferred
 					if (lightType == "POINT_LIGHT")
 						defines += ",SHADOWS_CUBE";
 
-					LightShaders[index] = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("shaders/deferred/light", defines);
+					LightShaders[index] = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("/shaders/deferred/light", defines);
 					LightParams[index] = new LightParams();
 				}
 			}
@@ -145,21 +145,21 @@ namespace Triton.Graphics.Deferred
 			PointLightShaderOffset = 1 * lightPermutations.Length;
 			SpotLightShaderOffset = 2 * lightPermutations.Length;
 
-			CombineShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/combine");
-			RenderShadowsShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/render_shadows");
-			RenderShadowsSkinnedShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/render_shadows", "SKINNED");
-			RenderShadowsCubeShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/deferred/render_shadows_cube");
-			FXAAShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/post/fxaa");
+			CombineShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/combine");
+			RenderShadowsShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows");
+			RenderShadowsSkinnedShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows", "SKINNED");
+			RenderShadowsCubeShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows_cube");
+			FXAAShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/fxaa");
 
-			RandomNoiseTexture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("textures/random_n");
+			RandomNoiseTexture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("/textures/random_n");
 
 			QuadMesh = Backend.CreateBatchBuffer();
 			QuadMesh.Begin();
 			QuadMesh.AddQuad(new Vector2(-1, -1), new Vector2(2, 2), Vector2.Zero, new Vector2(1, 1));
 			QuadMesh.End();
 
-			UnitSphere = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/unit_sphere");
-			UnitCone = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("models/unit_cone");
+			UnitSphere = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("/models/unit_sphere");
+			UnitCone = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("/models/unit_cone");
 			
 			AmbientRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
 			LightAccumulatinRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);

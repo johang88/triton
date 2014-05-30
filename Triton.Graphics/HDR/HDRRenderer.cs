@@ -95,14 +95,14 @@ namespace Triton.Graphics.HDR
 					new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.R32f, Renderer.PixelType.Float, 0),
 				}))
 			};
-	
-			TonemapShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/post/tonemap");
-			HighPassShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/post/highpass");
-			BlurHorizontalShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/post/blur", "BLUR_HORIZONTAL");
-			BlurVerticalShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/post/blur", "BLUR_VERTICAL");
-			LuminanceMapShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/post/luminance_map");
-			AdaptLuminanceShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/post/adapt_luminance");
-			QuadShader = ResourceManager.Load<Resources.ShaderProgram>("shaders/post/quad");
+
+			TonemapShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/tonemap");
+			HighPassShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/highpass");
+			BlurHorizontalShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/blur", "BLUR_HORIZONTAL");
+			BlurVerticalShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/blur", "BLUR_VERTICAL");
+			LuminanceMapShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/luminance_map");
+			AdaptLuminanceShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/adapt_luminance");
+			QuadShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/quad");
 
 			QuadMesh = Backend.CreateBatchBuffer();
 			QuadMesh.Begin();

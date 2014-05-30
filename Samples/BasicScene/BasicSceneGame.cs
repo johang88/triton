@@ -33,10 +33,10 @@ namespace Triton.Samples
 			Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0);
 
 			// Create our awesome main actor :)
-			Crate = Stage.AddMesh("models/crate");
+			Crate = Stage.AddMesh("/models/crate");
 
 			// Create a "floor"
-			var floor = Stage.AddMesh("models/crate");
+			var floor = Stage.AddMesh("/models/crate");
 			floor.World = Triton.Matrix4.Scale(10, 1, 10) * Triton.Matrix4.CreateTranslation(0, -1, 4);
 
 			// Light it

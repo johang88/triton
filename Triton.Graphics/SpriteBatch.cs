@@ -40,8 +40,8 @@ namespace Triton.Graphics
 					new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Color, Renderer.VertexPointerType.Float, 4, sizeof(float) * 5),
 				}), 32);
 
-			Shader = resourceManager.Load<Resources.ShaderProgram>("shaders/sprite");
-			ShaderSRGB = resourceManager.Load<Resources.ShaderProgram>("shaders/sprite", "SRGB");
+			Shader = resourceManager.Load<Resources.ShaderProgram>("/shaders/sprite");
+			ShaderSRGB = resourceManager.Load<Resources.ShaderProgram>("/shaders/sprite", "SRGB");
 
 			Quads = new List<QuadInfo>();
 			for (var i = 0; i < 32; i++)

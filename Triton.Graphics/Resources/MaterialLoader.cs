@@ -12,8 +12,8 @@ namespace Triton.Graphics.Resources
 		private readonly Triton.Common.IO.FileSystem FileSystem;
 		private readonly Triton.Common.ResourceManager ResourceManager;
 
-		private const string DefaultShader = "shaders/deferred/gbuffer";
-		private const string DefaultSplatShader = "shaders/deferred/gbuffer_splat";
+		private const string DefaultShader = "/shaders/deferred/gbuffer";
+		private const string DefaultSplatShader = "/shaders/deferred/gbuffer_splat";
 
 		public MaterialLoader(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
 		{

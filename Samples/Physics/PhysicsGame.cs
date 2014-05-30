@@ -44,7 +44,7 @@ namespace Triton.Samples
 			Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0);
 
 			var floor = GameWorld.CreateGameObject();
-			floor.AddComponent(new Mesh { Filename = "models/floor" });
+			floor.AddComponent(new Mesh { Filename = "/models/floor" });
 			floor.AddComponent(new BoxRigidBody { Height = 0.01f, Width = 20.0f, Length = 20.0f, IsStatic = true });
 			GameWorld.Add(floor);
 
@@ -58,7 +58,7 @@ namespace Triton.Samples
 			{
 				var crate = GameWorld.CreateGameObject();
 				crate.Position = new Vector3(-3 + i * 1.5f, 0.5f, 2);
-				crate.AddComponent(new Mesh { Filename = "models/crate" });
+				crate.AddComponent(new Mesh { Filename = "/models/crate" });
 				crate.AddComponent(new BoxRigidBody());
 				GameWorld.Add(crate);
 			}
@@ -132,7 +132,7 @@ namespace Triton.Samples
 
 				var crate = GameWorld.CreateGameObject();
 				crate.Position = Player.Position + Vector3.Transform(new Vector3(0, -0.5f, 1.5f), Camera.Orientation);
-				crate.AddComponent(new Mesh { Filename = "models/crate" });
+				crate.AddComponent(new Mesh { Filename = "/models/crate" });
 				crate.AddComponent(new BoxRigidBody());
 				GameWorld.Add(crate);
 

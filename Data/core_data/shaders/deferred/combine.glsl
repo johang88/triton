@@ -1,4 +1,4 @@
-import(shaders/core);
+import(/shaders/core);
 #ifdef VERTEX_SHADER
 
 layout(location = ATTRIB_POSITION) in vec3 iPosition;

@@ -1,4 +1,4 @@
 {
-	"diffuse-map": "textures/crate_d",
-	"normal-map": "textures/crate_n"
+	"diffuse-map": "/textures/crate_d",
+	"normal-map": "/textures/crate_n"
 }

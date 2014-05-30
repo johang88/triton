@@ -1,6 +1,6 @@
 info face="Consolas" size=18 bold=0 italic=0 charset="" unicode=1 stretchH=100 smooth=1 aa=2 padding=0,0,0,0 spacing=1,1 outline=0
 common lineHeight=18 base=14 scaleW=256 scaleH=256 pages=1 packed=0 alphaChnl=0 redChnl=4 greenChnl=4 blueChnl=4
-page id=0 file="fonts/system_font_0"
+page id=0 file="/fonts/system_font_0"
 chars count=193
 char id=0    x=48    y=114   width=2     height=18    xoffset=0     yoffset=0     xadvance=8     page=0  chnl=15
 char id=13   x=63    y=114   width=1     height=18    xoffset=0     yoffset=0     xadvance=0     page=0  chnl=15

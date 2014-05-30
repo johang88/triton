@@ -230,7 +230,7 @@ namespace Triton.Game
 		/// </summary>
 		protected virtual void LoadResources()
 		{
-			DebugFont = ResourceManager.Load<Triton.Graphics.Resources.BitmapFont>("fonts/system_font");
+			DebugFont = ResourceManager.Load<Triton.Graphics.Resources.BitmapFont>("/fonts/system_font");
 			DebugSprite = GraphicsBackend.CreateSpriteBatch();
 		}
 
