@@ -142,6 +142,15 @@ namespace Triton.Graphics.Resources
 					material.SpecularValue = Common.StringConverter.Parse<float>(definition.Get("specular"));
 				}
 
+				if (!string.IsNullOrWhiteSpace(definition.Get("lighting-mode")))
+				{
+					var mode = Common.StringConverter.Parse<LightingMode>(definition.Get("lighting-mode"));
+					if (mode == LightingMode.Unlit)
+					{
+						shaderOptions.Add("UNLIT");
+					}
+				}
+
 				var shader = DefaultShader;
 				if (!string.IsNullOrEmpty(definition.Get("shader")))
 					shader = definition.Get("shader");

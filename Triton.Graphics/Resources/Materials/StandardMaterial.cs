@@ -90,7 +90,6 @@ namespace Triton.Graphics.Resources.Materials
 				backend.BindShaderVariable(Handles.SamplerNormal, textureUnit++);
 			if (Roughness != null)
 				backend.BindShaderVariable(Handles.SamplerRoughness, textureUnit++);
-			backend.BindShaderVariable(Handles.SamplerEnvironment, textureUnit++);
 
 			backend.BindShaderVariable(Handles.MaterialDiffuseColor, ref DiffuseColor);
 			backend.BindShaderVariable(Handles.MaterialMetallicValue, MetallicValue);
@@ -112,7 +111,6 @@ namespace Triton.Graphics.Resources.Materials
 			public int SamplerDiffuse = 0;
 			public int SamplerNormal = 0;
 			public int SamplerRoughness = 0;
-			public int SamplerEnvironment = 0;
 			public int Bones = 0;
 			public int MaterialDiffuseColor = 0;
 			public int MaterialMetallicValue = 0;
