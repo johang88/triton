@@ -9,7 +9,7 @@ using Triton.Input;
 
 namespace Triton.Samples
 {
-	class PhysicsGame : Triton.Game.Game
+	class PhysicsGame : BaseGame
 	{
 		private GameObject Player;
 		private CharacterController PlayerCharacter;
