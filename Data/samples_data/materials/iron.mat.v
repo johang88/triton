@@ -1,5 +1,5 @@
 {
-	"diffuse-color": "0.2274 0.2196 0.2313",
+	"diffuse-color": "196 199 199",
 	"metallic": 0.9,
 	"roughness": 0.4
 }

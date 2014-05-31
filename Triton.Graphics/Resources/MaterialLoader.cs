@@ -111,6 +111,7 @@ namespace Triton.Graphics.Resources
 				{
 					shaderOptions.Add("MATERIAL_DIFFUSE_COLOR");
 					material.DiffuseColor = Common.StringConverter.Parse<Vector3>(definition.Get("diffuse-color"));
+					material.DiffuseColor = material.DiffuseColor / 255.0f;
 				}
 
 				if (!string.IsNullOrWhiteSpace(definition.Get("normal-map")))
