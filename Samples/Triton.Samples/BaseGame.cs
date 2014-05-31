@@ -55,6 +55,14 @@ namespace Triton.Samples
 			{
 				DeferredRenderer.EnableShadows = !DeferredRenderer.EnableShadows;
 			}
+
+			if (InputManager.WasKeyPressed(Input.Key.G))
+			{
+				if ((DebugFlags & Game.DebugFlags.GBuffer) == Game.DebugFlags.GBuffer)
+					DebugFlags &= ~Game.DebugFlags.GBuffer;
+				else
+					DebugFlags |= Game.DebugFlags.GBuffer;
+			}
 		}
 
 		protected override void RenderUI(float deltaTime)
