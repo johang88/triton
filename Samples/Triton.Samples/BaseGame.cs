@@ -10,7 +10,7 @@ namespace Triton.Samples
 {
 	public abstract class BaseGame : Triton.Game.Game
 	{
-
+		protected Random RNG = new Random();
 
 		public BaseGame(string name)
 			: base(name)

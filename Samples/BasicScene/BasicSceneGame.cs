@@ -17,8 +17,6 @@ namespace Triton.Samples
 		private float LightBaseIntensity = 8.4f;
 		private float LightFlickerCutoff = 0.3f;
 
-		private Random RNG = new Random();
-
 		private Vector3 CratePosition = new Vector3(0, 0, 3.0f);
 
 		public BasicSceneGame()
