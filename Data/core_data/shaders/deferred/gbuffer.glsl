@@ -154,5 +154,9 @@ void main() {
 	oNormal = vec4(normals, 1);
 	oSpecular = vec4(metallic, roughness, specular, 0);
 	oPosition = position;
+	
+#ifdef UNLIT
+	oNormal.w = 0;
+#endif
 }
 #endif
