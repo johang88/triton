@@ -10,6 +10,7 @@ namespace Triton.Graphics.Resources.Materials
 	{
 		public Texture Diffuse;
 		public Texture Normal;
+		public Texture Roughness;
 		public Vector3 DiffuseColor;
 		public float MetallicValue;
 		public float SpecularValue;
@@ -42,6 +43,8 @@ namespace Triton.Graphics.Resources.Materials
 				textures.Add(Diffuse.Handle);
 			if (Normal != null)
 				textures.Add(Normal.Handle);
+			if (Roughness != null)
+				textures.Add(Roughness.Handle);
 
 			Textures = textures.ToArray();
 		}
@@ -54,11 +57,14 @@ namespace Triton.Graphics.Resources.Materials
 				ResourceManager.Unload(Diffuse);
 			if (Normal != null)
 				ResourceManager.Unload(Normal);
+			if (Roughness != null)
+				ResourceManager.Unload(Roughness);
 			if (Shader != null)
 				ResourceManager.Unload(Shader);
 
 			Diffuse = null;
 			Normal = null;
+			Roughness = null;
 			Shader = null;
 		}
 
@@ -82,6 +88,8 @@ namespace Triton.Graphics.Resources.Materials
 				backend.BindShaderVariable(Handles.SamplerDiffuse, textureUnit++);
 			if (Normal != null)
 				backend.BindShaderVariable(Handles.SamplerNormal, textureUnit++);
+			if (Roughness != null)
+				backend.BindShaderVariable(Handles.SamplerRoughness, textureUnit++);
 			backend.BindShaderVariable(Handles.SamplerEnvironment, textureUnit++);
 
 			backend.BindShaderVariable(Handles.MaterialDiffuseColor, ref DiffuseColor);
@@ -103,6 +111,7 @@ namespace Triton.Graphics.Resources.Materials
 			public int ItWorldView = 0;
 			public int SamplerDiffuse = 0;
 			public int SamplerNormal = 0;
+			public int SamplerRoughness = 0;
 			public int SamplerEnvironment = 0;
 			public int Bones = 0;
 			public int MaterialDiffuseColor = 0;

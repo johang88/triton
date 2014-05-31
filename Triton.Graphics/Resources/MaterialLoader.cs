@@ -125,7 +125,12 @@ namespace Triton.Graphics.Resources
 					material.MetallicValue = Common.StringConverter.Parse<float>(definition.Get("metallic"));
 				}
 
-				if (!string.IsNullOrWhiteSpace(definition.Get("roughness")))
+				if (!string.IsNullOrWhiteSpace(definition.Get("roughness-map")))
+				{
+					shaderOptions.Add("MATERIAL_ROUGHNESS_MAP");
+					material.Roughness = ResourceManager.Load<Texture>(definition.Get("roughness-map"), "srgb");
+				}
+				else if (!string.IsNullOrWhiteSpace(definition.Get("roughness")))
 				{
 					shaderOptions.Add("MATERIAL_ROUGHNESS_VALUE");
 					material.RoughnessValue = Common.StringConverter.Parse<float>(definition.Get("roughness"));

@@ -79,6 +79,7 @@ layout(location = 3) out vec4 oSpecular;
 
 uniform sampler2D samplerDiffuse;
 uniform sampler2D samplerNormal;
+uniform sampler2D samplerRoughness;
 uniform samplerCube samplerEnvironment;
 
 uniform mat4x4 itWorldView;
@@ -92,7 +93,7 @@ vec3 get_normals() {
 #ifdef NORMAL_MAP
 	mat3x3 rot = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
 
-	vec3 N = normalize(texture2D(samplerNormal, texCoord).xyz * 2.0 - 1.0);
+	vec3 N = normalize(texture(samplerNormal, texCoord).xyz * 2.0 - 1.0);
 	vec3 N2 = normalize(rot * N);
 	
 	return N2;
@@ -103,7 +104,7 @@ vec3 get_normals() {
 
 vec3 get_diffuse() {
 #ifdef DIFFUSE_MAP
-	vec3 diffuse =  texture2D(samplerDiffuse, texCoord).xyz;
+	vec3 diffuse =  texture(samplerDiffuse, texCoord).xyz;
 #elif defined(MATERIAL_DIFFUSE_COLOR)
 	vec3 diffuse = materialDiffuseColor;
 #else
@@ -131,6 +132,8 @@ float get_specular() {
 float get_roughness() {
 #ifdef MATERIAL_ROUGHNESS_VALUE
 	return materialRoughnessValue;
+#elif defined(MATERIAL_ROUGHNESS_MAP)
+	return texture(samplerRoughness, texCoord).x;
 #else
 	return 0.8;
 #endif
