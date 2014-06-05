@@ -25,8 +25,6 @@ namespace Triton.Samples
 		public PhysicsGame()
 			: base("Physics")
 		{
-			Width = 1280;
-			Height = 720;
 		}
 
 		protected override SharpFileSystem.IFileSystem MountFileSystem()

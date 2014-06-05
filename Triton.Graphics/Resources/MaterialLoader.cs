@@ -105,7 +105,12 @@ namespace Triton.Graphics.Resources
 				if (!string.IsNullOrWhiteSpace(definition.Get("diffuse-map")))
 				{
 					shaderOptions.Add("DIFFUSE_MAP");
-					material.Diffuse = ResourceManager.Load<Texture>(definition.Get("diffuse-map"), "srgb");
+					material.Diffuse= ResourceManager.Load<Texture>(definition.Get("diffuse-map"), "srgb");
+				}
+				else if (!string.IsNullOrWhiteSpace(definition.Get("diffuse-cube")))
+				{
+					shaderOptions.Add("DIFFUSE_CUBE");
+					material.DiffuseCube = ResourceManager.Load<Texture>(definition.Get("diffuse-cube"), "srgb");
 				}
 				else if (!string.IsNullOrWhiteSpace(definition.Get("diffuse-color")))
 				{

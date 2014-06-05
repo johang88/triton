@@ -54,7 +54,7 @@ namespace Triton.Samples
 			{
 				var materialName = materials[i % materials.Length];
 
-				var cube= GameWorld.CreateGameObject();
+				var cube = GameWorld.CreateGameObject();
 				cube.Position = new Vector3(-3 + i * 1.5f, 1.0f, 2);
 				cube.AddComponent(new Mesh { Filename = "/models/crate", MeshParameters = materialName });
 				GameWorld.Add(cube);
@@ -66,7 +66,7 @@ namespace Triton.Samples
 
 				var cube = GameWorld.CreateGameObject();
 				cube.Position = new Vector3(-3 + i * 1.5f, 1.0f, -2);
-				cube.AddComponent(new Mesh { Filename = "/models/crate", MeshParameters = materialName });
+				cube.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = materialName });
 				GameWorld.Add(cube);
 			}
 
@@ -79,15 +79,7 @@ namespace Triton.Samples
 				GameWorld.Add(sphere);
 			}
 
-			//Stage.CreateDirectionalLight(
-			//	new Vector3(0.3f, -0.7f, 0.2f),
-			//	new Vector3(1f, 0.8f, 0.5f),
-			//	true,
-			//	intensity: 10
-			//	);
-
 			DebugFlags |= Game.DebugFlags.RenderStats;
-			//HDRRenderer.WhitePoint = new Vector3(1, 1, 1) * 300;
 		}
 
 		protected override void Update(float frameTime)

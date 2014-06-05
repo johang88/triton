@@ -16,6 +16,7 @@ out vec3 tangent;
 out vec3 bitangent;
 out vec2 texCoord;
 out vec4 position;
+out vec4 worldPosition;
 
 uniform mat4x4 world;
 uniform mat4x4 worldView;
@@ -59,6 +60,7 @@ void main()
 	bitangent = normalize(cross(normal, tangent));
 	
 	position = worldView * vec4(iPosition, 1);
+	worldPosition = world * vec4(iPosition, 1);
 	
 	gl_Position = modelViewProjection * vec4(iPosition, 1);
 #endif
@@ -71,6 +73,7 @@ in vec3 tangent;
 in vec3 bitangent;
 in vec2 texCoord;
 in vec4 position;
+in vec4 worldPosition;
 
 layout(location = 0) out vec4 oColor;
 layout(location = 1) out vec4 oNormal;
@@ -81,13 +84,16 @@ uniform sampler2D samplerDiffuse;
 uniform sampler2D samplerNormal;
 uniform sampler2D samplerRoughness;
 uniform samplerCube samplerEnvironment;
+uniform samplerCube samplerDiffuseCube;
 
 uniform mat4x4 itWorldView;
+uniform mat4x4 itWorld;
 
 uniform vec3 materialDiffuseColor;
 uniform float materialMetallicValue;
 uniform float materialSpecularValue;
 uniform float materialRoughnessValue;
+uniform vec3 cameraPosition;
 
 vec3 get_normals() {
 #ifdef NORMAL_MAP
@@ -105,6 +111,8 @@ vec3 get_normals() {
 vec3 get_diffuse() {
 #ifdef DIFFUSE_MAP
 	vec3 diffuse =  texture(samplerDiffuse, texCoord).xyz;
+#elif defined(DIFFUSE_CUBE)
+	vec3 diffuse = texture(samplerDiffuseCube, worldPosition.xyz).xyz;
 #elif defined(MATERIAL_DIFFUSE_COLOR)
 	vec3 diffuse = materialDiffuseColor;
 #else
@@ -141,6 +149,7 @@ float get_roughness() {
 
 void main() {
 	vec3 normals = get_normals();
+	vec3 worldNormals = normalize(mat3x3(itWorld) * normals);
 	normals = normalize(mat3x3(itWorldView) * normals);
 	
 	vec3 diffuse = get_diffuse();
@@ -149,6 +158,8 @@ void main() {
 	float specular = get_specular();
 
 	float roughness = get_roughness();
+	
+	vec3 environmentLighting = vec3(0);
 
 	oColor = vec4(diffuse, 0);
 	oNormal = vec4(normals, 1);

@@ -39,9 +39,9 @@ namespace Triton.Graphics.Resources
 			if (!FileSystem.FileExists(filename))
 			{
 				if (resource.Name.EndsWith("_n"))
-					filename = "textures/missing_n.dds";
+					filename = "/textures/missing_n.dds";
 				else
-					filename = "textures/missing.dds";
+					filename = "/textures/missing.dds";
 			}
 
 			using (var stream = FileSystem.OpenRead(filename))
