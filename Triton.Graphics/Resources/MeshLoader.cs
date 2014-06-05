@@ -145,6 +145,8 @@ namespace Triton.Graphics.Resources
 					};
 				}
 
+				mesh.BoundingSphereRadius = mesh.SubMeshes.Max(s => s.BoundingSphereRadius);
+
 				resource.Parameters = parameters;
 			}
 		}

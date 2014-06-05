@@ -9,6 +9,7 @@ namespace Triton.Graphics.Resources
 	public class Mesh : Triton.Common.Resource
 	{
 		public SubMesh[] SubMeshes { get; internal set; }
+		public float BoundingSphereRadius;
 
 		public Mesh(string name, string parameters)
 			: base(name, parameters)

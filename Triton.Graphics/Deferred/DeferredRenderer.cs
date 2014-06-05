@@ -68,6 +68,9 @@ namespace Triton.Graphics.Deferred
 
 		public ShadowQuality ShadowQuality = ShadowQuality.High;
 
+		// Mesh list used for rendering, declared here to avoid GC
+		private List<MeshInstance> Meshes = new List<MeshInstance>();
+
 		public DeferredRenderer(Common.ResourceManager resourceManager, Backend backend, int width, int height)
 		{
 			if (resourceManager == null)
@@ -585,8 +588,9 @@ namespace Triton.Graphics.Deferred
 
 			viewProjection = projection;
 
-			var meshes = stage.GetMeshes();
-			foreach (var mesh in meshes)
+			Meshes.Clear();
+			stage.GetMeshesInRadius(light.Position, light.Range, Meshes);
+			foreach (var mesh in Meshes)
 			{
 				if (!mesh.CastShadows)
 					continue;

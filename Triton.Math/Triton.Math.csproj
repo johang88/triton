@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Intersections.cs" />
     <Compile Include="Matrix4.cs" />
     <Compile Include="Quaternion.cs" />
     <Compile Include="Util.cs" />

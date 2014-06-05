@@ -58,6 +58,20 @@ namespace Triton.Graphics
 			return Meshes;
 		}
 
+		public void GetMeshesInRadius(Vector3 position, float radius, List<MeshInstance> meshes)
+		{
+			foreach (var mesh in Meshes)
+			{
+				var world = mesh.World;
+				var meshPosition = Vector3.Transform(Vector3.Zero, world);
+
+				if (Math.Intersections.SphereToSphere(ref position, radius, ref meshPosition, mesh.Mesh.BoundingSphereRadius))
+				{
+					meshes.Add(mesh);
+				}
+			}
+		}
+
 		public Light CreateDirectionalLight(Vector3 direction, Vector3 color, bool castShadows = false, float shadowRange = 64.0f, float shadowBias = 0.001f, float intensity = 1.0f)
 		{
 			var light = new Light
