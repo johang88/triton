@@ -20,6 +20,7 @@ namespace Triton.Graphics.Resources
 	public class SubMesh
 	{
 		public Material Material;
+		public float BoundingSphereRadius;
 		public int Handle;
 	}
 }

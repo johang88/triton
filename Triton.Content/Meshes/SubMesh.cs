@@ -11,6 +11,7 @@ namespace Triton.Content.Meshes
 		public string Material;
 		public Renderer.VertexFormat VertexFormat;
 		public int TriangleCount;
+		public float BoundingSphereRadius;
 		public byte[] Vertices;
 		public byte[] Indices;
 	}

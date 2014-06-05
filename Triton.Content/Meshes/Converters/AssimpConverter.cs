@@ -57,6 +57,7 @@ namespace Triton.Content.Meshes.Converters
 					}
 
 					var subMesh = new SubMesh();
+					subMesh.BoundingSphereRadius = 0;
 
 					// Create vertex format
 					if (meshToImport.HasBones)
@@ -96,6 +97,10 @@ namespace Triton.Content.Meshes.Converters
 						vertices[i].Normal = new Vector3(normals[i].X, normals[i].Y, normals[i].Z);
 						vertices[i].Tangent = new Vector3(tangents[i].X, tangents[i].Y, tangents[i].Z);
 						vertices[i].TexCoord = new Vector2(texCoords[i].X, texCoords[i].Y);
+
+						var length = vertices[i].Position.Length;
+						if (subMesh.BoundingSphereRadius < length)
+							subMesh.BoundingSphereRadius = length;
 					}
 
 					// Map bone weights if they are available

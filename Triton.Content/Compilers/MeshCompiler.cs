@@ -19,7 +19,7 @@ namespace Triton.Content.Compilers
 	{
 		private Factory<string, IMeshImporter> ImporterFactory;
 
-		const int Version = 0x0120;
+		const int Version = 0x0130;
 
 		public MeshCompiler()
 		{
@@ -88,6 +88,9 @@ namespace Triton.Content.Compilers
 						writer.Write(element.Count);
 						writer.Write(element.Offset);
 					}
+
+					// Bounding sphere
+					writer.Write(subMesh.BoundingSphereRadius);
 
 					// Vertices
 					writer.Write(subMesh.Vertices);
