@@ -66,10 +66,10 @@ void main()
 #if defined(SPOT_LIGHT) || defined(POINT_LIGHT)
 	vec3 lightVec = lightPosition - position;
 	float dist = length(lightVec);
-	vec3 lightDir = lightVec / dist;
+	vec3 lightDir = normalize(lightVec / dist);
 #else
 	vec3 lightDir = -normalize(lightDirection);
-	vec3 lightVec = lightDirection;
+	vec3 lightVec = lightDir;
 #endif
 	
 	vec3 eyeDir = normalize(cameraPosition - position);
@@ -109,9 +109,9 @@ void main()
 		
 		vec3 diffuseColor = mix(gbuffer0.xyz, vec3(0), metallic);
 		vec3 specularColor = mix(0.08 * vec3(specular), gbuffer0.xyz, metallic);
-		
-		vec3 diffuseLighting = get_diffuse(diffuseColor);
-		vec3 specularLighting = get_specular(normal, eyeDir, lightVec, roughness, specularColor, lightRange);
+
+		vec3 diffuseLighting = get_diffuse(diffuseColor, normal, eyeDir, lightDir, roughness);
+		vec3 specularLighting = get_specular(normal, eyeDir, lightDir, roughness, specularColor, lightRange);
 		
 		lighting = lightColor * nDotL * attenuation * (diffuseLighting + specularLighting);
 	}

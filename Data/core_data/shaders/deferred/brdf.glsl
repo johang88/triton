@@ -1,6 +1,24 @@
 
-vec3 get_diffuse(vec3 diffuseColor) {
+vec3 get_diffuse(vec3 diffuseColor, vec3 normal, vec3 viewer, vec3 light, float roughness) {
+#ifdef OREN_NAYAR
+	float gamma = dot(viewer - normal * dot(viewer, normal), light - normal * dot(light, normal));
+	
+	float roughSq = roughness * roughness;
+	
+	float A = 1.0f - 0.5f * (roughSq / (roughSq + 0.57f));
+	float B = 0.45f * (roughSq / (roughSq + 0.09f));
+	
+	float alpha = max(acos(dot(viewer, normal)), acos(dot(light, normal)));
+	float beta = min(acos(dot(viewer, normal)), acos(dot(light, normal)));
+	
+	float C = sin(alpha) * tan(beta);
+	
+	float final = A + B * max(0.0f, gamma) * C;
+	
+	return diffuseColor * final;
+#else
 	return diffuseColor / PI;
+#endif
 }
 
 vec3 cook_torrance(vec3 normal, vec3 viewer, vec3 lightDir, float roughnessValue, vec3 specularColor, float energy) {
@@ -115,12 +133,10 @@ vec3 brdf_stuff2(vec3 normal, vec3 viewer, vec3 lightDir, float roughness, vec3 
 	return (D * G) * F;
 }
 
-vec3 get_specular(vec3 normal, vec3 viewer, vec3 lightVec, float roughness, vec3 specularColor, float radius) {
+vec3 get_specular(vec3 normal, vec3 viewer, vec3 lightDir, float roughness, vec3 specularColor, float radius) {
 	float a = roughness * roughness;
 	
 	float energy = 1;
 	
-	lightVec = normalize(lightVec);
-	
-	return brdf_stuff2(normal, viewer, lightVec, roughness, specularColor, energy);
+	return brdf_stuff2(normal, viewer, lightDir, roughness, specularColor, energy);
 }
