@@ -21,7 +21,7 @@ namespace Triton.Graphics.Terrain
 		private readonly int Handle;
 		public readonly Resources.Mesh Mesh;
 
-		private short[] Data;
+		private ushort[] Data;
 
 		public Vector3 Position = Vector3.Zero;
 
@@ -45,12 +45,12 @@ namespace Triton.Graphics.Terrain
 			Width = width;
 			Depth = depth;
 
-			Data = new short[size * size];
+			Data = new ushort[size * size];
 			using (var reader = new System.IO.BinaryReader(stream))
 			{
 				var i = 0;
 				while (reader.BaseStream.Position < reader.BaseStream.Length)
-					Data[i++] = reader.ReadInt16();
+					Data[i++] = reader.ReadUInt16();
 			}
 
 			var vres = Res + 1;
@@ -202,7 +202,7 @@ namespace Triton.Graphics.Terrain
 
 		private float At(int x, int z)
 		{
-			return Data[z * Size + x] / (float)short.MaxValue;
+			return Data[z * Size + x] / (float)ushort.MaxValue;
 		}
 
 		struct Vertex
