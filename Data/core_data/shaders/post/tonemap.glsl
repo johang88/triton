@@ -24,6 +24,7 @@ layout(location = 0) out vec4 oColor;
 uniform sampler2D samplerScene;
 uniform sampler2D samplerBloom;
 uniform sampler2D samplerLuminance;
+uniform float keyValue = 0.115;
 
 vec3 tonemap(vec3 x)
 {
@@ -42,7 +43,7 @@ void main()
 	float averageLuminance = get_average_luminance(samplerLuminance);
 	vec3 color = texture2D(samplerScene, texCoord).xyz;
 
-	color = calc_exposed_color(color, averageLuminance, 0);
+	color = calc_exposed_color(color, averageLuminance, 0, keyValue);
 	color = tonemap(color);
 	
 	vec3 whiteScale = vec3(1.0) / tonemap(vec3(11.2));

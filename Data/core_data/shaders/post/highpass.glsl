@@ -24,6 +24,7 @@ layout(location = 0) out vec4 oColor;
 uniform sampler2D samplerScene;
 uniform sampler2D samplerLuminance;
 uniform float bloomThreshold;
+uniform float keyValue = 0.115;
 
 void main()
 {
@@ -31,7 +32,7 @@ void main()
 	
 	float averageLuminance = get_average_luminance(samplerLuminance);
 
-	color = calc_exposed_color(color, averageLuminance, bloomThreshold);
+	color = calc_exposed_color(color, averageLuminance, bloomThreshold, keyValue);
 	
 	if (dot(color, vec3(0.333)) <= 0.001)
 		color = vec3(0);

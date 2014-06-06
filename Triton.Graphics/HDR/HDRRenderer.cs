@@ -43,6 +43,7 @@ namespace Triton.Graphics.HDR
 		public float BloomThreshold = 9.2f;
 		public float BlurSigma = 3.0f;
 		public float AdaptationRate = 0.5f;
+		public float KeyValue = 0.115f;
 
 		private int BlurSampler;
 
@@ -175,6 +176,7 @@ namespace Triton.Graphics.HDR
 			Backend.BindShaderVariable(HighPassParams.SamplerScene, 0);
 			Backend.BindShaderVariable(HighPassParams.SamplerLuminance, 1);
 			Backend.BindShaderVariable(HighPassParams.BloomThreshold, BloomThreshold);
+			Backend.BindShaderVariable(HighPassParams.KeyValue, KeyValue);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 			Backend.EndPass();
@@ -247,6 +249,7 @@ namespace Triton.Graphics.HDR
 			Backend.BindShaderVariable(TonemapParams.SamplerScene, 0);
 			Backend.BindShaderVariable(TonemapParams.SamplerBloom, 1);
 			Backend.BindShaderVariable(TonemapParams.SamplerLuminance, 2);
+			Backend.BindShaderVariable(TonemapParams.KeyValue, KeyValue);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 			Backend.EndPass();

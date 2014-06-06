@@ -12,5 +12,6 @@ namespace Triton.Graphics.HDR
 		public int SamplerScene = 0;
 		public int SamplerLuminance = 0;
 		public int BloomThreshold = 0;
+		public int KeyValue = 0;
 	}
 }
