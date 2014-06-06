@@ -114,7 +114,7 @@ namespace Triton.Graphics.Terrain
 			z *= Size;
 
 			if (x < 0.0f || x >= Size || z < 0 || z >= Size)
-				return float.NegativeInfinity;
+				return -1;
 
 			int xi = (int)x, zi = (int)z;
 			float xpct = x - xi, zpct = z - zi;
@@ -176,7 +176,7 @@ namespace Triton.Graphics.Terrain
 			down -= here;
 
 			var normal = Vector3.Cross(left, down) * flip;
-			normal.Normalize();
+			normal = normal.Normalize();
 
 			return normal;
 		}
