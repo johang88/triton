@@ -1,4 +1,8 @@
 import(/shaders/core);
+
+uniform float time;
+uniform vec2 uvAnimation;
+
 #ifdef VERTEX_SHADER
 
 layout(location = ATTRIB_POSITION) in vec3 iPosition;
@@ -29,6 +33,10 @@ uniform mat4x4[64] bones;
 void main()
 {
 	texCoord = iTexCoord;
+	
+#ifdef ANIM_UV
+	texCoord += uvAnimation * time;
+#endif
 	
 #ifdef SKINNED
 	vec4 blendPos = vec4(0, 0, 0, 0);

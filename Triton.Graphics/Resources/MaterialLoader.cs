@@ -148,6 +148,12 @@ namespace Triton.Graphics.Resources
 					material.SpecularValue = Common.StringConverter.Parse<float>(definition.Get("specular"));
 				}
 
+				if (!string.IsNullOrWhiteSpace(definition.Get("uv-animation")))
+				{
+					shaderOptions.Add("ANIM_UV");
+					material.UvAnimation = Common.StringConverter.Parse<Vector2>(definition.Get("uv-animation6"));
+				}
+
 				if (!string.IsNullOrWhiteSpace(definition.Get("lighting-mode")))
 				{
 					var mode = Common.StringConverter.Parse<LightingMode>(definition.Get("lighting-mode"));

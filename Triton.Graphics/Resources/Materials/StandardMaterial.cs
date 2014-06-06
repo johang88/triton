@@ -16,6 +16,7 @@ namespace Triton.Graphics.Resources.Materials
 		public float MetallicValue;
 		public float SpecularValue;
 		public float RoughnessValue;
+		public Vector2 UvAnimation;
 
 		public ShaderProgram Shader;
 		private ShaderHandles Handles;
@@ -104,6 +105,8 @@ namespace Triton.Graphics.Resources.Materials
 			backend.BindShaderVariable(Handles.MaterialMetallicValue, MetallicValue);
 			backend.BindShaderVariable(Handles.MaterialSpecularValue, SpecularValue);
 			backend.BindShaderVariable(Handles.MaterialRoughnessValue, RoughnessValue);
+			backend.BindShaderVariable(Handles.Time, backend.ElapsedTime);
+			backend.BindShaderVariable(Handles.UvAnimation, ref UvAnimation);
 
 			if (skeleton != null)
 			{
@@ -129,6 +132,8 @@ namespace Triton.Graphics.Resources.Materials
 			public int MaterialRoughnessValue = 0;
 			public int CameraPosition = 0;
 			public int ItWorld = 0;
+			public int Time = 0;
+			public int UvAnimation = 0;
 		}
 	}
 }

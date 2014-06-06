@@ -65,6 +65,7 @@ namespace Triton.Graphics
 		public bool CursorVisible { get; set; }
 
 		public float FrameTime { get; private set; }
+		public float ElapsedTime { get; private set; }
 
 		// Used as a cache to prevent generation of garabage during deserialization of the OpCode stream
 		private Matrix4[] MatrixDeserializationCache = new Matrix4[64];
@@ -123,6 +124,8 @@ namespace Triton.Graphics
 				{ SamplerParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge },
 				{ SamplerParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge }
 			});
+
+			ElapsedTime = 0;
 		}
 
 		public void Dispose()
@@ -193,6 +196,7 @@ namespace Triton.Graphics
 			}
 
 			FrameTime = (float)Watch.Elapsed.TotalSeconds;
+			ElapsedTime += FrameTime;
 			Watch.Restart();
 			return true;
 		}
