@@ -137,12 +137,18 @@ namespace Triton.Graphics.Resources
 					var vertices = reader.ReadBytes(vertexCount);
 					var indices = reader.ReadBytes(indexCount);
 
-					mesh.SubMeshes[i] = new SubMesh
-					{
-						Handle = Backend.RenderSystem.CreateMesh(triangleCount, vertexFormat, vertices, indices, false, onResourceLoaded),
-						Material = material,
-						BoundingSphereRadius = boundingSphereRadius
-					};
+					var subMesh = new SubMesh();
+
+					subMesh.VertexBufferHandle = Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, vertexFormat);
+					subMesh.IndexBufferHandle = Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ElementArrayBuffer);
+					Backend.RenderSystem.SetBufferData(subMesh.VertexBufferHandle, vertices, false);
+					Backend.RenderSystem.SetBufferData(subMesh.IndexBufferHandle, indices, false);
+
+					subMesh.Handle = Backend.RenderSystem.CreateMesh(triangleCount, subMesh.VertexBufferHandle, subMesh.IndexBufferHandle, onResourceLoaded);
+					subMesh.Material = material;
+					subMesh.BoundingSphereRadius = boundingSphereRadius;
+
+					mesh.SubMeshes[i] = subMesh;
 				}
 
 				mesh.BoundingSphereRadius = mesh.SubMeshes.Max(s => s.BoundingSphereRadius);

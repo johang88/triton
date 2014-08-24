@@ -75,9 +75,12 @@ namespace Triton.Samples
 				sphere.Position = new Vector3(0, 2.5f, 0);
 				sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
 				sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = "/materials/light_sphere", CastShadows = false });
-				sphere.AddComponent(new PointLight { Color = new Vector3(1f, 0.8f, 0.5f) });
+				sphere.AddComponent(new PointLight { Color = new Vector3(1f, 0.8f, 0.5f), Intensity = 15 });
 				GameWorld.Add(sphere);
 			}
+
+			//Stage.AddMesh("/models/skybox");
+			Stage.SetSkyBox("/models/skybox");
 
 			DebugFlags |= Game.DebugFlags.RenderStats;
 		}

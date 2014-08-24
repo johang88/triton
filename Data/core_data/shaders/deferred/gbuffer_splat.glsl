@@ -44,6 +44,7 @@ layout(location = 0) out vec4 oColor;
 layout(location = 1) out vec4 oNormal;
 layout(location = 2) out vec4 oPosition;
 layout(location = 3) out vec4 oSpecular;
+layout(location = 4) out vec4 oEmissive;
 
 uniform sampler2D samplerSplat;
 uniform sampler2D samplerNormal1;
@@ -67,7 +68,7 @@ void main()
 	vec4 n4 = texture2D(samplerNormal4, texCoordDetail);
 	
 	vec4 normalSpecular = n1 * splat.x + n2 * splat.y + n3 * splat.z + n4 * splat.w;
-	vec3 N = normalize(normalSpecular.xyz * 2.0 - 1.0;
+	vec3 N = normalize(normalSpecular.xyz * 2.0 - 1.0);
 
 	mat3x3 rot = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
 
@@ -93,5 +94,6 @@ void main()
 	oNormal = vec4(N2.xyz, 1.0);
 	oSpecular = specular;
 	oPosition = position;
+	oEmissive = vec4(1, 1, 1, 1);
 }
 #endif

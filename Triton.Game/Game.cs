@@ -20,8 +20,8 @@ namespace Triton.Game
 
 		private ManualResetEvent RendererReady = new ManualResetEvent(false);
 
-		public int Width { get; set; }
-		public int Height { get; set; }
+		public int RequestedWidth { get; set; }
+		public int RequestedHeight { get; set; }
 
 		public Graphics.Stage Stage { get; private set; }
 		public Graphics.Camera Camera { get; private set; }
@@ -80,7 +80,7 @@ namespace Triton.Game
 
 		private void RenderLoop()
 		{
-			using (GraphicsBackend = new Triton.Graphics.Backend(ResourceManager, Width, Height, Name, false))
+			using (GraphicsBackend = new Triton.Graphics.Backend(ResourceManager, RequestedWidth, RequestedHeight, Name, false))
 			{
 				Triton.Graphics.Resources.ResourceLoaders.Init(ResourceManager, GraphicsBackend, FileSystem);
 
@@ -102,11 +102,11 @@ namespace Triton.Game
 			AudioSystem = new Audio.AudioSystem(FileSystem);
 			PhysicsWorld = new Triton.Physics.World(GraphicsBackend, ResourceManager);
 
-			DeferredRenderer = new Graphics.Deferred.DeferredRenderer(ResourceManager, GraphicsBackend, Width, Height);
-			HDRRenderer = new Graphics.HDR.HDRRenderer(ResourceManager, GraphicsBackend, Width, Height);
+			DeferredRenderer = new Graphics.Deferred.DeferredRenderer(ResourceManager, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
+			HDRRenderer = new Graphics.HDR.HDRRenderer(ResourceManager, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
 
 			Stage = new Graphics.Stage(ResourceManager);
-			Camera = new Graphics.Camera(new Vector2(Width, Height));
+			Camera = new Graphics.Camera(new Vector2(GraphicsBackend.Width, GraphicsBackend.Height));
 
 			InputManager = new Input.InputManager(GraphicsBackend.WindowBounds);
 
@@ -183,7 +183,7 @@ namespace Triton.Game
 					DebugSprite.RenderQuad(textures[i], new Vector2(129 * i + 1, 1), new Vector2(128, 128), Vector2.Zero, Vector2.One, Vector4.One, false, i == 0 || i == 3 || i == 4);
 				}
 
-				DebugSprite.Render(Width, Height);
+				DebugSprite.Render(GraphicsBackend.Width, GraphicsBackend.Height);
 			}
 
 			if ((DebugFlags & Triton.Game.DebugFlags.RenderStats) == Triton.Game.DebugFlags.RenderStats)
@@ -208,7 +208,7 @@ namespace Triton.Game
 					DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\t\tGen ({0})\t{1}", i, GC.CollectionCount(i));
 				}
 
-				DebugSprite.Render(Width, Height);
+				DebugSprite.Render(GraphicsBackend.Width, GraphicsBackend.Height);
 			}
 
 			GraphicsBackend.EndScene();

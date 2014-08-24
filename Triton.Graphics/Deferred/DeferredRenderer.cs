@@ -20,11 +20,13 @@ namespace Triton.Graphics.Deferred
 		private RenderShadowsParams RenderShadowsCubeParams = new RenderShadowsParams();
 		private RenderShadowsParams RenderShadowsSkinnedParams = new RenderShadowsParams();
 		private FXAAParams FXAAParams = new FXAAParams();
+		private FogParams FogParams = new FogParams();
 
 		private Vector2 ScreenSize;
 
 		public readonly RenderTarget GBuffer;
 		private readonly RenderTarget LightAccumulation;
+		private readonly RenderTarget Temporary;
 		private readonly RenderTarget Output;
 		private readonly RenderTarget SpotShadowsRenderTarget;
 		private readonly RenderTarget PointShadowsRenderTarget;
@@ -41,14 +43,18 @@ namespace Triton.Graphics.Deferred
 		private Resources.ShaderProgram RenderShadowsCubeShader;
 		private Resources.ShaderProgram RenderShadowsSkinnedShader;
 		private Resources.ShaderProgram FXAAShader;
+		private Resources.ShaderProgram FogShader;
 
 		// Used for point light shadows
 		private Light ShadowSpotLight = new Light();
 
 		private Resources.Texture RandomNoiseTexture;
+		private Resources.Texture EnvironmentMap;
+		private Resources.Texture EnvironmentMapSpecular;
 
 		private bool HandlesInitialized = false;
 
+		private int SkyRenderState;
 		private int AmbientRenderState;
 		private int LightAccumulatinRenderState;
 		private int ShadowsRenderState;
@@ -71,6 +77,8 @@ namespace Triton.Graphics.Deferred
 		// Mesh list used for rendering, declared here to avoid GC
 		private List<MeshInstance> Meshes = new List<MeshInstance>();
 
+		public FogSettings FogSettings = new FogSettings();
+
 		public DeferredRenderer(Common.ResourceManager resourceManager, Backend backend, int width, int height)
 		{
 			if (resourceManager == null)
@@ -89,10 +97,17 @@ namespace Triton.Graphics.Deferred
 				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 1),
 				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 2),
 				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 3),
+				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 4),
 				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.Depth24Stencil8, Renderer.PixelType.Float, 0)
 			}));
 
 			LightAccumulation = Backend.CreateRenderTarget("light_accumulation", new Definition(width, height, false, new List<Definition.Attachment>()
+			{
+				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0),
+				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.Depth24Stencil8, Renderer.PixelType.Float, GBuffer.Handle)
+			}));
+
+			Temporary = Backend.CreateRenderTarget("deferred_temp", new Definition(width, height, false, new List<Definition.Attachment>()
 			{
 				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0),
 				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.Depth24Stencil8, Renderer.PixelType.Float, GBuffer.Handle)
@@ -153,8 +168,11 @@ namespace Triton.Graphics.Deferred
 			RenderShadowsSkinnedShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows", "SKINNED");
 			RenderShadowsCubeShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows_cube");
 			FXAAShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/fxaa");
+			FogShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/fog");
 
 			RandomNoiseTexture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("/textures/random_n");
+			EnvironmentMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("/textures/sky_ambient");
+			EnvironmentMapSpecular = ResourceManager.Load<Triton.Graphics.Resources.Texture>("/textures/sky");
 
 			QuadMesh = Backend.CreateBatchBuffer();
 			QuadMesh.Begin();
@@ -165,6 +183,7 @@ namespace Triton.Graphics.Deferred
 			UnitCone = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("/models/unit_cone");
 
 			AmbientRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
+			SkyRenderState = Backend.CreateRenderState(false, false, false);
 			LightAccumulatinRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
 			ShadowsRenderState = Backend.CreateRenderState(false, true, true);
 			DirectionalRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Back, true, Triton.Renderer.DepthFunction.Lequal);
@@ -194,6 +213,7 @@ namespace Triton.Graphics.Deferred
 			RenderShadowsSkinnedShader.GetUniformLocations(RenderShadowsSkinnedParams);
 			RenderShadowsCubeShader.GetUniformLocations(RenderShadowsCubeParams);
 			FXAAShader.GetUniformLocations(FXAAParams);
+			FogShader.GetUniformLocations(FogParams);
 		}
 
 		public RenderTarget Render(Stage stage, Camera camera)
@@ -213,7 +233,7 @@ namespace Triton.Graphics.Deferred
 			var clearColor = stage.ClearColor;
 			clearColor.W = 0;
 			Backend.BeginPass(GBuffer, clearColor, true);
-			RenderScene(stage, ref view, ref projection);
+			RenderScene(stage, camera, ref view, ref projection);
 			Backend.EndPass();
 
 			// Render light accumulation
@@ -224,11 +244,37 @@ namespace Triton.Graphics.Deferred
 
 			Backend.EndPass();
 
+			var currentRenderTarget = Temporary;
+			var currentSource = LightAccumulation;
+
+			if (FogSettings.Enable)
+			{
+				Backend.BeginPass(currentRenderTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
+
+				Backend.BeginInstance(FogShader.Handle, new int[] { currentSource.Textures[0].Handle, GBuffer.Textures[2].Handle }, new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering }, LightAccumulatinRenderState);
+				Backend.BindShaderVariable(FogParams.SamplerScene, 0);
+				Backend.BindShaderVariable(FogParams.SamplerGBuffer2, 1);
+				Backend.BindShaderVariable(FogParams.FogStart, FogSettings.Start);
+				Backend.BindShaderVariable(FogParams.FogEnd, FogSettings.End);
+				Backend.BindShaderVariable(FogParams.FogColor, ref FogSettings.Color);
+
+				Vector2 screenSize = new Vector2(LightAccumulation.Width, LightAccumulation.Height);
+				Backend.BindShaderVariable(FogParams.ScreenSize, ref screenSize);
+
+				Backend.DrawMesh(QuadMesh.MeshHandle);
+
+				Backend.EndPass();
+
+				var tmp = currentRenderTarget;
+				currentRenderTarget = currentSource;
+				currentSource = tmp;
+			}
+
 			if (EnableFXAA)
 			{
-				Backend.BeginPass(Output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
+				Backend.BeginPass(currentRenderTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
 
-				Backend.BeginInstance(FXAAShader.Handle, new int[] { LightAccumulation.Textures[0].Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, LightAccumulatinRenderState);
+				Backend.BeginInstance(FXAAShader.Handle, new int[] { currentSource.Textures[0].Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, LightAccumulatinRenderState);
 				Backend.BindShaderVariable(FXAAParams.SamplerScene, 0);
 
 				Vector2 screenSize = new Vector2(LightAccumulation.Width, LightAccumulation.Height);
@@ -237,24 +283,42 @@ namespace Triton.Graphics.Deferred
 				Backend.DrawMesh(QuadMesh.MeshHandle);
 
 				Backend.EndPass();
-			}
-			else
-			{
-				Backend.BeginPass(Output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
 
-				Backend.BeginInstance(CombineShader.Handle, new int[] { LightAccumulation.Textures[0].Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, LightAccumulatinRenderState);
-				Backend.BindShaderVariable(CombineParams.SamplerLight, 0);
-				Backend.DrawMesh(QuadMesh.MeshHandle);
-
-				Backend.EndPass();
+				var tmp = currentRenderTarget;
+				currentRenderTarget = currentSource;
+				currentSource = tmp;
 			}
+
+			Backend.BeginPass(Output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
+
+			Backend.BeginInstance(CombineShader.Handle, new int[] { currentSource.Textures[0].Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, LightAccumulatinRenderState);
+			Backend.BindShaderVariable(CombineParams.SamplerLight, 0);
+			Backend.DrawMesh(QuadMesh.MeshHandle);
+
+			Backend.EndPass();
 
 			return Output;
 		}
 
-		private void RenderScene(Stage stage, ref Matrix4 view, ref Matrix4 projection)
+		private void RenderScene(Stage stage, Camera camera, ref Matrix4 view, ref Matrix4 projection)
 		{
 			var modelViewProjection = Matrix4.Identity;
+
+			if (stage.Sky != null)
+			{
+				var world = Matrix4.CreateTranslation(camera.Position);
+				modelViewProjection = world * view * projection;
+
+				var worldView = world * view;
+				var itWorldView = Matrix4.Transpose(Matrix4.Invert(worldView));
+
+				foreach (var subMesh in stage.Sky.Mesh.SubMeshes)
+				{
+					subMesh.Material.BindMaterial(Backend, EnvironmentMap, EnvironmentMapSpecular, camera, ref world, ref worldView, ref itWorldView, ref modelViewProjection, null, SkyRenderState);
+					Backend.DrawMesh(subMesh.Handle);
+					Backend.EndInstance();
+				}
+			}
 
 			var meshes = stage.GetMeshes();
 			foreach (var mesh in meshes)
@@ -267,7 +331,7 @@ namespace Triton.Graphics.Deferred
 
 				foreach (var subMesh in mesh.Mesh.SubMeshes)
 				{
-					subMesh.Material.BindMaterial(Backend, ref world, ref worldView, ref itWorldView, ref modelViewProjection, mesh.Skeleton);
+					subMesh.Material.BindMaterial(Backend, EnvironmentMap, EnvironmentMapSpecular, camera, ref world, ref worldView, ref itWorldView, ref modelViewProjection, mesh.Skeleton, 0);
 					Backend.DrawMesh(subMesh.Handle);
 					Backend.EndInstance();
 				}
@@ -281,12 +345,13 @@ namespace Triton.Graphics.Deferred
 			var ambientColor = new Vector3((float)System.Math.Pow(stage.AmbientColor.X, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Y, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Z, 2.2f));
 
 			Backend.BeginInstance(AmbientLightShader.Handle,
-				new int[] { GBuffer.Textures[0].Handle, GBuffer.Textures[1].Handle, GBuffer.Textures[3].Handle },
-				new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering },
+				new int[] { GBuffer.Textures[0].Handle, GBuffer.Textures[1].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[4].Handle },
+				new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering },
 				AmbientRenderState);
 			Backend.BindShaderVariable(AmbientLightParams.SamplerGBuffer0, 0);
 			Backend.BindShaderVariable(AmbientLightParams.SamplerGBuffer1, 1);
 			Backend.BindShaderVariable(AmbientLightParams.SamplerGBuffer3, 2);
+			Backend.BindShaderVariable(AmbientLightParams.SamplerGBuffer4, 3);
 			Backend.BindShaderVariable(AmbientLightParams.ModelViewProjection, ref modelViewProjection);
 			Backend.BindShaderVariable(AmbientLightParams.AmbientColor, ref ambientColor);
 
@@ -527,7 +592,8 @@ namespace Triton.Graphics.Deferred
 			if (light.Type == LighType.Directional)
 			{
 				view = Matrix4.LookAt(camera.Position - light.Direction * light.Range, camera.Position, Vector3.UnitY);
-				projection = Matrix4.CreatePerspectiveFieldOfView(Math.Util.DegreesToRadians(40), renderTarget.Width / (float)renderTarget.Height, clipPlane.X, clipPlane.Y);
+				projection = Matrix4.CreatePerspectiveFieldOfView(Math.Util.DegreesToRadians(20), renderTarget.Width / (float)renderTarget.Height, clipPlane.X, clipPlane.Y);
+				//projection = Matrix4.CreateOrthographic(renderTarget.Width, renderTarget.Height, clipPlane.X, clipPlane.Y * 10000);
 			}
 			else
 			{

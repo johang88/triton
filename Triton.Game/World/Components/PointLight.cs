@@ -34,6 +34,7 @@ namespace Triton.Game.World.Components
 		{
 			base.Update(stepSize);
 
+			Light.Position = Owner.Position;
 			Light.Range = Range;
 			Light.Color = Color;
 			Light.ShadowBias = ShadowBias;

@@ -13,7 +13,6 @@ namespace Triton.Graphics.Resources
 		private readonly Triton.Common.ResourceManager ResourceManager;
 
 		private const string DefaultShader = "/shaders/deferred/gbuffer";
-		private const string DefaultSplatShader = "/shaders/deferred/gbuffer_splat";
 
 		public MaterialLoader(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
 		{
@@ -31,146 +30,114 @@ namespace Triton.Graphics.Resources
 			var filename = name + ".mat.v";
 
 			using (var stream = FileSystem.OpenRead(filename))
-			using(var reader = new System.IO.StreamReader(stream))
+			using (var reader = new System.IO.StreamReader(stream))
 			{
 				var definition = JsonObject.Parse(reader.ReadToEnd());
-				var type = definition.Get("type") ?? "standard";
 
-				if (type == "splat")
-				{
-					Material material = new Materials.SplatMaterial(name, parameters, ResourceManager);
-					material.Definition = definition;
+				var isSkinned = Common.StringConverter.ParseBool(definition.Get("is_skinned") ?? "false");
 
-					return material;
-				}
-				else
-				{
-					var isSkinned = Common.StringConverter.ParseBool(definition.Get("is_skinned") ?? "false");
+				Material material = new Materials.StandardMaterial(name, parameters, ResourceManager, isSkinned);
+				material.Definition = definition;
 
-					Material material = new Materials.StandardMaterial(name, parameters, ResourceManager, isSkinned);
-					material.Definition = definition;
-
-					return material;
-				}
+				return material;
 			}
 		}
 
 		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
 		{
-			if (resource is Materials.SplatMaterial)
+			var material = (Materials.StandardMaterial)resource;
+			var filename = resource.Name + ".mat.v";
+
+			var definition = material.Definition;
+			var shaderOptions = new List<string>();
+
+			if (material.IsSkinned)
+				shaderOptions.Add("SKINNED");
+
+			if (!string.IsNullOrWhiteSpace(definition.Get("diffuse-map")))
 			{
-				var material = (Materials.SplatMaterial)resource;
-				var filename = resource.Name + ".mat.v";
-
-				var definition = material.Definition;
-
-				if (!string.IsNullOrWhiteSpace(definition.Get("diffuse1")))
-					material.Diffuse1 = ResourceManager.Load<Texture>(definition.Get("diffuse1"), "srgb");
-				if (!string.IsNullOrWhiteSpace(definition.Get("diffuse2")))
-					material.Diffuse2 = ResourceManager.Load<Texture>(definition.Get("diffuse2"), "srgb");
-				if (!string.IsNullOrWhiteSpace(definition.Get("diffuse3")))
-					material.Diffuse3 = ResourceManager.Load<Texture>(definition.Get("diffuse3"), "srgb");
-				if (!string.IsNullOrWhiteSpace(definition.Get("diffuse4")))
-					material.Diffuse4 = ResourceManager.Load<Texture>(definition.Get("diffuse4"), "srgb");
-				if (!string.IsNullOrWhiteSpace(definition.Get("normal1")))
-					material.Normal1 = ResourceManager.Load<Texture>(definition.Get("normal1"));
-				if (!string.IsNullOrWhiteSpace(definition.Get("normal2")))
-					material.Normal2 = ResourceManager.Load<Texture>(definition.Get("normal2"));
-				if (!string.IsNullOrWhiteSpace(definition.Get("normal3")))
-					material.Normal3 = ResourceManager.Load<Texture>(definition.Get("normal3"));
-				if (!string.IsNullOrWhiteSpace(definition.Get("normal4")))
-					material.Normal4 = ResourceManager.Load<Texture>(definition.Get("normal4"));
-				if (!string.IsNullOrWhiteSpace(definition.Get("splat")))
-					material.Splat = ResourceManager.Load<Texture>(definition.Get("splat"));
-
-				var shader = DefaultSplatShader;
-				if (!string.IsNullOrEmpty(definition.Get("shader")))
-					shader = definition.Get("shader");
-
-				material.Shader = ResourceManager.Load<ShaderProgram>(shader);
-
-				onLoaded(material);
+				shaderOptions.Add("DIFFUSE_MAP");
+				material.Diffuse1 = ResourceManager.Load<Texture>(definition.Get("diffuse-map"), "srgb");
 			}
-			else
+			else if (!string.IsNullOrWhiteSpace(definition.Get("diffuse-cube")))
 			{
-				var material = (Materials.StandardMaterial)resource;
-				var filename = resource.Name + ".mat.v";
-
-				var definition = material.Definition;
-				var shaderOptions = new List<string>();
-
-				if (material.IsSkinned)
-					shaderOptions.Add("SKINNED");
-
-				if (!string.IsNullOrWhiteSpace(definition.Get("diffuse-map")))
-				{
-					shaderOptions.Add("DIFFUSE_MAP");
-					material.Diffuse= ResourceManager.Load<Texture>(definition.Get("diffuse-map"), "srgb");
-				}
-				else if (!string.IsNullOrWhiteSpace(definition.Get("diffuse-cube")))
-				{
-					shaderOptions.Add("DIFFUSE_CUBE");
-					material.DiffuseCube = ResourceManager.Load<Texture>(definition.Get("diffuse-cube"), "srgb");
-				}
-				else if (!string.IsNullOrWhiteSpace(definition.Get("diffuse-color")))
-				{
-					shaderOptions.Add("MATERIAL_DIFFUSE_COLOR");
-					material.DiffuseColor = Common.StringConverter.Parse<Vector3>(definition.Get("diffuse-color"));
-					material.DiffuseColor = material.DiffuseColor / 255.0f;
-				}
-
-				if (!string.IsNullOrWhiteSpace(definition.Get("normal-map")))
-				{
-					shaderOptions.Add("NORMAL_MAP");
-					material.Normal = ResourceManager.Load<Texture>(definition.Get("normal-map"), "srgb");
-				}
-
-				if (!string.IsNullOrWhiteSpace(definition.Get("metallic")))
-				{
-					shaderOptions.Add("MATERIAL_METALLIC_VALUE");
-					material.MetallicValue = Common.StringConverter.Parse<float>(definition.Get("metallic"));
-				}
-
-				if (!string.IsNullOrWhiteSpace(definition.Get("roughness-map")))
-				{
-					shaderOptions.Add("MATERIAL_ROUGHNESS_MAP");
-					material.Roughness = ResourceManager.Load<Texture>(definition.Get("roughness-map"), "srgb");
-				}
-				else if (!string.IsNullOrWhiteSpace(definition.Get("roughness")))
-				{
-					shaderOptions.Add("MATERIAL_ROUGHNESS_VALUE");
-					material.RoughnessValue = Common.StringConverter.Parse<float>(definition.Get("roughness"));
-				}
-
-				if (!string.IsNullOrWhiteSpace(definition.Get("specular")))
-				{
-					shaderOptions.Add("MATERIAL_SPECULAR_VALUE");
-					material.SpecularValue = Common.StringConverter.Parse<float>(definition.Get("specular"));
-				}
-
-				if (!string.IsNullOrWhiteSpace(definition.Get("uv-animation")))
-				{
-					shaderOptions.Add("ANIM_UV");
-					material.UvAnimation = Common.StringConverter.Parse<Vector2>(definition.Get("uv-animation6"));
-				}
-
-				if (!string.IsNullOrWhiteSpace(definition.Get("lighting-mode")))
-				{
-					var mode = Common.StringConverter.Parse<LightingMode>(definition.Get("lighting-mode"));
-					if (mode == LightingMode.Unlit)
-					{
-						shaderOptions.Add("UNLIT");
-					}
-				}
-
-				var shader = DefaultShader;
-				if (!string.IsNullOrEmpty(definition.Get("shader")))
-					shader = definition.Get("shader");
-
-				material.Shader = ResourceManager.Load<ShaderProgram>(shader, shaderOptions.Join(","));
-
-				onLoaded(material);
+				shaderOptions.Add("DIFFUSE_CUBE");
+				material.DiffuseCube = ResourceManager.Load<Texture>(definition.Get("diffuse-cube"), "srgb");
 			}
+			else if (!string.IsNullOrWhiteSpace(definition.Get("diffuse-color")))
+			{
+				shaderOptions.Add("MATERIAL_DIFFUSE_COLOR");
+				material.DiffuseColor = Common.StringConverter.Parse<Vector3>(definition.Get("diffuse-color"));
+				material.DiffuseColor = material.DiffuseColor / 255.0f;
+			}
+
+			if (!string.IsNullOrWhiteSpace(definition.Get("normal-map")))
+			{
+				shaderOptions.Add("NORMAL_MAP");
+				material.Normal1 = ResourceManager.Load<Texture>(definition.Get("normal-map"));
+			}
+
+			if (!string.IsNullOrEmpty(definition.Get("diffuse-splat-1")))
+			{
+				shaderOptions.Add("SPLAT");
+				material.Diffuse1 = ResourceManager.Load<Texture>(definition.Get("diffuse-splat-1"), "srgb");
+				material.Diffuse2 = ResourceManager.Load<Texture>(definition.Get("diffuse-splat-2"), "srgb");
+				material.Diffuse3 = ResourceManager.Load<Texture>(definition.Get("diffuse-splat-3"), "srgb");
+				material.Diffuse4 = ResourceManager.Load<Texture>(definition.Get("diffuse-splat-4"), "srgb");
+
+				material.Normal1 = ResourceManager.Load<Texture>(definition.Get("normal-splat-1"));
+				material.Normal2 = ResourceManager.Load<Texture>(definition.Get("normal-splat-2"));
+				material.Normal3 = ResourceManager.Load<Texture>(definition.Get("normal-splat-3"));
+				material.Normal4 = ResourceManager.Load<Texture>(definition.Get("normal-splat-4"));
+
+				material.Splat = ResourceManager.Load<Texture>(definition.Get("splat-map"), "srgb");
+			}
+
+			if (!string.IsNullOrWhiteSpace(definition.Get("metallic")))
+			{
+				shaderOptions.Add("MATERIAL_METALLIC_VALUE");
+				material.MetallicValue = Common.StringConverter.Parse<float>(definition.Get("metallic"));
+			}
+
+			if (!string.IsNullOrWhiteSpace(definition.Get("roughness-map")))
+			{
+				shaderOptions.Add("MATERIAL_ROUGHNESS_MAP");
+				material.Roughness = ResourceManager.Load<Texture>(definition.Get("roughness-map"), "srgb");
+			}
+			else if (!string.IsNullOrWhiteSpace(definition.Get("roughness")))
+			{
+				shaderOptions.Add("MATERIAL_ROUGHNESS_VALUE");
+				material.RoughnessValue = Common.StringConverter.Parse<float>(definition.Get("roughness"));
+			}
+
+			if (!string.IsNullOrWhiteSpace(definition.Get("specular")))
+			{
+				shaderOptions.Add("MATERIAL_SPECULAR_VALUE");
+				material.SpecularValue = Common.StringConverter.Parse<float>(definition.Get("specular"));
+			}
+
+			if (!string.IsNullOrWhiteSpace(definition.Get("uv-animation")))
+			{
+				shaderOptions.Add("ANIM_UV");
+				material.UvAnimation = Common.StringConverter.Parse<Vector2>(definition.Get("uv-animation"));
+			}
+
+			if (!string.IsNullOrWhiteSpace(definition.Get("lighting-mode")))
+			{
+				var mode = Common.StringConverter.Parse<LightingMode>(definition.Get("lighting-mode"));
+				if (mode == LightingMode.Unlit)
+				{
+					shaderOptions.Add("UNLIT");
+				}
+			}
+
+			var shader = DefaultShader;
+			if (!string.IsNullOrEmpty(definition.Get("shader")))
+				shader = definition.Get("shader");
+
+			material.Shader = ResourceManager.Load<ShaderProgram>(shader, shaderOptions.Aggregate((a, b) => a + "," + b));
+
+			onLoaded(material);
 		}
 
 		public void Unload(Common.Resource resource)

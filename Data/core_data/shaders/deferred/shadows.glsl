@@ -182,7 +182,7 @@ float get_shadows(sampler2DShadow shadowMap, float nDotL, vec3 viewPos, mat4x4 i
 	if (nDotL <= 0)
 		return 0;
 		
-	float bias = shadowBias;
+	float bias = 0.1;
 	
 	bias = shadowBias * tan(acos(nDotL));
 	bias = clamp(bias, 0.0, shadowBias * 2.0);
@@ -194,7 +194,7 @@ float get_shadows_cube(samplerCubeShadow shadowMap, float nDotL, vec3 viewPos, m
 	if (nDotL <= 0)
 		return 0;
 		
-	float bias = shadowBias;
+	float bias = 1;
 	
 	bias = shadowBias * tan(acos(nDotL));
 	bias = clamp(bias, 0.0, shadowBias * 2.0);

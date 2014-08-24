@@ -51,10 +51,11 @@
   <ItemGroup>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\OpenTK.1.1.1579.5793\lib\NET40\OpenTK.dll</HintPath>
+      <HintPath>..\packages\OpenTK.1.1.1589.5942\lib\NET40\OpenTK.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Text">
-      <HintPath>..\packages\ServiceStack.Text.3.9.59\lib\net35\ServiceStack.Text.dll</HintPath>
+    <Reference Include="ServiceStack.Text, Version=3.9.71.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ServiceStack.Text.3.9.71\lib\net35\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -72,6 +73,8 @@
     <Compile Include="Deferred\AmbientLightParams.cs" />
     <Compile Include="Deferred\CombineParams.cs" />
     <Compile Include="Deferred\DeferredRenderer.cs" />
+    <Compile Include="Deferred\FogParams.cs" />
+    <Compile Include="Deferred\FogSettings.cs" />
     <Compile Include="Deferred\FXAAParams.cs" />
     <Compile Include="Deferred\ShadowQuality.cs" />
     <Compile Include="Deferred\RenderShadowsParams.cs" />
@@ -92,7 +95,6 @@
     <Compile Include="Resources\BitmapFontLoader.cs" />
     <Compile Include="Resources\Material.cs" />
     <Compile Include="Resources\MaterialLoader.cs" />
-    <Compile Include="Resources\Materials\SplatMaterial.cs" />
     <Compile Include="Resources\Materials\StandardMaterial.cs" />
     <Compile Include="Resources\Mesh.cs" />
     <Compile Include="Resources\MeshLoader.cs" />
@@ -111,7 +113,9 @@
     <Compile Include="SkeletalAnimation\Transform.cs" />
     <Compile Include="SpriteBatch.cs" />
     <Compile Include="Stage.cs" />
+    <Compile Include="Terrain\Chunk.cs" />
     <Compile Include="Terrain\Terrain.cs" />
+    <Compile Include="Terrain\TerrainData.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Triton.Common\Triton.Common.csproj">

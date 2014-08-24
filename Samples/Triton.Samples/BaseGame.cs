@@ -15,8 +15,8 @@ namespace Triton.Samples
 		public BaseGame(string name)
 			: base(name)
 		{
-			Width = 1280;
-			Height = 720;
+			RequestedWidth = 1280;
+			RequestedHeight = 720;
 		}
 
 		protected KeyValuePair<FileSystemPath, IFileSystem> CreateMount(string mountPoint, IFileSystem fileSystem)
@@ -30,7 +30,8 @@ namespace Triton.Samples
 				CreateMount("/tmp/", new PhysicalFileSystem("./tmp")),
 				CreateMount("/", new MergedFileSystem(
 					new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/core_data/")),
-					new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/samples_data/"))
+					new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/samples_data/")),
+					new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/no_dist/"))
 					))
 				);
 		}
@@ -70,9 +71,9 @@ namespace Triton.Samples
 			base.RenderUI(deltaTime);
 
 			var offsetY = 2;
-			DebugFont.DrawText(DebugSprite, new Vector2(4, Height - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] FXAA: {0}", DeferredRenderer.EnableFXAA ? "Enabled" : "Disabled");
-			DebugFont.DrawText(DebugSprite, new Vector2(4, Height - DebugFont.LineHeight * offsetY++), Vector4.One, "[c] Shadow Quality: {0}", DeferredRenderer.ShadowQuality);
-			DebugFont.DrawText(DebugSprite, new Vector2(4, Height - DebugFont.LineHeight * offsetY++), Vector4.One, "[v] Shadows: {0}", DeferredRenderer.EnableShadows ? "Enabled" : "Disabled");
+			DebugFont.DrawText(DebugSprite, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] FXAA: {0}", DeferredRenderer.EnableFXAA ? "Enabled" : "Disabled");
+			DebugFont.DrawText(DebugSprite, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[c] Shadow Quality: {0}", DeferredRenderer.ShadowQuality);
+			DebugFont.DrawText(DebugSprite, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[v] Shadows: {0}", DeferredRenderer.EnableShadows ? "Enabled" : "Disabled");
 		}
 	}
 }

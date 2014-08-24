@@ -12,6 +12,7 @@ namespace Triton.Graphics.Deferred
 		public int SamplerGBuffer0 = 0;
 		public int SamplerGBuffer1 = 0;
 		public int SamplerGBuffer3 = 0;
+		public int SamplerGBuffer4 = 0;
 		public int AmbientColor = 0;
 	}
 }

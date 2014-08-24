@@ -12,13 +12,15 @@ namespace Triton.Renderer
 		public readonly VertexPointerType Type;
 		public readonly byte Count;
 		public readonly short Offset;
+		public readonly short Divisor;
 
-		public VertexFormatElement(VertexFormatSemantic semantic, VertexPointerType type, byte count, short offset)
+		public VertexFormatElement(VertexFormatSemantic semantic, VertexPointerType type, byte count, short offset, short divisor = 0)
 		{
 			Semantic = semantic;
 			Type = type;
 			Count = count;
 			Offset = offset;
+			Divisor = divisor;
 		}
 	}
 }

@@ -34,8 +34,8 @@ vec4 blur(vec2 texScale, float sigma) {
 	for (int i = -6; i < 6; i++) {
 		float weight = calc_gaussian_weight(i, sigma);
 		vec2 tc = texCoord + (vec2(i) / textureSize) * texScale;
-		vec4 sample = texture2D(samplerScene, tc);
-		color += sample * weight;
+		vec4 s = texture2D(samplerScene, tc);
+		color += s * weight;
 	}
 	
 	return color;

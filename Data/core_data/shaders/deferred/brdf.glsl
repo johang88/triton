@@ -1,3 +1,4 @@
+#define OREN_NAYAR
 
 vec3 get_diffuse(vec3 diffuseColor, vec3 normal, vec3 viewer, vec3 light, float roughness) {
 #ifdef OREN_NAYAR

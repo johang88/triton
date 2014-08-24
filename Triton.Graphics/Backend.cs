@@ -74,6 +74,9 @@ namespace Triton.Graphics
 		public readonly int DefaultSamplerNoFiltering;
 		public readonly int DefaultSamplerMipMapNearest;
 
+		public int Width { get { return Window.Width; } }
+		public int Height { get { return Window.Height; } }
+
 		public Backend(ResourceManager resourceManager, int width, int height, string title, bool fullscreen)
 		{
 			if (resourceManager == null)
@@ -85,10 +88,11 @@ namespace Triton.Graphics
 
 			// Create the main rendering window
 			Window = new NativeWindow(width, height, title, fullscreen ? GameWindowFlags.Fullscreen : GameWindowFlags.Default, graphicsMode, DisplayDevice.Default);
+
 			Window.Visible = true;
 			Window.Closing += Window_Closing;
 
-			Log.WriteLine("Window created @ {0}x{1} {2}", width, height, fullscreen ? "fullscreen" : "windowed");
+			Log.WriteLine("Window created @ {0}x{1} {2}", Window.Width, Window.Height, fullscreen ? "fullscreen" : "windowed");
 
 			// Setup the render system
 			RenderSystem = new Renderer.RenderSystem(Window.WindowInfo, ProcessQueue.Enqueue);
@@ -680,20 +684,6 @@ namespace Triton.Graphics
 		public BatchBuffer CreateBatchBuffer(Renderer.VertexFormat vertexFormat = null, int initialCount = 128)
 		{
 			return new BatchBuffer(RenderSystem, vertexFormat, initialCount);
-		}
-
-		public int CreateMesh<T, T2>(int triangleCount, Renderer.VertexFormat vertexFormat, T[] vertexData, T2[] indexData, bool stream)
-			where T : struct
-			where T2 : struct
-		{
-			return RenderSystem.CreateMesh(triangleCount, vertexFormat, vertexData, indexData, stream, null);
-		}
-
-		public void UpdateMesh<T, T2>(int handle, int triangleCount, Renderer.VertexFormat vertexFormat, T[] vertexData, T2[] indexData, bool stream)
-			where T : struct
-			where T2 : struct
-		{
-			RenderSystem.SetMeshData(handle, vertexFormat, triangleCount, vertexData, indexData, stream, null);
 		}
 
 		public Resources.Texture CreateTexture(string name, int width, int height, PixelFormat pixelFormat, PixelInternalFormat interalFormat, byte[] data)

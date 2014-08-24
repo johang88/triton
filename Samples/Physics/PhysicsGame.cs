@@ -90,13 +90,15 @@ namespace Triton.Samples
 			}
 
 			// Light it
-			Stage.CreatePointLight(
-				position: new Vector3(0, 2, 0),
-				range: 9.0f,
-				color: new Vector3(0.85f, 0.8f, 0.9f),
-				castShadows: true,
-				intensity: 6
-				);
+			{
+				var sphere = GameWorld.CreateGameObject();
+				sphere.Position = new Vector3(0, 2.5f, 2);
+				sphere.Scale = new Vector3(1, 1, 1);
+				sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = "/materials/light_sphere", CastShadows = false });
+				sphere.AddComponent(new PointLight { Color = new Vector3(1f, 0.8f, 0.5f), Intensity = 15 });
+				sphere.AddComponent(new SphereRigidBody { Radius = 0.7f });
+				GameWorld.Add(sphere);
+			}
 
 			DebugFlags |= Game.DebugFlags.RenderStats;
 		}

@@ -22,6 +22,9 @@ namespace Triton.Graphics.Resources
 	{
 		public Material Material;
 		public float BoundingSphereRadius;
+
+		public int VertexBufferHandle;
+		public int IndexBufferHandle;
 		public int Handle;
 	}
 }

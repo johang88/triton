@@ -16,6 +16,8 @@ namespace Triton.Graphics
 		public Vector3 AmbientColor = new Vector3(0.2f, 0.2f, 0.2f);
 		public Vector4 ClearColor = Vector4.Zero;
 
+		public MeshInstance Sky = null;
+
 		public Stage(Common.ResourceManager resourceManager)
 		{
 			if (resourceManager == null)
@@ -39,6 +41,16 @@ namespace Triton.Graphics
 			Meshes.Add(instance);
 
 			return instance;
+		}
+
+		public MeshInstance SetSkyBox(string mesh, string parameters = "")
+		{
+			Sky = new MeshInstance
+			{
+				Mesh = ResourceManager.Load<Resources.Mesh>(mesh, parameters)
+			};
+
+			return Sky;
 		}
 
 		public void RemoveMesh(MeshInstance mesh)

@@ -31,6 +31,7 @@ namespace Triton.Renderer
 
 		private readonly Textures.TextureManager TextureManager;
 		private readonly Meshes.MeshManager MeshManager;
+		private readonly Meshes.BufferManager BufferManager;
 		private readonly Shaders.ShaderManager ShaderManager;
 		private readonly RenderTargets.RenderTargetManager RenderTargetManager;
 		private readonly RenderStates.RenderStateManager RenderStateManager;
@@ -63,7 +64,8 @@ namespace Triton.Renderer
 			Common.Log.WriteLine(" - FSAA Samples: {0}", Context.GraphicsMode.Samples);
 
 			TextureManager = new Textures.TextureManager();
-			MeshManager = new Meshes.MeshManager();
+			BufferManager = new Meshes.BufferManager();
+			MeshManager = new Meshes.MeshManager(BufferManager);
 			ShaderManager = new Shaders.ShaderManager();
 			RenderTargetManager = new RenderTargets.RenderTargetManager();
 			RenderStateManager = new RenderStates.RenderStateManager();
@@ -90,6 +92,7 @@ namespace Triton.Renderer
 			SamplerManager.Dispose();
 			TextureManager.Dispose();
 			MeshManager.Dispose();
+			BufferManager.Dispose();
 			ShaderManager.Dispose();
 			RenderTargetManager.Dispose();
 
@@ -159,49 +162,103 @@ namespace Triton.Renderer
 			GL.GenerateMipmap((GenerateMipmapTarget)(int)target);
 		}
 
-		public int CreateMesh<T, T2>(int triangleCount, VertexFormat vertexFormat, T[] vertexData, T2[] indexData, bool stream, OnLoadedCallback loadedCallback)
+		public int CreateBuffer(BufferTarget target, VertexFormat vertexFormat = null)
+		{
+			return BufferManager.Create(target, vertexFormat);
+		}
+
+		public void DestroyBuffer(int handle)
+		{
+			AddToWorkQueue(() => BufferManager.Destroy(handle));
+		}
+
+		public void SetBufferData<T>(int handle, T[] data, bool stream)
 			where T : struct
-			where T2 : struct
+		{
+			AddToWorkQueue(() =>
+			{
+				BufferManager.SetData(handle, data, stream);
+			});
+		}
+
+		public void SetBufferDataDirect(int handle, IntPtr length, IntPtr data, bool stream)
+		{
+			BufferManager.SetDataDirect(handle, length, data, stream);
+		}
+
+		public int CreateMesh(int triangleCount, int vertexBuffer, int indexBuffer, OnLoadedCallback loadedCallback)
 		{
 			var handle = MeshManager.Create();
-			SetMeshData(handle, vertexFormat, triangleCount, vertexData, indexData, stream, loadedCallback);
+
+			AddToWorkQueue(() =>
+			{
+				MeshManager.Initialize(handle, triangleCount, vertexBuffer, indexBuffer);
+
+				if (loadedCallback != null)
+					loadedCallback(handle, true, "");
+			});
 
 			return handle;
 		}
 
 		public void DestroyMesh(int handle)
 		{
-			AddToWorkQueue(() => MeshManager.Destroy(handle));
-		}
-
-		public void SetMeshData<T, T2>(int handle, VertexFormat vertexFormat, int triangleCount, T[] vertexData, T2[] indexData, bool stream, OnLoadedCallback loadedCallback)
-			where T : struct
-			where T2 : struct
-		{
-			AddToWorkQueue(() =>
+			AddToWorkQueue(() => 
 			{
-				MeshManager.SetData(handle, vertexFormat, triangleCount, vertexData, indexData, stream);
+				int vertexBufferId, indexBufferId;
+				if (MeshManager.GetMeshData(handle, out vertexBufferId, out indexBufferId))
+				{
+					BufferManager.Destroy(vertexBufferId);
+					BufferManager.Destroy(indexBufferId);
+				}
 
-				if (loadedCallback != null)
-					loadedCallback(handle, true, "");
+				MeshManager.Destroy(handle);
 			});
 		}
 
 		public void SetMeshDataDirect(int handle, int triangleCount, IntPtr vertexDataLength, IntPtr indexDataLength, IntPtr vertexData, IntPtr indexData, bool stream)
 		{
-			MeshManager.SetDataDirect(handle, triangleCount, vertexDataLength, indexDataLength, vertexData, indexData, stream);
+			int vertexBufferId, indexBufferId;
+			MeshManager.GetMeshData(handle, out vertexBufferId, out indexBufferId);
+
+			//BufferManager.SetDataDirect(vertexBufferId, vertexDataLength, vertexData, stream);
+			//BufferManager.SetDataDirect(indexBufferId, indexDataLength, indexData, stream);
+
+			//MeshManager.SetTriangleCount(handle, triangleCount);
+		}
+
+		public void SetIndexBuffer(int handle, int indexBufferHandle)
+		{
+			AddToWorkQueue(() =>
+			{
+				MeshManager.SetIndexBuffer(handle, indexBufferHandle);
+			});
+		}
+
+		public void MeshSetTriangleCount(int handle, int triangleCount, bool queue)
+		{
+			if (queue)
+			{
+				AddToWorkQueue(() => MeshManager.SetTriangleCount(handle, triangleCount));
+			}
+			else
+			{
+				MeshManager.SetTriangleCount(handle, triangleCount);
+			}
 		}
 
 		public void RenderMesh(int handle)
 		{
-			int triangleCount, vertexArrayObjectId, indexBufferId;
+			int triangleCount, vertexArrayObjectId;
 
-			MeshManager.GetMeshData(handle, out triangleCount, out vertexArrayObjectId, out indexBufferId);
+			MeshManager.GetRenderData(handle, out triangleCount, out vertexArrayObjectId);
 			if (triangleCount <= 0)
 				return;
 
 			GL.BindVertexArray(vertexArrayObjectId);
 			GL.DrawElements(PrimitiveType.Triangles, triangleCount * 3, DrawElementsType.UnsignedInt, IntPtr.Zero);
+
+			RenderSystem.CheckGLError();
 		}
 
 		public void BeginScene(int renderTargetHandle, int width, int height)
@@ -336,7 +393,7 @@ namespace Triton.Renderer
 					if (attachment.AttachmentPoint == RenderTargets.Definition.AttachmentPoint.Color || definition.RenderDepthToTexture)
 					{
 						var target = TextureTarget.Texture2D;
-						
+
 						if (definition.RenderToCubeMap)
 						{
 							target = TextureTarget.TextureCubeMap;

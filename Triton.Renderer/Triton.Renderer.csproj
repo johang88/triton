@@ -51,7 +51,7 @@
   <ItemGroup>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\OpenTK.1.1.1579.5793\lib\NET40\OpenTK.dll</HintPath>
+      <HintPath>..\packages\OpenTK.1.1.1589.5942\lib\NET40\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -64,9 +64,11 @@
   <ItemGroup>
     <Compile Include="BlendingFactorDest.cs" />
     <Compile Include="BlendingFactorSrc.cs" />
+    <Compile Include="BufferTarget.cs" />
     <Compile Include="CullFaceMode.cs" />
     <Compile Include="DDS\LoaderDDS.cs" />
     <Compile Include="DepthFunction.cs" />
+    <Compile Include="Meshes\BufferManager.cs" />
     <Compile Include="Meshes\MeshManager.cs" />
     <Compile Include="RenderStates\RenderStateManager.cs" />
     <Compile Include="RenderSystem.cs" />
