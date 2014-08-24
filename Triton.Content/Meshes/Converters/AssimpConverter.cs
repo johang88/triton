@@ -14,12 +14,12 @@ namespace Triton.Content.Meshes.Converters
 	{
 		public Mesh Import(string filename)
 		{
-			using (var importer = new AssimpImporter())
+			using (var importer = new AssimpContext())
 			{
-				importer.AttachLogStream(new LogStream((msg, userData) =>
-				{
-					Common.Log.WriteLine(msg);
-				}));
+				//importer.AttachLogStream(new LogStream((msg, userData) =>
+				//{
+				//	Common.Log.WriteLine(msg);
+				//}));
 
 				var mesh = new Mesh();
 
@@ -50,7 +50,7 @@ namespace Triton.Content.Meshes.Converters
 						continue;
 					}
 
-					if (meshToImport.TextureCoordsChannelCount == 0)
+					if (meshToImport.TextureCoordinateChannelCount == 0)
 					{
 						Common.Log.WriteLine("{0}:{1} does not have any texture channels", filename, meshToImport.Name);
 						continue;
@@ -88,7 +88,7 @@ namespace Triton.Content.Meshes.Converters
 					var positions = meshToImport.Vertices;
 					var normals = meshToImport.Normals;
 					var tangents = meshToImport.Tangents;
-					var texCoords = meshToImport.GetTextureCoords(0);
+					var texCoords = meshToImport.TextureCoordinateChannels[0];
 
 					// Setup vertex data
 					for (var i = 0; i < vertices.Length; i++)
@@ -108,7 +108,7 @@ namespace Triton.Content.Meshes.Converters
 					{
 						var bones = meshToImport.Bones;
 
-						for (var i = 0; i < bones.Length; i++)
+						for (var i = 0; i < bones.Count; i++)
 						{
 							var bone = bones[i];
 
@@ -174,7 +174,7 @@ namespace Triton.Content.Meshes.Converters
 					{
 						using (var writer = new BinaryWriter(memStream))
 						{
-							var indices = meshToImport.GetIntIndices();
+							var indices = meshToImport.GetUnsignedIndices();
 							foreach (var index in indices)
 							{
 								writer.Write(index);
