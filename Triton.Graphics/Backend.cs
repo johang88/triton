@@ -359,6 +359,13 @@ namespace Triton.Graphics
 							RenderSystem.RenderMesh(meshHandle);
 						}
 						break;
+					case OpCode.DrawMeshInstanced:
+						{
+							var meshHandle = reader.ReadInt32();
+							var instanceCount = reader.ReadInt32();
+							RenderSystem.RenderMeshInstanced(meshHandle, instanceCount);
+						}
+						break;
 					case OpCode.UpdateMesh:
 						{
 							var meshHandle = reader.ReadInt32();
@@ -621,6 +628,18 @@ namespace Triton.Graphics
 		}
 
 		/// <summary>
+		/// Draw an instanced mesh.
+		/// </summary>
+		/// <param name="handle"></param>
+		/// <param name="instanceCount"></param>
+		public void DrawMeshInstanced(int handle, int instanceCount)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.DrawMeshInstanced);
+			PrimaryBuffer.Writer.Write(handle);
+			PrimaryBuffer.Writer.Write(instanceCount);
+		}
+
+		/// <summary>
 		/// Uploads a mesh inline in the command stream, UpdateMesh() is preferred if it not neccecary to change a mesh while rendering.
 		/// </summary>
 		public void UpdateMeshInline(int handle, int triangleCount, int vertexCount, int indexCount, float[] vertexData, int[] indexData, bool stream)
@@ -739,6 +758,7 @@ namespace Triton.Graphics
 			BindShaderVariableVector4Array,
 			UpdateMesh,
 			DrawMesh,
+			DrawMeshInstanced,
 			GenerateMips
 		}
 

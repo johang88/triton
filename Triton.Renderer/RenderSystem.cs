@@ -254,6 +254,20 @@ namespace Triton.Renderer
 			RenderSystem.CheckGLError();
 		}
 
+		public void RenderMeshInstanced(int handle, int instanceCount)
+		{
+			int triangleCount, vertexArrayObjectId;
+
+			MeshManager.GetRenderData(handle, out triangleCount, out vertexArrayObjectId);
+			if (triangleCount <= 0)
+				return;
+
+			GL.BindVertexArray(vertexArrayObjectId);
+			GL.DrawElementsInstanced(PrimitiveType.Triangles, triangleCount * 3, DrawElementsType.UnsignedInt, IntPtr.Zero, instanceCount);
+			
+			RenderSystem.CheckGLError();
+		}
+
 		public void BeginScene(int renderTargetHandle, int width, int height)
 		{
 			BindRenderTarget(renderTargetHandle);
