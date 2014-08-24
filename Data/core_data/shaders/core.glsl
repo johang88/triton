@@ -7,6 +7,8 @@
 #define ATTRIB_COLOR 5
 #define ATTRIB_BONE_INDEX 6
 #define ATTRIB_BONE_WEIGHT 7
+// NOTE: Is a 4x4 matrix so it takes up 4 slots
+#define ATTRIB_INSTANCE_TRANSFORM 8
 
 #define PI 3.14159265358979323846264
 #define PI_OVER_FOUR PI/4
