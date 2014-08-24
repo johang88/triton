@@ -80,7 +80,7 @@ namespace Triton.Samples
 			}
 
 			//Stage.AddMesh("/models/skybox");
-			Stage.SetSkyBox("/models/skybox");
+			//Stage.SetSkyBox("/models/skybox");
 
 			DebugFlags |= Game.DebugFlags.RenderStats;
 		}
