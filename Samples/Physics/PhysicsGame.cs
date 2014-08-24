@@ -27,14 +27,6 @@ namespace Triton.Samples
 		{
 		}
 
-		protected override SharpFileSystem.IFileSystem MountFileSystem()
-		{
-			return new SharpFileSystem.FileSystems.MergedFileSystem(
-				new SharpFileSystem.FileSystems.PhysicalFileSystem("../Data/core_data/"),
-				new SharpFileSystem.FileSystems.PhysicalFileSystem("../Data/samples_data/")
-				);
-		}
-
 		protected override void LoadResources()
 		{
 			base.LoadResources();
