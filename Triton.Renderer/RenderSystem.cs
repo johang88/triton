@@ -205,13 +205,6 @@ namespace Triton.Renderer
 		{
 			AddToWorkQueue(() => 
 			{
-				int vertexBufferId, indexBufferId;
-				if (MeshManager.GetMeshData(handle, out vertexBufferId, out indexBufferId))
-				{
-					BufferManager.Destroy(vertexBufferId);
-					BufferManager.Destroy(indexBufferId);
-				}
-
 				MeshManager.Destroy(handle);
 			});
 		}

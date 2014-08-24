@@ -80,7 +80,7 @@ namespace Triton.Renderer.Meshes
 
 			var id = ++Handles[index].Id;
 			Handles[index].Initialized = false;
-			Handles[index].VertexBufferID = -1;
+			Handles[index].VertexBufferID = null;
 			Handles[index].IndexBufferID = -1;
 
 			return CreateHandle(index, id);
@@ -110,6 +110,14 @@ namespace Triton.Renderer.Meshes
 
 		public void Initialize(int handle, int triangleCount, int vertexBufferId, int indexBufferId)
 		{
+			Initialize(handle, triangleCount, new int[] { vertexBufferId }, indexBufferId);
+		}
+
+		public void Initialize(int handle, int triangleCount, int[] vertexBufferId, int indexBufferId)
+		{
+			if (vertexBufferId.Length == 0)
+				throw new ArgumentException("missing vertex buffer");
+
 			int index, id;
 			ExtractHandle(handle, out index, out id);
 
@@ -126,14 +134,17 @@ namespace Triton.Renderer.Meshes
 			GL.GenVertexArrays(1, out Handles[index].VertexArrayObjectID);
 			GL.BindVertexArray(Handles[index].VertexArrayObjectID);
 
-			BufferManager.Bind(Handles[index].VertexBufferID);
-			SetVertexFormat(BufferManager.GetVertexFormat(vertexBufferId));
-			
+			for (var i = 0; i < vertexBufferId.Length; i++)
+			{
+				BufferManager.Bind(Handles[index].VertexBufferID[i]);
+				SetVertexFormat(BufferManager.GetVertexFormat(vertexBufferId[i]));
+			}
+
 			BufferManager.Bind(Handles[index].IndexBufferID);
 			RenderSystem.CheckGLError();
 
 			GL.BindVertexArray(0);
-			BufferManager.Unbind(Handles[index].VertexBufferID);
+			BufferManager.Unbind(Handles[index].VertexBufferID[0]);
 			BufferManager.Unbind(Handles[index].IndexBufferID);
 
 			Handles[index].Initialized = true;
@@ -207,7 +218,7 @@ namespace Triton.Renderer.Meshes
 				return false;
 			}
 
-			vertexBufferId = Handles[index].VertexBufferID;
+			vertexBufferId = Handles[index].VertexBufferID[0];
 			indexBufferId = Handles[index].IndexBufferID;
 
 			return true;
@@ -219,7 +230,7 @@ namespace Triton.Renderer.Meshes
 			public short Id;
 
 			public int VertexArrayObjectID;
-			public int VertexBufferID;
+			public int[] VertexBufferID;
 			public int IndexBufferID;
 			public int TriangleCount;
 		}
