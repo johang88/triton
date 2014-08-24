@@ -98,6 +98,13 @@ namespace Triton
 			res = new Vector3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
 		}
 
+		public static Vector3 Subtract(Vector3 a, Vector3 b)
+		{
+			Vector3 res;
+			Subtract(ref a, ref b, out res);
+			return res;
+		}
+
 		public static void Multiply(ref Vector3 a, float scalar, out Vector3 res)
 		{
 			res = new Vector3(a.X * scalar, a.Y * scalar, a.Z * scalar);
@@ -485,6 +492,16 @@ namespace Triton
 			q.Normalize();
 
 			return q;
+		}
+
+		public static float Distance(Vector3 a, Vector3 b)
+		{
+			return (b - a).Length;
+		}
+
+		public static float DistanceSquared(Vector3 a, Vector3 b)
+		{
+			return (b - a).LengthSquared;
 		}
 	}
 }

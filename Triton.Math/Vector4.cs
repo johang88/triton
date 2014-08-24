@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 namespace Triton
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct Vector4
+	public struct Vector4 : IEquatable<Vector4>
 	{
 		public float X;
 		public float Y;
@@ -181,6 +181,38 @@ namespace Triton
 			Quaternion.Multiply(ref t, ref i, out v);
 
 			result = new Vector4(v.X, v.Y, v.Z, v.W);
+		}
+
+		public static bool operator ==(Vector4 left, Vector4 right)
+		{
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(Vector4 left, Vector4 right)
+		{
+			return !left.Equals(right);
+		}
+
+		public override int GetHashCode()
+		{
+			return X.GetHashCode() ^ Y.GetHashCode() ^ Z.GetHashCode() ^ W.GetHashCode();
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (!(obj is Vector4))
+				return false;
+
+			return this.Equals((Vector4)obj);
+		}
+
+		public bool Equals(Vector4 other)
+		{
+			return
+				X == other.X &&
+				Y == other.Y &&
+				Z == other.Z &&
+				W == other.W;
 		}
 
 		public float this[int index]

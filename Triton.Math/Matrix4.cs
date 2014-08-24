@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 namespace Triton
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct Matrix4
+	public struct Matrix4 : IEquatable<Matrix4>
 	{
 		public Vector4 Row0;
 		public Vector4 Row1;
@@ -522,6 +522,38 @@ namespace Triton
 		public static Matrix4 Transpose(Matrix4 mat)
 		{
 			return new Matrix4(mat.Column0, mat.Column1, mat.Column2, mat.Column3);
+		}
+
+		public static bool operator ==(Matrix4 left, Matrix4 right)
+		{
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(Matrix4 left, Matrix4 right)
+		{
+			return !left.Equals(right);
+		}
+
+		public override int GetHashCode()
+		{
+			return Row0.GetHashCode() ^ Row1.GetHashCode() ^ Row2.GetHashCode() ^ Row3.GetHashCode();
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (!(obj is Matrix4))
+				return false;
+
+			return this.Equals((Matrix4)obj);
+		}
+
+		public bool Equals(Matrix4 other)
+		{
+			return
+				Row0 == other.Row0 &&
+				Row1 == other.Row1 &&
+				Row2 == other.Row2 &&
+				Row3 == other.Row3;
 		}
 
 		public float M11 { get { return Row0.X; } set { Row0.X = value; } }
