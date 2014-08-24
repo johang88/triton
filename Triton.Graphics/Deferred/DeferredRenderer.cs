@@ -591,7 +591,34 @@ namespace Triton.Graphics.Deferred
 			Matrix4 view, projection;
 			if (light.Type == LighType.Directional)
 			{
-				view = Matrix4.LookAt(camera.Position - light.Direction * light.Range, camera.Position, Vector3.UnitY);
+				var cameraFrustum = camera.GetFrustum();
+				var lightDir = -light.Direction;
+				lightDir.Normalize();
+
+				Matrix4 lightRotation = Matrix4.LookAt(Vector3.Zero, lightDir, Vector3.UnitY);
+				Vector3[] corners = cameraFrustum.GetCorners();
+
+				for (var i = 0; i < corners.Length; i++)
+				{
+					corners[i] = Vector3.Transform(corners[i], lightRotation);
+				}
+
+				var lightBox = BoundingBox.CreateFromPoints(corners);
+				var boxSize = lightBox.Max - lightBox.Min;
+				Vector3 halfBoxSize;
+				Vector3.Multiply(ref boxSize, 0.5f, out halfBoxSize);
+
+				var lightPosition = lightBox.Min + halfBoxSize;
+				lightPosition.Z = lightBox.Min.Z;
+
+				lightPosition = Vector3.Transform(lightPosition, Matrix4.Invert(lightRotation));
+
+				view = Matrix4.LookAt(lightPosition, lightPosition - lightDir, Vector3.UnitY);
+				projection = Matrix4.CreateOrthographic(boxSize.X, boxSize.Y, -boxSize.Z, boxSize.Z);
+				//clipPlane.X = -boxSize.Z;
+				//clipPlane.Y = boxSize.Z;
+
+				//view = Matrix4.LookAt(lightPosition, camera.Position, Vector3.UnitY);
 				projection = Matrix4.CreatePerspectiveFieldOfView(Math.Util.DegreesToRadians(20), renderTarget.Width / (float)renderTarget.Height, clipPlane.X, clipPlane.Y);
 				//projection = Matrix4.CreateOrthographic(renderTarget.Width, renderTarget.Height, clipPlane.X, clipPlane.Y * 10000);
 			}

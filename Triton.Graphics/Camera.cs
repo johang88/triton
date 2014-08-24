@@ -25,6 +25,8 @@ namespace Triton.Graphics
 		public Quaternion Orientation;
 		public Vector3 Position;
 
+		private BoundingFrustum Frustum = new BoundingFrustum(Matrix4.Identity);
+
 		public Camera(Vector2 viewport)
 		{
 			Viewport = viewport;
@@ -112,6 +114,18 @@ namespace Triton.Graphics
 			Position.X += x;
 			Position.Y += y;
 			Position.Z += z;
+		}
+
+		public BoundingFrustum GetFrustum()
+		{
+			Matrix4 view, projection;
+
+			GetViewMatrix(out view);
+			GetProjectionMatrix(out projection);
+
+			Frustum.Matrix = view * projection;
+
+			return Frustum;
 		}
 	}
 }
