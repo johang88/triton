@@ -7,7 +7,7 @@
     <ProjectGuid>{F49A11CD-2FCE-4247-9205-68F5E6B470B3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Triton.Math</RootNamespace>
+    <RootNamespace>Triton</RootNamespace>
     <AssemblyName>Triton.Math</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
