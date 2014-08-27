@@ -183,6 +183,7 @@ namespace Triton.Renderer
 
 		public void SetBufferDataDirect(int handle, IntPtr length, IntPtr data, bool stream)
 		{
+			GL.BindVertexArray(0);
 			BufferManager.SetDataDirect(handle, length, data, stream);
 		}
 
@@ -214,10 +215,11 @@ namespace Triton.Renderer
 			int vertexBufferId, indexBufferId;
 			MeshManager.GetMeshData(handle, out vertexBufferId, out indexBufferId);
 
-			//BufferManager.SetDataDirect(vertexBufferId, vertexDataLength, vertexData, stream);
-			//BufferManager.SetDataDirect(indexBufferId, indexDataLength, indexData, stream);
+			GL.BindVertexArray(0);
+			BufferManager.SetDataDirect(vertexBufferId, vertexDataLength, vertexData, stream);
+			BufferManager.SetDataDirect(indexBufferId, indexDataLength, indexData, stream);
 
-			//MeshManager.SetTriangleCount(handle, triangleCount);
+			MeshManager.SetTriangleCount(handle, triangleCount);
 		}
 
 		public void SetIndexBuffer(int handle, int indexBufferHandle)
