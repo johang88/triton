@@ -6,147 +6,153 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics
 {
-	public class Stage
-	{
-		private readonly Common.ResourceManager ResourceManager;
+    public class Stage
+    {
+        private readonly Common.ResourceManager ResourceManager;
 
-		private readonly List<MeshInstance> Meshes = new List<MeshInstance>();
-		private readonly List<Light> Lights = new List<Light>();
+        private readonly List<MeshInstance> Meshes = new List<MeshInstance>();
+        private readonly List<Light> Lights = new List<Light>();
 
-		public Vector3 AmbientColor = new Vector3(0.2f, 0.2f, 0.2f);
-		public Vector4 ClearColor = Vector4.Zero;
+        public Vector3 AmbientColor = new Vector3(0.2f, 0.2f, 0.2f);
+        public Vector4 ClearColor = Vector4.Zero;
 
-		public Stage(Common.ResourceManager resourceManager)
-		{
-			if (resourceManager == null)
-				throw new ArgumentNullException("resourceManager");
+        public Stage(Common.ResourceManager resourceManager)
+        {
+            if (resourceManager == null)
+                throw new ArgumentNullException("resourceManager");
 
-			ResourceManager = resourceManager;
-		}
+            ResourceManager = resourceManager;
+        }
 
-		public MeshInstance AddMesh(string mesh, string parameters = "")
-		{
-			return AddMesh(ResourceManager.Load<Resources.Mesh>(mesh, parameters));
-		}
+        public MeshInstance AddMesh(string mesh, string parameters = "")
+        {
+            return AddMesh(ResourceManager.Load<Resources.Mesh>(mesh, parameters));
+        }
 
-		public MeshInstance AddMesh(Resources.Mesh mesh)
-		{
-			var instance = new MeshInstance
-			{
-				Mesh = mesh
-			};
+        public MeshInstance AddMesh(Resources.Mesh mesh)
+        {
+            var instance = new MeshInstance
+            {
+                Mesh = mesh
+            };
 
-			Meshes.Add(instance);
+            Meshes.Add(instance);
 
-			return instance;
-		}
+            return instance;
+        }
 
-		public void RemoveMesh(MeshInstance mesh)
-		{
-			Meshes.Remove(mesh);
-			ResourceManager.Unload(mesh.Mesh);
-		}
+        public void RemoveMesh(MeshInstance mesh)
+        {
+            Meshes.Remove(mesh);
+            ResourceManager.Unload(mesh.Mesh);
+        }
 
-		public void Clear()
-		{
-			Meshes.Clear();
-			Lights.Clear();
-		}
+        public void Clear()
+        {
+            Meshes.Clear();
+            Lights.Clear();
+        }
 
         public void PrepareRenderOperations(Matrix4 viewMatrix, RenderOperations operations)
         {
-            foreach (var mesh in Meshes)
+            for (var i = 0; i < Meshes.Count; i++)
             {
-                foreach (var subMesh in mesh.Mesh.SubMeshes)
+                var meshInstance = Meshes[i];
+                var subMeshes = meshInstance.Mesh.SubMeshes;
+
+                for (var j = 0; j < subMeshes.Length; j++)
                 {
-                    operations.Add(subMesh.Handle, mesh.World, subMesh.Material, null, false);
+                    var subMesh = subMeshes[j];
+                    operations.Add(subMesh.Handle, meshInstance.World, subMesh.Material, null, false);
                 }
             }
         }
 
         public void PrepareRenderOperations(Vector3 position, float radius, RenderOperations operations)
         {
-            foreach (var mesh in Meshes)
+            for (var i = 0; i < Meshes.Count; i++)
             {
-                var world = mesh.World;
-				var meshPosition = Vector3.Transform(Vector3.Zero, world);
+                var meshInstance = Meshes[i];
+                var subMeshes = meshInstance.Mesh.SubMeshes;
+                var meshPosition = Vector3.Transform(Vector3.Zero, meshInstance.World);
 
-                if (Math.Intersections.SphereToSphere(ref position, radius, ref meshPosition, mesh.Mesh.BoundingSphereRadius))
+                if (Math.Intersections.SphereToSphere(ref position, radius, ref meshPosition, meshInstance.Mesh.BoundingSphereRadius))
                 {
-                    foreach (var subMesh in mesh.Mesh.SubMeshes)
+                    for (var j = 0; j < subMeshes.Length; j++)
                     {
-                        operations.Add(subMesh.Handle, mesh.World, subMesh.Material, null, false);
+                        var subMesh = subMeshes[j];
+                        operations.Add(subMesh.Handle, meshInstance.World, subMesh.Material, null, false);
                     }
                 }
             }
         }
 
-		public Light CreateDirectionalLight(Vector3 direction, Vector3 color, bool castShadows = false, float shadowRange = 64.0f, float shadowBias = 0.001f, float intensity = 1.0f)
-		{
-			var light = new Light
-			{
-				Type = LighType.Directional,
-				Direction = direction,
-				Color = color,
-				CastShadows = castShadows,
-				ShadowBias = shadowBias,
-				Range = shadowRange,
-				Intensity = intensity
-			};
+        public Light CreateDirectionalLight(Vector3 direction, Vector3 color, bool castShadows = false, float shadowRange = 64.0f, float shadowBias = 0.001f, float intensity = 1.0f)
+        {
+            var light = new Light
+            {
+                Type = LighType.Directional,
+                Direction = direction,
+                Color = color,
+                CastShadows = castShadows,
+                ShadowBias = shadowBias,
+                Range = shadowRange,
+                Intensity = intensity
+            };
 
-			Lights.Add(light);
+            Lights.Add(light);
 
-			return light;
-		}
+            return light;
+        }
 
-		public Light CreatePointLight(Vector3 position, float range, Vector3 color, bool castShadows = false, float shadowBias = 0.001f, float intensity = 1.0f)
-		{
-			var light = new Light
-			{
-				Type = LighType.PointLight,
-				Position = position,
-				Range = range,
-				Color = color,
-				CastShadows = castShadows,
-				ShadowBias = shadowBias,
-				Intensity = intensity
-			};
+        public Light CreatePointLight(Vector3 position, float range, Vector3 color, bool castShadows = false, float shadowBias = 0.001f, float intensity = 1.0f)
+        {
+            var light = new Light
+            {
+                Type = LighType.PointLight,
+                Position = position,
+                Range = range,
+                Color = color,
+                CastShadows = castShadows,
+                ShadowBias = shadowBias,
+                Intensity = intensity
+            };
 
-			Lights.Add(light);
+            Lights.Add(light);
 
-			return light;
-		}
+            return light;
+        }
 
-		public Light CreateSpotLight(Vector3 position, Vector3 direction, float innerAngle, float outerAngle, float range, Vector3 color, bool castShadows = false, float shadowBias = 0.001f, float intensity = 1.0f)
-		{
-			direction.Normalize();
-			var light = new Light
-			{
-				Type = LighType.SpotLight,
-				Position = position,
-				Range = range,
-				Color = color,
-				Direction = direction,
-				InnerAngle = innerAngle,
-				OuterAngle = outerAngle,
-				CastShadows = castShadows,
-				ShadowBias = shadowBias,
-				Intensity = intensity
-			};
+        public Light CreateSpotLight(Vector3 position, Vector3 direction, float innerAngle, float outerAngle, float range, Vector3 color, bool castShadows = false, float shadowBias = 0.001f, float intensity = 1.0f)
+        {
+            direction.Normalize();
+            var light = new Light
+            {
+                Type = LighType.SpotLight,
+                Position = position,
+                Range = range,
+                Color = color,
+                Direction = direction,
+                InnerAngle = innerAngle,
+                OuterAngle = outerAngle,
+                CastShadows = castShadows,
+                ShadowBias = shadowBias,
+                Intensity = intensity
+            };
 
-			Lights.Add(light);
+            Lights.Add(light);
 
-			return light;
-		}
+            return light;
+        }
 
-		public void RemoveLight(Light light)
-		{
-			Lights.Remove(light);
-		}
+        public void RemoveLight(Light light)
+        {
+            Lights.Remove(light);
+        }
 
-		public IReadOnlyCollection<Light> GetLights()
-		{
-			return Lights;
-		}
-	}
+        public IReadOnlyCollection<Light> GetLights()
+        {
+            return Lights;
+        }
+    }
 }
