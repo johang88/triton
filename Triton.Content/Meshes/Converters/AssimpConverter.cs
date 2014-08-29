@@ -83,6 +83,8 @@ namespace Triton.Content.Meshes.Converters
 						});
 					}
 
+					subMesh.TriangleCount = meshToImport.FaceCount;
+
 					Vertex[] vertices = new Vertex[meshToImport.VertexCount];
 
 					var positions = meshToImport.Vertices;
@@ -174,7 +176,7 @@ namespace Triton.Content.Meshes.Converters
 					{
 						using (var writer = new BinaryWriter(memStream))
 						{
-							var indices = meshToImport.GetUnsignedIndices();
+							var indices = meshToImport.GetIndices();
 							foreach (var index in indices)
 							{
 								writer.Write(index);
@@ -185,8 +187,14 @@ namespace Triton.Content.Meshes.Converters
 
 					if (model.HasMaterials)
 					{
-						var material = model.Materials[meshToImport.MaterialIndex];
-						subMesh.Material = material.Name;
+						var material = model.Materials[meshToImport.MaterialIndex].Name;
+
+						if (!material.StartsWith("/materials/"))
+						{
+							material = "/materials/" + material;
+						}
+
+						subMesh.Material = material;
 					}
 					else
 					{

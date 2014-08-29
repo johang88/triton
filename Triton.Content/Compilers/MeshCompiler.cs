@@ -26,6 +26,7 @@ namespace Triton.Content.Compilers
 			ImporterFactory = new Factory<string, IMeshImporter>();
 			ImporterFactory.Add(".xml", () => new Meshes.Converters.OgreXmlConverter());
 			ImporterFactory.Add(".dae", () => new Meshes.Converters.AssimpConverter());
+			ImporterFactory.Add(".fbx", () => new Meshes.Converters.AssimpConverter());
 		}
 
 		public void Compile(string inputPath, string outputPath, ContentData contentData)
