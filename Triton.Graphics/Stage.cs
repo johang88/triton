@@ -63,12 +63,12 @@ namespace Triton.Graphics
                 for (var j = 0; j < subMeshes.Length; j++)
                 {
                     var subMesh = subMeshes[j];
-                    operations.Add(subMesh.Handle, meshInstance.World, subMesh.Material, null, false);
+                    operations.Add(subMesh.Handle, meshInstance.World, subMesh.Material, null, false, meshInstance.CastShadows);
                 }
             }
         }
 
-        public void PrepareRenderOperations(Vector3 position, float radius, RenderOperations operations)
+        public void PrepareRenderOperations(Vector3 position, float radius, RenderOperations operations, bool shadowCastersOnly = false)
         {
             for (var i = 0; i < Meshes.Count; i++)
             {
@@ -76,12 +76,12 @@ namespace Triton.Graphics
                 var subMeshes = meshInstance.Mesh.SubMeshes;
                 var meshPosition = Vector3.Transform(Vector3.Zero, meshInstance.World);
 
-                if (Math.Intersections.SphereToSphere(ref position, radius, ref meshPosition, meshInstance.Mesh.BoundingSphereRadius))
+                if (meshInstance.CastShadows && Math.Intersections.SphereToSphere(ref position, radius, ref meshPosition, meshInstance.Mesh.BoundingSphereRadius))
                 {
                     for (var j = 0; j < subMeshes.Length; j++)
                     {
                         var subMesh = subMeshes[j];
-                        operations.Add(subMesh.Handle, meshInstance.World, subMesh.Material, null, false);
+                        operations.Add(subMesh.Handle, meshInstance.World, subMesh.Material, null, false, meshInstance.CastShadows);
                     }
                 }
             }

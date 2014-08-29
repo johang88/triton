@@ -29,5 +29,7 @@ namespace Triton.Graphics
 		/// Set to true if object is to be rendered using instancing, used to select correct shadow shaders etc
 		/// </summary>
 		public bool UseInstancing;
+
+        public bool CastShadows;
 	}
 }

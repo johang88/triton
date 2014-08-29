@@ -670,7 +670,7 @@ namespace Triton.Graphics.Deferred
 			viewProjection = projection;
 
             ShadowRenderOperations.Reset();
-            stage.PrepareRenderOperations(light.Position, light.Range * 2, ShadowRenderOperations);
+            stage.PrepareRenderOperations(light.Position, light.Range * 2, ShadowRenderOperations, true);
 
             RenderOperation[] operations;
             int count;

@@ -12,13 +12,14 @@ namespace Triton.Graphics
 		private readonly RenderOperation[] Operations = new RenderOperation[MaxOperations];
 		private int OperationsCount = 0;
 
-		public void Add(int meshHandle, Matrix4 world, Resources.Material material, SkeletalAnimation.SkeletonInstance skeleton = null, bool useInstancing = false)
+		public void Add(int meshHandle, Matrix4 world, Resources.Material material, SkeletalAnimation.SkeletonInstance skeleton = null, bool useInstancing = false, bool castShadows = true)
 		{
 			Operations[OperationsCount].MeshHandle = meshHandle;
 			Operations[OperationsCount].WorldMatrix = world;
 			Operations[OperationsCount].Material = material;
 			Operations[OperationsCount].Skeleton = skeleton;
 			Operations[OperationsCount].UseInstancing = useInstancing;
+            Operations[OperationsCount].CastShadows = castShadows;
             OperationsCount++;
 		}
 
