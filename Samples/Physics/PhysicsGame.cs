@@ -87,12 +87,15 @@ namespace Triton.Samples
 				sphere.Position = new Vector3(0, 2.5f, 2);
 				sphere.Scale = new Vector3(1, 1, 1);
 				sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = "/materials/light_sphere", CastShadows = false });
-				sphere.AddComponent(new PointLight { Color = new Vector3(1f, 0.8f, 0.5f), Intensity = 15 });
+				sphere.AddComponent(new PointLight { Color = new Vector3(1f, 0.8f, 0.5f), Intensity = 2 });
 				sphere.AddComponent(new SphereRigidBody { Radius = 0.7f });
 				GameWorld.Add(sphere);
 			}
 
 			DebugFlags |= Game.DebugFlags.RenderStats;
+
+            HDRRenderer.AdaptationRate = 2;
+            DeferredRenderer.ShadowQuality = Graphics.Deferred.ShadowQuality.Lowest;
 		}
 
 		protected override void Update(float frameTime)

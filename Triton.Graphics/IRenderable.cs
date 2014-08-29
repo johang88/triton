@@ -10,6 +10,4 @@ namespace Triton.Graphics
 	{
 		void AddRenderOperations(RenderOperations operations);
 	}
-
-	
 }

@@ -74,10 +74,10 @@ namespace Triton.Graphics.Deferred
 
 		public ShadowQuality ShadowQuality = ShadowQuality.High;
 
-		// Mesh list used for rendering, declared here to avoid GC
-		private List<MeshInstance> Meshes = new List<MeshInstance>();
-
 		public FogSettings FogSettings = new FogSettings();
+
+        private readonly RenderOperations RenderOperations = new RenderOperations();
+        private readonly RenderOperations ShadowRenderOperations = new RenderOperations();
 
 		public DeferredRenderer(Common.ResourceManager resourceManager, Backend backend, int width, int height)
 		{
@@ -304,38 +304,26 @@ namespace Triton.Graphics.Deferred
 		{
 			var modelViewProjection = Matrix4.Identity;
 
-			if (stage.Sky != null)
-			{
-				var world = Matrix4.CreateTranslation(camera.Position);
-				modelViewProjection = world * view * projection;
+            RenderOperations.Reset();
+            stage.PrepareRenderOperations(view, RenderOperations);
 
-				var worldView = world * view;
-				var itWorldView = Matrix4.Transpose(Matrix4.Invert(worldView));
+            RenderOperation[] operations;
+            int count;
+            RenderOperations.GetOperations(out operations, out count);
 
-				foreach (var subMesh in stage.Sky.Mesh.SubMeshes)
-				{
-					subMesh.Material.BindMaterial(Backend, EnvironmentMap, EnvironmentMapSpecular, camera, ref world, ref worldView, ref itWorldView, ref modelViewProjection, null, SkyRenderState);
-					Backend.DrawMesh(subMesh.Handle);
-					Backend.EndInstance();
-				}
-			}
+            for (var i = 0; i < count; i++)
+            {
+                var world = operations[i].WorldMatrix;
 
-			var meshes = stage.GetMeshes();
-			foreach (var mesh in meshes)
-			{
-				var world = mesh.World;
-				modelViewProjection = world * view * projection;
+                modelViewProjection = world * view * projection;
 
-				var worldView = world * view;
-				var itWorldView = Matrix4.Transpose(Matrix4.Invert(worldView));
+                var worldView = world * view;
+                var itWorldView = Matrix4.Transpose(Matrix4.Invert(worldView));
 
-				foreach (var subMesh in mesh.Mesh.SubMeshes)
-				{
-					subMesh.Material.BindMaterial(Backend, EnvironmentMap, EnvironmentMapSpecular, camera, ref world, ref worldView, ref itWorldView, ref modelViewProjection, mesh.Skeleton, 0);
-					Backend.DrawMesh(subMesh.Handle);
-					Backend.EndInstance();
-				}
-			}
+                operations[i].Material.BindMaterial(Backend, EnvironmentMap, EnvironmentMapSpecular, camera, ref world, ref worldView, ref itWorldView, ref modelViewProjection, operations[i].Skeleton, 0);
+                Backend.DrawMesh(operations[i].MeshHandle);
+                Backend.EndInstance();
+            }
 		}
 
 		private void RenderAmbientLight(Stage stage)
@@ -630,27 +618,27 @@ namespace Triton.Graphics.Deferred
 
 			viewProjection = view * projection;
 
-			var meshes = stage.GetMeshes();
-			foreach (var mesh in meshes)
-			{
-				if (!mesh.CastShadows)
-					continue;
+            ShadowRenderOperations.Reset();
+            stage.PrepareRenderOperations(view, ShadowRenderOperations);
 
-				var world = mesh.World;
+            RenderOperation[] operations;
+            int count;
+            RenderOperations.GetOperations(out operations, out count);
 
-				modelViewProjection = world * view * projection;
+            for (var i = 0; i < count; i++)
+            {
+                var world = operations[i].WorldMatrix;
 
-				foreach (var subMesh in mesh.Mesh.SubMeshes)
-				{
-					Backend.BeginInstance(RenderShadowsShader.Handle, new int[] { }, null, ShadowsRenderState);
-					Backend.BindShaderVariable(RenderShadowsParams.ModelViewProjection, ref modelViewProjection);
-					Backend.BindShaderVariable(RenderShadowsParams.ClipPlane, ref clipPlane);
+                modelViewProjection = world * view * projection;
 
-					Backend.DrawMesh(subMesh.Handle);
+                Backend.BeginInstance(RenderShadowsShader.Handle, new int[] { }, null, ShadowsRenderState);
+                Backend.BindShaderVariable(RenderShadowsParams.ModelViewProjection, ref modelViewProjection);
+                Backend.BindShaderVariable(RenderShadowsParams.ClipPlane, ref clipPlane);
 
-					Backend.EndInstance();
-				}
-			}
+                Backend.DrawMesh(operations[i].MeshHandle);
+
+                Backend.EndInstance();
+            }
 
 			Backend.EndPass();
 		}
@@ -681,29 +669,27 @@ namespace Triton.Graphics.Deferred
 
 			viewProjection = projection;
 
-			Meshes.Clear();
-			stage.GetMeshesInRadius(light.Position, light.Range, Meshes);
-			foreach (var mesh in Meshes)
-			{
-				if (!mesh.CastShadows)
-					continue;
+            ShadowRenderOperations.Reset();
+            stage.PrepareRenderOperations(light.Position, light.Range * 2, ShadowRenderOperations);
 
-				var world = mesh.World;
+            RenderOperation[] operations;
+            int count;
+            ShadowRenderOperations.GetOperations(out operations, out count);
 
-				foreach (var subMesh in mesh.Mesh.SubMeshes)
-				{
-					Backend.BeginInstance(RenderShadowsCubeShader.Handle, new int[] { }, null, ShadowsRenderState);
-					Backend.BindShaderVariable(RenderShadowsCubeParams.Model, ref world);
-					Backend.BindShaderVariable(RenderShadowsCubeParams.ClipPlane, ref clipPlane);
-					Backend.BindShaderVariable(RenderShadowsCubeParams.ViewProjectionMatrices, ref viewProjectionMatrices);
-					Backend.BindShaderVariable(RenderShadowsCubeParams.LightPosition, ref light.Position);
+            for (var i = 0; i < count; i++)
+            {
+                var world = operations[i].WorldMatrix;
 
-					Backend.DrawMesh(subMesh.Handle);
+                Backend.BeginInstance(RenderShadowsCubeShader.Handle, new int[] { }, null, ShadowsRenderState);
+                Backend.BindShaderVariable(RenderShadowsCubeParams.Model, ref world);
+                Backend.BindShaderVariable(RenderShadowsCubeParams.ClipPlane, ref clipPlane);
+                Backend.BindShaderVariable(RenderShadowsCubeParams.ViewProjectionMatrices, ref viewProjectionMatrices);
+                Backend.BindShaderVariable(RenderShadowsCubeParams.LightPosition, ref light.Position);
 
-					Backend.EndInstance();
-				}
-			}
+                Backend.DrawMesh(operations[i].MeshHandle);
 
+                Backend.EndInstance();
+            }
 			Backend.EndPass();
 		}
 	}

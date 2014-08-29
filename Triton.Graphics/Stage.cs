@@ -16,8 +16,6 @@ namespace Triton.Graphics
 		public Vector3 AmbientColor = new Vector3(0.2f, 0.2f, 0.2f);
 		public Vector4 ClearColor = Vector4.Zero;
 
-		public MeshInstance Sky = null;
-
 		public Stage(Common.ResourceManager resourceManager)
 		{
 			if (resourceManager == null)
@@ -43,16 +41,6 @@ namespace Triton.Graphics
 			return instance;
 		}
 
-		public MeshInstance SetSkyBox(string mesh, string parameters = "")
-		{
-			Sky = new MeshInstance
-			{
-				Mesh = ResourceManager.Load<Resources.Mesh>(mesh, parameters)
-			};
-
-			return Sky;
-		}
-
 		public void RemoveMesh(MeshInstance mesh)
 		{
 			Meshes.Remove(mesh);
@@ -65,24 +53,33 @@ namespace Triton.Graphics
 			Lights.Clear();
 		}
 
-		public IReadOnlyCollection<MeshInstance> GetMeshes()
-		{
-			return Meshes;
-		}
+        public void PrepareRenderOperations(Matrix4 viewMatrix, RenderOperations operations)
+        {
+            foreach (var mesh in Meshes)
+            {
+                foreach (var subMesh in mesh.Mesh.SubMeshes)
+                {
+                    operations.Add(subMesh.Handle, mesh.World, subMesh.Material, null, false);
+                }
+            }
+        }
 
-		public void GetMeshesInRadius(Vector3 position, float radius, List<MeshInstance> meshes)
-		{
-			foreach (var mesh in Meshes)
-			{
-				var world = mesh.World;
+        public void PrepareRenderOperations(Vector3 position, float radius, RenderOperations operations)
+        {
+            foreach (var mesh in Meshes)
+            {
+                var world = mesh.World;
 				var meshPosition = Vector3.Transform(Vector3.Zero, world);
 
-				if (Math.Intersections.SphereToSphere(ref position, radius, ref meshPosition, mesh.Mesh.BoundingSphereRadius))
-				{
-					meshes.Add(mesh);
-				}
-			}
-		}
+                if (Math.Intersections.SphereToSphere(ref position, radius, ref meshPosition, mesh.Mesh.BoundingSphereRadius))
+                {
+                    foreach (var subMesh in mesh.Mesh.SubMeshes)
+                    {
+                        operations.Add(subMesh.Handle, mesh.World, subMesh.Material, null, false);
+                    }
+                }
+            }
+        }
 
 		public Light CreateDirectionalLight(Vector3 direction, Vector3 color, bool castShadows = false, float shadowRange = 64.0f, float shadowBias = 0.001f, float intensity = 1.0f)
 		{
