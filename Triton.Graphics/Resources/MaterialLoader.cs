@@ -29,6 +29,12 @@ namespace Triton.Graphics.Resources
 		{
 			var filename = name + ".mat.v";
 
+			if (!FileSystem.FileExists(filename))
+			{
+				Common.Log.WriteLine(string.Format("Missing material {0}", filename), Common.LogLevel.Error);
+				filename = "/materials/default.mat.v";
+			}
+
 			using (var stream = FileSystem.OpenRead(filename))
 			using (var reader = new System.IO.StreamReader(stream))
 			{

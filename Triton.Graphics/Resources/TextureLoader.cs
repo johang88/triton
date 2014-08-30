@@ -38,6 +38,8 @@ namespace Triton.Graphics.Resources
 
 			if (!FileSystem.FileExists(filename))
 			{
+				Common.Log.WriteLine(string.Format("Missing texture {0}", filename), Common.LogLevel.Error);
+
 				if (resource.Name.EndsWith("_n"))
 					filename = "/textures/missing_n.dds";
 				else
