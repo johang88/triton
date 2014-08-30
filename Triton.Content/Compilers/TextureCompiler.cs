@@ -15,26 +15,15 @@ namespace Triton.Content.Compilers
 
 	public class TextureCompiler : ICompiler
 	{
-		public void Compile(string inputPath, string outputPath, ContentData contentData)
+		public void Compile(string inputPath, string outputPath, Database.ContentEntry contentData)
 		{
 			var filename = Path.GetFileNameWithoutExtension(inputPath);
 			var extension = Path.GetExtension(inputPath);
 
 			outputPath += ".dds";
 
-			TextureSettings settings;
-
-			if (contentData.Settings == null || !(contentData.Settings is TextureSettings))
-			{
-				settings = new TextureSettings();
-				contentData.Settings = settings;
-
-				settings.IsNormalMap = filename.EndsWith("_n");
-			}
-			else
-			{
-				settings = contentData.Settings as TextureSettings;
-			}
+			TextureSettings settings = new TextureSettings();
+			settings.IsNormalMap = filename.EndsWith("_n");
 
 			if (extension != ".dds")
 			{
