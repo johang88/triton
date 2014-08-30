@@ -27,8 +27,7 @@ namespace Triton.Content.Meshes.Converters
 				//importer.ZAxisRotation = (float)(System.Math.PI / 2.0);
 
 				var model = importer.ImportFile(filename, PostProcessSteps.CalculateTangentSpace | PostProcessSteps.Triangulate 
-					| PostProcessSteps.GenerateNormals | PostProcessSteps.LimitBoneWeights
-					| PostProcessSteps.GenerateUVCoords | PostProcessSteps.TransformUVCoords);
+					| PostProcessSteps.GenerateNormals | PostProcessSteps.LimitBoneWeights | PostProcessSteps.GenerateUVCoords);
 
 				foreach (var meshToImport in model.Meshes)
 				{
