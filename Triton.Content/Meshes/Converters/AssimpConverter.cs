@@ -24,9 +24,10 @@ namespace Triton.Content.Meshes.Converters
 				var mesh = new Mesh();
 
 				importer.SetConfig(new Assimp.Configs.VertexBoneWeightLimitConfig(4));
+				//importer.ZAxisRotation = (float)(System.Math.PI / 2.0);
 
 				var model = importer.ImportFile(filename, PostProcessSteps.CalculateTangentSpace | PostProcessSteps.Triangulate 
-					| PostProcessSteps.GenerateNormals | PostProcessSteps.PreTransformVertices | PostProcessSteps.LimitBoneWeights
+					| PostProcessSteps.GenerateNormals | PostProcessSteps.LimitBoneWeights
 					| PostProcessSteps.GenerateUVCoords | PostProcessSteps.TransformUVCoords);
 
 				foreach (var meshToImport in model.Meshes)
