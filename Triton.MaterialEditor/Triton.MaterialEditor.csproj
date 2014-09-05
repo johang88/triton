@@ -64,12 +64,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomNodes\Context.cs" />
     <Compile Include="CustomNodes\FloatConstNode.cs" />
     <Compile Include="CustomNodes\NormalMapNode.cs" />
     <Compile Include="CustomNodes\RootNode.cs" />
     <Compile Include="CustomNodes\TextureNode.cs" />
     <Compile Include="CustomNodes\Vector3ConstNode.cs" />
+    <Compile Include="CustomNodes\Vector4AddNode.cs" />
     <Compile Include="CustomNodes\Vector4ConstNode.cs" />
+    <Compile Include="CustomNodes\Vector4MulScalarNode.cs" />
     <Compile Include="DataTypes\ShaderData.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

@@ -35,6 +35,24 @@ namespace Triton.MaterialEditor
 			MouseLocation = e.Location;
 		}
 
+		private void processToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			RootNode.Process(0);
+		}
+
+		private void nodeGraphPanel1_onSelectionChanged(object sender, NodeGraphControl.NodeGraphPanelSelectionEventArgs args)
+		{
+			if (args.NewSelectionCount == 1)
+			{
+				propertyGrid1.SelectedObject = nodeGraphPanel1.View.SelectedItems[0];
+			}
+		}
+
+		private void nodeGraphPanel1_onSelectionCleared(object sender, NodeGraphControl.NodeGraphPanelSelectionEventArgs args)
+		{
+			propertyGrid1.SelectedObject = null;
+		}
+
 		private void floatToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
@@ -65,22 +83,16 @@ namespace Triton.MaterialEditor
 			this.nodeGraphPanel1.AddNode(new CustomNodes.NormalMapNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
-		private void nodeGraphPanel1_onSelectionChanged(object sender, NodeGraphControl.NodeGraphPanelSelectionEventArgs args)
+		private void addToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			if (args.NewSelectionCount == 1)
-			{
-				propertyGrid1.SelectedObject = nodeGraphPanel1.View.SelectedItems[0];
-			}
+			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
+			this.nodeGraphPanel1.AddNode(new CustomNodes.Vector4AddNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
-		private void nodeGraphPanel1_onSelectionCleared(object sender, NodeGraphControl.NodeGraphPanelSelectionEventArgs args)
+		private void multiplyScalarToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			propertyGrid1.SelectedObject = null;
-		}
-
-		private void processToolStripMenuItem_Click(object sender, EventArgs e)
-		{
-			RootNode.Process(0);
+			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
+			this.nodeGraphPanel1.AddNode(new CustomNodes.Vector4MulScalarNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 	}
 }

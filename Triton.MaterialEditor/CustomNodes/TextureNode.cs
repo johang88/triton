@@ -10,6 +10,8 @@ namespace Triton.MaterialEditor.CustomNodes
 {
 	public class TextureConstNode : NodeGraphNode
 	{
+		static int Counter = 0;
+		private int SamplerNumber = Counter++;
 		public string Value { get; set; }
 
 		public TextureConstNode(XmlTreeNode p_TreeNode, NodeGraphView p_View)
@@ -46,17 +48,33 @@ namespace Triton.MaterialEditor.CustomNodes
 
 		public override NodeGraphData Process(int connectorIndex)
 		{
-			var shader = "texture(samplerTest, texCoord)";
-			switch (connectorIndex)
-			{
-				case 1: shader += ".x"; break;
-				case 2: shader += ".y"; break;
-				case 3: shader += ".z"; break;
-				case 4: shader += ".w"; break;
-				default: break;
-			}
+			var samplerName = "sampler_" + Common.StringConverter.ToString(SamplerNumber);
+			var sample = "texture(" + samplerName + ", texCoord)";
+			string outputVar = "";
 
-			return new DataTypes.ShaderData(shader);
+			if (connectorIndex > 0)
+			{
+				outputVar = Context.NextVariable("f");
+				switch (connectorIndex)
+				{
+					case 1: sample += ".x";  break;
+					case 2: sample += ".y"; break;
+					case 3: sample += ".z"; break;
+					case 4: sample += ".w"; break;
+					default: break;
+				}
+			}
+			else
+			{
+				outputVar = Context.NextVariable("v");
+			}
+			
+			var statements = new List<string>()
+			{
+				string.Format("vec4 {0} = {1}", outputVar, sample),
+			};
+
+			return new DataTypes.ShaderData(statements, outputVar);
 		}
 	}
 }

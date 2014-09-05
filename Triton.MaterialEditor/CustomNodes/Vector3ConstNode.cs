@@ -40,12 +40,36 @@ namespace Triton.MaterialEditor.CustomNodes
 
 		public override NodeGraphData Process(int connectorIndex)
 		{
-			switch (connectorIndex)
+			if (connectorIndex > 0)
 			{
-				case 1: return new DataTypes.ShaderData(Common.StringConverter.ToString(Value.X));
-				case 2: return new DataTypes.ShaderData(Common.StringConverter.ToString(Value.Y));
-				case 3: return new DataTypes.ShaderData(Common.StringConverter.ToString(Value.Z));
-				default: return new DataTypes.ShaderData(Common.StringConverter.ToString(Value));
+				var outputVar = Context.NextVariable("f");
+				float value = 0;
+
+				switch (connectorIndex)
+				{
+					case 1: value = Value.X; break;
+					case 2: value = Value.Y; break;
+					case 3: value = Value.Z; break;
+					default: break;
+				}
+
+				var statements = new List<string>()
+				{
+					string.Format("float {0} = {1}", outputVar, Common.StringConverter.ToString(value)),
+				};
+
+				return new DataTypes.ShaderData(statements, outputVar);
+			}
+			else
+			{
+				var outputVar = Context.NextVariable("v");
+
+				var statements = new List<string>()
+				{
+					string.Format("vec3 {0} = vec3({1}, {2}, {3})", outputVar, Common.StringConverter.ToString(Value.X), Common.StringConverter.ToString(Value.Y), Common.StringConverter.ToString(Value.Z)),
+				};
+
+				return new DataTypes.ShaderData(statements, outputVar);
 			}
 		}
 

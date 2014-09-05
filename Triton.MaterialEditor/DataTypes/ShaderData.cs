@@ -9,11 +9,13 @@ namespace Triton.MaterialEditor.DataTypes
 {
 	public class ShaderData : NodeGraphData
 	{
-		public string Value { get; set; }
+		public List<string> Statements = new List<string>();
+		public string VarName { get; set; }
 
-		public ShaderData(string value)
+		public ShaderData(List<string> statements, string varName)
 		{
-			Value = value;
+			Statements = statements;
+			VarName = varName;
 		}
 	}
 }

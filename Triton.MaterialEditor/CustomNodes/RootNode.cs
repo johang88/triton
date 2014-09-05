@@ -36,10 +36,20 @@ namespace Triton.MaterialEditor.CustomNodes
 		{
 			NodeGraphListData inputData = this.GetInputData();
 
-			var diffuseShader = (inputData.Data[0] as DataTypes.ShaderData).Value;
-			var normalsShader = (inputData.Data[1] as DataTypes.ShaderData).Value;
-			var metallicShader = (inputData.Data[2] as DataTypes.ShaderData).Value;
-			var roughnessShader = (inputData.Data[3] as DataTypes.ShaderData).Value;
+			var diffuseShaderData = (inputData.Data[0] as DataTypes.ShaderData);
+			var builder = new StringBuilder();
+
+			foreach (var statement in diffuseShaderData.Statements)
+			{
+				builder.Append(statement).Append(";\n");
+			}
+
+			builder.Append("return ").Append(diffuseShaderData.VarName).Append(";\n");
+			var diffuseShader = builder.ToString();
+
+			//var normalsShader = (inputData.Data[1] as DataTypes.ShaderData).Value;
+			//var metallicShader = (inputData.Data[2] as DataTypes.ShaderData).Value;
+			//var roughnessShader = (inputData.Data[3] as DataTypes.ShaderData).Value;
 
 			return null;
 		}

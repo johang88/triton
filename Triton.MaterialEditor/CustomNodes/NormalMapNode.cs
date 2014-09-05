@@ -26,35 +26,28 @@ namespace Triton.MaterialEditor.CustomNodes
 
 		private void Setup()
 		{
-			m_sName = "Texture: ...";
-			Value = "/no_normal_map";
+			m_sName = "Normal map";
+			this.Height = 64;
 
-			Width = 210;
-			Height = 96;
-
-			m_Connectors.Add(new NodeGraphConnector("Value", this, ConnectorType.OutputConnector, 0, "Vector3"));
-			m_Connectors.Add(new NodeGraphConnector("X", this, ConnectorType.OutputConnector, 1, "Float"));
-			m_Connectors.Add(new NodeGraphConnector("Y", this, ConnectorType.OutputConnector, 2, "Float"));
-			m_Connectors.Add(new NodeGraphConnector("Z", this, ConnectorType.OutputConnector, 3, "Float"));
+			this.m_Connectors.Add(new NodeGraphConnector("Texture", this, ConnectorType.InputConnector, 0, "Vector4"));
+			m_Connectors.Add(new NodeGraphConnector("Normals", this, ConnectorType.OutputConnector, 0, "Vector3"));
 		}
 
 		public override NodeGraphData Process(int connectorIndex)
 		{
-			var shader = "texture(samplerNormal, texCoord)";
-			switch (connectorIndex)
+			var a = Connectors[0].Process() as DataTypes.ShaderData;
+			
+			var inputVar = a.VarName;
+			var outputVar = Context.NextVariable("normals");
+			var tbnVar = Context.NextVariable("tbn");
+
+			var statements = new List<string>()
 			{
-				case 1: shader += ".x"; break;
-				case 2: shader += ".y"; break;
-				case 3: shader += ".z"; break;
-				default: break;
-			}
+				string.Format("mat4x4 {0} = normalize(mat3x3(normalize(tangent), normalize(bitangent), normalize(normal))", tbnVar),
+				string.Format("vec3 {0} = normalize({1}, normalize({2}.xyz * 2.0 - 1.0))", outputVar, tbnVar, inputVar)
+			};
 
-			return new DataTypes.ShaderData(shader);
-		}
-
-		protected override string GetName()
-		{
-			return "Texture: " + Value;
+			return new DataTypes.ShaderData(a.Statements.Concat(statements).ToList(), outputVar);
 		}
 	}
 }

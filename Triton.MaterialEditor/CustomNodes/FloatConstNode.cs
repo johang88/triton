@@ -39,7 +39,14 @@ namespace Triton.MaterialEditor.CustomNodes
 
 		public override NodeGraphData Process(int connectorIndex)
 		{
-			return new DataTypes.ShaderData(Common.StringConverter.ToString(Value));
+			var outputVar = Context.NextVariable("f");
+
+			var statements = new List<string>()
+			{
+				string.Format("float {0} = {1}", outputVar, Common.StringConverter.ToString(Value)),
+			};
+
+			return new DataTypes.ShaderData(statements, outputVar);
 		}
 
 		protected override string GetName()

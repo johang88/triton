@@ -34,6 +34,8 @@
 			this.floatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.vector3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.vector4ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.multiplyScalarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.textureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.normalMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
@@ -101,40 +103,57 @@
             this.textureToolStripMenuItem,
             this.normalMapToolStripMenuItem});
 			this.contextMenuStrip1.Name = "contextMenuStrip1";
-			this.contextMenuStrip1.Size = new System.Drawing.Size(163, 124);
+			this.contextMenuStrip1.Size = new System.Drawing.Size(176, 152);
 			// 
 			// floatToolStripMenuItem
 			// 
 			this.floatToolStripMenuItem.Name = "floatToolStripMenuItem";
-			this.floatToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
+			this.floatToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
 			this.floatToolStripMenuItem.Text = "Float";
 			this.floatToolStripMenuItem.Click += new System.EventHandler(this.floatToolStripMenuItem_Click);
 			// 
 			// vector3ToolStripMenuItem
 			// 
 			this.vector3ToolStripMenuItem.Name = "vector3ToolStripMenuItem";
-			this.vector3ToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
+			this.vector3ToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
 			this.vector3ToolStripMenuItem.Text = "Vector3";
 			this.vector3ToolStripMenuItem.Click += new System.EventHandler(this.vector3ToolStripMenuItem_Click);
 			// 
 			// vector4ToolStripMenuItem
 			// 
+			this.vector4ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addToolStripMenuItem,
+            this.multiplyScalarToolStripMenuItem});
 			this.vector4ToolStripMenuItem.Name = "vector4ToolStripMenuItem";
-			this.vector4ToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
+			this.vector4ToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
 			this.vector4ToolStripMenuItem.Text = "Vector4";
 			this.vector4ToolStripMenuItem.Click += new System.EventHandler(this.vector4ToolStripMenuItem_Click);
+			// 
+			// addToolStripMenuItem
+			// 
+			this.addToolStripMenuItem.Name = "addToolStripMenuItem";
+			this.addToolStripMenuItem.Size = new System.Drawing.Size(176, 24);
+			this.addToolStripMenuItem.Text = "Add";
+			this.addToolStripMenuItem.Click += new System.EventHandler(this.addToolStripMenuItem_Click);
+			// 
+			// multiplyScalarToolStripMenuItem
+			// 
+			this.multiplyScalarToolStripMenuItem.Name = "multiplyScalarToolStripMenuItem";
+			this.multiplyScalarToolStripMenuItem.Size = new System.Drawing.Size(176, 24);
+			this.multiplyScalarToolStripMenuItem.Text = "Multiply Scalar";
+			this.multiplyScalarToolStripMenuItem.Click += new System.EventHandler(this.multiplyScalarToolStripMenuItem_Click);
 			// 
 			// textureToolStripMenuItem
 			// 
 			this.textureToolStripMenuItem.Name = "textureToolStripMenuItem";
-			this.textureToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
+			this.textureToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
 			this.textureToolStripMenuItem.Text = "Texture";
 			this.textureToolStripMenuItem.Click += new System.EventHandler(this.textureToolStripMenuItem_Click);
 			// 
 			// normalMapToolStripMenuItem
 			// 
 			this.normalMapToolStripMenuItem.Name = "normalMapToolStripMenuItem";
-			this.normalMapToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
+			this.normalMapToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
 			this.normalMapToolStripMenuItem.Text = "Normal Map";
 			this.normalMapToolStripMenuItem.Click += new System.EventHandler(this.normalMapToolStripMenuItem_Click);
 			// 
@@ -195,6 +214,8 @@
 		private System.Windows.Forms.PropertyGrid propertyGrid1;
 		private System.Windows.Forms.MenuStrip menuStrip1;
 		private System.Windows.Forms.ToolStripMenuItem processToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem addToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem multiplyScalarToolStripMenuItem;
 	}
 }
 
