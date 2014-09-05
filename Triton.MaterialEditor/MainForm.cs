@@ -19,11 +19,14 @@ namespace Triton.MaterialEditor
 		{
 			InitializeComponent();
 
+			Tools.CustomTypeDescriptorProvider.Register(typeof(CustomNodes.Vector3ConstNode));
+			Tools.CustomTypeDescriptorProvider.Register(typeof(CustomNodes.Vector4ConstNode));
+
 			this.nodeGraphPanel1.View.RegisterDataType(new NodeGraphDataTypes.NodeGraphDataTypeFloat());
 			this.nodeGraphPanel1.View.RegisterDataType(new NodeGraphDataTypes.NodeGraphDataTypeVector3());
 			this.nodeGraphPanel1.View.RegisterDataType(new NodeGraphDataTypes.NodeGraphDataTypeVector4());
 
-			RootNode = new CustomNodes.RootNode(200, 0, nodeGraphPanel1.View);
+			RootNode = new CustomNodes.RootNode(100, 0, nodeGraphPanel1.View);
 			this.nodeGraphPanel1.AddNode(RootNode);
 		}
 
@@ -60,6 +63,19 @@ namespace Triton.MaterialEditor
 		{
 			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
 			this.nodeGraphPanel1.AddNode(new CustomNodes.NormalMapNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
+		}
+
+		private void nodeGraphPanel1_onSelectionChanged(object sender, NodeGraphControl.NodeGraphPanelSelectionEventArgs args)
+		{
+			if (args.NewSelectionCount == 1)
+			{
+				propertyGrid1.SelectedObject = nodeGraphPanel1.View.SelectedItems[0];
+			}
+		}
+
+		private void nodeGraphPanel1_onSelectionCleared(object sender, NodeGraphControl.NodeGraphPanelSelectionEventArgs args)
+		{
+			propertyGrid1.SelectedObject = null;
 		}
 	}
 }

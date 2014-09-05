@@ -47,6 +47,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeGraphControl", "ThirdPa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Triton.MaterialEditor", "Triton.MaterialEditor\Triton.MaterialEditor.csproj", "{106DCCA7-786D-4A8C-9A54-E85E72E2D566}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Triton.Tools", "Triton.Tools\Triton.Tools.csproj", "{33EF76C5-1894-460C-9CB3-A7DBF260321E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -269,6 +271,17 @@ Global
 		{106DCCA7-786D-4A8C-9A54-E85E72E2D566}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{106DCCA7-786D-4A8C-9A54-E85E72E2D566}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{106DCCA7-786D-4A8C-9A54-E85E72E2D566}.Release|x86.ActiveCfg = Release|Any CPU
+		{33EF76C5-1894-460C-9CB3-A7DBF260321E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33EF76C5-1894-460C-9CB3-A7DBF260321E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33EF76C5-1894-460C-9CB3-A7DBF260321E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{33EF76C5-1894-460C-9CB3-A7DBF260321E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{33EF76C5-1894-460C-9CB3-A7DBF260321E}.Debug|x86.ActiveCfg = Debug|x86
+		{33EF76C5-1894-460C-9CB3-A7DBF260321E}.Debug|x86.Build.0 = Debug|x86
+		{33EF76C5-1894-460C-9CB3-A7DBF260321E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33EF76C5-1894-460C-9CB3-A7DBF260321E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33EF76C5-1894-460C-9CB3-A7DBF260321E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{33EF76C5-1894-460C-9CB3-A7DBF260321E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{33EF76C5-1894-460C-9CB3-A7DBF260321E}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -283,5 +296,6 @@ Global
 		{1535B7C5-4557-46FB-AB18-668DC8B0686B} = {0CFDCBD0-BA7D-4164-BD41-7809AE5E289B}
 		{191D6385-577C-4074-A43F-5CE5ECAED8B7} = {0CFDCBD0-BA7D-4164-BD41-7809AE5E289B}
 		{106DCCA7-786D-4A8C-9A54-E85E72E2D566} = {0CFDCBC0-BA7D-4164-BD41-8709AE5E289E}
+		{33EF76C5-1894-460C-9CB3-A7DBF260321E} = {0CFDCBC0-BA7D-4164-BD41-8709AE5E289E}
 	EndGlobalSection
 EndGlobal

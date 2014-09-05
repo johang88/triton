@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{106DCCA7-786D-4A8C-9A54-E85E72E2D566}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <ProjectGuid>{33EF76C5-1894-460C-9CB3-A7DBF260321E}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Triton.MaterialEditor</RootNamespace>
-    <AssemblyName>Triton.MaterialEditor</AssemblyName>
+    <RootNamespace>Triton.Tools</RootNamespace>
+    <AssemblyName>Triton.Tools</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -39,7 +37,6 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -49,78 +46,37 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomNodes\FloatConstNode.cs" />
-    <Compile Include="CustomNodes\NormalMapNode.cs" />
-    <Compile Include="CustomNodes\RootNode.cs" />
-    <Compile Include="CustomNodes\TextureNode.cs" />
-    <Compile Include="CustomNodes\Vector3ConstNode.cs" />
-    <Compile Include="CustomNodes\Vector4ConstNode.cs" />
-    <Compile Include="MainForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MainForm.Designer.cs">
-      <DependentUpon>MainForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="NodeGraphDataTypes\NodeGraphDataTypeFloat.cs" />
-    <Compile Include="NodeGraphDataTypes\NodeGraphDataTypeVector3.cs" />
-    <Compile Include="NodeGraphDataTypes\NodeGraphDataTypeVector4.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="CustomPropertyDescriptor.cs" />
+    <Compile Include="CustomTypeDescriptor.cs" />
+    <Compile Include="CustomTypeDescriptorProvider.cs" />
+    <Compile Include="Helpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="MainForm.resx">
-      <DependentUpon>MainForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
+    <Compile Include="TypeConverters\QuaternionTypeConverter.cs" />
+    <Compile Include="TypeConverters\Vector3TypeConverter.cs" />
+    <Compile Include="TypeConverters\Vector4TypeConverter.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ThirdParty\NodeGraphControl\NodeGraphControl.csproj">
-      <Project>{ad33efc3-c5cd-4f6f-a958-22e23f1f0b8b}</Project>
-      <Name>NodeGraphControl</Name>
+    <ProjectReference Include="..\Triton.Common\Triton.Common.csproj">
+      <Project>{354b215a-cc57-408b-900d-e7e1f95c04c2}</Project>
+      <Name>Triton.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">
       <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>
       <Name>Triton.Math</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Triton.Tools\Triton.Tools.csproj">
-      <Project>{33ef76c5-1894-460c-9cb3-a7dbf260321e}</Project>
-      <Name>Triton.Tools</Name>
-    </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

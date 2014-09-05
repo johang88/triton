@@ -36,6 +36,7 @@
 			this.vector4ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.textureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.normalMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
 			this.contextMenuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -84,6 +85,8 @@
 			this.nodeGraphPanel1.SmoothBehavior = false;
 			this.nodeGraphPanel1.TabIndex = 4;
 			this.nodeGraphPanel1.UseLinkColoring = true;
+			this.nodeGraphPanel1.onSelectionChanged += new NodeGraphControl.NodeGraphPanelSelectionEventHandler(this.nodeGraphPanel1_onSelectionChanged);
+			this.nodeGraphPanel1.onSelectionCleared += new NodeGraphControl.NodeGraphPanelSelectionEventHandler(this.nodeGraphPanel1_onSelectionCleared);
 			this.nodeGraphPanel1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.nodeGraphPanel1_MouseMove);
 			// 
 			// contextMenuStrip1
@@ -95,48 +98,58 @@
             this.textureToolStripMenuItem,
             this.normalMapToolStripMenuItem});
 			this.contextMenuStrip1.Name = "contextMenuStrip1";
-			this.contextMenuStrip1.Size = new System.Drawing.Size(176, 152);
+			this.contextMenuStrip1.Size = new System.Drawing.Size(163, 124);
 			// 
 			// floatToolStripMenuItem
 			// 
 			this.floatToolStripMenuItem.Name = "floatToolStripMenuItem";
-			this.floatToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+			this.floatToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
 			this.floatToolStripMenuItem.Text = "Float";
 			this.floatToolStripMenuItem.Click += new System.EventHandler(this.floatToolStripMenuItem_Click);
 			// 
 			// vector3ToolStripMenuItem
 			// 
 			this.vector3ToolStripMenuItem.Name = "vector3ToolStripMenuItem";
-			this.vector3ToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+			this.vector3ToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
 			this.vector3ToolStripMenuItem.Text = "Vector3";
 			this.vector3ToolStripMenuItem.Click += new System.EventHandler(this.vector3ToolStripMenuItem_Click);
 			// 
 			// vector4ToolStripMenuItem
 			// 
 			this.vector4ToolStripMenuItem.Name = "vector4ToolStripMenuItem";
-			this.vector4ToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+			this.vector4ToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
 			this.vector4ToolStripMenuItem.Text = "Vector4";
 			this.vector4ToolStripMenuItem.Click += new System.EventHandler(this.vector4ToolStripMenuItem_Click);
 			// 
 			// textureToolStripMenuItem
 			// 
 			this.textureToolStripMenuItem.Name = "textureToolStripMenuItem";
-			this.textureToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+			this.textureToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
 			this.textureToolStripMenuItem.Text = "Texture";
 			this.textureToolStripMenuItem.Click += new System.EventHandler(this.textureToolStripMenuItem_Click);
 			// 
 			// normalMapToolStripMenuItem
 			// 
 			this.normalMapToolStripMenuItem.Name = "normalMapToolStripMenuItem";
-			this.normalMapToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+			this.normalMapToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
 			this.normalMapToolStripMenuItem.Text = "Normal Map";
 			this.normalMapToolStripMenuItem.Click += new System.EventHandler(this.normalMapToolStripMenuItem_Click);
+			// 
+			// propertyGrid1
+			// 
+			this.propertyGrid1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.propertyGrid1.Location = new System.Drawing.Point(924, 0);
+			this.propertyGrid1.Name = "propertyGrid1";
+			this.propertyGrid1.Size = new System.Drawing.Size(276, 781);
+			this.propertyGrid1.TabIndex = 5;
 			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1200, 781);
+			this.Controls.Add(this.propertyGrid1);
 			this.Controls.Add(this.nodeGraphPanel1);
 			this.Name = "MainForm";
 			this.Text = "Material Editor";
@@ -154,6 +167,7 @@
 		private System.Windows.Forms.ToolStripMenuItem vector4ToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem textureToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem normalMapToolStripMenuItem;
+		private System.Windows.Forms.PropertyGrid propertyGrid1;
 	}
 }
 
