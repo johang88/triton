@@ -228,7 +228,7 @@ namespace NodeGraphControl
         {
             if (this.m_oConnectorType == ConnectorType.OutputConnector)
             {
-                return m_oParentNode.Process();
+                return m_oParentNode.Process(this.m_iConnectorIndex);
             }
             else
             {

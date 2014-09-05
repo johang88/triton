@@ -333,7 +333,7 @@ namespace NodeGraphControl
         /// VIRTUAL: Processes the node and returns NodeGraphData according to the process. Must be overriden because returns null;
         /// </summary>
         /// <returns></returns>
-        public virtual NodeGraphData Process()
+        public virtual NodeGraphData Process(int connectorIndex)
         {
             return null;
         }

@@ -37,7 +37,10 @@
 			this.textureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.normalMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
+			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+			this.processToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextMenuStrip1.SuspendLayout();
+			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// nodeGraphPanel1
@@ -144,17 +147,39 @@
 			this.propertyGrid1.Size = new System.Drawing.Size(276, 781);
 			this.propertyGrid1.TabIndex = 5;
 			// 
+			// menuStrip1
+			// 
+			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.processToolStripMenuItem});
+			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+			this.menuStrip1.Name = "menuStrip1";
+			this.menuStrip1.Size = new System.Drawing.Size(1200, 28);
+			this.menuStrip1.TabIndex = 6;
+			this.menuStrip1.Text = "menuStrip1";
+			// 
+			// processToolStripMenuItem
+			// 
+			this.processToolStripMenuItem.Name = "processToolStripMenuItem";
+			this.processToolStripMenuItem.Size = new System.Drawing.Size(70, 24);
+			this.processToolStripMenuItem.Text = "Process";
+			this.processToolStripMenuItem.Click += new System.EventHandler(this.processToolStripMenuItem_Click);
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1200, 781);
+			this.Controls.Add(this.menuStrip1);
 			this.Controls.Add(this.propertyGrid1);
 			this.Controls.Add(this.nodeGraphPanel1);
+			this.MainMenuStrip = this.menuStrip1;
 			this.Name = "MainForm";
 			this.Text = "Material Editor";
 			this.contextMenuStrip1.ResumeLayout(false);
+			this.menuStrip1.ResumeLayout(false);
+			this.menuStrip1.PerformLayout();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -168,6 +193,8 @@
 		private System.Windows.Forms.ToolStripMenuItem textureToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem normalMapToolStripMenuItem;
 		private System.Windows.Forms.PropertyGrid propertyGrid1;
+		private System.Windows.Forms.MenuStrip menuStrip1;
+		private System.Windows.Forms.ToolStripMenuItem processToolStripMenuItem;
 	}
 }
 

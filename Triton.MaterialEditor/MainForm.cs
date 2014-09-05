@@ -77,5 +77,10 @@ namespace Triton.MaterialEditor
 		{
 			propertyGrid1.SelectedObject = null;
 		}
+
+		private void processToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			RootNode.Process(0);
+		}
 	}
 }

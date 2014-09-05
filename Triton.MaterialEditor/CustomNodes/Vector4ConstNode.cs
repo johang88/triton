@@ -39,6 +39,18 @@ namespace Triton.MaterialEditor.CustomNodes
 			m_Connectors.Add(new NodeGraphConnector("W", this, ConnectorType.OutputConnector, 4, "Float"));
 		}
 
+		public override NodeGraphData Process(int connectorIndex)
+		{
+			switch (connectorIndex)
+			{
+				case 1: return new DataTypes.ShaderData(Common.StringConverter.ToString(Value.X));
+				case 2: return new DataTypes.ShaderData(Common.StringConverter.ToString(Value.Y));
+				case 3: return new DataTypes.ShaderData(Common.StringConverter.ToString(Value.Z));
+				case 4: return new DataTypes.ShaderData(Common.StringConverter.ToString(Value.W));
+				default: return new DataTypes.ShaderData(Common.StringConverter.ToString(Value));
+			}
+		}
+
 		protected override string GetName()
 		{
 			return "Vector4: " + Value.ToString();

@@ -31,5 +31,17 @@ namespace Triton.MaterialEditor.CustomNodes
 			this.m_Connectors.Add(new NodeGraphConnector("Roughness", this, ConnectorType.InputConnector, 3, "Float"));
 			this.Height = 96;
 		}
+
+		public override NodeGraphData Process(int connectorIndex)
+		{
+			NodeGraphListData inputData = this.GetInputData();
+
+			var diffuseShader = (inputData.Data[0] as DataTypes.ShaderData).Value;
+			var normalsShader = (inputData.Data[1] as DataTypes.ShaderData).Value;
+			var metallicShader = (inputData.Data[2] as DataTypes.ShaderData).Value;
+			var roughnessShader = (inputData.Data[3] as DataTypes.ShaderData).Value;
+
+			return null;
+		}
 	}
 }

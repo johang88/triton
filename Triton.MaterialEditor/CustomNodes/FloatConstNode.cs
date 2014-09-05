@@ -3,6 +3,7 @@ using NodeGraphControl.Xml;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,6 +35,11 @@ namespace Triton.MaterialEditor.CustomNodes
 			Height = 45;
 
 			m_Connectors.Add(new NodeGraphConnector("Value", this, ConnectorType.OutputConnector, 0, "Float"));
+		}
+
+		public override NodeGraphData Process(int connectorIndex)
+		{
+			return new DataTypes.ShaderData(Common.StringConverter.ToString(Value));
 		}
 
 		protected override string GetName()

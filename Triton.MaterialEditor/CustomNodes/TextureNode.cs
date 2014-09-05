@@ -43,5 +43,20 @@ namespace Triton.MaterialEditor.CustomNodes
 		{
 			return "Texture: " + Value;
 		}
+
+		public override NodeGraphData Process(int connectorIndex)
+		{
+			var shader = "texture(samplerTest, texCoord)";
+			switch (connectorIndex)
+			{
+				case 1: shader += ".x"; break;
+				case 2: shader += ".y"; break;
+				case 3: shader += ".z"; break;
+				case 4: shader += ".w"; break;
+				default: break;
+			}
+
+			return new DataTypes.ShaderData(shader);
+		}
 	}
 }

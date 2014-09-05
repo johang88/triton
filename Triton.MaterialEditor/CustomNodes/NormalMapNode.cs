@@ -38,6 +38,20 @@ namespace Triton.MaterialEditor.CustomNodes
 			m_Connectors.Add(new NodeGraphConnector("Z", this, ConnectorType.OutputConnector, 3, "Float"));
 		}
 
+		public override NodeGraphData Process(int connectorIndex)
+		{
+			var shader = "texture(samplerNormal, texCoord)";
+			switch (connectorIndex)
+			{
+				case 1: shader += ".x"; break;
+				case 2: shader += ".y"; break;
+				case 3: shader += ".z"; break;
+				default: break;
+			}
+
+			return new DataTypes.ShaderData(shader);
+		}
+
 		protected override string GetName()
 		{
 			return "Texture: " + Value;

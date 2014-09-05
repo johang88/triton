@@ -70,6 +70,7 @@
     <Compile Include="CustomNodes\TextureNode.cs" />
     <Compile Include="CustomNodes\Vector3ConstNode.cs" />
     <Compile Include="CustomNodes\Vector4ConstNode.cs" />
+    <Compile Include="DataTypes\ShaderData.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -110,6 +111,10 @@
     <ProjectReference Include="..\ThirdParty\NodeGraphControl\NodeGraphControl.csproj">
       <Project>{ad33efc3-c5cd-4f6f-a958-22e23f1f0b8b}</Project>
       <Name>NodeGraphControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Triton.Common\Triton.Common.csproj">
+      <Project>{354b215a-cc57-408b-900d-e7e1f95c04c2}</Project>
+      <Name>Triton.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">
       <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>

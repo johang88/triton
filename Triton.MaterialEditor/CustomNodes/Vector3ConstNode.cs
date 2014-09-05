@@ -38,6 +38,17 @@ namespace Triton.MaterialEditor.CustomNodes
 			m_Connectors.Add(new NodeGraphConnector("Z", this, ConnectorType.OutputConnector, 3, "Float"));
 		}
 
+		public override NodeGraphData Process(int connectorIndex)
+		{
+			switch (connectorIndex)
+			{
+				case 1: return new DataTypes.ShaderData(Common.StringConverter.ToString(Value.X));
+				case 2: return new DataTypes.ShaderData(Common.StringConverter.ToString(Value.Y));
+				case 3: return new DataTypes.ShaderData(Common.StringConverter.ToString(Value.Z));
+				default: return new DataTypes.ShaderData(Common.StringConverter.ToString(Value));
+			}
+		}
+
 		protected override string GetName()
 		{
 			return "Vector3: " + Value.ToString();
