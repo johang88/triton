@@ -213,7 +213,6 @@
 			// saveFileDialog1
 			// 
 			this.saveFileDialog1.Filter = "Materials|*.mat";
-			this.saveFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.saveFileDialog1_FileOk);
 			// 
 			// MainForm
 			// 

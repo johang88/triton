@@ -128,10 +128,5 @@ namespace Triton.MaterialEditor
 				nodeGraphPanel1.SaveCurrentView(saveFileDialog1.FileName);
 			}
 		}
-
-		private void saveFileDialog1_FileOk(object sender, CancelEventArgs e)
-		{
-
-		}
 	}
 }
