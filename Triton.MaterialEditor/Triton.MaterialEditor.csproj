@@ -64,26 +64,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomNodes\Context.cs" />
-    <Compile Include="CustomNodes\FloatConstNode.cs" />
-    <Compile Include="CustomNodes\NormalMapNode.cs" />
-    <Compile Include="CustomNodes\RootNode.cs" />
-    <Compile Include="CustomNodes\TextureNode.cs" />
-    <Compile Include="CustomNodes\Vector3ConstNode.cs" />
-    <Compile Include="CustomNodes\Vector4AddNode.cs" />
-    <Compile Include="CustomNodes\Vector4ConstNode.cs" />
-    <Compile Include="CustomNodes\Vector4MulScalarNode.cs" />
-    <Compile Include="DataTypes\BuildShaderData.cs" />
-    <Compile Include="DataTypes\ShaderData.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="NodeGraphDataTypes\NodeGraphDataTypeFloat.cs" />
-    <Compile Include="NodeGraphDataTypes\NodeGraphDataTypeVector3.cs" />
-    <Compile Include="NodeGraphDataTypes\NodeGraphDataTypeVector4.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="MainForm.resx">
@@ -119,6 +105,10 @@
     <ProjectReference Include="..\Triton.Common\Triton.Common.csproj">
       <Project>{354b215a-cc57-408b-900d-e7e1f95c04c2}</Project>
       <Name>Triton.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Triton.Content\Triton.Content.csproj">
+      <Project>{05e298cb-db9f-4389-bc94-a27793673caf}</Project>
+      <Name>Triton.Content</Name>
     </ProjectReference>
     <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">
       <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>

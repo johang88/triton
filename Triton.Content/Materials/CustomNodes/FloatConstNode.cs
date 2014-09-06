@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Triton.MaterialEditor.CustomNodes
+namespace Triton.Content.Materials.CustomNodes
 {
 	public class FloatConstNode : NodeGraphNode
 	{

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Triton.MaterialEditor.NodeGraphDataTypes
+namespace Triton.Content.Materials.NodeGraphDataTypes
 {
 	public class NodeGraphDataTypeVector4 : NodeGraphDataType
 	{

@@ -369,11 +369,7 @@ namespace NodeGraphControl
 
             object[] arguments = { p_Node, p_View };
 
-            object v_Out = System.Reflection.Assembly.GetEntryAssembly().CreateInstance(className, false,
-                                                                                    System.Reflection.BindingFlags.CreateInstance,
-                                                                                    null,
-                                                                                    arguments, System.Globalization.CultureInfo.GetCultureInfo("fr-fr"),
-                                                                                    null);
+			object v_Out = ReflectionHelper.CreateInstance(className, arguments);
 
             return v_Out as NodeGraphNode;
         }
@@ -386,11 +382,7 @@ namespace NodeGraphControl
         /// <returns></returns>
         public static NodeGraphNode GenerateInstanceFromName(System.Reflection.Assembly p_Assembly, string p_TypeName, object[] p_ConstructorArgs)
         {
-            object v_Out = p_Assembly.CreateInstance(p_TypeName, false,
-                                                     System.Reflection.BindingFlags.CreateInstance,
-                                                     null,
-                                                     p_ConstructorArgs, System.Globalization.CultureInfo.GetCultureInfo("fr-fr"),
-                                                     null);
+			object v_Out = ReflectionHelper.CreateInstance(p_TypeName, p_ConstructorArgs);
 
             return v_Out as NodeGraphNode;
         }

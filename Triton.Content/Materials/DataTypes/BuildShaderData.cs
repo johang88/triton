@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Triton.MaterialEditor.DataTypes
+namespace Triton.Content.Materials.DataTypes
 {
 	public class BuildShaderData : NodeGraphData
 	{

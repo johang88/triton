@@ -42,10 +42,12 @@ namespace ContentProcessor
 			extensionToType.Add(".bmp", "texture");
 			extensionToType.Add(".jpg", "texture");
 			extensionToType.Add(".dds", "texture");
+			extensionToType.Add(".mat", "material");
 
 			Compilers.Add("mesh", () => new Triton.Content.Compilers.MeshCompiler());
 			Compilers.Add("skeleton", () => new Triton.Content.Compilers.SkeletonCompiler());
 			Compilers.Add("texture", () => new Triton.Content.Compilers.TextureCompiler());
+			Compilers.Add("material", () => new Triton.Content.Compilers.MaterialCompiler());
 
 			Application = new Triton.Common.CommandLineApplication(parameters, "ContentProcessor in=<input_dir> out=<output_dir>");
 

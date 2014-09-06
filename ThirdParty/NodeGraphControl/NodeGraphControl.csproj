@@ -81,6 +81,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>NodeGraphResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ReflectionHelper.cs" />
     <Compile Include="Xml\SerializationUtils.cs" />
   </ItemGroup>
   <ItemGroup>

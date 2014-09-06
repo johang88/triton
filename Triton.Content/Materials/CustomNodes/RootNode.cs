@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Triton.MaterialEditor.DataTypes;
+using Triton.Content.Materials.DataTypes;
 
-namespace Triton.MaterialEditor.CustomNodes
+namespace Triton.Content.Materials.CustomNodes
 {
 	public class RootNode : NodeGraphNode
 	{

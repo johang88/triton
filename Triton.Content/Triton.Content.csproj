@@ -52,12 +52,17 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\AssimpNet.3.3.1\lib\net45\AssimpNet.dll</HintPath>
     </Reference>
+    <Reference Include="MurmurHash">
+      <HintPath>..\packages\murmurhash.1.0.0\lib\net45\MurmurHash.dll</HintPath>
+    </Reference>
     <Reference Include="ServiceStack.Text, Version=3.9.71.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\ServiceStack.Text.3.9.71\lib\net35\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -65,6 +70,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compilers\MaterialCompiler.cs" />
     <Compile Include="Compilers\MeshCompiler.cs" />
     <Compile Include="Compilers\SkeletonCompiler.cs" />
     <Compile Include="Compilers\TextureCompiler.cs" />
@@ -72,6 +78,21 @@
     <Compile Include="Database\ContentEntry.cs" />
     <Compile Include="Database\DB.cs" />
     <Compile Include="ICompiler.cs" />
+    <Compile Include="Materials\CustomNodes\Context.cs" />
+    <Compile Include="Materials\CustomNodes\FloatConstNode.cs" />
+    <Compile Include="Materials\CustomNodes\NormalMapNode.cs" />
+    <Compile Include="Materials\CustomNodes\RootNode.cs" />
+    <Compile Include="Materials\CustomNodes\TextureNode.cs" />
+    <Compile Include="Materials\CustomNodes\Vector3ConstNode.cs" />
+    <Compile Include="Materials\CustomNodes\Vector4AddNode.cs" />
+    <Compile Include="Materials\CustomNodes\Vector4ConstNode.cs" />
+    <Compile Include="Materials\CustomNodes\Vector4MulScalarNode.cs" />
+    <Compile Include="Materials\DataTypes\BuildShaderData.cs" />
+    <Compile Include="Materials\DataTypes\ShaderData.cs" />
+    <Compile Include="Materials\Material.cs" />
+    <Compile Include="Materials\NodeGraphDataTypes\NodeGraphDataTypeFloat.cs" />
+    <Compile Include="Materials\NodeGraphDataTypes\NodeGraphDataTypeVector3.cs" />
+    <Compile Include="Materials\NodeGraphDataTypes\NodeGraphDataTypeVector4.cs" />
     <Compile Include="Meshes\Converters\AssimpConverter.cs" />
     <Compile Include="Meshes\Converters\OgreXmlConverter.cs" />
     <Compile Include="Meshes\IMeshConverter.cs" />
@@ -89,6 +110,10 @@
     <Compile Include="SQLite\SQLiteAsync.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ThirdParty\NodeGraphControl\NodeGraphControl.csproj">
+      <Project>{ad33efc3-c5cd-4f6f-a958-22e23f1f0b8b}</Project>
+      <Name>NodeGraphControl</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Triton.Common\Triton.Common.csproj">
       <Project>{354b215a-cc57-408b-900d-e7e1f95c04c2}</Project>
       <Name>Triton.Common</Name>

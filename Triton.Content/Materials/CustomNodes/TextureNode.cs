@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Triton.MaterialEditor.CustomNodes
+namespace Triton.Content.Materials.CustomNodes
 {
 	public class TextureConstNode : NodeGraphNode
 	{
@@ -51,6 +51,8 @@ namespace Triton.MaterialEditor.CustomNodes
 			var samplerName = "sampler_" + Common.StringConverter.ToString(SamplerNumber);
 			var sample = "texture(" + samplerName + ", texCoord)";
 			string outputVar = "";
+
+			Context.Samplers.Add(samplerName, Value);
 
 			if (connectorIndex > 0)
 			{

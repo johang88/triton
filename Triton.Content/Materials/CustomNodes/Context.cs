@@ -4,15 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Triton.MaterialEditor.CustomNodes
+namespace Triton.Content.Materials.CustomNodes
 {
 	static class Context
 	{
 		private static int Counter = 0;
+		public static readonly Dictionary<string, string> Samplers = new Dictionary<string, string>();
 
 		public static void Reset()
 		{
 			Counter = 0;
+			Samplers.Clear();
 		}
 
 		public static string NextVariable(string prefix)
