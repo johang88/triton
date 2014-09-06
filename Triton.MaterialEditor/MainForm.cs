@@ -37,7 +37,8 @@ namespace Triton.MaterialEditor
 
 		private void processToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			RootNode.Process(0);
+			var result = RootNode.Process(0) as DataTypes.BuildShaderData;
+
 		}
 
 		private void nodeGraphPanel1_onSelectionChanged(object sender, NodeGraphControl.NodeGraphPanelSelectionEventArgs args)

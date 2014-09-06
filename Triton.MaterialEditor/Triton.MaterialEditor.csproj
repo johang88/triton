@@ -73,6 +73,7 @@
     <Compile Include="CustomNodes\Vector4AddNode.cs" />
     <Compile Include="CustomNodes\Vector4ConstNode.cs" />
     <Compile Include="CustomNodes\Vector4MulScalarNode.cs" />
+    <Compile Include="DataTypes\BuildShaderData.cs" />
     <Compile Include="DataTypes\ShaderData.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
