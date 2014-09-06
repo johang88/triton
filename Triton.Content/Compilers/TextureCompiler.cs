@@ -15,7 +15,7 @@ namespace Triton.Content.Compilers
 
 	public class TextureCompiler : ICompiler
 	{
-		public void Compile(string inputPath, string outputPath, Database.ContentEntry contentData)
+		public void Compile(CompilationContext context, string inputPath, string outputPath, Database.ContentEntry contentData)
 		{
 			var filename = Path.GetFileNameWithoutExtension(inputPath);
 			var extension = Path.GetExtension(inputPath);

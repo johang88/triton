@@ -77,6 +77,7 @@ namespace ContentProcessor
 			}
 
 			Database = new Triton.Content.Database.DB(Path.Combine(inputDir, ContentDBFilename));
+			var context = new CompilationContext(inputDir, outputDir);
 
 			// Import source content to database
 			foreach (var file in Directory.GetFiles(inputDir, "*", SearchOption.AllDirectories))
@@ -128,7 +129,7 @@ namespace ContentProcessor
 					}
 
 					var compiler = Compilers.Create(entry.Type);
-					compiler.Compile(sourcePath, outputPath, entry);
+					compiler.Compile(context, sourcePath, outputPath, entry);
 
 					Log.WriteLine("Processed {0}", entry.Id);
 					entry.LastCompilation = DateTime.Now;

@@ -22,7 +22,7 @@ namespace Triton.Content.Compilers
 			ImporterFactory.Add(".xml", () => new Skeletons.Converters.OgreXmlConverter());
 		}
 
-		public void Compile(string inputPath, string outputPath, Database.ContentEntry contentData)
+		public void Compile(CompilationContext context, string inputPath, string outputPath, Database.ContentEntry contentData)
 		{
 			outputPath += ".skeleton";
 

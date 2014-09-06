@@ -23,7 +23,7 @@ namespace Triton.Content.Compilers
 		{
 		}
 
-		public void Compile(string inputPath, string outputPath, Database.ContentEntry contentData)
+		public void Compile(CompilationContext context, string inputPath, string outputPath, Database.ContentEntry contentData)
 		{
 			outputPath += ".mat";
 
