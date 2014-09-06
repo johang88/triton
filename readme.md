@@ -13,7 +13,7 @@ This might become a game engine sometime in the future, but right now a lot of c
 Open up `Triton.sln` and hit compile.
 
 ## Samples
-Currently there is only the test application. The test resources are not available for the public at the moment. But it should run perfectly fine if you get some resources of your own.
+There are several samples available in the samples folder.
 
 ## Content pipeline
 The content processor will process all media files in the specified folder and write optimized versions to the specified output folder. The `nVidia command lines tools` has to be installed and present in the PATH in order for the content processor to function properly.
@@ -31,7 +31,6 @@ Example: `ContentProcessor.exe in=..\Media out=..Data'
 
 ## Assemblies
 * ContentProcessor - Front end executable for the content processor.
-* Test - Test application
 * Triton.Common - Virtual file system, resource manager, logging and more.
 * Triton.Content - Contains all content compilers (ie meshes, textures and skeletons).
 * Triton.Game - Game base system.
