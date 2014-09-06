@@ -127,14 +127,15 @@ namespace NodeGraphControl
         /// </summary>
         /// <param name="p_XmlTreeNode">the parent XmlTreeNode used in serialization</param>
         /// <param name="p_Panel">the panel that will contain this NodeGraphView</param>
-        public NodeGraphView(XmlTreeNode p_XmlTreeNode, NodeGraphPanel p_Panel)
+		public NodeGraphView(XmlTreeNode p_XmlTreeNode, NodeGraphPanel p_Panel, Dictionary<string, NodeGraphDataType> knownDataTypes)
         {
             System.Globalization.CultureInfo v_IntlCultureInfo = new System.Globalization.CultureInfo("en-us");
+			this.m_KnownDataTypes = knownDataTypes;
             this.m_oPanel = p_Panel;
             this.ViewX = int.Parse(p_XmlTreeNode.m_attributes["ViewX"]);
             this.ViewY = int.Parse(p_XmlTreeNode.m_attributes["ViewY"]);
             this.ViewZoom = float.Parse(p_XmlTreeNode.m_attributes["ViewZoom"], v_IntlCultureInfo);
-
+			this.CurrentViewZoom = this.ViewZoom;
 
             this.m_NodeCollection = new List<NodeGraphNode>();
 

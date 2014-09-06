@@ -1345,7 +1345,7 @@ namespace NodeGraphControl
         {
                 Xml.XmlTree v_InTree = new Xml.XmlTree("NodeGraphControl");
                 v_InTree.LoadXML(p_FileName);
-                this.View = new NodeGraphView(v_InTree.m_rootNode.GetFirstChild(Xml.SerializationUtils.GetFullTypeName(this.View)), this);
+				this.View = new NodeGraphView(v_InTree.m_rootNode.GetFirstChild(Xml.SerializationUtils.GetFullTypeName(this.View)), this, this.View.KnownDataTypes);
                 this.UpdateFontSize();
                 this.Refresh();
         }
