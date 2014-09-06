@@ -70,6 +70,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CompilationContext.cs" />
     <Compile Include="Compilers\MaterialCompiler.cs" />
     <Compile Include="Compilers\MeshCompiler.cs" />
     <Compile Include="Compilers\SkeletonCompiler.cs" />
