@@ -37,11 +37,11 @@ namespace Triton.Content.Compilers
 				nodeGraphPanel.LoadCurrentViewPure(inputPath);
 
 				RootNode root = null;
-				foreach (var i_Node in nodeGraphPanel.View.NodeCollection)
+				foreach (var node in nodeGraphPanel.View.NodeCollection)
 				{
-					if (i_Node is RootNode)
+					if (node is RootNode)
 					{
-						root = i_Node as RootNode;
+						root = node as RootNode;
 						break;
 					}
 				}
