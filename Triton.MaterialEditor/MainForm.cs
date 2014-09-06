@@ -23,12 +23,12 @@ namespace Triton.MaterialEditor
 			Tools.CustomTypeDescriptorProvider.Register(typeof(CustomNodes.Vector3ConstNode));
 			Tools.CustomTypeDescriptorProvider.Register(typeof(CustomNodes.Vector4ConstNode));
 
-			this.nodeGraphPanel1.View.RegisterDataType(new NodeGraphDataTypes.NodeGraphDataTypeFloat());
-			this.nodeGraphPanel1.View.RegisterDataType(new NodeGraphDataTypes.NodeGraphDataTypeVector3());
-			this.nodeGraphPanel1.View.RegisterDataType(new NodeGraphDataTypes.NodeGraphDataTypeVector4());
+			nodeGraphPanel1.View.RegisterDataType(new NodeGraphDataTypes.NodeGraphDataTypeFloat());
+			nodeGraphPanel1.View.RegisterDataType(new NodeGraphDataTypes.NodeGraphDataTypeVector3());
+			nodeGraphPanel1.View.RegisterDataType(new NodeGraphDataTypes.NodeGraphDataTypeVector4());
 
 			RootNode = new CustomNodes.RootNode(100, 0, nodeGraphPanel1.View);
-			this.nodeGraphPanel1.AddNode(RootNode);
+			nodeGraphPanel1.AddNode(RootNode);
 		}
 
 		private void nodeGraphPanel1_MouseMove(object sender, MouseEventArgs e)
@@ -58,51 +58,50 @@ namespace Triton.MaterialEditor
 		private void floatToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
-			this.nodeGraphPanel1.AddNode(new CustomNodes.FloatConstNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
+			nodeGraphPanel1.AddNode(new CustomNodes.FloatConstNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
 		private void vector3ToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
-			this.nodeGraphPanel1.AddNode(new CustomNodes.Vector3ConstNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
+			nodeGraphPanel1.AddNode(new CustomNodes.Vector3ConstNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
 		private void vector4ToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
-			this.nodeGraphPanel1.AddNode(new CustomNodes.Vector4ConstNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
+			nodeGraphPanel1.AddNode(new CustomNodes.Vector4ConstNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
 		private void textureToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
-			this.nodeGraphPanel1.AddNode(new CustomNodes.TextureConstNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
+			nodeGraphPanel1.AddNode(new CustomNodes.TextureConstNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
 		private void normalMapToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
-			this.nodeGraphPanel1.AddNode(new CustomNodes.NormalMapNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
+			nodeGraphPanel1.AddNode(new CustomNodes.NormalMapNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
 		private void addToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
-			this.nodeGraphPanel1.AddNode(new CustomNodes.Vector4AddNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
+			nodeGraphPanel1.AddNode(new CustomNodes.Vector4AddNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
 		private void multiplyScalarToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
-			this.nodeGraphPanel1.AddNode(new CustomNodes.Vector4MulScalarNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
+			nodeGraphPanel1.AddNode(new CustomNodes.Vector4MulScalarNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
 		private void loadToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
 			{
-				this.nodeGraphPanel1.LoadCurrentView(openFileDialog1.FileName);
-
+				nodeGraphPanel1.LoadCurrentView(openFileDialog1.FileName);
 			}
 
 			foreach (NodeGraphNode i_Node in this.nodeGraphPanel1.View.NodeCollection)
@@ -126,7 +125,7 @@ namespace Triton.MaterialEditor
 					}
 				}
 
-				this.nodeGraphPanel1.SaveCurrentView(saveFileDialog1.FileName);
+				nodeGraphPanel1.SaveCurrentView(saveFileDialog1.FileName);
 			}
 		}
 
