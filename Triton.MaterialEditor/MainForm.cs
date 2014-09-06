@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodeGraphControl;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -94,6 +95,44 @@ namespace Triton.MaterialEditor
 		{
 			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
 			this.nodeGraphPanel1.AddNode(new CustomNodes.Vector4MulScalarNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
+		}
+
+		private void loadToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+			{
+				this.nodeGraphPanel1.LoadCurrentView(openFileDialog1.FileName);
+
+			}
+
+			foreach (NodeGraphNode i_Node in this.nodeGraphPanel1.View.NodeCollection)
+			{
+				if (i_Node is CustomNodes.RootNode)
+				{
+					RootNode = i_Node as CustomNodes.RootNode;
+				}
+			}
+		}
+
+		private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if (saveFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+			{
+				if (System.IO.File.Exists(saveFileDialog1.FileName))
+				{
+					if (MessageBox.Show(saveFileDialog1.FileName + " Exists, overwrite?", "Overwrite Confirmation", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Cancel)
+					{
+						return;
+					}
+				}
+
+				this.nodeGraphPanel1.SaveCurrentView(saveFileDialog1.FileName);
+			}
+		}
+
+		private void saveFileDialog1_FileOk(object sender, CancelEventArgs e)
+		{
+
 		}
 	}
 }

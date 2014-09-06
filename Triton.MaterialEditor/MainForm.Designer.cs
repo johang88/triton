@@ -41,12 +41,19 @@
 			this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.processToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.loadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
 			this.contextMenuStrip1.SuspendLayout();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// nodeGraphPanel1
 			// 
+			this.nodeGraphPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.nodeGraphPanel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(67)))), ((int)(((byte)(65)))), ((int)(((byte)(64)))));
 			this.nodeGraphPanel1.ConnectorFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
 			this.nodeGraphPanel1.ConnectorFillSelectedColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(32)))), ((int)(((byte)(32)))));
@@ -55,7 +62,6 @@
 			this.nodeGraphPanel1.ConnectorOutlineSelectedColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
 			this.nodeGraphPanel1.ConnectorTextColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
 			this.nodeGraphPanel1.ContextMenuStrip = this.contextMenuStrip1;
-			this.nodeGraphPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.nodeGraphPanel1.DrawShadow = true;
 			this.nodeGraphPanel1.EnableDrawDebug = false;
 			this.nodeGraphPanel1.GridAlpha = ((byte)(16));
@@ -64,7 +70,7 @@
 			this.nodeGraphPanel1.LinkEditableColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(255)))), ((int)(((byte)(0)))));
 			this.nodeGraphPanel1.LinkHardness = 2F;
 			this.nodeGraphPanel1.LinkVisualStyle = NodeGraphControl.LinkVisualStyle.Curve;
-			this.nodeGraphPanel1.Location = new System.Drawing.Point(0, 0);
+			this.nodeGraphPanel1.Location = new System.Drawing.Point(0, 32);
 			this.nodeGraphPanel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
 			this.nodeGraphPanel1.Name = "nodeGraphPanel1";
 			this.nodeGraphPanel1.NodeConnectorFont = new System.Drawing.Font("Tahoma", 7F);
@@ -86,7 +92,7 @@
 			this.nodeGraphPanel1.SelectionFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(128)))), ((int)(((byte)(90)))), ((int)(((byte)(30)))));
 			this.nodeGraphPanel1.SelectionOutlineColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(180)))), ((int)(((byte)(60)))));
 			this.nodeGraphPanel1.ShowGrid = true;
-			this.nodeGraphPanel1.Size = new System.Drawing.Size(1200, 781);
+			this.nodeGraphPanel1.Size = new System.Drawing.Size(971, 749);
 			this.nodeGraphPanel1.SmoothBehavior = false;
 			this.nodeGraphPanel1.TabIndex = 4;
 			this.nodeGraphPanel1.UseLinkColoring = true;
@@ -103,19 +109,19 @@
             this.textureToolStripMenuItem,
             this.normalMapToolStripMenuItem});
 			this.contextMenuStrip1.Name = "contextMenuStrip1";
-			this.contextMenuStrip1.Size = new System.Drawing.Size(176, 152);
+			this.contextMenuStrip1.Size = new System.Drawing.Size(163, 124);
 			// 
 			// floatToolStripMenuItem
 			// 
 			this.floatToolStripMenuItem.Name = "floatToolStripMenuItem";
-			this.floatToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+			this.floatToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
 			this.floatToolStripMenuItem.Text = "Float";
 			this.floatToolStripMenuItem.Click += new System.EventHandler(this.floatToolStripMenuItem_Click);
 			// 
 			// vector3ToolStripMenuItem
 			// 
 			this.vector3ToolStripMenuItem.Name = "vector3ToolStripMenuItem";
-			this.vector3ToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+			this.vector3ToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
 			this.vector3ToolStripMenuItem.Text = "Vector3";
 			this.vector3ToolStripMenuItem.Click += new System.EventHandler(this.vector3ToolStripMenuItem_Click);
 			// 
@@ -125,7 +131,7 @@
             this.addToolStripMenuItem,
             this.multiplyScalarToolStripMenuItem});
 			this.vector4ToolStripMenuItem.Name = "vector4ToolStripMenuItem";
-			this.vector4ToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+			this.vector4ToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
 			this.vector4ToolStripMenuItem.Text = "Vector4";
 			this.vector4ToolStripMenuItem.Click += new System.EventHandler(this.vector4ToolStripMenuItem_Click);
 			// 
@@ -146,14 +152,14 @@
 			// textureToolStripMenuItem
 			// 
 			this.textureToolStripMenuItem.Name = "textureToolStripMenuItem";
-			this.textureToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+			this.textureToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
 			this.textureToolStripMenuItem.Text = "Texture";
 			this.textureToolStripMenuItem.Click += new System.EventHandler(this.textureToolStripMenuItem_Click);
 			// 
 			// normalMapToolStripMenuItem
 			// 
 			this.normalMapToolStripMenuItem.Name = "normalMapToolStripMenuItem";
-			this.normalMapToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+			this.normalMapToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
 			this.normalMapToolStripMenuItem.Text = "Normal Map";
 			this.normalMapToolStripMenuItem.Click += new System.EventHandler(this.normalMapToolStripMenuItem_Click);
 			// 
@@ -161,15 +167,17 @@
 			// 
 			this.propertyGrid1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.propertyGrid1.Location = new System.Drawing.Point(924, 0);
+			this.propertyGrid1.Location = new System.Drawing.Point(970, 0);
 			this.propertyGrid1.Name = "propertyGrid1";
-			this.propertyGrid1.Size = new System.Drawing.Size(276, 781);
+			this.propertyGrid1.Size = new System.Drawing.Size(230, 781);
 			this.propertyGrid1.TabIndex = 5;
 			// 
 			// menuStrip1
 			// 
 			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.processToolStripMenuItem});
+            this.processToolStripMenuItem,
+            this.loadToolStripMenuItem,
+            this.saveToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
 			this.menuStrip1.Size = new System.Drawing.Size(1200, 28);
@@ -182,6 +190,30 @@
 			this.processToolStripMenuItem.Size = new System.Drawing.Size(70, 24);
 			this.processToolStripMenuItem.Text = "Process";
 			this.processToolStripMenuItem.Click += new System.EventHandler(this.processToolStripMenuItem_Click);
+			// 
+			// loadToolStripMenuItem
+			// 
+			this.loadToolStripMenuItem.Name = "loadToolStripMenuItem";
+			this.loadToolStripMenuItem.Size = new System.Drawing.Size(54, 24);
+			this.loadToolStripMenuItem.Text = "Load";
+			this.loadToolStripMenuItem.Click += new System.EventHandler(this.loadToolStripMenuItem_Click);
+			// 
+			// saveToolStripMenuItem
+			// 
+			this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+			this.saveToolStripMenuItem.Size = new System.Drawing.Size(52, 24);
+			this.saveToolStripMenuItem.Text = "Save";
+			this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+			// 
+			// openFileDialog1
+			// 
+			this.openFileDialog1.FileName = "openFileDialog1";
+			this.openFileDialog1.Filter = "Materials|*.mat";
+			// 
+			// saveFileDialog1
+			// 
+			this.saveFileDialog1.Filter = "Materials|*.mat";
+			this.saveFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.saveFileDialog1_FileOk);
 			// 
 			// MainForm
 			// 
@@ -216,6 +248,10 @@
 		private System.Windows.Forms.ToolStripMenuItem processToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem addToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem multiplyScalarToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem loadToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
+		private System.Windows.Forms.OpenFileDialog openFileDialog1;
+		private System.Windows.Forms.SaveFileDialog saveFileDialog1;
 	}
 }
 

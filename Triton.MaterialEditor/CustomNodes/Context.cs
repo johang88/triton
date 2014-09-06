@@ -10,6 +10,11 @@ namespace Triton.MaterialEditor.CustomNodes
 	{
 		private static int Counter = 0;
 
+		public static void Reset()
+		{
+			Counter = 0;
+		}
+
 		public static string NextVariable(string prefix)
 		{
 			return prefix + "_" + Common.StringConverter.ToString(Counter++);

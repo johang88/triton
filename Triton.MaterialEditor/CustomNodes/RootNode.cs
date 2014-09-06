@@ -51,6 +51,8 @@ namespace Triton.MaterialEditor.CustomNodes
 
 		public override NodeGraphData Process(int connectorIndex)
 		{
+			Context.Reset();
+
 			NodeGraphListData inputData = this.GetInputData();
 
 			string diffuseShader = "return vec4(0.5, 0.5, 0.5, 1);";
