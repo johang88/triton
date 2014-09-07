@@ -66,6 +66,8 @@
     <Compile Include="Conversion.cs" />
     <Compile Include="DebugDrawer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\Mesh.cs" />
+    <Compile Include="Resources\MeshLoader.cs" />
     <Compile Include="World.cs" />
   </ItemGroup>
   <ItemGroup>
