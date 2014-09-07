@@ -104,15 +104,15 @@ uniform mat4x4 itWorld;
 
 uniform vec3 cameraPosition;
 
-uniform sampler2D sampler_2;
-uniform sampler2D sampler_3;
+uniform sampler2D sampler_4;
+uniform sampler2D sampler_5;
 vec4 get_diffuse() {
-vec4 v_0 = texture(sampler_2, texCoord);
+vec4 v_0 = texture(sampler_4, texCoord);
 return pow(v_0, vec4(2.2));
 
 }
 vec3 get_normals() {
-vec4 v_1 = texture(sampler_3, texCoord);
+vec4 v_1 = texture(sampler_5, texCoord);
 mat3x3 tbn_3 = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
 vec3 normals_2 = normalize(tbn_3 * normalize(v_1.xyz * 2.0 - 1.0));
 return normals_2;
@@ -124,7 +124,7 @@ return f_4;
 
 }
 float get_roughness() {
-float f_5 = 0;
+float f_5 = 0.6;
 return f_5;
 
 }

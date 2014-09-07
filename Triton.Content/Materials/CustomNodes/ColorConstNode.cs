@@ -15,8 +15,8 @@ namespace Triton.Content.Materials.CustomNodes
 		public ColorConstNode(XmlTreeNode p_TreeNode, NodeGraphView p_View)
 			: base(p_TreeNode, p_View)
 		{
-			Value = Common.StringConverter.Parse<Vector4>(p_TreeNode.m_attributes["Value"]);
 			Setup();
+			Value = Common.StringConverter.Parse<Vector4>(p_TreeNode.m_attributes["Value"]);
 		}
 
 		public ColorConstNode(int p_X, int p_Y, NodeGraphView p_View, bool p_CanBeSelected)

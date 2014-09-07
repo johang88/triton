@@ -104,28 +104,22 @@ uniform mat4x4 itWorld;
 
 uniform vec3 cameraPosition;
 
-uniform sampler2D sampler_4;
-uniform sampler2D sampler_5;
 vec4 get_diffuse() {
-vec4 v_0 = texture(sampler_4, texCoord);
+vec4 v_0 = vec3(0.7686275, 199, 199, 255);
 return pow(v_0, vec4(2.2));
 
 }
 vec3 get_normals() {
-vec4 v_1 = texture(sampler_5, texCoord);
-mat3x3 tbn_3 = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
-vec3 normals_2 = normalize(tbn_3 * normalize(v_1.xyz * 2.0 - 1.0));
-return normals_2;
-
+return normalize(normal);
 }
 float get_metallic() {
-float f_4 = 0;
-return f_4;
+float f_1 = 1;
+return f_1;
 
 }
 float get_roughness() {
-float f_5 = 0;
-return f_5;
+float f_2 = 0.4;
+return f_2;
 
 }
 float get_specular() {

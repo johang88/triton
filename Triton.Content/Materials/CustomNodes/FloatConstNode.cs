@@ -17,8 +17,8 @@ namespace Triton.Content.Materials.CustomNodes
 		public FloatConstNode(XmlTreeNode p_TreeNode, NodeGraphView p_View)
 			: base(p_TreeNode, p_View)
 		{
-			Value = float.Parse(p_TreeNode.m_attributes["Value"]);
 			Setup();
+			Value = float.Parse(p_TreeNode.m_attributes["Value"]);
 		}
 
 		public FloatConstNode(int p_X, int p_Y, NodeGraphView p_View, bool p_CanBeSelected)
