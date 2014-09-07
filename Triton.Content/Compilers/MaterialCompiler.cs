@@ -53,14 +53,13 @@ namespace Triton.Content.Compilers
 				material.Samplers = new Dictionary<string, string>(Context.Samplers);
 			}
 
-			var shaderOutputPath = System.IO.Path.GetDirectoryName(outputPath);
-
 			var murmur128 = MurmurHash.Create128(managed: false);
 			var shader = Encoding.UTF8.GetBytes(material.ShaderSource);
 			var hash = murmur128.ComputeHash(shader);
 
 			var shaderName = BitConverter.ToString(hash).ToLowerInvariant().Replace("-", "");
-			shaderOutputPath = Path.Combine(shaderOutputPath, shaderName + ".glsl");
+			var shaderPath = "/shaders/generated/" + shaderName;
+			var shaderOutputPath = context.GetOutputPath(shaderPath + ".glsl");
 
 			if (!File.Exists(shaderOutputPath))
 			{
@@ -83,8 +82,8 @@ namespace Triton.Content.Compilers
 				// Version
 				writer.Write(Version);
 
-				// This is wrong ... 
-				writer.Write(shaderOutputPath);
+				// Shader reference
+				writer.Write(shaderPath);
 
 				// Samplers
 				writer.Write(material.Samplers.Count);
