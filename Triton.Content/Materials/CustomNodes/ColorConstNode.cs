@@ -70,7 +70,7 @@ namespace Triton.Content.Materials.CustomNodes
 
 				var statements = new List<string>()
 				{
-					string.Format("vec4 {0} = vec3({1}, {2}, {3}, {4})", outputVar, Common.StringConverter.ToString(scaledValue.X), Common.StringConverter.ToString(Value.Y), Common.StringConverter.ToString(Value.Z), Common.StringConverter.ToString(Value.W)),
+					string.Format("vec4 {0} = vec4({1}, {2}, {3}, {4})", outputVar, Common.StringConverter.ToString(scaledValue.X), Common.StringConverter.ToString(scaledValue.Y), Common.StringConverter.ToString(scaledValue.Z), Common.StringConverter.ToString(scaledValue.W)),
 				};
 
 				return new DataTypes.ShaderData(statements, outputVar);
