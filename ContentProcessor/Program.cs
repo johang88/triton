@@ -112,7 +112,7 @@ namespace ContentProcessor
 				if (!File.Exists(sourcePath))
 					continue;
 
-				if (!noCache && File.GetLastWriteTime(entry.Source) <= entry.LastCompilation)
+				if (!noCache && File.GetLastWriteTime(sourcePath) <= entry.LastCompilation)
 					continue;
 
 				if (Compilers.Exists(entry.Type))
