@@ -25,7 +25,7 @@ namespace Triton.MaterialEditor
 
 			Tools.CustomTypeDescriptorProvider.Register(typeof(Vector3ConstNode));
 			Tools.CustomTypeDescriptorProvider.Register(typeof(Vector4ConstNode));
-			Tools.CustomTypeDescriptorProvider.Register(typeof(ColorConstNode));
+			Tools.CustomTypeDescriptorProvider.Register(typeof(ColorConstNode	));
 
 			nodeGraphPanel1.View.RegisterDataType(new NodeGraphDataTypeFloat());
 			nodeGraphPanel1.View.RegisterDataType(new NodeGraphDataTypeVector3());
