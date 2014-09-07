@@ -61,16 +61,13 @@ namespace Triton.Content.Compilers
 			var shaderPath = "generated/shaders/" + shaderName;
 			var shaderOutputPath = context.GetOutputPath(shaderPath + ".glsl");
 
-			if (!File.Exists(shaderOutputPath))
-			{
-				var template = context.GetShaderTemplate();
-				material.ShaderSource = template.Replace("//__MATERIAL__PLACEHOLDER__", material.ShaderSource);
+			var template = context.GetShaderTemplate();
+			material.ShaderSource = template.Replace("//__MATERIAL__PLACEHOLDER__", material.ShaderSource);
 
-				using (var stream = context.OpenOutput(shaderPath + ".glsl"))
-				using (var writer = new StreamWriter(stream))
-				{
-					writer.Write(material.ShaderSource);
-				}
+			using (var stream = context.OpenOutput(shaderPath + ".glsl"))
+			using (var writer = new StreamWriter(stream))
+			{
+				writer.Write(material.ShaderSource);
 			}
 
 			using (var stream = File.Open(outputPath, FileMode.Create))
@@ -86,7 +83,7 @@ namespace Triton.Content.Compilers
 				writer.Write(Version);
 
 				// Shader reference
-				writer.Write("/shaders/" + shaderName );
+				writer.Write("/shaders/" + shaderName);
 
 				// Samplers
 				writer.Write(material.Samplers.Count);
