@@ -8,9 +8,6 @@ using System.Threading;
 using Triton.Common;
 using Triton.Content;
 using Triton.Content.Database;
-using ServiceStack.Text;
-using ServiceStack.Text.Jsv;
-
 namespace ContentProcessor
 {
 	class Program
@@ -27,8 +24,6 @@ namespace ContentProcessor
 		{
 			Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
 			Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File("Logs/ContentProcessor.txt"));
-
-			ServiceStack.Text.JsConfig.IncludeTypeInfo = true;
 
 			var extensionToType = new Dictionary<string, string>();
 			extensionToType.Add(".mesh", "mesh");
