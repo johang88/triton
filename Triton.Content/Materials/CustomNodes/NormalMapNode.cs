@@ -43,8 +43,8 @@ namespace Triton.Content.Materials.CustomNodes
 
 			var statements = new List<string>()
 			{
-				string.Format("mat4x4 {0} = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal))", tbnVar),
-				string.Format("vec3 {0} = normalize({1}, normalize({2}.xyz * 2.0 - 1.0))", outputVar, tbnVar, inputVar)
+				string.Format("mat3x3 {0} = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal))", tbnVar),
+				string.Format("vec3 {0} = normalize({1} * normalize({2}.xyz * 2.0 - 1.0))", outputVar, tbnVar, inputVar)
 			};
 
 			return new DataTypes.ShaderData(a.Statements.Concat(statements).ToList(), outputVar);

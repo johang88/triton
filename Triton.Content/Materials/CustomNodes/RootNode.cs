@@ -87,6 +87,11 @@ namespace Triton.Content.Materials.CustomNodes
 
 			var shaderBuilder = new StringBuilder();
 
+			foreach (var sampler in Context.Samplers)
+			{
+				shaderBuilder.AppendLine(string.Format("uniform sampler2D {0};", sampler.Key));
+			}
+
 			shaderBuilder
 				.AppendLine("vec4 get_diffuse() {")
 				.AppendLine(diffuseShader)

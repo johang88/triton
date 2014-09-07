@@ -36,13 +36,19 @@ namespace Triton.Content
 		public Stream OpenOutput(string path)
 		{
 			path = GetOutputPath(path);
+			var directory = Path.GetDirectoryName(path);
 
-			if (!Directory.Exists(path))
+			if (!Directory.Exists(directory))
 			{
-				Directory.CreateDirectory(path);
+				Directory.CreateDirectory(directory);
 			}
 
 			return File.Open(path, FileMode.Create);
+		}
+
+		public string GetShaderTemplate()
+		{
+			return File.ReadAllText(GetOutputPath("core_data/shaders/deferred/gbuffer.glsl"));
 		}
 	}
 }

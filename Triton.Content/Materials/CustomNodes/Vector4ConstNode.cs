@@ -15,6 +15,7 @@ namespace Triton.Content.Materials.CustomNodes
 		public Vector4ConstNode(XmlTreeNode p_TreeNode, NodeGraphView p_View)
 			: base(p_TreeNode, p_View)
 		{
+			Value = Common.StringConverter.Parse<Vector4>(p_TreeNode.m_attributes["Value"]);
 			Setup();
 		}
 
@@ -78,6 +79,14 @@ namespace Triton.Content.Materials.CustomNodes
 		protected override string GetName()
 		{
 			return "Vector4: " + Value.ToString();
+		}
+
+		public override XmlTreeNode SerializeToXML(XmlTreeNode p_Parent)
+		{
+			var element = base.SerializeToXML(p_Parent);
+			element.AddParameter("Value", Common.StringConverter.ToString(Value));
+
+			return element;
 		}
 	}
 }

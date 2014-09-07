@@ -17,6 +17,7 @@ namespace Triton.Content.Materials.CustomNodes
 		public FloatConstNode(XmlTreeNode p_TreeNode, NodeGraphView p_View)
 			: base(p_TreeNode, p_View)
 		{
+			Value = float.Parse(p_TreeNode.m_attributes["Value"]);
 			Setup();
 		}
 
@@ -52,6 +53,14 @@ namespace Triton.Content.Materials.CustomNodes
 		protected override string GetName()
 		{
 			return "Float: " + Value.ToString();
+		}
+
+		public override XmlTreeNode SerializeToXML(XmlTreeNode p_Parent)
+		{
+			var element = base.SerializeToXML(p_Parent);
+			element.AddParameter("Value", Value.ToString());
+
+			return element;
 		}
 	}
 }

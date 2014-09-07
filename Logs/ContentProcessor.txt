@@ -1,0 +1,3 @@
+Log file created: 2014-09-07 14:42:20
+<-> Processed samples_data/materials/crate
+<-> Processed samples_data/materials/default

@@ -18,6 +18,7 @@ namespace Triton.Content.Materials.CustomNodes
 			: base(p_TreeNode, p_View)
 		{
 			Setup();
+			Value = p_TreeNode.m_attributes["Value"];
 		}
 
 		public TextureConstNode(int p_X, int p_Y, NodeGraphView p_View, bool p_CanBeSelected)
@@ -77,6 +78,14 @@ namespace Triton.Content.Materials.CustomNodes
 			};
 
 			return new DataTypes.ShaderData(statements, outputVar);
+		}
+
+		public override XmlTreeNode SerializeToXML(XmlTreeNode p_Parent)
+		{
+			var element = base.SerializeToXML(p_Parent);
+			element.AddParameter("Value", Value);
+
+			return element;
 		}
 	}
 }

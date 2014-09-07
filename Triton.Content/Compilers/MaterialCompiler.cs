@@ -58,12 +58,15 @@ namespace Triton.Content.Compilers
 			var hash = murmur128.ComputeHash(shader);
 
 			var shaderName = BitConverter.ToString(hash).ToLowerInvariant().Replace("-", "");
-			var shaderPath = "/shaders/generated/" + shaderName;
+			var shaderPath = "generated/shaders/" + shaderName;
 			var shaderOutputPath = context.GetOutputPath(shaderPath + ".glsl");
 
 			if (!File.Exists(shaderOutputPath))
 			{
-				using (var stream = File.Open(shaderOutputPath, FileMode.Create))
+				var template = context.GetShaderTemplate();
+				material.ShaderSource = template.Replace("//__MATERIAL__PLACEHOLDER__", material.ShaderSource);
+
+				using (var stream = context.OpenOutput(shaderPath + ".glsl"))
 				using (var writer = new StreamWriter(stream))
 				{
 					writer.Write(material.ShaderSource);
@@ -83,7 +86,7 @@ namespace Triton.Content.Compilers
 				writer.Write(Version);
 
 				// Shader reference
-				writer.Write(shaderPath);
+				writer.Write("/shaders/" + shaderName );
 
 				// Samplers
 				writer.Write(material.Samplers.Count);

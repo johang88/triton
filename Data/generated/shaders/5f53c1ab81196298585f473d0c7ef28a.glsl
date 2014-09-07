@@ -108,7 +108,22 @@ uniform mat4x4 itWorld;
 
 uniform vec3 cameraPosition;
 
-//__MATERIAL__PLACEHOLDER__
+vec4 get_diffuse() {
+return vec4(0.5, 0.5, 0.5, 1);
+}
+vec3 get_normals() {
+return normalize(normal);
+}
+float get_metallic() {
+return 0.5;
+}
+float get_roughness() {
+return 0.5;
+}
+float get_specular() {
+return 0.5;
+}
+
 /*vec3 get_normals() {
 }*/
 

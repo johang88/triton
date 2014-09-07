@@ -9,14 +9,13 @@ namespace Triton.Graphics.Resources
 	public class Material : Triton.Common.Resource
 	{
 		private bool Initialized = false;
-		internal ServiceStack.Text.JsonObject Definition;
 
 		public Material(string name, string parameters)
 			: base(name, parameters)
 		{
 		}
 
-		public virtual void Initialize()
+		public virtual void Initialize(Backend backend)
 		{
 			Initialized = true;
 		}
@@ -38,7 +37,7 @@ namespace Triton.Graphics.Resources
 		{
 			if (!Initialized)
 			{
-				Initialize();
+				Initialize(backend);
 			}
 		}
 	}

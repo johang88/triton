@@ -31,7 +31,8 @@ namespace Triton.Samples
 				CreateMount("/", new MergedFileSystem(
 					new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/core_data/")),
 					new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/samples_data/")),
-					new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/no_dist/"))
+					new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/no_dist/")),
+					new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/generated/"))
 					))
 				);
 		}

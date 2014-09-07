@@ -46,6 +46,5 @@ namespace Triton.Content.Materials.CustomNodes
 
 			return new DataTypes.ShaderData(a.Statements.Concat(b.Statements).Concat(statements).ToList(), outputVar);
 		}
-
 	}
 }
