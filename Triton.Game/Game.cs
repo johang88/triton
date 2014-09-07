@@ -99,6 +99,8 @@ namespace Triton.Game
 		{
 			WaitHandle.WaitAll(new WaitHandle[] { RendererReady });
 
+			Physics.Resources.ResourceLoaders.Init(ResourceManager, FileSystem);
+
 			AudioSystem = new Audio.AudioSystem(FileSystem);
 			PhysicsWorld = new Triton.Physics.World(GraphicsBackend, ResourceManager);
 
