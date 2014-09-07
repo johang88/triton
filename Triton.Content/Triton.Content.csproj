@@ -79,6 +79,7 @@
     <Compile Include="Database\ContentEntry.cs" />
     <Compile Include="Database\DB.cs" />
     <Compile Include="ICompiler.cs" />
+    <Compile Include="Materials\CustomNodes\ColorConstNode.cs" />
     <Compile Include="Materials\CustomNodes\Context.cs" />
     <Compile Include="Materials\CustomNodes\FloatConstNode.cs" />
     <Compile Include="Materials\CustomNodes\NormalMapNode.cs" />

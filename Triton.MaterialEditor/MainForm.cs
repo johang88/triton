@@ -25,6 +25,7 @@ namespace Triton.MaterialEditor
 
 			Tools.CustomTypeDescriptorProvider.Register(typeof(Vector3ConstNode));
 			Tools.CustomTypeDescriptorProvider.Register(typeof(Vector4ConstNode));
+			Tools.CustomTypeDescriptorProvider.Register(typeof(ColorConstNode));
 
 			nodeGraphPanel1.View.RegisterDataType(new NodeGraphDataTypeFloat());
 			nodeGraphPanel1.View.RegisterDataType(new NodeGraphDataTypeVector3());
@@ -129,6 +130,12 @@ namespace Triton.MaterialEditor
 
 				nodeGraphPanel1.SaveCurrentView(saveFileDialog1.FileName);
 			}
+		}
+
+		private void colorToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
+			nodeGraphPanel1.AddNode(new ColorConstNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 	}
 }

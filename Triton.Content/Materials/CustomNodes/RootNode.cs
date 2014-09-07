@@ -34,7 +34,7 @@ namespace Triton.Content.Materials.CustomNodes
 			this.Height = 116;
 		}
 
-		private string BuildShader(ShaderData shaderData)
+		private string BuildShader(ShaderData shaderData, bool gammaCorrect = false)
 		{
 			var builder = new StringBuilder();
 
@@ -43,9 +43,15 @@ namespace Triton.Content.Materials.CustomNodes
 				builder.Append(statement).Append(";\n");
 			}
 
-			builder.Append("return ").Append(shaderData.VarName).Append(";\n");
-			var diffuseShader = builder.ToString();
-
+			if (gammaCorrect)
+			{
+				builder.Append("return pow(").Append(shaderData.VarName).Append(", vec4(2.2))").Append(";\n");
+			}
+			else
+			{
+				builder.Append("return ").Append(shaderData.VarName).Append(";\n");
+			}
+			
 			return builder.ToString();
 		}
 
@@ -58,7 +64,7 @@ namespace Triton.Content.Materials.CustomNodes
 			string diffuseShader = "return vec4(0.5, 0.5, 0.5, 1);";
 			if (inputData.Data[0] is ShaderData)
 			{
-				diffuseShader = BuildShader(inputData.Data[0] as DataTypes.ShaderData);
+				diffuseShader = BuildShader(inputData.Data[0] as DataTypes.ShaderData, true);
 			}
 
 			string normalsShader = "return normalize(normal);";

@@ -45,6 +45,7 @@
 			this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+			this.colorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextMenuStrip1.SuspendLayout();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -106,22 +107,23 @@
             this.floatToolStripMenuItem,
             this.vector3ToolStripMenuItem,
             this.vector4ToolStripMenuItem,
+            this.colorToolStripMenuItem,
             this.textureToolStripMenuItem,
             this.normalMapToolStripMenuItem});
 			this.contextMenuStrip1.Name = "contextMenuStrip1";
-			this.contextMenuStrip1.Size = new System.Drawing.Size(163, 124);
+			this.contextMenuStrip1.Size = new System.Drawing.Size(176, 176);
 			// 
 			// floatToolStripMenuItem
 			// 
 			this.floatToolStripMenuItem.Name = "floatToolStripMenuItem";
-			this.floatToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
+			this.floatToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
 			this.floatToolStripMenuItem.Text = "Float";
 			this.floatToolStripMenuItem.Click += new System.EventHandler(this.floatToolStripMenuItem_Click);
 			// 
 			// vector3ToolStripMenuItem
 			// 
 			this.vector3ToolStripMenuItem.Name = "vector3ToolStripMenuItem";
-			this.vector3ToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
+			this.vector3ToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
 			this.vector3ToolStripMenuItem.Text = "Vector3";
 			this.vector3ToolStripMenuItem.Click += new System.EventHandler(this.vector3ToolStripMenuItem_Click);
 			// 
@@ -131,7 +133,7 @@
             this.addToolStripMenuItem,
             this.multiplyScalarToolStripMenuItem});
 			this.vector4ToolStripMenuItem.Name = "vector4ToolStripMenuItem";
-			this.vector4ToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
+			this.vector4ToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
 			this.vector4ToolStripMenuItem.Text = "Vector4";
 			this.vector4ToolStripMenuItem.Click += new System.EventHandler(this.vector4ToolStripMenuItem_Click);
 			// 
@@ -152,14 +154,14 @@
 			// textureToolStripMenuItem
 			// 
 			this.textureToolStripMenuItem.Name = "textureToolStripMenuItem";
-			this.textureToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
+			this.textureToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
 			this.textureToolStripMenuItem.Text = "Texture";
 			this.textureToolStripMenuItem.Click += new System.EventHandler(this.textureToolStripMenuItem_Click);
 			// 
 			// normalMapToolStripMenuItem
 			// 
 			this.normalMapToolStripMenuItem.Name = "normalMapToolStripMenuItem";
-			this.normalMapToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
+			this.normalMapToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
 			this.normalMapToolStripMenuItem.Text = "Normal Map";
 			this.normalMapToolStripMenuItem.Click += new System.EventHandler(this.normalMapToolStripMenuItem_Click);
 			// 
@@ -214,6 +216,13 @@
 			// 
 			this.saveFileDialog1.Filter = "Materials|*.mat";
 			// 
+			// colorToolStripMenuItem
+			// 
+			this.colorToolStripMenuItem.Name = "colorToolStripMenuItem";
+			this.colorToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+			this.colorToolStripMenuItem.Text = "Color";
+			this.colorToolStripMenuItem.Click += new System.EventHandler(this.colorToolStripMenuItem_Click);
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -251,6 +260,7 @@
 		private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
 		private System.Windows.Forms.OpenFileDialog openFileDialog1;
 		private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+		private System.Windows.Forms.ToolStripMenuItem colorToolStripMenuItem;
 	}
 }
 
