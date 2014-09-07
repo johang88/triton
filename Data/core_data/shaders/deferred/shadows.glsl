@@ -99,8 +99,7 @@ float sample_shadow_29(sampler2DShadow shadowMap, vec2 uv, vec3 worldPos, float 
 	return result / 29;
 }
 
-float check_shadow(sampler2DShadow shadowMap, vec3 viewPos, mat4x4 invView, mat4x4 shadowViewProj, vec2 clipPlane, float shadowBias, float texelSize) {
-	vec3 worldPos = (invView * vec4(viewPos, 1)).xyz;
+float check_shadow(sampler2DShadow shadowMap, vec3 worldPos, mat4x4 shadowViewProj, vec2 clipPlane, float shadowBias, float texelSize) {
 	vec4 shadowUv = shadowViewProj * vec4(worldPos, 1);
 
 	vec2 uv = 0.5 * shadowUv.xy / shadowUv.w + vec2(0.5, 0.5);
@@ -118,10 +117,7 @@ float check_shadow(sampler2DShadow shadowMap, vec3 viewPos, mat4x4 invView, mat4
 #endif
 }
 
-float check_shadow_cube(samplerCubeShadow shadowMap, vec3 viewPos, mat4x4 invView, vec2 clipPlane, float shadowBias, float texelSize, vec3 lightPositionVS) {
-	vec3 worldPos = (invView * vec4(viewPos, 1)).xyz;
-	vec3 lightPosition = (invView * vec4(lightPositionVS, 1)).xyz;
-	
+float check_shadow_cube(samplerCubeShadow shadowMap, vec3 worldPos, vec2 clipPlane, float shadowBias, float texelSize, vec3 lightPosition) {
 	vec3 lookup = worldPos - lightPosition;
 	float distance = length(lookup) / (clipPlane.y - clipPlane.x);
 	
@@ -178,7 +174,7 @@ float check_shadow_cube(samplerCubeShadow shadowMap, vec3 viewPos, mat4x4 invVie
 #endif
 }
 
-float get_shadows(sampler2DShadow shadowMap, float nDotL, vec3 viewPos, mat4x4 invView, mat4x4 shadowViewProj, vec2 clipPlane, float shadowBias, float texelSize) {
+float get_shadows(sampler2DShadow shadowMap, float nDotL, vec3 worldPos, mat4x4 shadowViewProj, vec2 clipPlane, float shadowBias, float texelSize) {
 	if (nDotL <= 0)
 		return 0;
 		
@@ -187,10 +183,10 @@ float get_shadows(sampler2DShadow shadowMap, float nDotL, vec3 viewPos, mat4x4 i
 	bias = shadowBias * tan(acos(nDotL));
 	bias = clamp(bias, 0.0, shadowBias * 2.0);
 	
-	return check_shadow(shadowMap, viewPos, invView, shadowViewProj, clipPlane, bias, texelSize);
+	return check_shadow(shadowMap, worldPos, shadowViewProj, clipPlane, bias, texelSize);
 }
 
-float get_shadows_cube(samplerCubeShadow shadowMap, float nDotL, vec3 viewPos, mat4x4 invView,  vec2 clipPlane, float shadowBias, float texelSize, vec3 lightPosition) {
+float get_shadows_cube(samplerCubeShadow shadowMap, float nDotL, vec3 worldPos, vec2 clipPlane, float shadowBias, float texelSize, vec3 lightPosition) {
 	if (nDotL <= 0)
 		return 0;
 		
@@ -199,5 +195,5 @@ float get_shadows_cube(samplerCubeShadow shadowMap, float nDotL, vec3 viewPos, m
 	bias = shadowBias * tan(acos(nDotL));
 	bias = clamp(bias, 0.0, shadowBias * 2.0);
 	
-	return check_shadow_cube(shadowMap, viewPos, invView, clipPlane, bias, texelSize, lightPosition);
+	return check_shadow_cube(shadowMap, worldPos, clipPlane, bias, texelSize, lightPosition);
 }

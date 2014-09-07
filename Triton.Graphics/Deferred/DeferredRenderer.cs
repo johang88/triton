@@ -318,9 +318,9 @@ namespace Triton.Graphics.Deferred
                 modelViewProjection = world * view * projection;
 
                 var worldView = world * view;
-                var itWorldView = Matrix4.Transpose(Matrix4.Invert(worldView));
+				var itWorld = Matrix4.Transpose(Matrix4.Invert(world));
 
-                operations[i].Material.BindMaterial(Backend, EnvironmentMap, EnvironmentMapSpecular, camera, ref world, ref worldView, ref itWorldView, ref modelViewProjection, operations[i].Skeleton, 0);
+                operations[i].Material.BindMaterial(Backend, EnvironmentMap, EnvironmentMapSpecular, camera, ref world, ref worldView, ref itWorld, ref modelViewProjection, operations[i].Skeleton, 0);
                 Backend.DrawMesh(operations[i].MeshHandle);
                 Backend.EndInstance();
             }
@@ -349,19 +349,17 @@ namespace Triton.Graphics.Deferred
 		private void RenderLights(Camera camera, ref Matrix4 view, ref Matrix4 projection, IReadOnlyCollection<Light> lights, Stage stage)
 		{
 			Matrix4 modelViewProjection = Matrix4.Identity;
-			Vector3 cameraPositionViewSpace;
-			Vector3.Transform(ref camera.Position, ref view, out cameraPositionViewSpace);
 
 			foreach (var light in lights)
 			{
 				if (!light.Enabled)
 					continue;
 
-				RenderLight(camera, ref view, ref projection, stage, ref modelViewProjection, ref cameraPositionViewSpace, light);
+				RenderLight(camera, ref view, ref projection, stage, ref modelViewProjection, light);
 			}
 		}
 
-		private void RenderLight(Camera camera, ref Matrix4 view, ref Matrix4 projection, Stage stage, ref Matrix4 modelViewProjection, ref Vector3 cameraPositionViewSpace, Light light)
+		private void RenderLight(Camera camera, ref Matrix4 view, ref Matrix4 projection, Stage stage, ref Matrix4 modelViewProjection, Light light)
 		{
 			// Pad the radius of the rendered sphere a little, it's quite low poly so there will be minor artifacts otherwise
 			var radius = light.Range * 1.1f;
@@ -481,7 +479,7 @@ namespace Triton.Graphics.Deferred
 			Backend.BindShaderVariable(shaderParams.ScreenSize, ref ScreenSize);
 			Backend.BindShaderVariable(shaderParams.ModelViewProjection, ref modelViewProjection);
 			Backend.BindShaderVariable(shaderParams.LightColor, ref lightColor);
-			Backend.BindShaderVariable(shaderParams.CameraPosition, ref cameraPositionViewSpace);
+			Backend.BindShaderVariable(shaderParams.CameraPosition, ref camera.Position);
 
 			if (light.Type == LighType.Directional || light.Type == LighType.SpotLight)
 			{
@@ -495,10 +493,7 @@ namespace Triton.Graphics.Deferred
 
 			if (light.Type == LighType.PointLight || light.Type == LighType.SpotLight)
 			{
-				Vector3 lightPosition;
-				Vector3.Transform(ref light.Position, ref view, out lightPosition);
-
-				Backend.BindShaderVariable(shaderParams.LightPosition, ref lightPosition);
+				Backend.BindShaderVariable(shaderParams.LightPosition, ref light.Position);
 				Backend.BindShaderVariable(shaderParams.LightRange, light.Range);
 			}
 
@@ -522,7 +517,6 @@ namespace Triton.Graphics.Deferred
 				if (light.Type == LighType.PointLight)
 				{
 					Backend.BindShaderVariable(shaderParams.SamplerShadowCube, 4);
-
 				}
 				else
 				{

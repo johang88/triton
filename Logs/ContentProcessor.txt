@@ -1,8 +1,1 @@
-Log file created: 2014-09-07 18:04:42
-<-> Processed samples_data/materials/crate
-<-> Processed samples_data/materials/default
-<-> Processed samples_data/materials/floor
-<-> Processed samples_data/materials/gold
-<-> Processed samples_data/materials/iron
-<-> Processed samples_data/materials/sphere
-<-> Processed samples_data/materials/wood
+Log file created: 2014-09-07 21:29:25

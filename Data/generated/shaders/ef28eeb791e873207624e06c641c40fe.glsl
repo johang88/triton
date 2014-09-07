@@ -26,7 +26,6 @@ out vec2 texCoord;
 out vec2 texCoordDetail;
 #endif
 out vec4 position;
-out vec4 worldPosition;
 
 uniform mat4x4 world;
 uniform mat4x4 worldView;
@@ -68,7 +67,7 @@ void main()
 	normal = normalize(blendNormal);
 	tangent = normalize(iTangent);
 	bitangent = cross(normal, tangent);
-	position = worldView * blendPos;
+	position = world * blendPos;
 
 	gl_Position = modelViewProjection * blendPos;
 #else
@@ -76,9 +75,8 @@ void main()
 	tangent = normalize(iTangent);
 	bitangent = normalize(cross(normal, tangent));
 	
-	position = worldView * vec4(iPosition, 1);
-	worldPosition = world * vec4(iPosition, 1);
-	
+	position = world * vec4(iPosition, 1);
+
 	gl_Position = modelViewProjection * vec4(iPosition, 1);
 #endif
 }
@@ -95,7 +93,6 @@ in vec2 texCoord;
 in vec2 texCoordDetail;
 #endif
 in vec4 position;
-in vec4 worldPosition;
 
 layout(location = 0) out vec4 oColor;
 layout(location = 1) out vec4 oNormal;
@@ -103,7 +100,6 @@ layout(location = 2) out vec4 oPosition;
 layout(location = 3) out vec4 oSpecular;
 layout(location = 4) out vec4 oEmissive;
 
-uniform mat4x4 itWorldView;
 uniform mat4x4 itWorld;
 
 uniform vec3 cameraPosition;
@@ -153,8 +149,8 @@ return 0.5;
 
 void main() {
 	vec3 normals = get_normals();
-	vec3 worldNormals = normalize(mat3x3(itWorld) * normals);
-	normals = normalize(mat3x3(itWorldView) * normals);
+	
+	normals = normalize(mat3x3(itWorld) * normals);
 	
 	vec3 diffuse = get_diffuse().xyz;
 	

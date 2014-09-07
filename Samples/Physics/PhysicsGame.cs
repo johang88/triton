@@ -92,7 +92,7 @@ namespace Triton.Samples
 				GameWorld.Add(sphere);
 			}
 
-			DebugFlags |= Game.DebugFlags.RenderStats;
+			DebugFlags |= Game.DebugFlags.RenderStats | Game.DebugFlags.GBuffer;
 
             HDRRenderer.AdaptationRate = 2;
             DeferredRenderer.ShadowQuality = Graphics.Deferred.ShadowQuality.Lowest;

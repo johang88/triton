@@ -97,9 +97,9 @@ void main()
 	if (attenuation > 0 && nDotL > 0) {
 #ifdef SHADOWS
 #ifdef SHADOWS_CUBE
-		float shadow = get_shadows_cube(samplerShadowCube, nDotL, position, invView, clipPlane, shadowBias, texelSize, lightPosition);
+		float shadow = get_shadows_cube(samplerShadowCube, nDotL, position, clipPlane, shadowBias, texelSize, lightPosition);
 #else
-		float shadow = get_shadows(samplerShadow, nDotL, position, invView, shadowViewProj, clipPlane, shadowBias, texelSize);
+		float shadow = get_shadows(samplerShadow, nDotL, position, shadowViewProj, clipPlane, shadowBias, texelSize);
 #endif
 		attenuation *= shadow;
 #endif

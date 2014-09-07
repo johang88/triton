@@ -59,18 +59,15 @@ namespace Triton.Graphics.Resources.Materials
 			Textures.Clear();
 		}
 
-		public override void BindMaterial(Backend backend, Texture environmentMap, Texture environmentMapSpecular, Camera camera, ref Matrix4 world, ref Matrix4 worldView, ref Matrix4 itWorldView, ref Matrix4 modelViewProjection, SkeletalAnimation.SkeletonInstance skeleton, int renderStateId)
+		public override void BindMaterial(Backend backend, Texture environmentMap, Texture environmentMapSpecular, Camera camera, ref Matrix4 world, ref Matrix4 worldView, ref Matrix4 itWorld, ref Matrix4 modelViewProjection, SkeletalAnimation.SkeletonInstance skeleton, int renderStateId)
 		{
-			base.BindMaterial(backend, environmentMap, environmentMapSpecular, camera, ref world, ref worldView, ref itWorldView, ref modelViewProjection, skeleton, renderStateId);
-
-			var itWorld = Matrix4.Transpose(Matrix4.Invert(world));
+			base.BindMaterial(backend, environmentMap, environmentMapSpecular, camera, ref world, ref worldView, ref itWorld, ref modelViewProjection, skeleton, renderStateId);
 
 			backend.BeginInstance(Shader.Handle, TextureHandles, samplers: Samplers, renderStateId: renderStateId);
 
 			backend.BindShaderVariable(Handles.ModelViewProjection, ref modelViewProjection);
 			backend.BindShaderVariable(Handles.World, ref world);
 			backend.BindShaderVariable(Handles.WorldView, ref worldView);
-			backend.BindShaderVariable(Handles.ItWorldView, ref itWorldView);
 			backend.BindShaderVariable(Handles.ItWorld, ref itWorld);
 
 			for (var i = 0; i < SamplerToTexture.Length; i++)
