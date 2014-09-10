@@ -58,6 +58,14 @@ namespace Triton.Samples
 				DeferredRenderer.EnableShadows = !DeferredRenderer.EnableShadows;
 			}
 
+			if (InputManager.WasKeyPressed(Input.Key.P))
+			{
+				if ((DebugFlags & Game.DebugFlags.Physics) == Game.DebugFlags.Physics)
+					DebugFlags &= ~Game.DebugFlags.Physics;
+				else
+					DebugFlags |= Game.DebugFlags.Physics;
+			}
+
 			if (InputManager.WasKeyPressed(Input.Key.G))
 			{
 				if ((DebugFlags & Game.DebugFlags.GBuffer) == Game.DebugFlags.GBuffer)
