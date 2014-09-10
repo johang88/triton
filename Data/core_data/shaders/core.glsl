@@ -21,3 +21,19 @@ float saturate(float value) {
 float square(float value) {
 	return value * value;
 }
+
+vec3 encodeNormals(vec3 normals) {
+	return normals * 0.5 + 0.5;
+}
+
+vec3 decodeNormals(vec3 normals) {
+	return normals * 2.0 - 1.0;
+}
+
+vec3 encodeDiffuse(vec3 diffuse) {
+	return sqrt(diffuse);
+}
+
+vec3 decodeDiffuse(vec3 diffuse) {
+	return diffuse * diffuse;
+}

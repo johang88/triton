@@ -91,32 +91,30 @@ namespace Triton.Graphics.Deferred
 
 			ScreenSize = new Vector2(width, height);
 
-			GBuffer = Backend.CreateRenderTarget("gbuffer", new Definition(width, height, false, new List<Definition.Attachment>()
+			GBuffer = Backend.CreateRenderTarget("gbuffer", new Definition(width, height, true, new List<Definition.Attachment>()
 			{
 				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0),
 				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 1),
 				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 2),
-				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 3),
-				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 4),
-				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.Depth24Stencil8, Renderer.PixelType.Float, 0)
+				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent32f, Renderer.PixelType.Float, 0)
 			}));
 
 			LightAccumulation = Backend.CreateRenderTarget("light_accumulation", new Definition(width, height, false, new List<Definition.Attachment>()
 			{
 				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0),
-				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.Depth24Stencil8, Renderer.PixelType.Float, GBuffer.Handle)
+				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.Depth24Stencil8, Renderer.PixelType.Float, 0)
 			}));
 
 			Temporary = Backend.CreateRenderTarget("deferred_temp", new Definition(width, height, false, new List<Definition.Attachment>()
 			{
 				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0),
-				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.Depth24Stencil8, Renderer.PixelType.Float, GBuffer.Handle)
+				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.Depth24Stencil8, Renderer.PixelType.Float, 0)
 			}));
 
 			Output = Backend.CreateRenderTarget("deferred_output", new Definition(width, height, false, new List<Definition.Attachment>()
 			{
 				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0),
-				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.Depth24Stencil8, Renderer.PixelType.Float, GBuffer.Handle)
+				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.Depth24Stencil8, Renderer.PixelType.Float, 0)
 			}));
 
 			SpotShadowsRenderTarget = Backend.CreateRenderTarget("spot_shadows", new Definition(512, 512, true, new List<Definition.Attachment>()
@@ -333,7 +331,7 @@ namespace Triton.Graphics.Deferred
 			var ambientColor = new Vector3((float)System.Math.Pow(stage.AmbientColor.X, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Y, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Z, 2.2f));
 
 			Backend.BeginInstance(AmbientLightShader.Handle,
-				new int[] { GBuffer.Textures[0].Handle, GBuffer.Textures[1].Handle, GBuffer.Textures[3].Handle, GBuffer.Textures[4].Handle },
+				new int[] { GBuffer.Textures[0].Handle, GBuffer.Textures[1].Handle },
 				new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering },
 				AmbientRenderState);
 			Backend.BindShaderVariable(AmbientLightParams.SamplerGBuffer0, 0);
@@ -473,7 +471,7 @@ namespace Triton.Graphics.Deferred
 			Backend.BindShaderVariable(shaderParams.SamplerGBuffer0, 0);
 			Backend.BindShaderVariable(shaderParams.SamplerGBuffer1, 1);
 			Backend.BindShaderVariable(shaderParams.SamplerGBuffer2, 2);
-			Backend.BindShaderVariable(shaderParams.SamplerGBuffer3, 3);
+			Backend.BindShaderVariable(shaderParams.samplerDepth, 3);
 
 			// Common uniforms
 			Backend.BindShaderVariable(shaderParams.ScreenSize, ref ScreenSize);
@@ -505,9 +503,9 @@ namespace Triton.Graphics.Deferred
 
 			if (light.CastShadows)
 			{
-				var inverseViewMatrix = Matrix4.Invert(view);
+				var inverseViewProjectionMatrix = Matrix4.Invert(view * projection);
 
-				Backend.BindShaderVariable(shaderParams.InvView, ref inverseViewMatrix);
+				Backend.BindShaderVariable(shaderParams.InvViewProjection, ref inverseViewProjectionMatrix);
 				Backend.BindShaderVariable(shaderParams.ClipPlane, ref shadowCameraClipPlane);
 				Backend.BindShaderVariable(shaderParams.ShadowBias, light.ShadowBias);
 

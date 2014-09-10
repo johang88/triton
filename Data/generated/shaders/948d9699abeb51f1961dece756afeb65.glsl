@@ -96,9 +96,7 @@ in vec4 position;
 
 layout(location = 0) out vec4 oColor;
 layout(location = 1) out vec4 oNormal;
-layout(location = 2) out vec4 oPosition;
-layout(location = 3) out vec4 oSpecular;
-layout(location = 4) out vec4 oEmissive;
+layout(location = 2) out vec4 oSpecular;
 
 uniform mat4x4 itWorld;
 
@@ -157,11 +155,9 @@ void main() {
 
 	float roughness = get_roughness();
 	
-	oColor = vec4(diffuse, 0);
-	oNormal = vec4(normals, 1);
+	oColor = vec4(encodeDiffuse(diffuse), 0);
+	oNormal = vec4(encodeNormals(normals), 1);
 	oSpecular = vec4(metallic, roughness, specular, 0);
-	oPosition = position;
-	oEmissive = vec4(1, 1, 1, 1);
 	
 #ifdef UNLIT
 	oNormal.w = 0;

@@ -31,7 +31,7 @@ layout(location = 0) out vec4 oColor;
 uniform sampler2D samplerGBuffer0;
 uniform sampler2D samplerGBuffer1;
 uniform sampler2D samplerGBuffer2;
-uniform sampler2D samplerGBuffer3;
+uniform sampler2D samplerDepth;
 
 uniform vec3 lightPosition;
 uniform vec3 lightColor;
@@ -40,7 +40,7 @@ uniform float lightRange;
 uniform vec2 screenSize;
 uniform vec3 cameraPosition;
 uniform vec3 lightDirection;
-uniform mat4x4 invView;
+uniform mat4x4 invViewProjection;
 uniform sampler2DShadow samplerShadow;
 uniform samplerCubeShadow samplerShadowCube;
 uniform mat4x4 shadowViewProj;
@@ -48,20 +48,32 @@ uniform vec2 clipPlane;
 uniform float shadowBias;
 uniform float texelSize;
 
+vec3 decodeWorldPosition(vec2 coord, float depth) {
+	depth = depth * 2.0 - 1.0;
+	
+	vec3 clipSpacePosition = vec3(coord * 2.0 - 1.0, depth);
+	vec4 worldPosition = invViewProjection * vec4(clipSpacePosition, 1);
+	
+	return worldPosition.xyz / worldPosition.w;
+}
+
 void main()
 {
 	vec2 project = gl_FragCoord.xy / screenSize.xy;
 	
 	vec4 gbuffer0 = texture2D(samplerGBuffer0, project); // color
 	vec4 gbuffer1 = texture2D(samplerGBuffer1, project); // normal
-	vec4 gbuffer2 = texture2D(samplerGBuffer2, project); // position
-	vec4 gbuffer3 = texture2D(samplerGBuffer3, project); // specular stuff
+	vec4 gbuffer2 = texture2D(samplerGBuffer2, project); // specular stuff
+	
+	vec3 diffuse = decodeDiffuse(gbuffer0.xyz);
+	
+	float depth = texture2D(samplerDepth, project).x;
+	vec3 position = decodeWorldPosition(project, depth);
 	
 	if (gbuffer1.w == 0)
 		discard;
 	
-	vec3 normal = normalize(gbuffer1.xyz);
-	vec3 position = gbuffer2.xyz;
+	vec3 normal = decodeNormals(gbuffer1.xyz);
 	
 #if defined(SPOT_LIGHT) || defined(POINT_LIGHT)
 	vec3 lightVec = lightPosition - position;
@@ -103,12 +115,12 @@ void main()
 #endif
 		attenuation *= shadow;
 #endif
-		float metallic = gbuffer3.x;
-		float roughness = gbuffer3.y;
-		float specular = gbuffer3.z;
+		float metallic = gbuffer2.x;
+		float roughness = gbuffer2.y;
+		float specular = gbuffer2.z;
 		
-		vec3 diffuseColor = mix(gbuffer0.xyz, vec3(0), metallic);
-		vec3 specularColor = mix(0.08 * vec3(specular), gbuffer0.xyz, metallic);
+		vec3 diffuseColor = mix(diffuse, vec3(0), metallic);
+		vec3 specularColor = mix(0.08 * vec3(specular), diffuse, metallic);
 
 		vec3 diffuseLighting = get_diffuse(diffuseColor, normal, eyeDir, lightDir, roughness);
 		vec3 specularLighting = get_specular(normal, eyeDir, lightDir, roughness, specularColor, lightRange);
