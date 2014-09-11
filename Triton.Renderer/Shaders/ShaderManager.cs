@@ -16,9 +16,11 @@ namespace Triton.Renderer.Shaders
 		private bool Disposed = false;
 		private readonly object Lock = new object();
 
-		int DefaultVertexHandle;
-		int DefaultFragmentHandle;
-		int DefaultProgramHandle;
+		private int ActiveShaderHandle = -1;
+
+		private int DefaultVertexHandle;
+		private int DefaultFragmentHandle;
+		private int DefaultProgramHandle;
 
 		public ShaderManager()
 		{
@@ -272,6 +274,17 @@ namespace Triton.Renderer.Shaders
 			}
 
 			return uniforms;
+		}
+
+		public void Bind(int handle)
+		{
+			if (ActiveShaderHandle == handle)
+				return;
+
+			ActiveShaderHandle = handle;
+
+			var programHandle = GetOpenGLHande(ActiveShaderHandle);
+			GL.UseProgram(programHandle);
 		}
 
 		public int GetOpenGLHande(int handle)

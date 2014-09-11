@@ -16,6 +16,8 @@ namespace Triton.Renderer.Samplers
 		private bool Disposed = false;
 		private readonly object Lock = new object();
 
+		private readonly int[] ActiveSamplers;
+
 		public SamplerManager()
 		{
 			// Each empty handle will store the location of the next empty handle 
@@ -25,6 +27,12 @@ namespace Triton.Renderer.Samplers
 			}
 
 			Handles[Handles.Length - 1].Id = -1;
+
+			ActiveSamplers = new int[20];
+			for (var i = 0; i < ActiveSamplers.Length; i++)
+			{
+				ActiveSamplers[i] = -1;
+			}
 		}
 
 		public void Dispose()
@@ -130,6 +138,17 @@ namespace Triton.Renderer.Samplers
 			}
 
 			Handles[index].Initialized = false;
+		}
+
+		public void Bind(int textureUnit, int handle)
+		{
+			if (ActiveSamplers[textureUnit] == handle)
+				return;
+
+			ActiveSamplers[textureUnit] = handle;
+
+			int sampler = GetOpenGLHande(handle);
+			GL.BindSampler(textureUnit, sampler);
 		}
 
 		public int GetOpenGLHande(int handle)

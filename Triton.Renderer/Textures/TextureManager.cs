@@ -17,6 +17,8 @@ namespace Triton.Renderer.Textures
 		private bool Disposed = false;
 		private readonly object Lock = new object();
 
+		private int[] ActiveTextures;
+
 		public TextureManager()
 		{
 			// Each empty handle will store the location of the next empty handle 
@@ -34,6 +36,12 @@ namespace Triton.Renderer.Textures
 			GL.TexImage2D(OGL.TextureTarget.Texture2D, 0, OGL.PixelInternalFormat.Rgb8, 1, 1, 0, OGL.PixelFormat.Rgba, OGL.PixelType.Byte, new byte[] { 0, 255, 255 });
 			GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 			GL.Finish();
+
+			ActiveTextures = new int[20];
+			for (var i = 0; i < ActiveTextures.Length; i++)
+			{
+				ActiveTextures[i] = -1;
+			}
 		}
 
 		public void Dispose()
@@ -171,6 +179,20 @@ namespace Triton.Renderer.Textures
 			GL.Finish();
 
 			Handles[index].Initialized = true;
+		}
+
+		public void Bind(int textureUnit, int handle)
+		{
+			if (ActiveTextures[textureUnit] == handle)
+				return;
+
+			ActiveTextures[textureUnit] = handle;
+
+			TextureTarget target;
+			var openGLHandle = GetOpenGLHande(handle, out target);
+
+			GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
+			GL.BindTexture((OpenTK.Graphics.OpenGL.TextureTarget)(int)target, openGLHandle);
 		}
 
 		public int GetOpenGLHande(int handle)

@@ -146,11 +146,7 @@ namespace Triton.Renderer
 
 		public void BindTexture(int handle, int textureUnit)
 		{
-			TextureTarget target;
-			var openGLHandle = TextureManager.GetOpenGLHande(handle, out target);
-
-			GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
-			GL.BindTexture((OpenTK.Graphics.OpenGL.TextureTarget)(int)target, openGLHandle);
+			TextureManager.Bind(textureUnit, handle);
 		}
 
 		public void GenreateMips(int handle)
@@ -309,8 +305,7 @@ namespace Triton.Renderer
 
 		public void BindShader(int handle)
 		{
-			var programHandle = ShaderManager.GetOpenGLHande(handle);
-			GL.UseProgram(programHandle);
+			ShaderManager.Bind(handle);
 		}
 
 		public int GetUniformLocation(int handle, string name)
@@ -458,8 +453,7 @@ namespace Triton.Renderer
 
 		public void BindSampler(int textureUnit, int handle)
 		{
-			int sampler = SamplerManager.GetOpenGLHande(handle);
-			GL.BindSampler(textureUnit, sampler);
+			SamplerManager.Bind(textureUnit, handle);
 		}
 
 		internal static void CheckGLError()
