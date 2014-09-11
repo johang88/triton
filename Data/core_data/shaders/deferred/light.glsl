@@ -65,15 +65,8 @@ void main()
 	vec4 gbuffer1 = texture2D(samplerGBuffer1, project); // normal
 	vec4 gbuffer2 = texture2D(samplerGBuffer2, project); // specular stuff
 	
-	vec3 diffuse = decodeDiffuse(gbuffer0.xyz);
-	
 	float depth = texture2D(samplerDepth, project).x;
 	vec3 position = decodeWorldPosition(project, depth);
-	
-	if (gbuffer1.w == 0)
-		discard;
-	
-	vec3 normal = decodeNormals(gbuffer1.xyz);
 	
 #if defined(SPOT_LIGHT) || defined(POINT_LIGHT)
 	vec3 lightVec = lightPosition - position;
@@ -89,10 +82,8 @@ void main()
 #if defined(SPOT_LIGHT) || defined(POINT_LIGHT)
 	float attenuation = saturate(1.0 - ((dist * dist) / (lightRange * lightRange)));
 	attenuation = attenuation * attenuation;
-	float radius = lightRange;
 #else
 	float attenuation = 1.0;
-	float radius = 1;
 #endif
 	
 #ifdef SPOT_LIGHT
@@ -103,6 +94,8 @@ void main()
 	attenuation *= spotFallof;
 #endif
 
+	vec3 normal = decodeNormals(gbuffer1.xyz);
+	
 	float nDotL = saturate(dot(normal, lightDir) * 1.08 - 0.08);
 	vec3 lighting = vec3(0, 0, 0);
 
@@ -118,6 +111,8 @@ void main()
 		float metallic = gbuffer2.x;
 		float roughness = gbuffer2.y;
 		float specular = gbuffer2.z;
+		
+		vec3 diffuse = decodeDiffuse(gbuffer0.xyz);
 		
 		vec3 diffuseColor = mix(diffuse, vec3(0), metallic);
 		vec3 specularColor = mix(0.08 * vec3(specular), diffuse, metallic);

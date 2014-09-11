@@ -72,8 +72,7 @@ float random(vec3 seed, int i){
 float sample_shadow_5(sampler2DShadow shadowMap, vec2 uv, vec3 worldPos, float texelSize, float distance, float shadowBias) {
 	float result = 0.0;
 	for (int i = 0; i < 5; i++) {
-		int index = int(16.0 * random(floor(worldPos.xyz * 1000.0), i)) % 16;
-		result += texture(shadowMap, vec3(uv.xy - poisson_disc_samples_5[i] * texelSize, distance - shadowBias * length(poisson_disc_samples_29[i])));
+		result += texture(shadowMap, vec3(uv.xy - poisson_disc_samples_5[i] * texelSize, distance - shadowBias * length(poisson_disc_samples_5[i])));
 	}
 	
 	return result / 5;
@@ -82,8 +81,7 @@ float sample_shadow_5(sampler2DShadow shadowMap, vec2 uv, vec3 worldPos, float t
 float sample_shadow_12(sampler2DShadow shadowMap, vec2 uv, vec3 worldPos, float texelSize, float distance, float shadowBias) {
 	float result = 0.0;
 	for (int i = 0; i < 12; i++) {
-		int index = int(16.0 * random(floor(worldPos.xyz * 1000.0), i)) % 16;
-		result += texture(shadowMap, vec3(uv.xy - poisson_disc_samples_12[i] * texelSize, distance - shadowBias * length(poisson_disc_samples_29[i])));
+		result += texture(shadowMap, vec3(uv.xy - poisson_disc_samples_12[i] * texelSize, distance - shadowBias * length(poisson_disc_samples_12[i])));
 	}
 	
 	return result / 12;
@@ -92,7 +90,6 @@ float sample_shadow_12(sampler2DShadow shadowMap, vec2 uv, vec3 worldPos, float 
 float sample_shadow_29(sampler2DShadow shadowMap, vec2 uv, vec3 worldPos, float texelSize, float distance, float shadowBias) {
 	float result = 0.0;
 	for (int i = 0; i < 29; i++) {
-		int index = int(16.0 * random(floor(worldPos.xyz * 1000.0), i)) % 16;
 		result += texture(shadowMap, vec3(uv.xy - poisson_disc_samples_29[i] * texelSize, distance - shadowBias * length(poisson_disc_samples_29[i])));
 	}
 	
@@ -132,7 +129,6 @@ float check_shadow_cube(samplerCubeShadow shadowMap, vec3 worldPos, vec2 clipPla
 #if SHADOW_QUALITY == 3
 	float result = 0;
 	for (int i = 0; i < 29; i++) {
-		int index = int(16.0 * random(floor(worldPos.xyz * 1000.0), i)) % 16;
 		result += texture(shadowMap, 
 			vec4(
 				lookup.xyz + sideVector * poisson_disc_samples_29[i].x + upVector * poisson_disc_samples_29[i].y,
@@ -144,7 +140,6 @@ float check_shadow_cube(samplerCubeShadow shadowMap, vec3 worldPos, vec2 clipPla
 #elif SHADOW_QUALITY == 2
 	float result = 0;
 	for (int i = 0; i < 12; i++) {
-		int index = int(16.0 * random(floor(worldPos.xyz * 1000.0), i)) % 16;
 		result += texture(shadowMap, 
 			vec4(
 				lookup.xyz + sideVector * poisson_disc_samples_12[i].x + upVector * poisson_disc_samples_12[i].y,
@@ -156,7 +151,6 @@ float check_shadow_cube(samplerCubeShadow shadowMap, vec3 worldPos, vec2 clipPla
 #elif SHADOW_QUALITY == 1
 	float result = 0;
 	for (int i = 0; i < 5; i++) {
-		int index = int(16.0 * random(floor(worldPos.xyz * 1000.0), i)) % 16;
 		result += texture(shadowMap, 
 			vec4(
 				lookup.xyz + sideVector * poisson_disc_samples_5[i].x + upVector * poisson_disc_samples_5[i].y,
@@ -178,9 +172,7 @@ float get_shadows(sampler2DShadow shadowMap, float nDotL, vec3 worldPos, mat4x4 
 	if (nDotL <= 0)
 		return 0;
 		
-	float bias = 0.1;
-	
-	bias = shadowBias * tan(acos(nDotL));
+	float bias = shadowBias * tan(acos(nDotL));
 	bias = clamp(bias, 0.0, shadowBias * 2.0);
 	
 	return check_shadow(shadowMap, worldPos, shadowViewProj, clipPlane, bias, texelSize);
@@ -190,9 +182,7 @@ float get_shadows_cube(samplerCubeShadow shadowMap, float nDotL, vec3 worldPos, 
 	if (nDotL <= 0)
 		return 0;
 		
-	float bias = 1;
-	
-	bias = shadowBias * tan(acos(nDotL));
+	float bias = shadowBias * tan(acos(nDotL));
 	bias = clamp(bias, 0.0, shadowBias * 2.0);
 	
 	return check_shadow_cube(shadowMap, worldPos, clipPlane, bias, texelSize, lightPosition);
