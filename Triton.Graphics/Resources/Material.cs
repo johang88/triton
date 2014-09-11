@@ -10,6 +10,10 @@ namespace Triton.Graphics.Resources
 	{
 		private bool Initialized = false;
 
+		// Not an awesome solution
+		private static int LastId = 0;
+		public readonly int Id = LastId++;
+
 		public Material(string name, string parameters)
 			: base(name, parameters)
 		{

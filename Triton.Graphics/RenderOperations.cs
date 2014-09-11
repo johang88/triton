@@ -11,6 +11,7 @@ namespace Triton.Graphics
 		const int MaxOperations = 8192;
 		private readonly RenderOperation[] Operations = new RenderOperation[MaxOperations];
 		private int OperationsCount = 0;
+		private readonly IComparer<RenderOperation> Comparer = new RenderOperationComparer();
 
 		public void Add(int meshHandle, Matrix4 world, Resources.Material material, SkeletalAnimation.SkeletonInstance skeleton = null, bool useInstancing = false, bool castShadows = true)
 		{
@@ -30,8 +31,18 @@ namespace Triton.Graphics
 
         public void GetOperations(out RenderOperation[] operations, out int count)
         {
+			Array.Sort(Operations, 0, OperationsCount, Comparer);
+
             operations = Operations;
             count = OperationsCount;
         }
+
+		class RenderOperationComparer : IComparer<RenderOperation>
+		{
+			public int Compare(RenderOperation x, RenderOperation y)
+			{
+				return x.Material.Id - y.Material.Id;
+			}
+		}
 	}
 }
