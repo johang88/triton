@@ -106,30 +106,37 @@ namespace ContentProcessor
 			var entries = Database.GetAllEntries();
 			foreach (var entry in entries)
 			{
-				var sourcePath = Path.Combine(inputDir, entry.Source);
-				var outputPath = Path.Combine(outputDir, entry.Id);
-
-				if (!File.Exists(sourcePath))
-					continue;
-
-				if (!noCache && File.GetLastWriteTime(sourcePath) <= entry.LastCompilation)
-					continue;
-
-				if (Compilers.Exists(entry.Type))
+				try
 				{
-					var fileOutputDirectory = Path.GetDirectoryName(outputPath);
-					if (!Directory.Exists(fileOutputDirectory))
+					var sourcePath = Path.Combine(inputDir, entry.Source);
+					var outputPath = Path.Combine(outputDir, entry.Id);
+
+					if (!File.Exists(sourcePath))
+						continue;
+
+					if (!noCache && File.GetLastWriteTime(sourcePath) <= entry.LastCompilation)
+						continue;
+
+					if (Compilers.Exists(entry.Type))
 					{
-						Directory.CreateDirectory(fileOutputDirectory);
+						var fileOutputDirectory = Path.GetDirectoryName(outputPath);
+						if (!Directory.Exists(fileOutputDirectory))
+						{
+							Directory.CreateDirectory(fileOutputDirectory);
+						}
+
+						var compiler = Compilers.Create(entry.Type);
+						compiler.Compile(context, sourcePath, outputPath, entry);
+
+						Log.WriteLine("Processed {0}", entry.Id);
+						entry.LastCompilation = DateTime.Now;
+
+						Database.SaveEntry(entry);
 					}
-
-					var compiler = Compilers.Create(entry.Type);
-					compiler.Compile(context, sourcePath, outputPath, entry);
-
-					Log.WriteLine("Processed {0}", entry.Id);
-					entry.LastCompilation = DateTime.Now;
-
-					Database.SaveEntry(entry);
+				}
+				catch (Exception e)
+				{
+					Log.WriteLine(string.Format("{0}\n\t{1}", entry.Source, e.ToString()), LogLevel.Error);
 				}
 			}
 		}
