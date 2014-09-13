@@ -7,8 +7,6 @@ layout(location = ATTRIB_TEXCOORD_0) in vec2 iTexCoord;
 
 out vec2 texCoord;
 
-uniform mat4x4 modelViewProjection;
-
 void main()
 {
 	texCoord = iTexCoord;

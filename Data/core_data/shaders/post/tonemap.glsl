@@ -7,12 +7,10 @@ layout(location = ATTRIB_TEXCOORD_0) in vec2 iTexCoord;
 
 out vec2 texCoord;
 
-uniform mat4x4 modelViewProjection;
-
 void main()
 {
 	texCoord = iTexCoord;
-	gl_Position = modelViewProjection * vec4(iPosition, 1);
+	gl_Position = vec4(iPosition, 1);
 }
 
 #else
@@ -57,8 +55,6 @@ void main()
 
 	vec3 bloom = texture2D(samplerBloom, texCoord).xyz;
 	
-	vec3 final = color + bloom;
-	final = pow(final, vec3(1.0 / 2.2));
-	oColor = vec4(final, 1);
+	oColor = vec4(color + bloom, 1);
 }
 #endif

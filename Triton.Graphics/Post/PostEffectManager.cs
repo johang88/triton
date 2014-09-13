@@ -19,8 +19,12 @@ namespace Triton.Graphics.Post
 
 		// Settings
 		public AntiAliasing AntiAliasing = AntiAliasing.FXAA;
+		public HDRSettings HDRSettings = new HDRSettings();
 
 		// Effects
+		private readonly Effects.AdaptLuminance AdaptLuminance;
+		private readonly Effects.Bloom Bloom;
+		private readonly Effects.Tonemap Tonemap;
 		private readonly Effects.Gamma Gamma;
 		private readonly Effects.FXAA FXAA;
 		
@@ -54,8 +58,17 @@ namespace Triton.Graphics.Post
 			Sprite = Backend.CreateSpriteBatch();
 
 			// Setup effects
+			AdaptLuminance = new Effects.AdaptLuminance(Backend, ResourceManager, QuadMesh);
+			Bloom = new Effects.Bloom(Backend, ResourceManager, QuadMesh);
+			Tonemap = new Effects.Tonemap(Backend, ResourceManager, QuadMesh);
 			Gamma = new Effects.Gamma(Backend, ResourceManager, QuadMesh);
 			FXAA = new Effects.FXAA(Backend, ResourceManager, QuadMesh);
+			 
+			// Default settings
+			HDRSettings.KeyValue = 0.115f;
+			HDRSettings.AdaptationRate = 0.5f;
+			HDRSettings.BlurSigma = 3.0f;
+			HDRSettings.BloomThreshold = 9.0f;
 		}
 
 		void SwapRenderTargets()
@@ -81,6 +94,14 @@ namespace Triton.Graphics.Post
 			}
 		}
 
+		private void ApplyLumianceBloomAndTonemap(float deltaTime)
+		{
+			var luminance = AdaptLuminance.Render(HDRSettings, TemporaryRenderTargets[0], deltaTime);
+			var bloom = Bloom.Render(HDRSettings, TemporaryRenderTargets[0], luminance);
+			Tonemap.Render(HDRSettings, TemporaryRenderTargets[0], TemporaryRenderTargets[1], bloom, luminance);
+			SwapRenderTargets();
+		}
+
 		public RenderTarget Render(Camera camera, RenderTarget gbuffer, RenderTarget input, float deltaTime)
 		{
 			// We always start by rendering the input texture to a temporary render target
@@ -90,6 +111,8 @@ namespace Triton.Graphics.Post
 			Sprite.Render(TemporaryRenderTargets[1].Width, TemporaryRenderTargets[1].Height);
 
 			SwapRenderTargets();
+
+			ApplyLumianceBloomAndTonemap(deltaTime);
 
 			ApplyAA();
 
