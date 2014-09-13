@@ -96,7 +96,7 @@ void main()
 
 	vec3 normal = decodeNormals(gbuffer1.xyz);
 	
-	float nDotL = saturate(dot(normal, lightDir) * 1.08 - 0.08);
+	float nDotL = saturate(dot(normal, lightDir));
 	vec3 lighting = vec3(0, 0, 0);
 
 	if (attenuation > 0 && nDotL > 0) {
