@@ -78,6 +78,7 @@
     <Compile Include="Materials\CustomNodes\ColorConstNode.cs" />
     <Compile Include="Materials\CustomNodes\Context.cs" />
     <Compile Include="Materials\CustomNodes\FloatConstNode.cs" />
+    <Compile Include="Materials\CustomNodes\FloatLerpNode.cs" />
     <Compile Include="Materials\CustomNodes\NormalMapNode.cs" />
     <Compile Include="Materials\CustomNodes\RootNode.cs" />
     <Compile Include="Materials\CustomNodes\TextureNode.cs" />

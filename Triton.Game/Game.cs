@@ -29,7 +29,7 @@ namespace Triton.Game
 		public Input.InputManager InputManager { get; private set; }
 
 		public Graphics.Deferred.DeferredRenderer DeferredRenderer { get; private set; }
-		public Graphics.HDR.HDRRenderer HDRRenderer { get; private set; }
+		public Graphics.Post.PostEffectManager PostEffectManager { get; private set; }
 
 		public Triton.Physics.World PhysicsWorld { get; private set; }
 
@@ -105,7 +105,7 @@ namespace Triton.Game
 			PhysicsWorld = new Triton.Physics.World(GraphicsBackend, ResourceManager);
 
 			DeferredRenderer = new Graphics.Deferred.DeferredRenderer(ResourceManager, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
-			HDRRenderer = new Graphics.HDR.HDRRenderer(ResourceManager, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
+			PostEffectManager = new Graphics.Post.PostEffectManager(ResourceManager, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
 
 			Stage = new Graphics.Stage(ResourceManager);
 			Camera = new Graphics.Camera(new Vector2(GraphicsBackend.Width, GraphicsBackend.Height));
@@ -167,7 +167,14 @@ namespace Triton.Game
 			GraphicsBackend.BeginScene();
 
 			var lightOutput = DeferredRenderer.Render(Stage, Camera);
-			HDRRenderer.Render(Camera, lightOutput, deltaTime);
+
+			var postProcessedResult = PostEffectManager.Render(Camera, DeferredRenderer.GBuffer, lightOutput, deltaTime);
+
+			GraphicsBackend.BeginPass(null, Vector4.Zero, false);
+
+			DebugSprite.RenderQuad(postProcessedResult.Textures[0], Vector2.Zero);
+			DebugSprite.Render(GraphicsBackend.Width, GraphicsBackend.Height);
+
 			RenderUI(deltaTime);
 
 			if ((DebugFlags & DebugFlags.Physics) == DebugFlags.Physics)

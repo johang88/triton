@@ -19,7 +19,6 @@ namespace Triton.Graphics.Deferred
 		private RenderShadowsParams RenderShadowsParams = new RenderShadowsParams();
 		private RenderShadowsParams RenderShadowsCubeParams = new RenderShadowsParams();
 		private RenderShadowsParams RenderShadowsSkinnedParams = new RenderShadowsParams();
-		private FXAAParams FXAAParams = new FXAAParams();
 		private FogParams FogParams = new FogParams();
 
 		private Vector2 ScreenSize;
@@ -42,7 +41,6 @@ namespace Triton.Graphics.Deferred
 		private Resources.ShaderProgram RenderShadowsShader;
 		private Resources.ShaderProgram RenderShadowsCubeShader;
 		private Resources.ShaderProgram RenderShadowsSkinnedShader;
-		private Resources.ShaderProgram FXAAShader;
 		private Resources.ShaderProgram FogShader;
 
 		// Used for point light shadows
@@ -65,7 +63,6 @@ namespace Triton.Graphics.Deferred
 
 		private int ShadowSampler;
 
-		public bool EnableFXAA = true;
 		public bool EnableShadows = true;
 
 		public int DirectionalShaderOffset = 0;
@@ -163,7 +160,6 @@ namespace Triton.Graphics.Deferred
 			RenderShadowsShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows");
 			RenderShadowsSkinnedShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows", "SKINNED");
 			RenderShadowsCubeShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows_cube");
-			FXAAShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/fxaa");
 			FogShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/fog");
 
 			RandomNoiseTexture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("/textures/random_n");
@@ -183,8 +179,8 @@ namespace Triton.Graphics.Deferred
 			LightAccumulatinRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
 			ShadowsRenderState = Backend.CreateRenderState(false, true, true);
 			DirectionalRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Back, true, Triton.Renderer.DepthFunction.Lequal);
-			LightInsideRenderState = Backend.CreateRenderState(true, false, true, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, Triton.Renderer.CullFaceMode.Front, true, Renderer.DepthFunction.Gequal);
-			LightOutsideRenderState = Backend.CreateRenderState(true, false, true, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Back, true, Triton.Renderer.DepthFunction.Lequal);
+			LightInsideRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, Triton.Renderer.CullFaceMode.Front, true, Renderer.DepthFunction.Gequal);
+			LightOutsideRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Back, true, Triton.Renderer.DepthFunction.Lequal);
 
 			ShadowSampler = Backend.RenderSystem.CreateSampler(new Dictionary<Renderer.SamplerParameterName, int>
 			{
@@ -208,7 +204,6 @@ namespace Triton.Graphics.Deferred
 			RenderShadowsShader.GetUniformLocations(RenderShadowsParams);
 			RenderShadowsSkinnedShader.GetUniformLocations(RenderShadowsSkinnedParams);
 			RenderShadowsCubeShader.GetUniformLocations(RenderShadowsCubeParams);
-			FXAAShader.GetUniformLocations(FXAAParams);
 			FogShader.GetUniformLocations(FogParams);
 		}
 
@@ -233,7 +228,7 @@ namespace Triton.Graphics.Deferred
 			Backend.EndPass();
 
 			// Render light accumulation
-			Backend.BeginPass(LightAccumulation, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
+			Backend.BeginPass(LightAccumulation, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), true);
 
 			RenderAmbientLight(stage);
 			RenderLights(camera, ref view, ref projection, stage.GetLights(), stage);
@@ -256,25 +251,6 @@ namespace Triton.Graphics.Deferred
 
 				Vector2 screenSize = new Vector2(LightAccumulation.Width, LightAccumulation.Height);
 				Backend.BindShaderVariable(FogParams.ScreenSize, ref screenSize);
-
-				Backend.DrawMesh(QuadMesh.MeshHandle);
-
-				Backend.EndPass();
-
-				var tmp = currentRenderTarget;
-				currentRenderTarget = currentSource;
-				currentSource = tmp;
-			}
-
-			if (EnableFXAA)
-			{
-				Backend.BeginPass(currentRenderTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
-
-				Backend.BeginInstance(FXAAShader.Handle, new int[] { currentSource.Textures[0].Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, LightAccumulatinRenderState);
-				Backend.BindShaderVariable(FXAAParams.SamplerScene, 0);
-
-				Vector2 screenSize = new Vector2(LightAccumulation.Width, LightAccumulation.Height);
-				Backend.BindShaderVariable(FXAAParams.TextureSize, ref screenSize);
 
 				Backend.DrawMesh(QuadMesh.MeshHandle);
 

@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Triton.Graphics.Deferred
+namespace Triton.Graphics.Post.Effects
 {
-	class FXAAParams
+	class HighPass
 	{
-		public int SamplerScene = 0;
-		public int TextureSize = 0;
 	}
 }

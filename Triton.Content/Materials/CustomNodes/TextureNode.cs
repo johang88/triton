@@ -55,8 +55,12 @@ namespace Triton.Content.Materials.CustomNodes
 
 			Context.Samplers.Add(samplerName, Value);
 
+			var type = "vec4";
+
 			if (connectorIndex > 0)
 			{
+				type = "float";
+
 				outputVar = Context.NextVariable("f");
 				switch (connectorIndex)
 				{
@@ -74,7 +78,7 @@ namespace Triton.Content.Materials.CustomNodes
 			
 			var statements = new List<string>()
 			{
-				string.Format("vec4 {0} = {1}", outputVar, sample),
+				string.Format("{2} {0} = {1}", outputVar, sample, type),
 			};
 
 			return new DataTypes.ShaderData(statements, outputVar);

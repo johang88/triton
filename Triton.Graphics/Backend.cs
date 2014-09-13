@@ -229,10 +229,15 @@ namespace Triton.Graphics
 
 							RenderSystem.BeginScene(renderTargetHandle, width, height);
 
-							var color = reader.ReadVector4();
-							var clearDepth = reader.ReadBoolean();
+							var clear = reader.ReadBoolean();
 
-							RenderSystem.Clear(color, clearDepth);
+							if (clear)
+							{
+								var color = reader.ReadVector4();
+								var clearDepth = reader.ReadBoolean();
+
+								RenderSystem.Clear(color, clearDepth);
+							}
 						}
 						break;
 					case OpCode.ChangeRenderTarget:
@@ -267,11 +272,6 @@ namespace Triton.Graphics
 								var samplerHandle = reader.ReadInt32();
 								RenderSystem.BindSampler(texUnit++, samplerHandle);
 							}
-
-							//for (; texUnit < numTextures; texUnit++)
-							//{
-							//	RenderSystem.BindSampler(texUnit, DefaultSampler);
-							//}
 						}
 						break;
 					case OpCode.EndInstance:
@@ -447,6 +447,30 @@ namespace Triton.Graphics
 		/// </summary>
 		/// <param name="renderTarget"></param>
 		/// <param name="clearColor"></param>
+		public void BeginPass(RenderTarget renderTarget)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.BeginPass);
+			if (renderTarget == null)
+			{
+				PrimaryBuffer.Writer.Write(0);
+				PrimaryBuffer.Writer.Write(Window.Width);
+				PrimaryBuffer.Writer.Write(Window.Height);
+			}
+			else
+			{
+				PrimaryBuffer.Writer.Write(renderTarget.Handle);
+				PrimaryBuffer.Writer.Write(renderTarget.Width);
+				PrimaryBuffer.Writer.Write(renderTarget.Height);
+			}
+
+			PrimaryBuffer.Writer.Write(false);
+		}
+
+		/// <summary>
+		/// Begin to render a new pass to the specified render target
+		/// </summary>
+		/// <param name="renderTarget"></param>
+		/// <param name="clearColor"></param>
 		public void BeginPass(RenderTarget renderTarget, Vector4 clearColor, bool clearDepth = true)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BeginPass);
@@ -463,6 +487,7 @@ namespace Triton.Graphics
 				PrimaryBuffer.Writer.Write(renderTarget.Height);
 			}
 
+			PrimaryBuffer.Writer.Write(true);
 			PrimaryBuffer.Writer.Write(clearColor);
 			PrimaryBuffer.Writer.Write(clearDepth);
 		}
@@ -690,6 +715,9 @@ namespace Triton.Graphics
 			{
 				var texture = new Resources.Texture("_sys/render_targets/" + name + "_" + StringConverter.ToString(i), "");
 				texture.Handle = textureHandles[i];
+				texture.Width = definition.Width;
+				texture.Height = definition.Height;
+
 				ResourceManager.Manage(texture);
 
 				textures[i] = texture;

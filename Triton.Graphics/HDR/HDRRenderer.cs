@@ -141,7 +141,7 @@ namespace Triton.Graphics.HDR
 			var modelViewProjection = Matrix4.Identity;
 
 			// Calculate luminance
-			Backend.BeginPass(LuminanceTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+			Backend.BeginPass(LuminanceTarget);
 			Backend.BeginInstance(LuminanceMapShader.Handle, new int[] { inputTarget.Textures[0].Handle },
 				samplers: new int[] { Backend.DefaultSamplerNoFiltering });
 			Backend.BindShaderVariable(LuminanceMapParams.ModelViewProjection, ref modelViewProjection);
@@ -156,7 +156,7 @@ namespace Triton.Graphics.HDR
 			var adaptedLuminanceSource = AdaptLuminanceTargets[CurrentLuminanceTarget == 0 ? 1 : 0];
 			CurrentLuminanceTarget = (CurrentLuminanceTarget + 1) % 2;
 
-			Backend.BeginPass(adaptedLuminanceTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+			Backend.BeginPass(adaptedLuminanceTarget);
 			Backend.BeginInstance(AdaptLuminanceShader.Handle, new int[] { adaptedLuminanceSource.Textures[0].Handle, LuminanceTarget.Textures[0].Handle },
 				samplers: new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerMipMapNearest });
 			Backend.BindShaderVariable(AdaptLuminanceParams.ModelViewProjection, ref modelViewProjection);
@@ -169,7 +169,7 @@ namespace Triton.Graphics.HDR
 			Backend.EndPass();
 
 			// High pass
-			Backend.BeginPass(BlurTargets[0], new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+			Backend.BeginPass(BlurTargets[0]);
 			Backend.BeginInstance(HighPassShader.Handle, new int[] { inputTarget.Textures[0].Handle, adaptedLuminanceSource.Textures[0].Handle },
 				samplers: new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering });
 			Backend.BindShaderVariable(HighPassParams.ModelViewProjection, ref modelViewProjection);
@@ -182,7 +182,7 @@ namespace Triton.Graphics.HDR
 			Backend.EndPass();
 
 			// Downsample 1
-			Backend.BeginPass(BlurTargets[1], new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+			Backend.BeginPass(BlurTargets[1]);
 			Backend.BeginInstance(QuadShader.Handle, new int[] { BlurTargets[0].Textures[0].Handle },
 				samplers: new int[] { BlurSampler });
 			Backend.BindShaderVariable(QuadParams.ModelViewProjection, ref modelViewProjection);
@@ -192,7 +192,7 @@ namespace Triton.Graphics.HDR
 			Backend.EndPass();
 
 			// Downsample 2
-			Backend.BeginPass(BlurTargets[2], new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+			Backend.BeginPass(BlurTargets[2]);
 			Backend.BeginInstance(QuadShader.Handle, new int[] { BlurTargets[1].Textures[0].Handle },
 				samplers: new int[] { BlurSampler });
 			Backend.BindShaderVariable(QuadParams.ModelViewProjection, ref modelViewProjection);
@@ -202,7 +202,7 @@ namespace Triton.Graphics.HDR
 			Backend.EndPass();
 
 			// Downsample 3
-			Backend.BeginPass(BlurTargets[4], new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+			Backend.BeginPass(BlurTargets[4]);
 			Backend.BeginInstance(QuadShader.Handle, new int[] { BlurTargets[2].Textures[0].Handle },
 				samplers: new int[] { BlurSampler });
 			Backend.BindShaderVariable(QuadParams.ModelViewProjection, ref modelViewProjection);
@@ -217,7 +217,7 @@ namespace Triton.Graphics.HDR
 				Vector2 blurTextureSize = new Vector2(BlurTargets[3].Width, BlurTargets[3].Height);
 
 				// Blur horizontal
-				Backend.BeginPass(BlurTargets[3], new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+				Backend.BeginPass(BlurTargets[3]);
 				Backend.BeginInstance(BlurHorizontalShader.Handle, new int[] { BlurTargets[4].Textures[0].Handle },
 					samplers: new int[] { Backend.DefaultSamplerNoFiltering });
 				Backend.BindShaderVariable(BlurHorizontalParams.ModelViewProjection, ref modelViewProjection);
@@ -229,7 +229,7 @@ namespace Triton.Graphics.HDR
 				Backend.EndPass();
 
 				// Blur vertical
-				Backend.BeginPass(BlurTargets[4], new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+				Backend.BeginPass(BlurTargets[4]);
 				Backend.BeginInstance(BlurVerticalShader.Handle, new int[] { BlurTargets[3].Textures[0].Handle },
 					samplers: new int[] { Backend.DefaultSamplerNoFiltering });
 				Backend.BindShaderVariable(BlurVerticalParams.ModelViewProjection, ref modelViewProjection);

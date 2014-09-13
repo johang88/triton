@@ -76,7 +76,7 @@ namespace Triton.Graphics
                 var subMeshes = meshInstance.Mesh.SubMeshes;
                 var meshPosition = Vector3.Transform(Vector3.Zero, meshInstance.World);
 
-                if (meshInstance.CastShadows && Math.Intersections.SphereToSphere(ref position, radius, ref meshPosition, meshInstance.Mesh.BoundingSphereRadius))
+                if ((!shadowCastersOnly || meshInstance.CastShadows) && Math.Intersections.SphereToSphere(ref position, radius, ref meshPosition, meshInstance.Mesh.BoundingSphereRadius))
                 {
                     for (var j = 0; j < subMeshes.Length; j++)
                     {

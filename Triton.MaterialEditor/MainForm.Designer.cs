@@ -36,6 +36,7 @@
 			this.vector4ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.multiplyScalarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.colorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.textureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.normalMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
@@ -45,7 +46,7 @@
 			this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-			this.colorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.lerpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextMenuStrip1.SuspendLayout();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -109,9 +110,10 @@
             this.vector4ToolStripMenuItem,
             this.colorToolStripMenuItem,
             this.textureToolStripMenuItem,
-            this.normalMapToolStripMenuItem});
+            this.normalMapToolStripMenuItem,
+            this.lerpToolStripMenuItem});
 			this.contextMenuStrip1.Name = "contextMenuStrip1";
-			this.contextMenuStrip1.Size = new System.Drawing.Size(176, 176);
+			this.contextMenuStrip1.Size = new System.Drawing.Size(176, 200);
 			// 
 			// floatToolStripMenuItem
 			// 
@@ -150,6 +152,13 @@
 			this.multiplyScalarToolStripMenuItem.Size = new System.Drawing.Size(176, 24);
 			this.multiplyScalarToolStripMenuItem.Text = "Multiply Scalar";
 			this.multiplyScalarToolStripMenuItem.Click += new System.EventHandler(this.multiplyScalarToolStripMenuItem_Click);
+			// 
+			// colorToolStripMenuItem
+			// 
+			this.colorToolStripMenuItem.Name = "colorToolStripMenuItem";
+			this.colorToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+			this.colorToolStripMenuItem.Text = "Color";
+			this.colorToolStripMenuItem.Click += new System.EventHandler(this.colorToolStripMenuItem_Click);
 			// 
 			// textureToolStripMenuItem
 			// 
@@ -216,12 +225,12 @@
 			// 
 			this.saveFileDialog1.Filter = "Materials|*.mat";
 			// 
-			// colorToolStripMenuItem
+			// lerpToolStripMenuItem
 			// 
-			this.colorToolStripMenuItem.Name = "colorToolStripMenuItem";
-			this.colorToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
-			this.colorToolStripMenuItem.Text = "Color";
-			this.colorToolStripMenuItem.Click += new System.EventHandler(this.colorToolStripMenuItem_Click);
+			this.lerpToolStripMenuItem.Name = "lerpToolStripMenuItem";
+			this.lerpToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+			this.lerpToolStripMenuItem.Text = "Lerp";
+			this.lerpToolStripMenuItem.Click += new System.EventHandler(this.lerpToolStripMenuItem_Click);
 			// 
 			// MainForm
 			// 
@@ -261,6 +270,7 @@
 		private System.Windows.Forms.OpenFileDialog openFileDialog1;
 		private System.Windows.Forms.SaveFileDialog saveFileDialog1;
 		private System.Windows.Forms.ToolStripMenuItem colorToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem lerpToolStripMenuItem;
 	}
 }
 

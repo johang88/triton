@@ -54,8 +54,8 @@ namespace Triton.Samples
 			DeferredRenderer.FogSettings.End = 2000.0f;
 			DeferredRenderer.FogSettings.Enable = true;
 
-			HDRRenderer.KeyValue = 0.735f;
-			HDRRenderer.AdaptationRate = 0.6f;
+			//HDRRenderer.KeyValue = 0.735f;
+			//HDRRenderer.AdaptationRate = 0.6f;
 
 			//Stage.SetSkyBox("/models/skybox");
 
