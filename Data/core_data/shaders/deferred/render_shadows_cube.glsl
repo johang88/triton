@@ -2,6 +2,7 @@ import(/shaders/core);
 #ifdef VERTEX_SHADER
 
 layout(location = ATTRIB_POSITION) in vec3 iPosition;
+layout(location = ATTRIB_NORMAL) in vec3 iNormal;
 #ifdef SKINNED
 layout(location = ATTRIB_BONE_INDEX) in vec4 iBoneIndex;
 layout(location = ATTRIB_BONE_WEIGHT) in vec4 iBoneWeight;
@@ -14,6 +15,7 @@ uniform mat4x4[64] bones;
 
 void main()
 {
+	vec3 offset = normalize(iNormal) * 0.05;
 #ifdef SKINNED
 	vec4 blendPos = vec4(0, 0, 0, 0);
 
@@ -26,11 +28,11 @@ void main()
 		blendPos += (worldMatrix * vec4(iPosition, 1)) * weight;
 	}
 	
-	blendPos = vec4(blendPos.xyz, 1);
+	blendPos = vec4(blendPos.xyz - offset, 1);
 	
 	gl_Position = model * blendPos;
 #else
-	gl_Position = model * vec4(iPosition, 1);
+	gl_Position = model * vec4(iPosition - offset, 1);
 #endif
 }
 
