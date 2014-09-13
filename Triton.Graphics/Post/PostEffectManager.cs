@@ -20,8 +20,10 @@ namespace Triton.Graphics.Post
 		// Settings
 		public AntiAliasing AntiAliasing = AntiAliasing.FXAA;
 		public HDRSettings HDRSettings = new HDRSettings();
+		public ScreenSpaceReflectionsSettings ScreenSpaceReflectionsSettings = new ScreenSpaceReflectionsSettings();
 
 		// Effects
+		private readonly Effects.ScreenSpaceReflections ScreenSpaceReflections;
 		private readonly Effects.AdaptLuminance AdaptLuminance;
 		private readonly Effects.Bloom Bloom;
 		private readonly Effects.Tonemap Tonemap;
@@ -58,6 +60,7 @@ namespace Triton.Graphics.Post
 			Sprite = Backend.CreateSpriteBatch();
 
 			// Setup effects
+			ScreenSpaceReflections = new Effects.ScreenSpaceReflections(Backend, ResourceManager, QuadMesh);
 			AdaptLuminance = new Effects.AdaptLuminance(Backend, ResourceManager, QuadMesh);
 			Bloom = new Effects.Bloom(Backend, ResourceManager, QuadMesh);
 			Tonemap = new Effects.Tonemap(Backend, ResourceManager, QuadMesh);
@@ -69,6 +72,8 @@ namespace Triton.Graphics.Post
 			HDRSettings.AdaptationRate = 0.5f;
 			HDRSettings.BlurSigma = 3.0f;
 			HDRSettings.BloomThreshold = 9.0f;
+
+			ScreenSpaceReflectionsSettings.Enable = false;
 		}
 
 		void SwapRenderTargets()
@@ -102,6 +107,15 @@ namespace Triton.Graphics.Post
 			SwapRenderTargets();
 		}
 
+		private void ApplyScreenSpaceReflections(Camera camera, RenderTarget gbuffer)
+		{
+			if (!ScreenSpaceReflectionsSettings.Enable)
+				return;
+
+			ScreenSpaceReflections.Render(camera, gbuffer, TemporaryRenderTargets[0], TemporaryRenderTargets[1]);
+			SwapRenderTargets();
+		}
+
 		public RenderTarget Render(Camera camera, RenderTarget gbuffer, RenderTarget input, float deltaTime)
 		{
 			// We always start by rendering the input texture to a temporary render target
@@ -112,6 +126,8 @@ namespace Triton.Graphics.Post
 
 			SwapRenderTargets();
 
+			
+			ApplyScreenSpaceReflections(camera, gbuffer);
 			ApplyLumianceBloomAndTonemap(deltaTime);
 
 			ApplyAA();
