@@ -24,14 +24,7 @@ uniform sampler2D samplerBloom;
 uniform sampler2D samplerLuminance;
 uniform float keyValue = 0.115;
 
-vec3 tonemap(vec3 x)
-{
-	/*float A = 0.22;
-	float B = 0.30;
-	float C = 0.10;
-	float D = 0.20;
-	float E = 0.01;
-	float F = 0.30;*/
+vec3 tonemap(vec3 x) {
 	float A = 0.15;
 	float B = 0.50;
 	float C = 0.10;
@@ -42,8 +35,7 @@ vec3 tonemap(vec3 x)
 	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
 }
 
-void main()
-{
+void main() {
 	float averageLuminance = get_average_luminance(samplerLuminance);
 	vec3 color = texture2D(samplerScene, texCoord).xyz;
 

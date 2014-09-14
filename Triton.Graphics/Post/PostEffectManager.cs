@@ -26,6 +26,7 @@ namespace Triton.Graphics.Post
 		private readonly Effects.ScreenSpaceReflections ScreenSpaceReflections;
 		private readonly Effects.AdaptLuminance AdaptLuminance;
 		private readonly Effects.Bloom Bloom;
+		private readonly Effects.LensFlares LensFlares;
 		private readonly Effects.Tonemap Tonemap;
 		private readonly Effects.Gamma Gamma;
 		private readonly Effects.FXAA FXAA;
@@ -64,6 +65,7 @@ namespace Triton.Graphics.Post
 			ScreenSpaceReflections = new Effects.ScreenSpaceReflections(Backend, ResourceManager, QuadMesh);
 			AdaptLuminance = new Effects.AdaptLuminance(Backend, ResourceManager, QuadMesh);
 			Bloom = new Effects.Bloom(Backend, ResourceManager, QuadMesh);
+			LensFlares = new Effects.LensFlares(Backend, ResourceManager, QuadMesh);
 			Tonemap = new Effects.Tonemap(Backend, ResourceManager, QuadMesh);
 			Gamma = new Effects.Gamma(Backend, ResourceManager, QuadMesh);
 			FXAA = new Effects.FXAA(Backend, ResourceManager, QuadMesh);
@@ -107,7 +109,9 @@ namespace Triton.Graphics.Post
 		{
 			var luminance = AdaptLuminance.Render(HDRSettings, TemporaryRenderTargets[0], deltaTime);
 			var bloom = Bloom.Render(HDRSettings, TemporaryRenderTargets[0], luminance);
-			Tonemap.Render(HDRSettings, TemporaryRenderTargets[0], TemporaryRenderTargets[1], bloom, luminance);
+			var lensFlares = LensFlares.Render(HDRSettings, TemporaryRenderTargets[0], luminance);
+
+			Tonemap.Render(HDRSettings, TemporaryRenderTargets[0], TemporaryRenderTargets[1], lensFlares, luminance);
 			SwapRenderTargets();
 		}
 
