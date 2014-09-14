@@ -15,8 +15,8 @@ namespace Triton.Samples
 		public BaseGame(string name)
 			: base(name)
 		{
-			RequestedWidth = 1280;
-			RequestedHeight = 720;
+			RequestedWidth = 1920;
+			RequestedHeight = 1080;
 			ResolutionScale = 1.0f;
 		}
 
