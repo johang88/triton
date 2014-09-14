@@ -68,6 +68,13 @@ namespace Triton.Samples
 				else
 					DebugFlags |= Game.DebugFlags.GBuffer;
 			}
+
+			if (InputManager.WasKeyPressed(Input.Key.F))
+			{
+				var aa = (int)PostEffectManager.AntiAliasing;
+				var lastAa = (int)Graphics.Post.AntiAliasing.Last;
+				PostEffectManager.AntiAliasing = (Graphics.Post.AntiAliasing)((aa + 1) % lastAa);
+			}
 		}
 
 		protected override void RenderUI(float deltaTime)
@@ -77,6 +84,7 @@ namespace Triton.Samples
 			var offsetY = 2;
 			DebugFont.DrawText(DebugSprite, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[c] Shadow Quality: {0}", DeferredRenderer.ShadowQuality);
 			DebugFont.DrawText(DebugSprite, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[v] Shadows: {0}", DeferredRenderer.EnableShadows ? "Enabled" : "Disabled");
+			DebugFont.DrawText(DebugSprite, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] Anti Aliasing: {0}", PostEffectManager.AntiAliasing);
 		}
 	}
 }

@@ -50,7 +50,7 @@ namespace Triton.Graphics.Shaders
 			using (var stream = FileSystem.OpenRead(path))
 			using (var reader = new System.IO.StreamReader(stream))
 			{
-				return reader.ReadToEnd();
+				return Process(reader.ReadToEnd());
 			}
 		}
 	}

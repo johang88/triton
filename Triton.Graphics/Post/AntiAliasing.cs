@@ -10,6 +10,7 @@ namespace Triton.Graphics.Post
 	{
 		Off,
 		FXAA,
-		SMAA
+		SMAA,
+		Last
 	}
 }

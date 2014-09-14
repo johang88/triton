@@ -101,10 +101,10 @@ namespace Triton.Renderer
 			Disposed = true;
 		}
 
-		public int CreateTexture(int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, OnLoadedCallback loadedCallback)
+		public int CreateTexture(int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap, OnLoadedCallback loadedCallback)
 		{
 			var handle = TextureManager.Create();
-			SetTextureData(handle, width, height, data, format, internalFormat, type, loadedCallback);
+			SetTextureData(handle, width, height, data, format, internalFormat, type, mipmap, loadedCallback);
 
 			return handle;
 		}
@@ -131,11 +131,11 @@ namespace Triton.Renderer
 			return handle;
 		}
 
-		public void SetTextureData(int handle, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, OnLoadedCallback loadedCallback)
+		public void SetTextureData(int handle, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap, OnLoadedCallback loadedCallback)
 		{
 			Action loadAction = () =>
 			{
-				TextureManager.SetPixelData(handle, TextureTarget.Texture2D, width, height, data, format, internalFormat, type);
+				TextureManager.SetPixelData(handle, TextureTarget.Texture2D, width, height, data, format, internalFormat, type, mipmap);
 
 				if (loadedCallback != null)
 					loadedCallback(handle, true, "");

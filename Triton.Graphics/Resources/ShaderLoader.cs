@@ -53,7 +53,7 @@ namespace Triton.Graphics.Resources
 		{
 			if (!string.IsNullOrWhiteSpace(content) && FileSystem.DirectoryExists("/tmp/"))
 			{
-				parameters = parameters.Replace(',', '_');
+				parameters = parameters.Replace(',', '_').Replace('/', '_').Replace('\\', '_');
 				if (!string.IsNullOrWhiteSpace(parameters))
 					parameters = '-' + parameters;
 				var filename = name.Replace('/', '_') + parameters + '.' + type;
@@ -96,7 +96,7 @@ namespace Triton.Graphics.Resources
 			if (!string.IsNullOrWhiteSpace(parameters))
 			{
 				var definesBuilder = new StringBuilder();
-				foreach (var param in parameters.Split(','))
+				foreach (var param in parameters.Split(';'))
 				{
 					definesBuilder.AppendLine("#define " + param);
 				}
@@ -104,13 +104,13 @@ namespace Triton.Graphics.Resources
 				defines = definesBuilder.ToString();
 			}
 
-			var vertexShaderSource = "#version 330 core\n#define VERTEX_SHADER\n" + defines + "\n" + shaderSource;
-			var fragmentShaderSource = "#version 330 core\n#define FRAGMENT_SHADER\n" + defines + "\n" + shaderSource;
+			var vertexShaderSource = "#version 410 core\n#define VERTEX_SHADER\n" + defines + "\n" + shaderSource;
+			var fragmentShaderSource = "#version 410 core\n#define FRAGMENT_SHADER\n" + defines + "\n" + shaderSource;
 
 			var geometryShaderSource = "";
 			if (shaderSource.Contains("GEOMETRY_SHADER"))
 			{
-				geometryShaderSource = "#version 330 core\n#define GEOMETRY_SHADER\n" + defines + "\n" + shaderSource;
+				geometryShaderSource = "#version 410 core\n#define GEOMETRY_SHADER\n" + defines + "\n" + shaderSource;
 			}
 
 			OutputShader(resource.Name, "vert", parameters, vertexShaderSource);

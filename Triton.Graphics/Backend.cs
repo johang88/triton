@@ -733,9 +733,9 @@ namespace Triton.Graphics
 			return new BatchBuffer(RenderSystem, vertexFormat, initialCount);
 		}
 
-		public Resources.Texture CreateTexture(string name, int width, int height, PixelFormat pixelFormat, PixelInternalFormat interalFormat, byte[] data)
+		public Resources.Texture CreateTexture(string name, int width, int height, PixelFormat pixelFormat, PixelInternalFormat interalFormat, PixelType pixelType, byte[] data, bool mipmap)
 		{
-			var handle = RenderSystem.CreateTexture(width, height, data, pixelFormat, interalFormat, PixelType.UnsignedByte, null);
+			var handle = RenderSystem.CreateTexture(width, height, data, pixelFormat, interalFormat, pixelType, mipmap, null);
 
 			var texture = new Resources.Texture(name, "");
 			texture.Handle = handle;
@@ -749,9 +749,9 @@ namespace Triton.Graphics
 			return texture;
 		}
 
-		public void UpdateTexture(Resources.Texture texture, byte[] data)
+		public void UpdateTexture(Resources.Texture texture, bool mipmap, byte[] data)
 		{
-			RenderSystem.SetTextureData(texture.Handle, texture.Width, texture.Height, data, texture.PixelFormat, texture.PixelInternalFormat, PixelType.UnsignedByte, null);
+			RenderSystem.SetTextureData(texture.Handle, texture.Width, texture.Height, data, texture.PixelFormat, texture.PixelInternalFormat, PixelType.UnsignedByte, mipmap, null);
 		}
 
 		public SpriteBatch CreateSpriteBatch()

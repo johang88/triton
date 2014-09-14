@@ -13,12 +13,12 @@ namespace Triton.Graphics.Post
 		private readonly RenderTargetManager RenderTargetManager;
 		private readonly Backend Backend;
 		private readonly Common.ResourceManager ResourceManager;
-		
+
 		private BatchBuffer QuadMesh;
 		private SpriteBatch Sprite;
 
 		// Settings
-		public AntiAliasing AntiAliasing = AntiAliasing.FXAA;
+		public AntiAliasing AntiAliasing = AntiAliasing.SMAA;
 		public HDRSettings HDRSettings = new HDRSettings();
 		public ScreenSpaceReflectionsSettings ScreenSpaceReflectionsSettings = new ScreenSpaceReflectionsSettings();
 
@@ -29,7 +29,8 @@ namespace Triton.Graphics.Post
 		private readonly Effects.Tonemap Tonemap;
 		private readonly Effects.Gamma Gamma;
 		private readonly Effects.FXAA FXAA;
-		
+		private readonly Effects.SMAA SMAA;
+
 		public PostEffectManager(Common.ResourceManager resourceManager, Backend backend, int width, int height)
 		{
 			if (resourceManager == null)
@@ -66,7 +67,8 @@ namespace Triton.Graphics.Post
 			Tonemap = new Effects.Tonemap(Backend, ResourceManager, QuadMesh);
 			Gamma = new Effects.Gamma(Backend, ResourceManager, QuadMesh);
 			FXAA = new Effects.FXAA(Backend, ResourceManager, QuadMesh);
-			 
+			SMAA = new Effects.SMAA(Backend, ResourceManager, QuadMesh);
+
 			// Default settings
 			HDRSettings.KeyValue = 0.115f;
 			HDRSettings.AdaptationRate = 0.5f;
@@ -92,6 +94,8 @@ namespace Triton.Graphics.Post
 					SwapRenderTargets();
 					break;
 				case AntiAliasing.SMAA:
+					SMAA.Render(TemporaryRenderTargets[0], TemporaryRenderTargets[1]);
+					SwapRenderTargets();
 					break;
 				case Post.AntiAliasing.Off:
 				default:
@@ -126,7 +130,6 @@ namespace Triton.Graphics.Post
 
 			SwapRenderTargets();
 
-			
 			ApplyScreenSpaceReflections(camera, gbuffer);
 			ApplyLumianceBloomAndTonemap(deltaTime);
 
