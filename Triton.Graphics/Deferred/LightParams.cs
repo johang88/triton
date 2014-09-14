@@ -27,6 +27,6 @@ namespace Triton.Graphics.Deferred
 		public int ShadowBias = 0;
 		public int ClipPlane = 0;
 		public int TexelSize = 0;
-		public int LightInvSquareRadius;
+		public int LightInvSquareRadius = 0;
 	}
 }
