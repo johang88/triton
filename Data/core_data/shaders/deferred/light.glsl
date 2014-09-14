@@ -33,6 +33,7 @@ uniform sampler2D samplerGBuffer1;
 uniform sampler2D samplerGBuffer2;
 uniform sampler2D samplerDepth;
 
+uniform float lightInvSquareRadius;
 uniform vec3 lightPosition;
 uniform vec3 lightColor;
 uniform vec2 spotParams;
@@ -60,8 +61,7 @@ void main()
 	
 #if defined(SPOT_LIGHT) || defined(POINT_LIGHT)
 	vec3 lightVec = lightPosition - position;
-	float dist = length(lightVec);
-	vec3 lightDir = normalize(lightVec / dist);
+	vec3 lightDir = normalize(lightVec);
 #else
 	vec3 lightDir = -normalize(lightDirection);
 	vec3 lightVec = lightDir;
@@ -70,8 +70,7 @@ void main()
 	vec3 eyeDir = normalize(cameraPosition - position);
 	
 #if defined(SPOT_LIGHT) || defined(POINT_LIGHT)
-	float attenuation = saturate(1.0 - ((dist * dist) / (lightRange * lightRange)));
-	attenuation = attenuation * attenuation;
+	float attenuation = saturate(1.0 - dot(lightVec, lightVec) * lightInvSquareRadius);
 #else
 	float attenuation = 1.0;
 #endif

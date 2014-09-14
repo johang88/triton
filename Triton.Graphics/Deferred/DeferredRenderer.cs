@@ -467,6 +467,7 @@ namespace Triton.Graphics.Deferred
 			{
 				Backend.BindShaderVariable(shaderParams.LightPosition, ref light.Position);
 				Backend.BindShaderVariable(shaderParams.LightRange, light.Range);
+				Backend.BindShaderVariable(shaderParams.LightInvSquareRadius, 1.0f / (light.Range * light.Range));
 			}
 
 			if (light.Type == LighType.SpotLight)

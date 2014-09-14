@@ -73,10 +73,10 @@ namespace Triton.Samples
 
 			{
 				var sphere = GameWorld.CreateGameObject();
-				sphere.Position = new Vector3(0, 2.5f, 0);
+				sphere.Position = new Vector3(2, 2.5f, 0);
 				sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
 				//sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = "/materials/light_sphere", CastShadows = false });
-				sphere.AddComponent(new PointLight { Color = new Vector3(0.8f, 0.3f, 0.35f), Intensity = 1 });
+				sphere.AddComponent(new PointLight { Color = new Vector3(0.8f, 0.3f, 0.35f), Intensity = 1, Range = 7 });
 				sphere.AddComponent(new LightAnimator() { WaveFunction = WaveFunction.Sin, Phase = 0.4f, Base = 0.1f });
 				GameWorld.Add(sphere);
 			}
@@ -96,7 +96,7 @@ namespace Triton.Samples
 				sphere.Position = new Vector3(-18, 2.5f, -5);
 				sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
 				//sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = "/materials/light_sphere", CastShadows = false });
-				sphere.AddComponent(new PointLight { Color = new Vector3(0.55f, 0.5f, 0.8f), Intensity = 1, Range = 8 });
+				sphere.AddComponent(new PointLight { Color = new Vector3(0.55f, 0.5f, 0.8f), Intensity = 1, Range = 8, CastShadows = false });
 				//sphere.AddComponent(new LightAnimator() { WaveFunction = WaveFunction.Sin, Base = 0.1f });
 				GameWorld.Add(sphere);
 			}
