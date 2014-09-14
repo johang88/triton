@@ -18,7 +18,7 @@ namespace Triton.Graphics.Post
 		private SpriteBatch Sprite;
 
 		// Settings
-		public AntiAliasing AntiAliasing = AntiAliasing.SMAA;
+		public AntiAliasing AntiAliasing = AntiAliasing.FXAA;
 		public HDRSettings HDRSettings = new HDRSettings();
 		public ScreenSpaceReflectionsSettings ScreenSpaceReflectionsSettings = new ScreenSpaceReflectionsSettings();
 
@@ -75,7 +75,7 @@ namespace Triton.Graphics.Post
 			HDRSettings.BlurSigma = 3.0f;
 			HDRSettings.BloomThreshold = 9.0f;
 
-			ScreenSpaceReflectionsSettings.Enable = false;
+			ScreenSpaceReflectionsSettings.Enable = true;
 		}
 
 		void SwapRenderTargets()

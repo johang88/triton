@@ -40,22 +40,12 @@ uniform float lightRange;
 uniform vec2 screenSize;
 uniform vec3 cameraPosition;
 uniform vec3 lightDirection;
-uniform mat4x4 invViewProjection;
 uniform sampler2DShadow samplerShadow;
 uniform samplerCubeShadow samplerShadowCube;
 uniform mat4x4 shadowViewProj;
 uniform vec2 clipPlane;
 uniform float shadowBias;
 uniform float texelSize;
-
-vec3 decodeWorldPosition(vec2 coord, float depth) {
-	depth = depth * 2.0 - 1.0;
-	
-	vec3 clipSpacePosition = vec3(coord * 2.0 - 1.0, depth);
-	vec4 worldPosition = invViewProjection * vec4(clipSpacePosition, 1);
-	
-	return worldPosition.xyz / worldPosition.w;
-}
 
 void main()
 {

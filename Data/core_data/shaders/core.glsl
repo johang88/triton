@@ -37,3 +37,13 @@ vec3 encodeDiffuse(vec3 diffuse) {
 vec3 decodeDiffuse(vec3 diffuse) {
 	return diffuse * diffuse;
 }
+
+uniform mat4x4 invViewProjection;
+vec3 decodeWorldPosition(vec2 coord, float depth) {
+	depth = depth * 2.0 - 1.0;
+	
+	vec3 clipSpacePosition = vec3(coord * 2.0 - 1.0, depth);
+	vec4 worldPosition = invViewProjection * vec4(clipSpacePosition, 1);
+	
+	return worldPosition.xyz / worldPosition.w;
+}
