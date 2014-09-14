@@ -18,10 +18,6 @@ namespace Triton.Renderer.Shaders
 
 		private int ActiveShaderHandle = -1;
 
-		private int DefaultVertexHandle;
-		private int DefaultFragmentHandle;
-		private int DefaultProgramHandle;
-
 		public ShaderManager()
 		{
 			// Each empty handle will store the location of the next empty handle 
@@ -31,30 +27,6 @@ namespace Triton.Renderer.Shaders
 			}
 
 			Handles[Handles.Length - 1].Id = -1;
-
-			CreateDefaultHandles();
-		}
-
-		void CreateDefaultHandles()
-		{
-			DefaultVertexHandle = GL.CreateShader(ShaderType.VertexShader);
-			DefaultFragmentHandle = GL.CreateShader(ShaderType.FragmentShader);
-
-			GL.ShaderSource(DefaultVertexHandle, DefaultVertexShaderSource);
-			GL.ShaderSource(DefaultFragmentHandle, DefaultFragmentShaderSource);
-
-			GL.CompileShader(DefaultVertexHandle);
-			GL.CompileShader(DefaultFragmentHandle);
-
-			DefaultProgramHandle = GL.CreateProgram();
-
-			GL.AttachShader(DefaultProgramHandle, DefaultVertexHandle);
-			GL.AttachShader(DefaultProgramHandle, DefaultFragmentHandle);
-
-			GL.BindAttribLocation(DefaultProgramHandle, 0, "iPosition");
-			GL.BindAttribLocation(DefaultProgramHandle, 3, "iTexCoord");
-
-			GL.LinkProgram(DefaultProgramHandle);
 		}
 
 		public void Dispose()
@@ -72,18 +44,14 @@ namespace Triton.Renderer.Shaders
 			{
 				if (Handles[i].Initialized)
 				{
-					GL.DeleteShader(Handles[i].VertexHandle);
-					GL.DeleteShader(Handles[i].FragmentHandle);
-					if (Handles[i].GeometryHandle != 0)
-						GL.DeleteShader(Handles[i].GeometryHandle);
+					foreach (var handle in Handles[i].ShaderHandles)
+					{
+						GL.DeleteShader(handle);
+					}
 					GL.DeleteProgram(Handles[i].ProgramHandle);
 				}
 				Handles[i].Initialized = false;
 			}
-
-			GL.DeleteShader(DefaultVertexHandle);
-			GL.DeleteShader(DefaultFragmentHandle);
-			GL.DeleteProgram(DefaultProgramHandle);
 
 			Disposed = true;
 		}
@@ -115,8 +83,7 @@ namespace Triton.Renderer.Shaders
 
 			var id = ++Handles[index].Id;
 			Handles[index].Initialized = false;
-			Handles[index].VertexHandle = 0;
-			Handles[index].FragmentHandle = 0;
+			Handles[index].ShaderHandles = null;
 			Handles[index].ProgramHandle = 0;
 
 			return CreateHandle(index, id);
@@ -138,17 +105,17 @@ namespace Triton.Renderer.Shaders
 
 			if (Handles[index].Initialized)
 			{
-				GL.DeleteShader(Handles[index].VertexHandle);
-				GL.DeleteShader(Handles[index].FragmentHandle);
-				if (Handles[index].GeometryHandle != 0)
-					GL.DeleteShader(Handles[index].GeometryHandle);
+				foreach (var shaderHandle in Handles[index].ShaderHandles)
+				{
+					GL.DeleteShader(shaderHandle);
+				}
 				GL.DeleteProgram(Handles[index].ProgramHandle);
 			}
 
 			Handles[index].Initialized = false;
 		}
 
-		public bool SetShaderData(int handle, string vertexShader, string fragmentShader, string geometryShader, out string errors)
+		public bool SetShaderData(int handle, Dictionary<ShaderType, string> sources, out string errors)
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
@@ -159,61 +126,42 @@ namespace Triton.Renderer.Shaders
 				return false;
 			}
 
+			errors = "";
+
 			if (!Handles[index].Initialized)
 			{
-				Handles[index].VertexHandle = GL.CreateShader(ShaderType.VertexShader);
-				Handles[index].FragmentHandle = GL.CreateShader(ShaderType.FragmentShader);
-
-				if (!string.IsNullOrEmpty(geometryShader))
-					Handles[index].GeometryHandle = GL.CreateShader(ShaderType.GeometryShader);
-				else
-					Handles[index].GeometryHandle = 0;
-
+				Handles[index].ShaderHandles = new int[sources.Count];
 				Handles[index].ProgramHandle = GL.CreateProgram();
 			}
 
-			// Compile shaders
-
-			GL.ShaderSource(Handles[index].VertexHandle, vertexShader);
-			GL.ShaderSource(Handles[index].FragmentHandle, fragmentShader);
-
-			if (!string.IsNullOrEmpty(geometryShader))
+			int errorCode = 1;
+			int i = 0;
+			foreach (var shader in sources)
 			{
-				GL.ShaderSource(Handles[index].GeometryHandle, geometryShader);
+				if (Handles[index].ShaderHandles[i] == 0)
+				{
+					Handles[index].ShaderHandles[i] = GL.CreateShader((OGL.ShaderType)(int)shader.Key);
+				}
+				GL.ShaderSource(Handles[index].ShaderHandles[i], shader.Value);
+				GL.CompileShader(Handles[index].ShaderHandles[i]);
+
+				GL.GetShader(Handles[index].ShaderHandles[i], ShaderParameter.CompileStatus, out errorCode);
+				GL.GetShaderInfoLog(Handles[index].ShaderHandles[i], out errors);
+
+				if (errorCode != 1)
+					break;
+
+				i++;
 			}
 
-			GL.CompileShader(Handles[index].VertexHandle);
-			GL.CompileShader(Handles[index].FragmentHandle);
-			if (Handles[index].GeometryHandle != 0)
-			{
-				GL.CompileShader(Handles[index].GeometryHandle);
-			}
-
-			// Check for compilation errors
-			int errorCode;
-
-			GL.GetShader(Handles[index].VertexHandle, ShaderParameter.CompileStatus, out errorCode);
-			GL.GetShaderInfoLog(Handles[index].VertexHandle, out errors);
-
-			if (errorCode == 1)
-			{
-				GL.GetShader(Handles[index].FragmentHandle, ShaderParameter.CompileStatus, out errorCode);
-				GL.GetShaderInfoLog(Handles[index].FragmentHandle, out errors);
-			}
-
-			if (errorCode == 1 && Handles[index].GeometryHandle != 0)
-			{
-				GL.GetShader(Handles[index].GeometryHandle, ShaderParameter.CompileStatus, out errorCode);
-				GL.GetShaderInfoLog(Handles[index].GeometryHandle, out errors);
-			}
 
 			if (errorCode != 1)
 			{
-				// Clean up the shader stuff so we don't risk a leak :)
-				GL.DeleteShader(Handles[index].VertexHandle);
-				GL.DeleteShader(Handles[index].FragmentHandle);
-				if (Handles[index].GeometryHandle != 0)
-					GL.DeleteShader(Handles[index].GeometryHandle);
+				foreach (var shaderHandle in Handles[index].ShaderHandles)
+				{
+					GL.DeleteShader(shaderHandle);
+				}
+
 				GL.DeleteProgram(Handles[index].ProgramHandle);
 
 				Handles[index].Initialized = false;
@@ -222,10 +170,11 @@ namespace Triton.Renderer.Shaders
 			}
 
 			// Link program
-			GL.AttachShader(Handles[index].ProgramHandle, Handles[index].VertexHandle);
-			GL.AttachShader(Handles[index].ProgramHandle, Handles[index].FragmentHandle);
-			if (errorCode == 1 && Handles[index].GeometryHandle != 0)
-				GL.AttachShader(Handles[index].ProgramHandle, Handles[index].GeometryHandle);
+			foreach (var shaderHandle in Handles[index].ShaderHandles)
+			{
+				GL.AttachShader(Handles[index].ProgramHandle, shaderHandle);
+			}
+
 			GL.LinkProgram(Handles[index].ProgramHandle);
 
 			// Check for link errors
@@ -235,9 +184,11 @@ namespace Triton.Renderer.Shaders
 			{
 				GL.GetProgramInfoLog(Handles[index].ProgramHandle, out errors);
 
-				// Clean up the shader stuff so we don't risk a leak :)
-				GL.DeleteShader(Handles[index].VertexHandle);
-				GL.DeleteShader(Handles[index].FragmentHandle);
+				foreach (var shaderHandle in Handles[index].ShaderHandles)
+				{
+					GL.DeleteShader(shaderHandle);
+				}
+
 				GL.DeleteProgram(Handles[index].ProgramHandle);
 
 				Handles[index].Initialized = false;
@@ -265,7 +216,7 @@ namespace Triton.Renderer.Shaders
 			{
 				int size;
 				ActiveUniformType type;
-				
+
 				var name = GL.GetActiveUniform(program, i, out size, out type);
 				name = name.Replace("[0]", "");
 				var location = GL.GetUniformLocation(program, name);
@@ -293,7 +244,7 @@ namespace Triton.Renderer.Shaders
 			ExtractHandle(handle, out index, out id);
 
 			if (id == -1 || Handles[index].Id != id || !Handles[index].Initialized)
-				return DefaultProgramHandle;
+				return 0;
 
 			return Handles[index].ProgramHandle;
 		}
@@ -301,31 +252,9 @@ namespace Triton.Renderer.Shaders
 		struct ShaderData
 		{
 			public int ProgramHandle;
-			public int VertexHandle;
-			public int FragmentHandle;
-			public int GeometryHandle;
+			public int[] ShaderHandles;
 			public short Id;
 			public bool Initialized;
 		}
-
-		const string DefaultVertexShaderSource
-			= "#version 150\n"
-			+ "in vec3 iPosition;\n"
-			+ "in vec2 iTexCoord;\n"
-			+ "out vec2 texCoord;\n"
-			+ "uniform mat4x4 modelViewProjection;\n"
-			+ "void main() {\n"
-			+ "    texCoord = iTexCoord;\n"
-			+ "    gl_Position = modelViewProjection * vec4(iPosition, 1);\n"
-			+ "}";
-
-		const string DefaultFragmentShaderSource
-			= "#version 150\n"
-			+ "in vec2 texCoord;\n"
-			+ "out vec4 oColor;\n"
-			+ "uniform sampler2D samplerDiffuse;\n"
-			+ "void main() {\n"
-			+ "    oColor = texture2D(samplerDiffuse, texCoord);\n"
-			+ "}";
 	}
 }

@@ -104,13 +104,19 @@ namespace Triton.Graphics.Resources
 				defines = definesBuilder.ToString();
 			}
 
+			var sources = new Dictionary<Renderer.ShaderType, string>();
+
 			var vertexShaderSource = "#version 410 core\n#define VERTEX_SHADER\n" + defines + "\n" + shaderSource;
 			var fragmentShaderSource = "#version 410 core\n#define FRAGMENT_SHADER\n" + defines + "\n" + shaderSource;
+
+			sources.Add(Renderer.ShaderType.VertexShader, vertexShaderSource);
+			sources.Add(Renderer.ShaderType.FragmentShader, fragmentShaderSource);
 
 			var geometryShaderSource = "";
 			if (shaderSource.Contains("GEOMETRY_SHADER"))
 			{
 				geometryShaderSource = "#version 410 core\n#define GEOMETRY_SHADER\n" + defines + "\n" + shaderSource;
+				sources.Add(Renderer.ShaderType.GeometryShader, geometryShaderSource);
 			}
 
 			OutputShader(resource.Name, "vert", parameters, vertexShaderSource);
@@ -137,9 +143,9 @@ namespace Triton.Graphics.Resources
 			};
 
 			if (shader.Handle == -1)
-				shader.Handle = Backend.RenderSystem.CreateShader(vertexShaderSource, fragmentShaderSource, geometryShaderSource, onResourceLoaded);
+				shader.Handle = Backend.RenderSystem.CreateShader(sources, onResourceLoaded);
 			else
-				Backend.RenderSystem.SetShaderData(shader.Handle, vertexShaderSource, fragmentShaderSource, geometryShaderSource, onResourceLoaded);
+				Backend.RenderSystem.SetShaderData(shader.Handle, sources, onResourceLoaded);
 		}
 
 		public void Unload(Common.Resource resource)

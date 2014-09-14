@@ -79,6 +79,7 @@
     <Compile Include="SamplerParameterName.cs" />
     <Compile Include="Samplers\SamplerManager.cs" />
     <Compile Include="Shaders\ShaderManager.cs" />
+    <Compile Include="ShaderType.cs" />
     <Compile Include="TextureCompareMode.cs" />
     <Compile Include="TextureMagFilter.cs" />
     <Compile Include="TextureMinFilter.cs" />
