@@ -75,7 +75,7 @@ namespace Triton.Graphics.Post
 			HDRSettings.BlurSigma = 3.0f;
 			HDRSettings.BloomThreshold = 9.0f;
 
-			ScreenSpaceReflectionsSettings.Enable = true;
+			ScreenSpaceReflectionsSettings.Enable = false;
 		}
 
 		void SwapRenderTargets()
