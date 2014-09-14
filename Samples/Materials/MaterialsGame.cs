@@ -82,7 +82,7 @@ namespace Triton.Samples
 			//Stage.AddMesh("/models/skybox");
 			//Stage.SetSkyBox("/models/skybox");
 
-			DebugFlags |= Game.DebugFlags.RenderStats;
+			DebugFlags |= Game.DebugFlags.RenderStats | Game.DebugFlags.GBuffer;
 		}
 
 		protected override void Update(float frameTime)
