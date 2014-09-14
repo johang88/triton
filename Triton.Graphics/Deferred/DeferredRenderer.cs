@@ -340,6 +340,8 @@ namespace Triton.Graphics.Deferred
 
 			var cameraDistanceToLight = light.Position - camera.Position;
 
+			var castShadows = light.CastShadows && EnableShadows;
+
 			if (light.Type == LighType.PointLight)
 			{
 				renderStateId = LightOutsideRenderState;
@@ -362,7 +364,7 @@ namespace Triton.Graphics.Deferred
 			Matrix4 shadowViewProjection;
 			Vector2 shadowCameraClipPlane;
 
-			if (light.CastShadows)
+			if (castShadows)
 			{
 				if (light.Type == LighType.PointLight)
 				{
@@ -414,7 +416,7 @@ namespace Triton.Graphics.Deferred
 			else if (light.Type == LighType.SpotLight)
 				lightTypeOffset = SpotLightShaderOffset;
 
-			if (light.CastShadows && EnableShadows)
+			if (castShadows)
 				lightTypeOffset += 1 + (int)ShadowQuality;
 
 			var shader = LightShaders[lightTypeOffset];
@@ -423,7 +425,7 @@ namespace Triton.Graphics.Deferred
 			// Setup textures and begin rendering with the chosen shader
 			int[] textures;
 			int[] samplers;
-			if (light.CastShadows)
+			if (castShadows)
 			{
 				var shadowMapHandle = SpotShadowsRenderTarget.Textures[0].Handle;
 				if (light.Type == LighType.Directional)
@@ -476,11 +478,11 @@ namespace Triton.Graphics.Deferred
 				Backend.BindShaderVariable(shaderParams.SpotParams, ref spotParams);
 			}
 
-			if (light.CastShadows)
-			{
-				var inverseViewProjectionMatrix = Matrix4.Invert(view * projection);
+			var inverseViewProjectionMatrix = Matrix4.Invert(view * projection);
+			Backend.BindShaderVariable(shaderParams.InvViewProjection, ref inverseViewProjectionMatrix);
 
-				Backend.BindShaderVariable(shaderParams.InvViewProjection, ref inverseViewProjectionMatrix);
+			if (castShadows)
+			{
 				Backend.BindShaderVariable(shaderParams.ClipPlane, ref shadowCameraClipPlane);
 				Backend.BindShaderVariable(shaderParams.ShadowBias, light.ShadowBias);
 
