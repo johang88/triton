@@ -14,7 +14,7 @@ namespace Triton.Samples
 		private GameObject Player;
 		private CharacterController PlayerCharacter;
 
-		const float MovementSpeed = 5.0f;
+		const float MovementSpeed = 3.5f;
 		const float MouseSensitivity = 0.0025f;
 
 		private float CameraYaw = 0;
@@ -30,10 +30,11 @@ namespace Triton.Samples
 			base.LoadResources();
 
 			Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0);
+			Stage.AmbientColor = Vector3.Zero;
 
 			var floor = GameWorld.CreateGameObject();
-			floor.AddComponent(new Mesh { Filename = "/models/floor" });
-			floor.AddComponent(new BoxRigidBody { Height = 0.01f, Width = 40.0f, Length = 40.0f, IsStatic = true });
+			floor.AddComponent(new Mesh { Filename = "/models/room" });
+			floor.AddComponent(new BoxRigidBody { Height = 0.01f, Width = 400.0f, Length = 400.0f, IsStatic = true });
 			GameWorld.Add(floor);
 
 			Player = GameWorld.CreateGameObject();
@@ -74,15 +75,40 @@ namespace Triton.Samples
 				var sphere = GameWorld.CreateGameObject();
 				sphere.Position = new Vector3(0, 2.5f, 0);
 				sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-				sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = "/materials/light_sphere", CastShadows = false });
-				sphere.AddComponent(new PointLight { Color = new Vector3(1f, 0.8f, 0.5f), Intensity = 2 });
+				//sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = "/materials/light_sphere", CastShadows = false });
+				sphere.AddComponent(new PointLight { Color = new Vector3(0.8f, 0.3f, 0.35f), Intensity = 1 });
+				sphere.AddComponent(new LightAnimator() { WaveFunction = WaveFunction.Sin, Phase = 0.4f, Base = 0.1f });
+				GameWorld.Add(sphere);
+			}
+
+			{
+				var sphere = GameWorld.CreateGameObject();
+				sphere.Position = new Vector3(-10, 2.5f, 1);
+				sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
+				//sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = "/materials/light_sphere", CastShadows = false });
+				sphere.AddComponent(new PointLight { Color = new Vector3(0.55f, 0.5f, 0.8f), Intensity = 1 });
+				//sphere.AddComponent(new LightAnimator() { WaveFunction = WaveFunction.Sin, Phase = 0.4f, Base = 0.1f });
+				GameWorld.Add(sphere);
+			}
+
+			{
+				var sphere = GameWorld.CreateGameObject();
+				sphere.Position = new Vector3(-18, 2.5f, -5);
+				sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
+				//sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = "/materials/light_sphere", CastShadows = false });
+				sphere.AddComponent(new PointLight { Color = new Vector3(0.55f, 0.5f, 0.8f), Intensity = 1, Range = 8 });
+				//sphere.AddComponent(new LightAnimator() { WaveFunction = WaveFunction.Sin, Base = 0.1f });
 				GameWorld.Add(sphere);
 			}
 
 			//Stage.AddMesh("/models/skybox");
 			//Stage.SetSkyBox("/models/skybox");
 
-			DebugFlags |= Game.DebugFlags.RenderStats | Game.DebugFlags.GBuffer;
+			PostEffectManager.HDRSettings.AdaptationRate = 2;
+			PostEffectManager.HDRSettings.KeyValue = 0.1f;
+			DeferredRenderer.ShadowQuality = Graphics.Deferred.ShadowQuality.Lowest;
+
+			DebugFlags |= Game.DebugFlags.RenderStats;
 		}
 
 		protected override void Update(float frameTime)

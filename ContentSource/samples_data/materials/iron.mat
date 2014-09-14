@@ -1,16 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <NodeGraphControl>
-     <NodeGraphControl.NodeGraphView ViewX="0" ViewY="0" ViewZoom="1">
+     <NodeGraphControl.NodeGraphView ViewX="-14" ViewY="-117" ViewZoom="1">
           <NodeGraphNodeCollection>
                <Triton.Content.Materials.CustomNodes.RootNode Name="Material" X="100" Y="0" Width="140" Height="116" Comment="" CanBeSelected="False" />
-               <Triton.Content.Materials.CustomNodes.ColorConstNode Name="Color: 196, 199, 199, 255" X="-430" Y="-60" Width="150" Height="116" Comment="" CanBeSelected="True" Value="196 199 199 255" />
-               <Triton.Content.Materials.CustomNodes.FloatConstNode Name="Float: 1" X="-333" Y="98" Width="80" Height="45" Comment="" CanBeSelected="True" Value="1" />
-               <Triton.Content.Materials.CustomNodes.FloatConstNode Name="Float: 0,4" X="-120" Y="191" Width="80" Height="45" Comment="" CanBeSelected="True" Value="0,4" />
+               <Triton.Content.Materials.CustomNodes.TextureConstNode Name="Texture: /textures/Brick_LumpyZeval_1k_d" X="-399" Y="-113" Width="210" Height="116" Comment="" CanBeSelected="True" Value="/textures/Metal_ShippingContainerDoor_1k_alb" />
+               <Triton.Content.Materials.CustomNodes.NormalMapNode Name="Normal map" X="-337" Y="53" Width="140" Height="64" Comment="" CanBeSelected="True" />
+               <Triton.Content.Materials.CustomNodes.TextureConstNode Name="Texture: /textures/Brick_LumpyZeval_1k_n" X="-380" Y="142" Width="210" Height="116" Comment="" CanBeSelected="True" Value="/textures/Metal_ShippingContainerDoor_1k_n" />
+               <Triton.Content.Materials.CustomNodes.FloatConstNode Name="Float: 0" X="-290" Y="283" Width="80" Height="45" Comment="" CanBeSelected="True" Value="1" />
+               <Triton.Content.Materials.CustomNodes.FloatConstNode Name="Float: 0,6" X="-51" Y="266" Width="80" Height="45" Comment="" CanBeSelected="True" Value="0,4" />
           </NodeGraphNodeCollection>
           <NodeGraphLinkCollection>
+               <NodeGraphControl.NodeGraphLink InputNodeId="3" OutputNodeId="2" InputNodeConnectorIdx="0" OutputNodeConnectorIdx="0" />
+               <NodeGraphControl.NodeGraphLink InputNodeId="2" OutputNodeId="0" InputNodeConnectorIdx="1" OutputNodeConnectorIdx="1" />
                <NodeGraphControl.NodeGraphLink InputNodeId="1" OutputNodeId="0" InputNodeConnectorIdx="0" OutputNodeConnectorIdx="0" />
-               <NodeGraphControl.NodeGraphLink InputNodeId="2" OutputNodeId="0" InputNodeConnectorIdx="0" OutputNodeConnectorIdx="2" />
-               <NodeGraphControl.NodeGraphLink InputNodeId="3" OutputNodeId="0" InputNodeConnectorIdx="0" OutputNodeConnectorIdx="3" />
+               <NodeGraphControl.NodeGraphLink InputNodeId="4" OutputNodeId="0" InputNodeConnectorIdx="0" OutputNodeConnectorIdx="2" />
+               <NodeGraphControl.NodeGraphLink InputNodeId="5" OutputNodeId="0" InputNodeConnectorIdx="0" OutputNodeConnectorIdx="3" />
           </NodeGraphLinkCollection>
      </NodeGraphControl.NodeGraphView>
 </NodeGraphControl>

@@ -85,6 +85,7 @@ namespace Triton.Samples
 			DebugFont.DrawText(DebugSprite, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[c] Shadow Quality: {0}", DeferredRenderer.ShadowQuality);
 			DebugFont.DrawText(DebugSprite, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[v] Shadows: {0}", DeferredRenderer.EnableShadows ? "Enabled" : "Disabled");
 			DebugFont.DrawText(DebugSprite, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] Anti Aliasing: {0}", PostEffectManager.AntiAliasing);
+			DebugFont.DrawText(DebugSprite, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] Camera Position: {0}", Common.StringConverter.ToString(Camera.Position));
 		}
 	}
 }

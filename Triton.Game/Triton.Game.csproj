@@ -63,6 +63,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="World\Component.cs" />
     <Compile Include="World\Components\BoxRigidBody.cs" />
+    <Compile Include="World\Components\LightAnimator.cs" />
     <Compile Include="World\Components\PointLight.cs" />
     <Compile Include="World\Components\RigidBody.cs" />
     <Compile Include="World\Components\CharacterController.cs" />

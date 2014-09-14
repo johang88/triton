@@ -49,6 +49,7 @@ namespace Triton.Content.Materials.CustomNodes
 
 		public override NodeGraphData Process(int connectorIndex)
 		{
+			SamplerNumber = Counter++; // TODO ......
 			var samplerName = "sampler_" + Common.StringConverter.ToString(SamplerNumber);
 			var sample = "texture(" + samplerName + ", texCoord)";
 			string outputVar = "";

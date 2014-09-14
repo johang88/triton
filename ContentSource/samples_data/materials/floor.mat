@@ -3,10 +3,10 @@
      <NodeGraphControl.NodeGraphView ViewX="-14" ViewY="-117" ViewZoom="1">
           <NodeGraphNodeCollection>
                <Triton.Content.Materials.CustomNodes.RootNode Name="Material" X="100" Y="0" Width="140" Height="116" Comment="" CanBeSelected="False" />
-               <Triton.Content.Materials.CustomNodes.TextureConstNode Name="Texture: /textures/Brick_LumpyZeval_1k_d" X="-399" Y="-113" Width="210" Height="116" Comment="" CanBeSelected="True" Value="/textures/Brick_LumpyZeval_1k_d" />
+               <Triton.Content.Materials.CustomNodes.TextureConstNode Name="Texture: /textures/Brick_LumpyZeval_1k_d" X="-399" Y="-113" Width="210" Height="116" Comment="" CanBeSelected="True" Value="/textures/Metal_SciFiFloorPlates_1k_d" />
                <Triton.Content.Materials.CustomNodes.NormalMapNode Name="Normal map" X="-337" Y="53" Width="140" Height="64" Comment="" CanBeSelected="True" />
-               <Triton.Content.Materials.CustomNodes.TextureConstNode Name="Texture: /textures/Brick_LumpyZeval_1k_n" X="-380" Y="142" Width="210" Height="116" Comment="" CanBeSelected="True" Value="/textures/Brick_LumpyZeval_1k_n" />
-               <Triton.Content.Materials.CustomNodes.FloatConstNode Name="Float: 0" X="-290" Y="283" Width="80" Height="45" Comment="" CanBeSelected="True" Value="0" />
+               <Triton.Content.Materials.CustomNodes.TextureConstNode Name="Texture: /textures/Brick_LumpyZeval_1k_n" X="-380" Y="142" Width="210" Height="116" Comment="" CanBeSelected="True" Value="/textures/Metal_SciFiFloorPlates_1k_n" />
+               <Triton.Content.Materials.CustomNodes.FloatConstNode Name="Float: 0" X="-290" Y="283" Width="80" Height="45" Comment="" CanBeSelected="True" Value="1" />
                <Triton.Content.Materials.CustomNodes.FloatConstNode Name="Float: 0,6" X="-51" Y="266" Width="80" Height="45" Comment="" CanBeSelected="True" Value="0,9" />
           </NodeGraphNodeCollection>
           <NodeGraphLinkCollection>
