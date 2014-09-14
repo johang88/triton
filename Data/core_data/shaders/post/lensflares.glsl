@@ -33,7 +33,7 @@ void main() {
 	vec2 uv = -texCoord + vec2(1.0);
 	
 	vec2 texelSize = 1.0 / textureSize;
-	vec3 distortion = vec3(-texelSize.x * 1.5, 0.0, texelSize.x * 1.5);
+	vec3 distortion = vec3(-texelSize.x * 1.2, 0.9, texelSize.x * 1.1);
 	vec3 direction = normalize(distortion);
 	
 	float ghostDispersal = 0.3;
