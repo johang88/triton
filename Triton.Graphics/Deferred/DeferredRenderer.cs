@@ -142,10 +142,10 @@ namespace Triton.Graphics.Deferred
 				for (var p = 0; p < lightPermutations.Length; p++)
 				{
 					var index = l * lightPermutations.Length + p;
-					var defines = lightType + "," + lightPermutations[p];
+					var defines = lightType + ";" + lightPermutations[p];
 
 					if (lightType == "POINT_LIGHT")
-						defines += ",SHADOWS_CUBE";
+						defines += ";SHADOWS_CUBE";
 
 					LightShaders[index] = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("/shaders/deferred/light", defines);
 					LightParams[index] = new LightParams();
