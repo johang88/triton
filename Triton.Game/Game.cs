@@ -22,6 +22,7 @@ namespace Triton.Game
 
 		public int RequestedWidth { get; set; }
 		public int RequestedHeight { get; set; }
+		public float ResolutionScale { get; set; }
 
 		public Graphics.Stage Stage { get; private set; }
 		public Graphics.Camera Camera { get; private set; }
@@ -39,7 +40,7 @@ namespace Triton.Game
 
 		public World.GameWorld GameWorld;
 
-		public Graphics.SpriteBatch DebugSprite;
+		public Graphics.SpriteBatch SpriteRenderer;
 		public Graphics.Resources.BitmapFont DebugFont;
 
 		public DebugFlags DebugFlags;
@@ -59,6 +60,8 @@ namespace Triton.Game
 			ResourceManager = new Triton.Common.ResourceManager();
 
 			FileSystem = new Common.IO.FileSystem(MountFileSystem());
+
+			ResolutionScale = 1.0f; // This is default for obvious reasons
 		}
 
 		public virtual void Dispose()
@@ -80,7 +83,7 @@ namespace Triton.Game
 
 		private void RenderLoop()
 		{
-			using (GraphicsBackend = new Triton.Graphics.Backend(ResourceManager, RequestedWidth, RequestedHeight, Name, false))
+			using (GraphicsBackend = new Triton.Graphics.Backend(ResourceManager, RequestedWidth, RequestedHeight, ResolutionScale, Name, false))
 			{
 				Triton.Graphics.Resources.ResourceLoaders.Init(ResourceManager, GraphicsBackend, FileSystem);
 
@@ -172,8 +175,8 @@ namespace Triton.Game
 
 			GraphicsBackend.BeginPass(null, Vector4.Zero, false);
 
-			DebugSprite.RenderQuad(postProcessedResult.Textures[0], Vector2.Zero);
-			DebugSprite.Render(GraphicsBackend.Width, GraphicsBackend.Height);
+			SpriteRenderer.RenderQuad(postProcessedResult.Textures[0], Vector2.Zero, new Vector2(GraphicsBackend.WindowWidth, GraphicsBackend.WindowHeight));
+			SpriteRenderer.Render(GraphicsBackend.WindowWidth, GraphicsBackend.WindowHeight);
 
 			RenderUI(deltaTime);
 
@@ -189,10 +192,10 @@ namespace Triton.Game
 				var textures = DeferredRenderer.GBuffer.Textures;
 				for (var i = 0; i < textures.Length; i++)
 				{
-					DebugSprite.RenderQuad(textures[i], new Vector2(257 * i + 1, 1), new Vector2(256, 256), Vector2.Zero, Vector2.One, Vector4.One, false, i == 0 || i == 3 || i == 4);
+					SpriteRenderer.RenderQuad(textures[i], new Vector2(257 * i + 1, 1), new Vector2(256, 256), Vector2.Zero, Vector2.One, Vector4.One, false, i == 0 || i == 3 || i == 4);
 				}
 
-				DebugSprite.Render(GraphicsBackend.Width, GraphicsBackend.Height);
+				SpriteRenderer.Render(GraphicsBackend.WindowWidth, GraphicsBackend.WindowHeight);
 			}
 
 			if ((DebugFlags & Triton.Game.DebugFlags.RenderStats) == Triton.Game.DebugFlags.RenderStats)
@@ -204,20 +207,20 @@ namespace Triton.Game
 
 				var offsetY = 1;
 
-				DebugFont.DrawText(DebugSprite, new Vector2(4, 4), Vector4.One, "Frame stats:");
-				DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tFrame time: {0:0.00}ms", GraphicsBackend.FrameTime * 1000.0f);
-				DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tAverage FPS: {0:0}", averageFPS);
-				DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tFPS:{0:0}", fps);
-				DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "GC stats:");
-				DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tAllocated memory {0}mb", allocatedMemory);
+				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4), Vector4.One, "Frame stats:");
+				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tFrame time: {0:0.00}ms", GraphicsBackend.FrameTime * 1000.0f);
+				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tAverage FPS: {0:0}", averageFPS);
+				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tFPS:{0:0}", fps);
+				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "GC stats:");
+				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tAllocated memory {0}mb", allocatedMemory);
 
-				DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tCollection count");
+				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tCollection count");
 				for (var i = 0; i < GC.MaxGeneration; i++)
 				{
-					DebugFont.DrawText(DebugSprite, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\t\tGen ({0})\t{1}", i, GC.CollectionCount(i));
+					DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\t\tGen ({0})\t{1}", i, GC.CollectionCount(i));
 				}
 
-				DebugSprite.Render(GraphicsBackend.Width, GraphicsBackend.Height);
+				SpriteRenderer.Render(GraphicsBackend.WindowWidth, GraphicsBackend.WindowHeight);
 			}
 
 			GraphicsBackend.EndScene();
@@ -240,7 +243,7 @@ namespace Triton.Game
 		protected virtual void LoadResources()
 		{
 			DebugFont = ResourceManager.Load<Triton.Graphics.Resources.BitmapFont>("/fonts/system_font");
-			DebugSprite = GraphicsBackend.CreateSpriteBatch();
+			SpriteRenderer = GraphicsBackend.CreateSpriteBatch();
 		}
 
 		/// <summary>

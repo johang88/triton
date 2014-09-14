@@ -17,6 +17,7 @@ namespace Triton.Samples
 		{
 			RequestedWidth = 1280;
 			RequestedHeight = 720;
+			ResolutionScale = 1.0f;
 		}
 
 		protected KeyValuePair<FileSystemPath, IFileSystem> CreateMount(string mountPoint, IFileSystem fileSystem)
@@ -82,10 +83,10 @@ namespace Triton.Samples
 			base.RenderUI(deltaTime);
 
 			var offsetY = 2;
-			DebugFont.DrawText(DebugSprite, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[c] Shadow Quality: {0}", DeferredRenderer.ShadowQuality);
-			DebugFont.DrawText(DebugSprite, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[v] Shadows: {0}", DeferredRenderer.EnableShadows ? "Enabled" : "Disabled");
-			DebugFont.DrawText(DebugSprite, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] Anti Aliasing: {0}", PostEffectManager.AntiAliasing);
-			DebugFont.DrawText(DebugSprite, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] Camera Position: {0}", Common.StringConverter.ToString(Camera.Position));
+			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[c] Shadow Quality: {0}", DeferredRenderer.ShadowQuality);
+			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[v] Shadows: {0}", DeferredRenderer.EnableShadows ? "Enabled" : "Disabled");
+			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] Anti Aliasing: {0}", PostEffectManager.AntiAliasing);
+			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] Camera Position: {0}", Common.StringConverter.ToString(Camera.Position));
 		}
 	}
 }

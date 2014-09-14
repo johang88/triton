@@ -74,10 +74,13 @@ namespace Triton.Graphics
 		public readonly int DefaultSamplerNoFiltering;
 		public readonly int DefaultSamplerMipMapNearest;
 
-		public int Width { get { return Window.Width; } }
-		public int Height { get { return Window.Height; } }
+		public int Width { get; private set; }
+		public int Height { get; private set; }
 
-		public Backend(ResourceManager resourceManager, int width, int height, string title, bool fullscreen)
+		public int WindowWidth { get { return Window.Width; } }
+		public int WindowHeight { get { return Window.Height; } }
+
+		public Backend(ResourceManager resourceManager, int width, int height, float resolutionScale, string title, bool fullscreen)
 		{
 			if (resourceManager == null)
 				throw new ArgumentNullException("resourceManager");
@@ -88,6 +91,9 @@ namespace Triton.Graphics
 
 			// Create the main rendering window
 			Window = new NativeWindow(width, height, title, fullscreen ? GameWindowFlags.Fullscreen : GameWindowFlags.Default, graphicsMode, DisplayDevice.Default);
+
+			Width = (int)(WindowWidth * resolutionScale);
+			Height = (int)(WindowHeight * resolutionScale);
 
 			Window.Visible = true;
 			Window.Closing += Window_Closing;
