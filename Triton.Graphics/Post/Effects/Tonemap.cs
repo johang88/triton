@@ -28,7 +28,7 @@ namespace Triton.Graphics.Post.Effects
 			});
 		}
 
-		public void Render(HDRSettings settings, RenderTarget input, RenderTarget output, RenderTarget bloom, RenderTarget luminance)
+		public void Render(HDRSettings settings, RenderTarget input, RenderTarget output, RenderTarget bloom, RenderTarget lensFlares, RenderTarget luminance)
 		{
 			if (ShaderParams == null)
 			{
@@ -37,11 +37,12 @@ namespace Triton.Graphics.Post.Effects
 			}
 
 			Backend.BeginPass(output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-			Backend.BeginInstance(Shader.Handle, new int[] { input.Textures[0].Handle, bloom.Textures[0].Handle, luminance.Textures[0].Handle },
-				samplers: new int[] { Backend.DefaultSamplerNoFiltering, BlurSampler, Backend.DefaultSamplerNoFiltering });
+			Backend.BeginInstance(Shader.Handle, new int[] { input.Textures[0].Handle, bloom.Textures[0].Handle, lensFlares.Textures[0].Handle, luminance.Textures[0].Handle },
+				samplers: new int[] { Backend.DefaultSamplerNoFiltering, BlurSampler, BlurSampler, Backend.DefaultSamplerNoFiltering });
 			Backend.BindShaderVariable(ShaderParams.SamplerScene, 0);
 			Backend.BindShaderVariable(ShaderParams.SamplerBloom, 1);
-			Backend.BindShaderVariable(ShaderParams.SamplerLuminance, 2);
+			Backend.BindShaderVariable(ShaderParams.SamplerLensFlares, 2);
+			Backend.BindShaderVariable(ShaderParams.SamplerLuminance, 3);
 			Backend.BindShaderVariable(ShaderParams.KeyValue, settings.KeyValue);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
@@ -52,6 +53,7 @@ namespace Triton.Graphics.Post.Effects
 		{
 			public int SamplerScene = 0;
 			public int SamplerBloom = 0;
+			public int SamplerLensFlares = 0;
 			public int SamplerLuminance = 0;
 			public int KeyValue = 0;
 		}

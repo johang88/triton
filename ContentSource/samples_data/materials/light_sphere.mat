@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NodeGraphControl>
+     <NodeGraphControl.NodeGraphView ViewX="0" ViewY="0" ViewZoom="1">
+          <NodeGraphNodeCollection>
+               <Triton.Content.Materials.CustomNodes.RootNode Name="Material" X="100" Y="0" Width="140" Height="116" Comment="" CanBeSelected="False" />
+               <Triton.Content.Materials.CustomNodes.ColorConstNode Name="Color: 2550, 2550, 2550, 255" X="-233" Y="42" Width="150" Height="116" Comment="" CanBeSelected="True" Value="2550 2550 2550 255" />
+          </NodeGraphNodeCollection>
+          <NodeGraphLinkCollection>
+               <NodeGraphControl.NodeGraphLink InputNodeId="1" OutputNodeId="0" InputNodeConnectorIdx="0" OutputNodeConnectorIdx="0" />
+          </NodeGraphLinkCollection>
+     </NodeGraphControl.NodeGraphView>
+</NodeGraphControl>

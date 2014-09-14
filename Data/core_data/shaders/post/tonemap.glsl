@@ -21,6 +21,7 @@ layout(location = 0) out vec4 oColor;
 
 uniform sampler2D samplerScene;
 uniform sampler2D samplerBloom;
+uniform sampler2D samplerLensFlares;
 uniform sampler2D samplerLuminance;
 uniform float keyValue = 0.115;
 
@@ -46,7 +47,8 @@ void main() {
 	color = color * whiteScale;
 
 	vec3 bloom = texture2D(samplerBloom, texCoord).xyz;
+	vec3 lensFlares = texture2D(samplerLensFlares, texCoord).xyz;
 	
-	oColor = vec4(color + bloom, 1);
+	oColor = vec4(color + bloom + lensFlares, 1);
 }
 #endif

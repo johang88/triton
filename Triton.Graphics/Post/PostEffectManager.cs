@@ -111,7 +111,7 @@ namespace Triton.Graphics.Post
 			var bloom = Bloom.Render(HDRSettings, TemporaryRenderTargets[0], luminance);
 			var lensFlares = LensFlares.Render(HDRSettings, TemporaryRenderTargets[0], luminance);
 
-			Tonemap.Render(HDRSettings, TemporaryRenderTargets[0], TemporaryRenderTargets[1], lensFlares, luminance);
+			Tonemap.Render(HDRSettings, TemporaryRenderTargets[0], TemporaryRenderTargets[1], bloom, lensFlares, luminance);
 			SwapRenderTargets();
 		}
 
