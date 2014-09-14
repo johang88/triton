@@ -70,7 +70,10 @@ void main()
 	vec3 eyeDir = normalize(cameraPosition - position);
 	
 #if defined(SPOT_LIGHT) || defined(POINT_LIGHT)
-	float attenuation = saturate(1.0 - dot(lightVec, lightVec) * lightInvSquareRadius);
+	float lightDistanceSquared = dot(lightVec, lightVec);
+	
+	float attenuation = 1.0 / lightDistanceSquared;
+	attenuation = attenuation * square(saturate(1.0 - square(lightDistanceSquared * square(1.0 / lightRange))));
 #else
 	float attenuation = 1.0;
 #endif
