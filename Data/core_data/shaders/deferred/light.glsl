@@ -118,7 +118,7 @@ void main()
 		vec3 specularColor = mix(0.08 * vec3(specular), diffuse, metallic);
 
 		vec3 diffuseLighting = get_diffuse(diffuseColor, normal, eyeDir, lightDir, roughness);
-		vec3 specularLighting = get_specular(normal, eyeDir, lightDir, roughness, specularColor, lightRange);
+		vec3 specularLighting = get_specular(normal, eyeDir, lightDir, roughness, specularColor);
 		
 		lighting = lightColor * nDotL * attenuation * (diffuseLighting + specularLighting);
 	}
