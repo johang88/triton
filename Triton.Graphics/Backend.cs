@@ -49,6 +49,9 @@ namespace Triton.Graphics
 		private CommandBuffer PrimaryBuffer = new CommandBuffer();
 		private CommandBuffer SecondaryBuffer = new CommandBuffer();
 
+		private Profiler PrimaryProfiler = new Profiler();
+		private Profiler SecondaryProfiler = new Profiler();
+
 		private readonly Semaphore DoubleBufferSynchronizer = new Semaphore(1, 1);
 
 		private readonly ConcurrentQueue<Action> ProcessQueue = new ConcurrentQueue<Action>();
@@ -197,6 +200,7 @@ namespace Triton.Graphics
 			{
 				DoubleBufferSynchronizer.WaitOne();
 
+				PrimaryProfiler.Reset();
 				ExecuteCommandStream();
 
 				RenderSystem.SwapBuffers();
@@ -404,6 +408,18 @@ namespace Triton.Graphics
 						var textureHandle = reader.ReadInt32();
 						RenderSystem.GenreateMips(textureHandle);
 						break;
+					case OpCode.ProfileBegin:
+						{
+							int name = reader.ReadInt32();
+							PrimaryProfiler.Begin(name);
+						}
+						break;
+					case OpCode.ProfileEnd:
+						{
+							int name = reader.ReadInt32();
+							PrimaryProfiler.End(name);
+						}
+						break;
 				}
 			}
 		}
@@ -427,6 +443,10 @@ namespace Triton.Graphics
 			var tmp = SecondaryBuffer;
 			SecondaryBuffer = PrimaryBuffer;
 			PrimaryBuffer = tmp;
+
+			var tmpProfiler = SecondaryProfiler;
+			SecondaryProfiler = PrimaryProfiler;
+			PrimaryProfiler = SecondaryProfiler;
 
 			DoubleBufferSynchronizer.Release();
 		}
@@ -700,6 +720,18 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write(textureHandle);
 		}
 
+		public void ProfileBeginSection(Common.HashedString name)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.ProfileBegin);
+			PrimaryBuffer.Writer.Write((int)name);
+		}
+
+		public void ProfileEndSection(Common.HashedString name)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.ProfileEnd);
+			PrimaryBuffer.Writer.Write((int)name);
+		}
+
 		public RenderTarget CreateRenderTarget(string name, Renderer.RenderTargets.Definition definition)
 		{
 			if (string.IsNullOrWhiteSpace(name))
@@ -793,7 +825,9 @@ namespace Triton.Graphics
 			UpdateMesh,
 			DrawMesh,
 			DrawMeshInstanced,
-			GenerateMips
+			GenerateMips,
+			ProfileBegin,
+			ProfileEnd
 		}
 
 		/// <summary>

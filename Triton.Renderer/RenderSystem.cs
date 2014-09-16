@@ -57,7 +57,7 @@ namespace Triton.Renderer
 			Context = new GraphicsContext(graphicsMode, WindowInfo, 3, 0, GraphicsContextFlags.ForwardCompatible);
 			Context.MakeCurrent(WindowInfo);
 			Context.LoadAll();
-
+			
 			Common.Log.WriteLine("OpenGL Context initialized");
 			Common.Log.WriteLine(" - Color format: {0}", Context.GraphicsMode.ColorFormat);
 			Common.Log.WriteLine(" - Depth: {0}", Context.GraphicsMode.Depth);
