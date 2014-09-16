@@ -10,6 +10,11 @@ namespace Triton.Graphics
 	{
 		public static readonly Common.HashedString GBuffer = "gbuffer";
 		public static readonly Common.HashedString Lighting = "lighting";
+		public static readonly Common.HashedString AntiAliasing = "anti aliasing";
+		public static readonly Common.HashedString LuminanceAdaptation = "luminance adaptation";
+		public static readonly Common.HashedString LensFlares = "lensflares";
+		public static readonly Common.HashedString Bloom = "bloom";
+		public static readonly Common.HashedString Tonemap = "tonemap";
 
 		private const int MaxSections = 32;
 		private ProfilerSection[] Sections = new ProfilerSection[MaxSections];

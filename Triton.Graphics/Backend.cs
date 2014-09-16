@@ -50,7 +50,7 @@ namespace Triton.Graphics
 		private CommandBuffer SecondaryBuffer = new CommandBuffer();
 
 		private Profiler PrimaryProfiler = new Profiler();
-		private Profiler SecondaryProfiler = new Profiler();
+		public Profiler SecondaryProfiler = new Profiler();
 
 		private readonly Semaphore DoubleBufferSynchronizer = new Semaphore(1, 1);
 

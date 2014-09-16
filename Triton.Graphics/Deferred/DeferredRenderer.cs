@@ -223,17 +223,21 @@ namespace Triton.Graphics.Deferred
 			// Render scene to GBuffer
 			var clearColor = stage.ClearColor;
 			clearColor.W = 0;
+			Backend.ProfileBeginSection(Profiler.GBuffer);
 			Backend.BeginPass(GBuffer, clearColor, true);
 			RenderScene(stage, camera, ref view, ref projection);
 			Backend.EndPass();
+			Backend.ProfileEndSection(Profiler.GBuffer);
 
 			// Render light accumulation
+			Backend.ProfileBeginSection(Profiler.Lighting);
 			Backend.BeginPass(LightAccumulation, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), true);
 
 			RenderAmbientLight(stage);
 			RenderLights(camera, ref view, ref projection, stage.GetLights(), stage);
 
 			Backend.EndPass();
+			Backend.ProfileEndSection(Profiler.Lighting);
 
 			var currentRenderTarget = Temporary;
 			var currentSource = LightAccumulation;

@@ -89,6 +89,7 @@ namespace Triton.Graphics.Post
 
 		private void ApplyAA()
 		{
+			Backend.ProfileBeginSection(Profiler.AntiAliasing);
 			switch (AntiAliasing)
 			{
 				case AntiAliasing.FXAA:
@@ -103,15 +104,27 @@ namespace Triton.Graphics.Post
 				default:
 					break;
 			}
+			Backend.ProfileEndSection(Profiler.AntiAliasing);
 		}
 
 		private void ApplyLumianceBloomAndTonemap(float deltaTime)
 		{
+			Backend.ProfileBeginSection(Profiler.LuminanceAdaptation);
 			var luminance = AdaptLuminance.Render(HDRSettings, TemporaryRenderTargets[0], deltaTime);
-			var bloom = Bloom.Render(HDRSettings, TemporaryRenderTargets[0], luminance);
-			var lensFlares = LensFlares.Render(HDRSettings, TemporaryRenderTargets[0], luminance);
+			Backend.ProfileEndSection(Profiler.LuminanceAdaptation);
 
+			Backend.ProfileBeginSection(Profiler.Bloom);
+			var bloom = Bloom.Render(HDRSettings, TemporaryRenderTargets[0], luminance);
+			Backend.ProfileEndSection(Profiler.Bloom);
+
+			Backend.ProfileBeginSection(Profiler.LensFlares);
+			var lensFlares = LensFlares.Render(HDRSettings, TemporaryRenderTargets[0], luminance);
+			Backend.ProfileEndSection(Profiler.LensFlares);
+
+			Backend.ProfileBeginSection(Profiler.Tonemap);
 			Tonemap.Render(HDRSettings, TemporaryRenderTargets[0], TemporaryRenderTargets[1], bloom, lensFlares, luminance);
+			Backend.ProfileEndSection(Profiler.Tonemap);
+
 			SwapRenderTargets();
 		}
 

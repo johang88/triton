@@ -220,6 +220,19 @@ namespace Triton.Game
 					DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\t\tGen ({0})\t{1}", i, GC.CollectionCount(i));
 				}
 
+				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "Profiler");
+				Graphics.Profiler.ProfilerSection[] sections;
+				int sectionCount;
+				GraphicsBackend.SecondaryProfiler.GetSections(out sections, out sectionCount);
+				for (var i = 0; i < sectionCount; i++)
+				{
+					var section = sections[i];
+					var diff = section.End - section.Start;
+					var name = Common.HashedStringTable.GetString(new Common.HashedString(section.Name));
+
+					DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\t{0} {1}ms", name, diff);
+				}
+
 				SpriteRenderer.Render(GraphicsBackend.WindowWidth, GraphicsBackend.WindowHeight);
 			}
 
