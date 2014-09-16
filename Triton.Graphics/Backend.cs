@@ -417,6 +417,7 @@ namespace Triton.Graphics
 					case OpCode.ProfileEnd:
 						{
 							int name = reader.ReadInt32();
+							OpenTK.Graphics.OpenGL.GL.Finish();
 							PrimaryProfiler.End(name);
 						}
 						break;
@@ -446,7 +447,7 @@ namespace Triton.Graphics
 
 			var tmpProfiler = SecondaryProfiler;
 			SecondaryProfiler = PrimaryProfiler;
-			PrimaryProfiler = SecondaryProfiler;
+			PrimaryProfiler = tmpProfiler;
 
 			DoubleBufferSynchronizer.Release();
 		}
