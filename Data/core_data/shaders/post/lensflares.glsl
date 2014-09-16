@@ -4,7 +4,7 @@ import(/shaders/core);
 layout(location = ATTRIB_POSITION) in vec3 iPosition;
 layout(location = ATTRIB_TEXCOORD_0) in vec2 iTexCoord;
 
-out vec2 texCoord;
+noperspective out vec2 texCoord;
 
 void main()
 {
