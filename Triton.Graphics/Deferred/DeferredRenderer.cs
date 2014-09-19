@@ -47,12 +47,9 @@ namespace Triton.Graphics.Deferred
 		private Light ShadowSpotLight = new Light();
 
 		private Resources.Texture RandomNoiseTexture;
-		private Resources.Texture EnvironmentMap;
-		private Resources.Texture EnvironmentMapSpecular;
 
 		private bool HandlesInitialized = false;
 
-		private int SkyRenderState;
 		private int AmbientRenderState;
 		private int LightAccumulatinRenderState;
 		private int ShadowsRenderState;
@@ -163,8 +160,6 @@ namespace Triton.Graphics.Deferred
 			FogShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/fog");
 
 			RandomNoiseTexture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("/textures/random_n");
-			EnvironmentMap = ResourceManager.Load<Triton.Graphics.Resources.Texture>("/textures/sky_ambient");
-			EnvironmentMapSpecular = ResourceManager.Load<Triton.Graphics.Resources.Texture>("/textures/sky");
 
 			QuadMesh = Backend.CreateBatchBuffer();
 			QuadMesh.Begin();
@@ -175,7 +170,6 @@ namespace Triton.Graphics.Deferred
 			UnitCone = ResourceManager.Load<Triton.Graphics.Resources.Mesh>("/models/unit_cone");
 
 			AmbientRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
-			SkyRenderState = Backend.CreateRenderState(false, false, false);
 			LightAccumulatinRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One);
 			ShadowsRenderState = Backend.CreateRenderState(false, true, true);
 			DirectionalRenderState = Backend.CreateRenderState(true, false, false, Triton.Renderer.BlendingFactorSrc.One, Triton.Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Back, true, Triton.Renderer.DepthFunction.Lequal);
@@ -296,7 +290,7 @@ namespace Triton.Graphics.Deferred
                 var worldView = world * view;
 				var itWorld = Matrix4.Transpose(Matrix4.Invert(world));
 
-                operations[i].Material.BindMaterial(Backend, EnvironmentMap, EnvironmentMapSpecular, camera, ref world, ref worldView, ref itWorld, ref modelViewProjection, operations[i].Skeleton, 0);
+                operations[i].Material.BindMaterial(Backend, camera, ref world, ref worldView, ref itWorld, ref modelViewProjection, operations[i].Skeleton, 0);
                 Backend.DrawMesh(operations[i].MeshHandle);
                 Backend.EndInstance();
             }

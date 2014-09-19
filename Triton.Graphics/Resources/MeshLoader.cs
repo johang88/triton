@@ -51,23 +51,23 @@ namespace Triton.Graphics.Resources
 			ResourceManager = resourceManager;
 		}
 
+		public string Extension { get { return ".mesh"; } }
+
 		public Common.Resource Create(string name, string parameters)
 		{
 			return new Mesh(name, parameters);
 		}
 
-		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
+		public void Load(Common.Resource resource, byte[] data)
 		{
 			// Destroy any existing mesh handles
 			Unload(resource);
 
 			var mesh = (Mesh)resource;
 
-			var filename = resource.Name + ".mesh";
+			var overrideMaterial = resource.Parameters;
 
-			var overrideMaterial = parameters;
-
-			using (var stream = FileSystem.OpenRead(filename))
+			using (var stream = new System.IO.MemoryStream(data))
 			using (var reader = new System.IO.BinaryReader(stream))
 			{
 				var magic = reader.ReadChars(4);
@@ -86,19 +86,6 @@ namespace Triton.Graphics.Resources
 
 				var meshCount = reader.ReadInt32();
 				mesh.SubMeshes = new SubMesh[meshCount];
-
-				var resourcesToLoad = meshCount;
-				Renderer.RenderSystem.OnLoadedCallback onResourceLoaded = (handle, success, errors) =>
-				{
-					resourcesToLoad--;
-					Common.Log.WriteLine(errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
-
-					if (resourcesToLoad > 0)
-						return;
-
-					if (onLoaded != null)
-						onLoaded(resource);
-				};
 
 				for (var i = 0; i < meshCount; i++)
 				{
@@ -141,10 +128,10 @@ namespace Triton.Graphics.Resources
 
 					subMesh.VertexBufferHandle = Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, vertexFormat);
 					subMesh.IndexBufferHandle = Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ElementArrayBuffer);
-					Backend.RenderSystem.SetBufferData(subMesh.VertexBufferHandle, vertices, false);
-					Backend.RenderSystem.SetBufferData(subMesh.IndexBufferHandle, indices, false);
+					Backend.RenderSystem.SetBufferData(subMesh.VertexBufferHandle, vertices, false, false);
+					Backend.RenderSystem.SetBufferData(subMesh.IndexBufferHandle, indices, false, false);
 
-					subMesh.Handle = Backend.RenderSystem.CreateMesh(triangleCount, subMesh.VertexBufferHandle, subMesh.IndexBufferHandle, onResourceLoaded);
+					subMesh.Handle = Backend.RenderSystem.CreateMesh(triangleCount, subMesh.VertexBufferHandle, subMesh.IndexBufferHandle, false);
 					subMesh.Material = material;
 					subMesh.BoundingSphereRadius = boundingSphereRadius;
 
@@ -152,8 +139,6 @@ namespace Triton.Graphics.Resources
 				}
 
 				mesh.BoundingSphereRadius = mesh.SubMeshes.Max(s => s.BoundingSphereRadius);
-
-				resource.Parameters = parameters;
 			}
 		}
 

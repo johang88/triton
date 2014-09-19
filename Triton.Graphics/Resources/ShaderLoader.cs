@@ -32,22 +32,7 @@ namespace Triton.Graphics.Resources
 			FileSystem = fileSystem;
 		}
 
-		private void OnFileChanged(string path)
-		{
-			if (!path.EndsWith(".glsl"))
-				return;
-
-			path = path.Replace(".glsl", "");
-
-			lock (ReloadLock)
-			{
-				ShaderProgram shader;
-				if (Shaders.TryGetValue(path, out shader) && shader.State == Common.ResourceLoadingState.Loaded)
-				{
-					Load(shader, "", null);
-				}
-			}
-		}
+		public string Extension { get { return ".glsl"; } }
 
 		private void OutputShader(string name, string type, string parameters, string content)
 		{
@@ -70,7 +55,7 @@ namespace Triton.Graphics.Resources
 			return new ShaderProgram(name, parameters, Backend);
 		}
 
-		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
+		public void Load(Common.Resource resource, byte[] data)
 		{
 			var shader = (ShaderProgram)resource;
 
@@ -79,19 +64,15 @@ namespace Triton.Graphics.Resources
 
 			var filename = resource.Name + ".glsl";
 
-			var shaderSource = ""; // Complete source of both shaders before splitting them
-
-			using (var stream = FileSystem.OpenRead(filename))
-			using (var reader = new System.IO.StreamReader(stream))
-			{
-				shaderSource = reader.ReadToEnd();
-			}
+			var shaderSource = Encoding.ASCII.GetString(data); // Complete source of both shaders before splitting them
 
 			var preProcessor = new Shaders.Preprocessor(FileSystem);
 
 			shaderSource = preProcessor.Process(shaderSource);
 
 			var defines = "";
+
+			var parameters = resource.Parameters;
 
 			if (!string.IsNullOrWhiteSpace(parameters))
 			{
@@ -125,27 +106,19 @@ namespace Triton.Graphics.Resources
 
 			resource.Parameters = parameters;
 
-			Renderer.RenderSystem.OnLoadedCallback onResourceLoaded = (handle, success, errors) =>
-			{
-				if (success)
-				{
-					shader.Uniforms = Backend.RenderSystem.GetUniforms(shader.Handle);
-				}
-
-				if (!string.IsNullOrWhiteSpace(errors))
-					Common.Log.WriteLine(shader.Name + ": " + errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
-
-				if (!Shaders.ContainsKey(shader.Name))
-					Shaders.Add(shader.Name, shader);
-
-				if (onLoaded != null)
-					onLoaded(resource);
-			};
-
 			if (shader.Handle == -1)
-				shader.Handle = Backend.RenderSystem.CreateShader(sources, onResourceLoaded);
-			else
-				Backend.RenderSystem.SetShaderData(shader.Handle, sources, onResourceLoaded);
+				shader.Handle = Backend.RenderSystem.CreateShader();
+
+			string errors;
+			var success = Backend.RenderSystem.SetShaderData(shader.Handle, sources, out errors);
+
+			if (success)
+			{
+				shader.Uniforms = Backend.RenderSystem.GetUniforms(shader.Handle);
+			}
+
+			if (!string.IsNullOrWhiteSpace(errors))
+				Common.Log.WriteLine(shader.Name + ": " + errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
 		}
 
 		public void Unload(Common.Resource resource)

@@ -27,26 +27,20 @@ namespace Triton.Graphics.Resources
 			ResourceManager = resourceManager;
 		}
 
+		public string Extension { get { return ".mat"; } }
+
 		public Common.Resource Create(string name, string parameters)
 		{
 			return new Materials.StandardMaterial(name, parameters, ResourceManager, false);
 		}
 
-		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
+		public void Load(Common.Resource resource, byte[] data)
 		{
 			Unload(resource);
 
 			var material = (Materials.StandardMaterial)resource;
 
-			var filename = resource.Name + ".mat";
-
-			if (!FileSystem.FileExists(filename))
-			{
-				Common.Log.WriteLine(string.Format("Missing material {0}", filename), Common.LogLevel.Error);
-				filename = "/materials/default.mat";
-			}
-
-			using (var stream = FileSystem.OpenRead(filename))
+			using (var stream = new System.IO.MemoryStream(data))
 			using (var reader = new System.IO.BinaryReader(stream))
 			{
 				var magic = reader.ReadChars(4);
@@ -75,8 +69,6 @@ namespace Triton.Graphics.Resources
 					material.Textures.Add(samplerName, ResourceManager.Load<Texture>(texturePath));
 				}
 			}
-
-			onLoaded(resource);
 		}
 
 		public void Unload(Common.Resource resource)

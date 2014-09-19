@@ -25,17 +25,17 @@ namespace Triton.Graphics.Resources
 			FileSystem = fileSystem;
 		}
 
+		public string Extension { get { return ".dds"; } }
+
 		public Common.Resource Create(string name, string parameters)
 		{
 			return new Texture(name, parameters);
 		}
 
-		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
+		public void Load(Common.Resource resource, byte[] data)
 		{
 			var texture = (Texture)resource;
 			var filename = resource.Name + ".dds";
-			bool srgb = parameters.Contains("srgb");
-
 			if (!FileSystem.FileExists(filename))
 			{
 				Common.Log.WriteLine(string.Format("Missing texture {0}", filename), Common.LogLevel.Error);
@@ -46,27 +46,7 @@ namespace Triton.Graphics.Resources
 					filename = "/textures/missing.dds";
 			}
 
-			using (var stream = FileSystem.OpenRead(filename))
-			using (var data = new System.IO.MemoryStream(1024 * 1024))
-			{
-				var count =0 ;
-				var buffer = new byte[4096];
-				while ((count = stream.Read(buffer, 0, buffer.Length)) != 0)
-				{
-					data.Write(buffer, 0, count);
-				}
-
-				Renderer.RenderSystem.OnLoadedCallback onResourceLoaded = (handle, success, errors) =>
-				{
-					Common.Log.WriteLine(errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
-
-					if (onLoaded != null)
-						onLoaded(resource);
-				};
-
-				texture.Handle = Backend.RenderSystem.CreateFromDDS(data.GetBuffer(), onResourceLoaded);
-				resource.Parameters = parameters;
-			}
+			texture.Handle = Backend.RenderSystem.CreateFromDDS(data);
 		}
 
 		public void Unload(Common.Resource resource)

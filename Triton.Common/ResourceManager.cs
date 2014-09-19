@@ -33,11 +33,19 @@ namespace Triton.Common
 	{
 		private readonly ConcurrentDictionary<string, Resource> Resources = new ConcurrentDictionary<string, Resource>();
 		private readonly Dictionary<Type, IResourceLoader> ResourceLoaders = new Dictionary<Type, IResourceLoader>();
+		private readonly ConcurrentQueue<ResourceToLoad> ResourcesToLoad = new ConcurrentQueue<ResourceToLoad>();
+
+		private readonly IO.FileSystem FileSystem;
+
 		private bool Disposed = false;
 		private object LoadingLock = new object();
 
-		public ResourceManager()
+		public ResourceManager(IO.FileSystem fileSystem)
 		{
+			if (fileSystem == null)
+				throw new ArgumentNullException("fileSystem");
+
+			FileSystem = fileSystem;
 		}
 
 		public void Dispose()
@@ -59,7 +67,7 @@ namespace Triton.Common
 			Disposed = true;
 		}
 
-		public TResource Load<TResource>(string name, string parameters = "", Action<Resource> onLoaded = null) where TResource : Resource
+		public TResource Load<TResource>(string name, string parameters = "") where TResource : Resource
 		{
 			if (!ResourceLoaders.ContainsKey(typeof(TResource)))
 				throw new InvalidOperationException("no resource loader for the specified type");
@@ -85,24 +93,42 @@ namespace Triton.Common
 				{
 					resource.State = ResourceLoadingState.Loading;
 
-					Task.Factory.StartNew(() =>
+					Task.Factory.StartNew(async () =>
 					{
-						loader.Load(resource, parameters, (r) =>
-						{
-							resource.State = ResourceLoadingState.Loaded;
-
-							if (!string.IsNullOrWhiteSpace(parameters))
-								Log.WriteLine("Loaded {0}?{2} of type {1}", name, typeof(TResource), parameters);
-							else
-								Log.WriteLine("Loaded {0} of type {1}", name, typeof(TResource));
-
-							if (onLoaded != null)
-								onLoaded(r);
-						});
+						await LoadResource(resource, loader);
 					});
 				}
 
 				return (TResource)resource;
+			}
+		}
+
+		private async Task LoadResource(Resource resource, IResourceLoader loader)
+		{
+			var data = await LoadDataForResource(resource, loader);
+			ResourcesToLoad.Enqueue(new ResourceToLoad
+			{
+				Resource = resource,
+				Loader = loader,
+				Data = data
+			});
+		}
+
+		private async Task<byte[]> LoadDataForResource(Resource resource, IResourceLoader loader)
+		{
+			var path = resource.Name + loader.Extension;
+
+			using (var stream = FileSystem.OpenRead(path))
+			{
+				byte[] data = new byte[stream.Length];
+
+				long bytesRead = 0;
+				while (bytesRead < stream.Length)
+				{
+					bytesRead += await stream.ReadAsync(data, (int)bytesRead, (int)(stream.Length - bytesRead));
+				}
+
+				return data;
 			}
 		}
 
@@ -146,6 +172,27 @@ namespace Triton.Common
 			}
 		}
 
+		/// <summary>
+		/// Should be called on the main thread
+		/// </summary>
+		public void TickResourceLoading(int maxResourcesPerFrame = 10)
+		{
+			while (maxResourcesPerFrame > 0 && ResourcesToLoad.Count > 0)
+			{
+				ResourceToLoad resourceToLoad;
+				if (ResourcesToLoad.TryDequeue(out resourceToLoad))
+				{
+					resourceToLoad.Loader.Load(resourceToLoad.Resource, resourceToLoad.Data);
+					resourceToLoad.Resource.State = ResourceLoadingState.Loaded;
+
+					if (!string.IsNullOrWhiteSpace(resourceToLoad.Resource.Parameters))
+						Log.WriteLine("Loaded {0}?{2} of type {1}", resourceToLoad.Resource.Name, resourceToLoad.Resource.GetType(), resourceToLoad.Resource.Parameters);
+					else
+						Log.WriteLine("Loaded {0} of type {1}", resourceToLoad.Resource.Name, resourceToLoad.Resource.GetType());
+				}
+			}
+		}
+
 		public void Manage(Resource resource)
 		{
 			if (resource == null)
@@ -184,6 +231,13 @@ namespace Triton.Common
 		public bool AllResourcesLoaded()
 		{
 			return Resources.All(r => r.Value.State == ResourceLoadingState.Loaded);
+		}
+
+		struct ResourceToLoad
+		{
+			public Resource Resource;
+			public IResourceLoader Loader;
+			public byte[] Data;
 		}
 	}
 }

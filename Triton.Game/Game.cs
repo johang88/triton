@@ -57,9 +57,8 @@ namespace Triton.Game
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File(string.Format("{0}/{1}.txt", logPath, name)));
 
-			ResourceManager = new Triton.Common.ResourceManager();
-
 			FileSystem = new Common.IO.FileSystem(MountFileSystem());
+			ResourceManager = new Triton.Common.ResourceManager(FileSystem);
 
 			ResolutionScale = 1.0f; // This is default for obvious reasons
 		}
@@ -89,8 +88,13 @@ namespace Triton.Game
 
 				RendererReady.Set();
 
-				while (GraphicsBackend.Process() && Running)
+				while (Running)
 				{
+					ResourceManager.TickResourceLoading(100);
+					
+					if (!GraphicsBackend.Process())
+						break;
+
 					Thread.Sleep(1);
 				}
 

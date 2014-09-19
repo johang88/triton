@@ -37,7 +37,7 @@ namespace Triton.Graphics.Resources
 		/// <param name="worldView"></param>
 		/// <param name="itWorldView"></param>
 		/// <param name="modelViewProjection"></param>
-		public virtual void BindMaterial(Backend backend, Texture environmentMap, Texture environmentMapSpecular, Camera camera, ref Matrix4 world, ref Matrix4 worldView, ref Matrix4 itWorld, ref Matrix4 modelViewProjection, SkeletalAnimation.SkeletonInstance skeleton, int renderStateId)
+		public virtual void BindMaterial(Backend backend, Camera camera, ref Matrix4 world, ref Matrix4 worldView, ref Matrix4 itWorld, ref Matrix4 modelViewProjection, SkeletalAnimation.SkeletonInstance skeleton, int renderStateId)
 		{
 			if (!Initialized)
 			{

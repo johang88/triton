@@ -58,10 +58,10 @@ namespace Triton.Graphics
 			VertexBufferHandle = RenderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, VertexFormat);
 			IndexBufferHandle = RenderSystem.CreateBuffer(Renderer.BufferTarget.ElementArrayBuffer);
 
-			RenderSystem.SetBufferData(VertexBufferHandle, new byte[0], true);
-			RenderSystem.SetBufferData(IndexBufferHandle, new byte[0], true);
+			RenderSystem.SetBufferData(VertexBufferHandle, new byte[0], true, true);
+			RenderSystem.SetBufferData(IndexBufferHandle, new byte[0], true, true);
 			
-			MeshHandle = RenderSystem.CreateMesh(0, VertexBufferHandle, IndexBufferHandle, null);
+			MeshHandle = RenderSystem.CreateMesh(0, VertexBufferHandle, IndexBufferHandle, true);
 		}
 
 		public void Dispose()
@@ -100,8 +100,8 @@ namespace Triton.Graphics
 		public void End()
 		{
 			RenderSystem.MeshSetTriangleCount(MeshHandle, IndexCount / 3, true);
-			RenderSystem.SetBufferData(VertexBufferHandle, VertexData, true);
-			RenderSystem.SetBufferData(IndexBufferHandle, IndexData, true);
+			RenderSystem.SetBufferData(VertexBufferHandle, VertexData, true, true);
+			RenderSystem.SetBufferData(IndexBufferHandle, IndexData, true, true);
 		}
 
 		public void EndInline(Backend backend)

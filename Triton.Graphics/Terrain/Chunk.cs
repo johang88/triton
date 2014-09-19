@@ -80,10 +80,10 @@ namespace Triton.Graphics.Terrain
 			Mesh.VertexBufferHandle = Terrain.Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, vertexFormat);
 			Mesh.IndexBufferHandle = Terrain.Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ElementArrayBuffer);
 
-			Terrain.Backend.RenderSystem.SetBufferData(Mesh.VertexBufferHandle, vertices, false);
-			Terrain.Backend.RenderSystem.SetBufferData(Mesh.IndexBufferHandle, indices, false);
+			Terrain.Backend.RenderSystem.SetBufferData(Mesh.VertexBufferHandle, vertices, false, true);
+			Terrain.Backend.RenderSystem.SetBufferData(Mesh.IndexBufferHandle, indices, false, true);
 
-			Mesh.Handle = Terrain.Backend.RenderSystem.CreateMesh(indices.Length / 3, Mesh.VertexBufferHandle, Mesh.IndexBufferHandle, null);
+			Mesh.Handle = Terrain.Backend.RenderSystem.CreateMesh(indices.Length / 3, Mesh.VertexBufferHandle, Mesh.IndexBufferHandle, true);
 		}
 
 		public void Update(Vector3 cameraPosition)

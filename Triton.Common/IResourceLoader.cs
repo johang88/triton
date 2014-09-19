@@ -16,8 +16,10 @@ namespace Triton.Common
 	/// </summary>
 	public interface IResourceLoader
 	{
+		string Extension { get; }
+
 		Resource Create(string name, string parameters);
-		void Load(Resource resource, string parameters, Action<Resource> onLoaded);
+		void Load(Resource resource, byte[] data);
 		void Unload(Resource resource);
 	}
 

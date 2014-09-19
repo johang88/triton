@@ -23,17 +23,18 @@ namespace Triton.Graphics.Resources
 			ResourceManager = resourceManager;
 		}
 
+		public string Extension { get { return ".fnt"; } }
+
 		public Common.Resource Create(string name, string parameters)
 		{
 			return new BitmapFont(name, parameters);
 		}
 
-		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
+		public void Load(Common.Resource resource, byte[] data)
 		{
 			var bitmapFont = (BitmapFont)resource;
-			var filename = resource.Name + ".fnt";
 
-			using (var stream = FileSystem.OpenRead(filename))
+			using (var stream = new System.IO.MemoryStream(data))
 			using (var reader = new System.IO.StreamReader(stream))
 			{
 				while (stream.Position < stream.Length)
@@ -61,8 +62,6 @@ namespace Triton.Graphics.Resources
 					}
 				}
 			}
-
-			onLoaded(bitmapFont);
 		}
 
 		private Dictionary<string, string> ParseCommands(string[] commands)

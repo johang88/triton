@@ -57,7 +57,7 @@ namespace Triton.Renderer
 			Context = new GraphicsContext(graphicsMode, WindowInfo, 3, 0, GraphicsContextFlags.ForwardCompatible);
 			Context.MakeCurrent(WindowInfo);
 			Context.LoadAll();
-			
+
 			Common.Log.WriteLine("OpenGL Context initialized");
 			Common.Log.WriteLine(" - Color format: {0}", Context.GraphicsMode.ColorFormat);
 			Common.Log.WriteLine(" - Depth: {0}", Context.GraphicsMode.Depth);
@@ -114,19 +114,11 @@ namespace Triton.Renderer
 			AddToWorkQueue(() => TextureManager.Destroy(handle));
 		}
 
-		public int CreateFromDDS(byte[] data, OnLoadedCallback loadedCallback)
+		public int CreateFromDDS(byte[] data)
 		{
 			var handle = TextureManager.Create();
 
-			Action loadAction = () =>
-			{
-				TextureManager.LoadDDS(handle, data);
-
-				if (loadedCallback != null)
-					loadedCallback(handle, true, "");
-			};
-
-			AddToWorkQueue(loadAction);
+			TextureManager.LoadDDS(handle, data);
 
 			return handle;
 		}
@@ -168,13 +160,20 @@ namespace Triton.Renderer
 			AddToWorkQueue(() => BufferManager.Destroy(handle));
 		}
 
-		public void SetBufferData<T>(int handle, T[] data, bool stream)
+		public void SetBufferData<T>(int handle, T[] data, bool stream, bool async)
 			where T : struct
 		{
-			AddToWorkQueue(() =>
+			if (async)
+			{
+				AddToWorkQueue(() =>
+				{
+					BufferManager.SetData(handle, data, stream);
+				});
+			}
+			else
 			{
 				BufferManager.SetData(handle, data, stream);
-			});
+			}
 		}
 
 		public void SetBufferDataDirect(int handle, IntPtr length, IntPtr data, bool stream)
@@ -183,24 +182,28 @@ namespace Triton.Renderer
 			BufferManager.SetDataDirect(handle, length, data, stream);
 		}
 
-		public int CreateMesh(int triangleCount, int vertexBuffer, int indexBuffer, OnLoadedCallback loadedCallback)
+		public int CreateMesh(int triangleCount, int vertexBuffer, int indexBuffer, bool async)
 		{
 			var handle = MeshManager.Create();
 
-			AddToWorkQueue(() =>
+			if (async)
+			{
+				AddToWorkQueue(() =>
+				{
+					MeshManager.Initialize(handle, triangleCount, vertexBuffer, indexBuffer);
+				});
+			}
+			else
 			{
 				MeshManager.Initialize(handle, triangleCount, vertexBuffer, indexBuffer);
-
-				if (loadedCallback != null)
-					loadedCallback(handle, true, "");
-			});
+			}
 
 			return handle;
 		}
 
 		public void DestroyMesh(int handle)
 		{
-			AddToWorkQueue(() => 
+			AddToWorkQueue(() =>
 			{
 				MeshManager.Destroy(handle);
 			});
@@ -262,7 +265,7 @@ namespace Triton.Renderer
 
 			GL.BindVertexArray(vertexArrayObjectId);
 			GL.DrawElementsInstanced(PrimitiveType.Triangles, triangleCount * 3, DrawElementsType.UnsignedInt, IntPtr.Zero, instanceCount);
-			
+
 			RenderSystem.CheckGLError();
 		}
 
@@ -278,12 +281,9 @@ namespace Triton.Renderer
 			Context.SwapBuffers();
 		}
 
-		public int CreateShader(Dictionary<ShaderType, string> sources, OnLoadedCallback loadedCallback)
+		public int CreateShader()
 		{
-			var handle = ShaderManager.Create();
-			SetShaderData(handle, sources, loadedCallback);
-
-			return handle;
+			return ShaderManager.Create();
 		}
 
 		public void DestroyShader(int handle)
@@ -291,16 +291,9 @@ namespace Triton.Renderer
 			AddToWorkQueue(() => ShaderManager.Destroy(handle));
 		}
 
-		public void SetShaderData(int handle, Dictionary<ShaderType, string> sources, OnLoadedCallback loadedCallback)
+		public bool SetShaderData(int handle, Dictionary<ShaderType, string> sources, out string errors)
 		{
-			AddToWorkQueue(() =>
-			{
-				string errors;
-				bool success = ShaderManager.SetShaderData(handle, sources, out errors);
-
-				if (loadedCallback != null)
-					loadedCallback(handle, success, errors);
-			});
+			return ShaderManager.SetShaderData(handle, sources, out errors);
 		}
 
 		public void BindShader(int handle)

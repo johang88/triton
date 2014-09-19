@@ -23,21 +23,21 @@ namespace Triton.Graphics.Resources
 			FileSystem = fileSystem;
 		}
 
+		public string Extension { get { return ".skeleton"; } }
+
 		public Common.Resource Create(string name, string parameters)
 		{
 			return new Skeleton(name, parameters);
 		}
 
-		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
+		public void Load(Common.Resource resource, byte[] data)
 		{
 			// Destroy any existing mesh handles
 			Unload(resource);
 
 			var skeleton = (Skeleton)resource;
 
-			var filename = resource.Name + ".skeleton";
-
-			using (var stream = FileSystem.OpenRead(filename))
+			using (var stream = new System.IO.MemoryStream(data))
 			using (var reader = new System.IO.BinaryReader(stream))
 			{
 				var magic = reader.ReadChars(4);
@@ -53,8 +53,6 @@ namespace Triton.Graphics.Resources
 
 				if (!validVersions.Contains(version))
 					throw new ArgumentException("invalid skeleton, unknown version");
-
-				resource.Parameters = parameters;
 
 				var boneCount = reader.ReadInt32();
 				skeleton.BindPose = new Transform[boneCount];
@@ -101,9 +99,6 @@ namespace Triton.Graphics.Resources
 					skeleton.Animations[i] = animation;
 				}
 			}
-
-			if (onLoaded != null)
-				onLoaded(skeleton);
 		}
 
 		public void Unload(Common.Resource resource)

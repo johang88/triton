@@ -27,12 +27,14 @@ namespace Triton.Physics.Resources
 			ResourceManager = resourceManager;
 		}
 
+		public string Extension { get { return ".col"; } }
+
 		public Common.Resource Create(string name, string parameters)
 		{
 			return new Mesh(name, parameters);
 		}
 
-		public void Load(Common.Resource resource, string parameters, Action<Common.Resource> onLoaded)
+		public void Load(Common.Resource resource, byte[] data)
 		{
 			Unload(resource);
 
@@ -40,9 +42,7 @@ namespace Triton.Physics.Resources
 
 			var filename = resource.Name + ".col";
 
-			var overrideMaterial = parameters;
-
-			using (var stream = FileSystem.OpenRead(filename))
+			using (var stream = new System.IO.MemoryStream(data))
 			using (var reader = new System.IO.BinaryReader(stream))
 			{
 				var magic = reader.ReadChars(4);
@@ -58,11 +58,6 @@ namespace Triton.Physics.Resources
 
 				if (!validVersions.Contains(version))
 					throw new ArgumentException("invalid mesh, unknown version");
-
-				var materialName = reader.ReadString();
-
-				if (!string.IsNullOrWhiteSpace(overrideMaterial))
-					materialName = overrideMaterial;
 
 				var isConvexHull = reader.ReadBoolean();
 				var vertexCount = reader.ReadInt32() / sizeof(float);
@@ -82,8 +77,6 @@ namespace Triton.Physics.Resources
 				}
 
 				mesh.Build(isConvexHull, vertices, indices);
-
-				resource.Parameters = parameters;
 			}
 		}
 
