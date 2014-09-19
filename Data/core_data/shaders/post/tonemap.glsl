@@ -25,7 +25,7 @@ uniform sampler2D samplerLensFlares;
 uniform sampler2D samplerLuminance;
 uniform float keyValue = 0.115;
 
-vec3 tonemap(vec3 x) {
+vec3 uncharted2tonemap(vec3 x) {
 	float A = 0.15;
 	float B = 0.50;
 	float C = 0.10;
@@ -34,6 +34,14 @@ vec3 tonemap(vec3 x) {
 	float F = 0.30;
 	
 	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
+}
+
+vec3 reinhard(vec3 x) {
+	return x / (x + 1);
+}
+
+vec3 tonemap(vec3 x) {
+	return uncharted2tonemap(x);
 }
 
 void main() {
