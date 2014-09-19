@@ -66,12 +66,16 @@ namespace Triton.Graphics.Deferred
 		public int PointLightShaderOffset = 0;
 		public int SpotLightShaderOffset = 0;
 
+		public int RenderedLights = 0;
+
 		public ShadowQuality ShadowQuality = ShadowQuality.High;
 
 		public FogSettings FogSettings = new FogSettings();
 
-        private readonly RenderOperations RenderOperations = new RenderOperations();
-        private readonly RenderOperations ShadowRenderOperations = new RenderOperations();
+		private readonly RenderOperations RenderOperations = new RenderOperations();
+		private readonly RenderOperations ShadowRenderOperations = new RenderOperations();
+
+		private BoundingSphere BoundingSphere = new BoundingSphere();
 
 		public DeferredRenderer(Common.ResourceManager resourceManager, Backend backend, int width, int height)
 		{
@@ -209,6 +213,8 @@ namespace Triton.Graphics.Deferred
 				HandlesInitialized = true;
 			}
 
+			RenderedLights = 0;
+
 			// Init common matrices
 			Matrix4 view, projection;
 			camera.GetViewMatrix(out view);
@@ -273,27 +279,28 @@ namespace Triton.Graphics.Deferred
 		private void RenderScene(Stage stage, Camera camera, ref Matrix4 view, ref Matrix4 projection)
 		{
 			var modelViewProjection = Matrix4.Identity;
+			var viewProjection = view * projection;
 
-            RenderOperations.Reset();
-            stage.PrepareRenderOperations(view, RenderOperations);
+			RenderOperations.Reset();
+			stage.PrepareRenderOperations(viewProjection, RenderOperations);
 
-            RenderOperation[] operations;
-            int count;
-            RenderOperations.GetOperations(out operations, out count);
+			RenderOperation[] operations;
+			int count;
+			RenderOperations.GetOperations(out operations, out count);
 
-            for (var i = 0; i < count; i++)
-            {
-                var world = operations[i].WorldMatrix;
+			for (var i = 0; i < count; i++)
+			{
+				var world = operations[i].WorldMatrix;
 
-                modelViewProjection = world * view * projection;
+				modelViewProjection = world * viewProjection;
 
-                var worldView = world * view;
+				var worldView = world * view;
 				var itWorld = Matrix4.Transpose(Matrix4.Invert(world));
 
-                operations[i].Material.BindMaterial(Backend, camera, ref world, ref worldView, ref itWorld, ref modelViewProjection, operations[i].Skeleton, 0);
-                Backend.DrawMesh(operations[i].MeshHandle);
-                Backend.EndInstance();
-            }
+				operations[i].Material.BindMaterial(Backend, camera, ref world, ref worldView, ref itWorld, ref modelViewProjection, operations[i].Skeleton, 0);
+				Backend.DrawMesh(operations[i].MeshHandle);
+				Backend.EndInstance();
+			}
 		}
 
 		private void RenderAmbientLight(Stage stage)
@@ -319,20 +326,33 @@ namespace Triton.Graphics.Deferred
 		private void RenderLights(Camera camera, ref Matrix4 view, ref Matrix4 projection, IReadOnlyCollection<Light> lights, Stage stage)
 		{
 			Matrix4 modelViewProjection = Matrix4.Identity;
+			var frustum = camera.GetFrustum();
 
 			foreach (var light in lights)
 			{
 				if (!light.Enabled)
 					continue;
 
-				RenderLight(camera, ref view, ref projection, stage, ref modelViewProjection, light);
+				RenderLight(camera, frustum, ref view, ref projection, stage, ref modelViewProjection, light);
 			}
 		}
 
-		private void RenderLight(Camera camera, ref Matrix4 view, ref Matrix4 projection, Stage stage, ref Matrix4 modelViewProjection, Light light)
+		private void RenderLight(Camera camera, BoundingFrustum cameraFrustum, ref Matrix4 view, ref Matrix4 projection, Stage stage, ref Matrix4 modelViewProjection, Light light)
 		{
 			// Pad the radius of the rendered sphere a little, it's quite low poly so there will be minor artifacts otherwise
 			var radius = light.Range * 1.1f;
+
+			// Culling
+			if (light.Type == LighType.PointLight)
+			{
+				BoundingSphere.Center = light.Position;
+				BoundingSphere.Radius = radius;
+
+				if (!cameraFrustum.Intersects(BoundingSphere))
+					return;
+			}
+
+			RenderedLights++;
 
 			var renderStateId = DirectionalRenderState;
 
@@ -585,27 +605,27 @@ namespace Triton.Graphics.Deferred
 
 			viewProjection = view * projection;
 
-            ShadowRenderOperations.Reset();
-            stage.PrepareRenderOperations(view, ShadowRenderOperations);
+			ShadowRenderOperations.Reset();
+			stage.PrepareRenderOperations(view, ShadowRenderOperations);
 
-            RenderOperation[] operations;
-            int count;
-            RenderOperations.GetOperations(out operations, out count);
+			RenderOperation[] operations;
+			int count;
+			RenderOperations.GetOperations(out operations, out count);
 
-            for (var i = 0; i < count; i++)
-            {
-                var world = operations[i].WorldMatrix;
+			for (var i = 0; i < count; i++)
+			{
+				var world = operations[i].WorldMatrix;
 
-                modelViewProjection = world * view * projection;
+				modelViewProjection = world * view * projection;
 
-                Backend.BeginInstance(RenderShadowsShader.Handle, new int[] { }, null, ShadowsRenderState);
-                Backend.BindShaderVariable(RenderShadowsParams.ModelViewProjection, ref modelViewProjection);
-                Backend.BindShaderVariable(RenderShadowsParams.ClipPlane, ref clipPlane);
+				Backend.BeginInstance(RenderShadowsShader.Handle, new int[] { }, null, ShadowsRenderState);
+				Backend.BindShaderVariable(RenderShadowsParams.ModelViewProjection, ref modelViewProjection);
+				Backend.BindShaderVariable(RenderShadowsParams.ClipPlane, ref clipPlane);
 
-                Backend.DrawMesh(operations[i].MeshHandle);
+				Backend.DrawMesh(operations[i].MeshHandle);
 
-                Backend.EndInstance();
-            }
+				Backend.EndInstance();
+			}
 
 			Backend.EndPass();
 		}
@@ -636,27 +656,27 @@ namespace Triton.Graphics.Deferred
 
 			viewProjection = projection;
 
-            ShadowRenderOperations.Reset();
-            stage.PrepareRenderOperations(light.Position, light.Range * 2, ShadowRenderOperations, true);
+			ShadowRenderOperations.Reset();
+			stage.PrepareRenderOperations(light.Position, light.Range * 2, ShadowRenderOperations, true);
 
-            RenderOperation[] operations;
-            int count;
-            ShadowRenderOperations.GetOperations(out operations, out count);
+			RenderOperation[] operations;
+			int count;
+			ShadowRenderOperations.GetOperations(out operations, out count);
 
-            for (var i = 0; i < count; i++)
-            {
-                var world = operations[i].WorldMatrix;
+			for (var i = 0; i < count; i++)
+			{
+				var world = operations[i].WorldMatrix;
 
-                Backend.BeginInstance(RenderShadowsCubeShader.Handle, new int[] { }, null, ShadowsRenderState);
-                Backend.BindShaderVariable(RenderShadowsCubeParams.Model, ref world);
-                Backend.BindShaderVariable(RenderShadowsCubeParams.ClipPlane, ref clipPlane);
-                Backend.BindShaderVariable(RenderShadowsCubeParams.ViewProjectionMatrices, ref viewProjectionMatrices);
-                Backend.BindShaderVariable(RenderShadowsCubeParams.LightPosition, ref light.Position);
+				Backend.BeginInstance(RenderShadowsCubeShader.Handle, new int[] { }, null, ShadowsRenderState);
+				Backend.BindShaderVariable(RenderShadowsCubeParams.Model, ref world);
+				Backend.BindShaderVariable(RenderShadowsCubeParams.ClipPlane, ref clipPlane);
+				Backend.BindShaderVariable(RenderShadowsCubeParams.ViewProjectionMatrices, ref viewProjectionMatrices);
+				Backend.BindShaderVariable(RenderShadowsCubeParams.LightPosition, ref light.Position);
 
-                Backend.DrawMesh(operations[i].MeshHandle);
+				Backend.DrawMesh(operations[i].MeshHandle);
 
-                Backend.EndInstance();
-            }
+				Backend.EndInstance();
+			}
 			Backend.EndPass();
 		}
 	}
