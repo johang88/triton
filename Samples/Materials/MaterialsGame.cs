@@ -101,7 +101,7 @@ namespace Triton.Samples
 
 			PostEffectManager.HDRSettings.AdaptationRate = 2;
 			PostEffectManager.HDRSettings.KeyValue = 0.1f;
-			DeferredRenderer.ShadowQuality = Graphics.Deferred.ShadowQuality.Lowest;
+			DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.Lowest;
 
 			DebugFlags |= Game.DebugFlags.RenderStats;
 		}

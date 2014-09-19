@@ -95,7 +95,7 @@ namespace Triton.Samples
 			DebugFlags |= Game.DebugFlags.RenderStats | Game.DebugFlags.GBuffer;
 
 			//HDRRenderer.AdaptationRate = 2;
-            DeferredRenderer.ShadowQuality = Graphics.Deferred.ShadowQuality.Lowest;
+			DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.Lowest;
 		}
 
 		protected override void Update(float frameTime)

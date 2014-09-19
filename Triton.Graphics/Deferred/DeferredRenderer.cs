@@ -60,17 +60,15 @@ namespace Triton.Graphics.Deferred
 
 		private int ShadowSampler;
 
-		public bool EnableShadows = true;
-
 		public int DirectionalShaderOffset = 0;
 		public int PointLightShaderOffset = 0;
 		public int SpotLightShaderOffset = 0;
 
 		public int RenderedLights = 0;
 
-		public ShadowQuality ShadowQuality = ShadowQuality.High;
-
 		public FogSettings FogSettings = new FogSettings();
+
+		public RenderSettings Settings;
 
 		private readonly RenderOperations RenderOperations = new RenderOperations();
 		private readonly RenderOperations ShadowRenderOperations = new RenderOperations();
@@ -83,6 +81,10 @@ namespace Triton.Graphics.Deferred
 				throw new ArgumentNullException("resourceManager");
 			if (backend == null)
 				throw new ArgumentNullException("backend");
+
+			Settings.ShadowQuality = ShadowQuality.High;
+			Settings.EnableShadows = true;
+			Settings.ShadowRenderDistance = 128.0f;
 
 			ResourceManager = resourceManager;
 			Backend = backend;
@@ -358,7 +360,15 @@ namespace Triton.Graphics.Deferred
 
 			var cameraDistanceToLight = light.Position - camera.Position;
 
-			var castShadows = light.CastShadows && EnableShadows;
+			var castShadows = light.CastShadows && Settings.EnableShadows;
+
+			if (light.Type == LighType.PointLight || light.Type == LighType.SpotLight)
+			{
+				if (Vector3.DistanceSquared(light.Position, camera.Position) > Settings.ShadowRenderDistance *Settings.ShadowRenderDistance)
+				{
+					castShadows = false;
+				}
+			}
 
 			if (light.Type == LighType.PointLight)
 			{
@@ -435,7 +445,7 @@ namespace Triton.Graphics.Deferred
 				lightTypeOffset = SpotLightShaderOffset;
 
 			if (castShadows)
-				lightTypeOffset += 1 + (int)ShadowQuality;
+				lightTypeOffset += 1 + (int)Settings.ShadowQuality;
 
 			var shader = LightShaders[lightTypeOffset];
 			var shaderParams = LightParams[lightTypeOffset];
@@ -678,6 +688,13 @@ namespace Triton.Graphics.Deferred
 				Backend.EndInstance();
 			}
 			Backend.EndPass();
+		}
+
+		public struct RenderSettings
+		{
+			public ShadowQuality ShadowQuality;
+			public bool EnableShadows;
+			public float ShadowRenderDistance;
 		}
 	}
 }

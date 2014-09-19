@@ -44,14 +44,14 @@ namespace Triton.Samples
 
 			if (InputManager.WasKeyPressed(Input.Key.C))
 			{
-				var shadowQuality = (int)DeferredRenderer.ShadowQuality;
+				var shadowQuality = (int)DeferredRenderer.Settings.ShadowQuality;
 				shadowQuality = (shadowQuality + 1) % ((int)Graphics.Deferred.ShadowQuality.High + 1);
-				DeferredRenderer.ShadowQuality = (Graphics.Deferred.ShadowQuality)shadowQuality;
+				DeferredRenderer.Settings.ShadowQuality = (Graphics.Deferred.ShadowQuality)shadowQuality;
 			}
 
 			if (InputManager.WasKeyPressed(Input.Key.V))
 			{
-				DeferredRenderer.EnableShadows = !DeferredRenderer.EnableShadows;
+				DeferredRenderer.Settings.EnableShadows = !DeferredRenderer.Settings.EnableShadows;
 			}
 
 			if (InputManager.WasKeyPressed(Input.Key.P))
@@ -83,8 +83,8 @@ namespace Triton.Samples
 			base.RenderUI(deltaTime);
 
 			var offsetY = 2;
-			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[c] Shadow Quality: {0}", DeferredRenderer.ShadowQuality);
-			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[v] Shadows: {0}", DeferredRenderer.EnableShadows ? "Enabled" : "Disabled");
+			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[c] Shadow Quality: {0}", DeferredRenderer.Settings.ShadowQuality);
+			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[v] Shadows: {0}", DeferredRenderer.Settings.EnableShadows ? "Enabled" : "Disabled");
 			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] Anti Aliasing: {0}", PostEffectManager.AntiAliasing);
 			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] Camera Position: {0}", Common.StringConverter.ToString(Camera.Position));
 		}
