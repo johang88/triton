@@ -12,5 +12,8 @@ namespace Triton.Graphics.Post
 		public float AdaptationRate;
 		public float BlurSigma;
 		public float BloomThreshold;
+
+		public bool EnableBloom;
+		public bool EnableLensFlares;
 	}
 }

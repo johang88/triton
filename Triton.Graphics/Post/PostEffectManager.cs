@@ -76,6 +76,8 @@ namespace Triton.Graphics.Post
 			HDRSettings.AdaptationRate = 0.5f;
 			HDRSettings.BlurSigma = 3.0f;
 			HDRSettings.BloomThreshold = 9.0f;
+			HDRSettings.EnableBloom = true;
+			HDRSettings.EnableLensFlares = true;
 
 			ScreenSpaceReflectionsSettings.Enable = false;
 		}
@@ -109,17 +111,25 @@ namespace Triton.Graphics.Post
 
 		private void ApplyLumianceBloomAndTonemap(float deltaTime)
 		{
+			RenderTarget bloom = null, lensFlares = null;
+
 			Backend.ProfileBeginSection(Profiler.LuminanceAdaptation);
 			var luminance = AdaptLuminance.Render(HDRSettings, TemporaryRenderTargets[0], deltaTime);
 			Backend.ProfileEndSection(Profiler.LuminanceAdaptation);
 
-			Backend.ProfileBeginSection(Profiler.Bloom);
-			var bloom = Bloom.Render(HDRSettings, TemporaryRenderTargets[0], luminance);
-			Backend.ProfileEndSection(Profiler.Bloom);
+			if (HDRSettings.EnableBloom)
+			{
+				Backend.ProfileBeginSection(Profiler.Bloom);
+				bloom = Bloom.Render(HDRSettings, TemporaryRenderTargets[0], luminance);
+				Backend.ProfileEndSection(Profiler.Bloom);
+			}
 
-			Backend.ProfileBeginSection(Profiler.LensFlares);
-			var lensFlares = LensFlares.Render(HDRSettings, TemporaryRenderTargets[0], luminance);
-			Backend.ProfileEndSection(Profiler.LensFlares);
+			if (HDRSettings.EnableLensFlares)
+			{
+				Backend.ProfileBeginSection(Profiler.LensFlares);
+				lensFlares = LensFlares.Render(HDRSettings, TemporaryRenderTargets[0], luminance);
+				Backend.ProfileEndSection(Profiler.LensFlares);
+			}
 
 			Backend.ProfileBeginSection(Profiler.Tonemap);
 			Tonemap.Render(HDRSettings, TemporaryRenderTargets[0], TemporaryRenderTargets[1], bloom, lensFlares, luminance);

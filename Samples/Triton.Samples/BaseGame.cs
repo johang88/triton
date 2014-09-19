@@ -54,6 +54,16 @@ namespace Triton.Samples
 				DeferredRenderer.Settings.EnableShadows = !DeferredRenderer.Settings.EnableShadows;
 			}
 
+			if (InputManager.WasKeyPressed(Input.Key.B))
+			{
+				PostEffectManager.HDRSettings.EnableBloom = !PostEffectManager.HDRSettings.EnableBloom;
+			}
+
+			if (InputManager.WasKeyPressed(Input.Key.L))
+			{
+				PostEffectManager.HDRSettings.EnableLensFlares = !PostEffectManager.HDRSettings.EnableLensFlares;
+			}
+
 			if (InputManager.WasKeyPressed(Input.Key.P))
 			{
 				if ((DebugFlags & Game.DebugFlags.Physics) == Game.DebugFlags.Physics)
@@ -86,6 +96,8 @@ namespace Triton.Samples
 			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[c] Shadow Quality: {0}", DeferredRenderer.Settings.ShadowQuality);
 			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[v] Shadows: {0}", DeferredRenderer.Settings.EnableShadows ? "Enabled" : "Disabled");
 			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] Anti Aliasing: {0}", PostEffectManager.AntiAliasing);
+			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[b] Bloom: {0}", PostEffectManager.HDRSettings.EnableBloom ? "Enabled" : "Disabled");
+			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[l] Lens Flares: {0}", PostEffectManager.HDRSettings.EnableLensFlares ? "Enabled" : "Disabled");
 			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] Camera Position: {0}", Common.StringConverter.ToString(Camera.Position));
 		}
 	}

@@ -268,7 +268,9 @@ namespace Triton.Graphics
 
 							for (var i = 0; i < numTextures; i++)
 							{
-								RenderSystem.BindTexture(reader.ReadInt32(), i);
+								var textureHandle = reader.ReadInt32();
+								if (textureHandle != 0)
+									RenderSystem.BindTexture(textureHandle, i);
 							}
 
 							var renderStateId = reader.ReadInt32();
@@ -405,8 +407,10 @@ namespace Triton.Graphics
 						}
 						break;
 					case OpCode.GenerateMips:
-						var textureHandle = reader.ReadInt32();
-						RenderSystem.GenreateMips(textureHandle);
+						{
+							var textureHandle = reader.ReadInt32();
+							RenderSystem.GenreateMips(textureHandle);
+						}
 						break;
 					case OpCode.ProfileBegin:
 						{

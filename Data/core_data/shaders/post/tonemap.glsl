@@ -25,6 +25,9 @@ uniform sampler2D samplerLensFlares;
 uniform sampler2D samplerLuminance;
 uniform float keyValue = 0.115;
 
+uniform bool enableBloom = true;
+uniform bool enableLensFlares = true;
+
 vec3 uncharted2tonemap(vec3 x) {
 	float A = 0.15;
 	float B = 0.50;
@@ -54,9 +57,16 @@ void main() {
 	vec3 whiteScale = vec3(1.0) / tonemap(vec3(11.2));
 	color = color * whiteScale;
 
-	vec3 bloom = texture2D(samplerBloom, texCoord).xyz;
-	vec3 lensFlares = texture2D(samplerLensFlares, texCoord).xyz;
+	if (enableBloom) {
+		vec3 bloom = texture2D(samplerBloom, texCoord).xyz;
+		color += bloom;
+	}
 	
-	oColor = vec4(color + bloom + lensFlares, 1);
+	if (enableLensFlares) {
+		vec3 lensFlares = texture2D(samplerLensFlares, texCoord).xyz;
+		color += lensFlares;
+	}
+	
+	oColor = vec4(color, 1);
 }
 #endif
