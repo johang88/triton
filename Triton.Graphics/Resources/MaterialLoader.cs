@@ -31,14 +31,14 @@ namespace Triton.Graphics.Resources
 
 		public Common.Resource Create(string name, string parameters)
 		{
-			return new Materials.StandardMaterial(name, parameters, ResourceManager, false);
+			return new Material(name, parameters, ResourceManager, false);
 		}
 
 		public void Load(Common.Resource resource, byte[] data)
 		{
 			Unload(resource);
 
-			var material = (Materials.StandardMaterial)resource;
+			var material = (Material)resource;
 
 			using (var stream = new System.IO.MemoryStream(data))
 			using (var reader = new System.IO.BinaryReader(stream))

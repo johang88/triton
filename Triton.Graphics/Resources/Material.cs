@@ -10,22 +10,57 @@ namespace Triton.Graphics.Resources
 	{
 		private bool Initialized = false;
 
+		public readonly Dictionary<string, Texture> Textures = new Dictionary<string, Texture>();
+
+		public ShaderProgram Shader;
+		private ShaderHandles Handles;
+		private Common.ResourceManager ResourceManager;
+		public bool IsSkinned;
+
+		private int[] TextureHandles;
+		private int[] SamplerToTexture;
+		private int[] Samplers;
+
 		// Not an awesome solution
 		private static int LastId = 0;
 		public readonly int Id = LastId++;
 
-		public Material(string name, string parameters)
+		public Material(string name, string parameters, Common.ResourceManager resourceManager, bool isSkinned)
 			: base(name, parameters)
 		{
+			IsSkinned = isSkinned;
+			ResourceManager = resourceManager;
 		}
 
-		public virtual void Initialize(Backend backend)
+		public void Initialize(Backend backend)
 		{
 			Initialized = true;
+
+			Handles = new ShaderHandles();
+			Shader.GetUniformLocations(Handles);
+
+			TextureHandles = new int[Textures.Count];
+			SamplerToTexture = new int[Textures.Count];
+			Samplers = new int[Textures.Count];
+
+			var i = 0;
+			foreach (var samplerInfo in Textures)
+			{
+				TextureHandles[i] = samplerInfo.Value.Handle;
+				Samplers[i] = backend.DefaultSampler;
+				SamplerToTexture[i] = Shader.GetUniform(samplerInfo.Key);
+				i++;
+			}
 		}
 
 		public virtual void Unload()
 		{
+			foreach (var samplerInfo in Textures)
+			{
+				ResourceManager.Unload(samplerInfo.Value);
+			}
+
+			Textures.Clear();
 		}
 
 		/// <summary>
@@ -37,12 +72,44 @@ namespace Triton.Graphics.Resources
 		/// <param name="worldView"></param>
 		/// <param name="itWorldView"></param>
 		/// <param name="modelViewProjection"></param>
-		public virtual void BindMaterial(Backend backend, Camera camera, ref Matrix4 world, ref Matrix4 worldView, ref Matrix4 itWorld, ref Matrix4 modelViewProjection, SkeletalAnimation.SkeletonInstance skeleton, int renderStateId)
+		public void BindMaterial(Backend backend, Camera camera, ref Matrix4 world, ref Matrix4 worldView, ref Matrix4 itWorld, ref Matrix4 modelViewProjection, SkeletalAnimation.SkeletonInstance skeleton, int renderStateId)
 		{
 			if (!Initialized)
 			{
 				Initialize(backend);
 			}
+
+			backend.BeginInstance(Shader.Handle, TextureHandles, samplers: Samplers, renderStateId: renderStateId);
+
+			backend.BindShaderVariable(Handles.ModelViewProjection, ref modelViewProjection);
+			backend.BindShaderVariable(Handles.World, ref world);
+			backend.BindShaderVariable(Handles.WorldView, ref worldView);
+			backend.BindShaderVariable(Handles.ItWorld, ref itWorld);
+
+			for (var i = 0; i < SamplerToTexture.Length; i++)
+			{
+				backend.BindShaderVariable(SamplerToTexture[i], i);
+			}
+
+			backend.BindShaderVariable(Handles.Time, backend.ElapsedTime);
+			backend.BindShaderVariable(Handles.CameraPosition, ref camera.Position);
+
+			if (skeleton != null)
+			{
+				backend.BindShaderVariable(Handles.Bones, ref skeleton.FinalBoneTransforms);
+			}
+		}
+
+		class ShaderHandles
+		{
+			public int ModelViewProjection = 0;
+			public int World = 0;
+			public int WorldView = 0;
+			public int ItWorldView = 0;
+			public int Bones = 0;
+			public int CameraPosition = 0;
+			public int ItWorld = 0;
+			public int Time = 0;
 		}
 	}
 }

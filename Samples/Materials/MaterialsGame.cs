@@ -96,10 +96,26 @@ namespace Triton.Samples
 				GameWorld.Add(sphere);
 			}
 
-			//Stage.AddMesh("/models/skybox");
-			//Stage.SetSkyBox("/models/skybox");
+			for (var i = 0; i < 200; i++ )
+			{
+				var x = (float)(-6.0 + RNG.NextDouble() * 15.0);
+				var z = (float)(-8.0 + RNG.NextDouble() * 20.0);
 
-			PostEffectManager.HDRSettings.AdaptationRate = 2;
+				var sphere = GameWorld.CreateGameObject();
+				sphere.Position = new Vector3(x, 0.5f, z);
+				sphere.AddComponent(new PointLight { 
+					Color = new Vector3(0.1f + (float)RNG.NextDouble() * 0.9f, 0.1f + (float)RNG.NextDouble() * 0.9f, 0.1f + (float)RNG.NextDouble() * 0.9f), 
+					Intensity = 0.3f + (float)RNG.NextDouble() * 0.6f,
+					Range = 0.7f + (float)RNG.NextDouble() * 0.9f,
+					CastShadows = false
+				});
+				GameWorld.Add(sphere);
+			}
+
+				//Stage.AddMesh("/models/skybox");
+				//Stage.SetSkyBox("/models/skybox");
+
+				PostEffectManager.HDRSettings.AdaptationRate = 2;
 			PostEffectManager.HDRSettings.KeyValue = 0.1f;
 			DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.Lowest;
 
