@@ -315,11 +315,33 @@ namespace Triton.Graphics
 							RenderSystem.SetUniformInt(uniformHandle, v);
 						}
 						break;
+					case OpCode.BindShaderVariableIntArray:
+						{
+							var uniformHandle = reader.ReadInt32();
+
+							var count = reader.ReadInt32();
+							var v = new int[count];
+							for (var i = 0; i < count; i++)
+								v[i] = reader.ReadInt32();
+							RenderSystem.SetUniformInt(uniformHandle, v.Length, ref v[0]);
+						}
+						break;
 					case OpCode.BindShaderVariableFloat:
 						{
 							var uniformHandle = reader.ReadInt32();
 							var v = reader.ReadSingle();
 							RenderSystem.SetUniformFloat(uniformHandle, v);
+						}
+						break;
+					case OpCode.BindShaderVariableFloatArray:
+						{
+							var uniformHandle = reader.ReadInt32();
+
+							var count = reader.ReadInt32();
+							var v = new float[count];
+							for (var i = 0; i < count; i++)
+								v[i] = reader.ReadSingle();
+							RenderSystem.SetUniformFloat(uniformHandle, v.Length, ref v[0]);
 						}
 						break;
 					case OpCode.BindShaderVariableVector4:
@@ -582,6 +604,26 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write(ref value);
 		}
 
+		public void BindShaderVariable(int uniformHandle, ref int[] value)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableIntArray);
+			PrimaryBuffer.Writer.Write(uniformHandle);
+
+			PrimaryBuffer.Writer.Write(value.Length);
+			for (var i = 0; i < value.Length; i++)
+				PrimaryBuffer.Writer.Write(value[i]);
+		}
+
+		public void BindShaderVariable(int uniformHandle, ref float[] value)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableFloatArray);
+			PrimaryBuffer.Writer.Write(uniformHandle);
+
+			PrimaryBuffer.Writer.Write(value.Length);
+			for (var i = 0; i < value.Length; i++)
+				PrimaryBuffer.Writer.Write(value[i]);
+		}
+
 		public void BindShaderVariable(int uniformHandle, ref Vector3[] value)
 		{
 			PrimaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableVector3Array);
@@ -821,7 +863,9 @@ namespace Triton.Graphics
 			BindShaderVariableMatrix4,
 			BindShaderVariableMatrix4Array,
 			BindShaderVariableInt,
+			BindShaderVariableIntArray,
 			BindShaderVariableFloat,
+			BindShaderVariableFloatArray,
 			BindShaderVariableVector2,
 			BindShaderVariableVector3,
 			BindShaderVariableVector3Array,

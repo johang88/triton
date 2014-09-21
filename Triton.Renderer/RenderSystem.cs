@@ -353,6 +353,16 @@ namespace Triton.Renderer
 			GL.Uniform4(handle, count, ref value);
 		}
 
+		public void SetUniformInt(int handle, int count, ref int value)
+		{
+			GL.Uniform1(handle, count, ref value);
+		}
+
+		public void SetUniformFloat(int handle, int count, ref float value)
+		{
+			GL.Uniform1(handle, count, ref value);
+		}
+
 		public void Clear(Triton.Vector4 clearColor, bool depth)
 		{
 			GL.ClearColor(clearColor.X, clearColor.Y, clearColor.Z, clearColor.W);
