@@ -56,6 +56,11 @@ namespace Triton.Graphics.Resources
 			return new ShaderProgram(name, parameters, Backend);
 		}
 
+		private string InsertHeader(string type, string defines, string source)
+		{
+			return string.Format("#version 410 core\n#define {0}\n{1}\n", type, defines) + source;
+		}
+
 		public void Load(Common.Resource resource, byte[] data)
 		{
 			var shader = (ShaderProgram)resource;
@@ -88,22 +93,37 @@ namespace Triton.Graphics.Resources
 
 			var sources = new Dictionary<Renderer.ShaderType, string>();
 
-			var vertexShaderSource = "#version 410 core\n#define VERTEX_SHADER\n" + defines + "\n" + shaderSource;
-			var fragmentShaderSource = "#version 410 core\n#define FRAGMENT_SHADER\n" + defines + "\n" + shaderSource;
-
-			sources.Add(Renderer.ShaderType.VertexShader, vertexShaderSource);
-			sources.Add(Renderer.ShaderType.FragmentShader, fragmentShaderSource);
-
-			var geometryShaderSource = "";
-			if (shaderSource.Contains("GEOMETRY_SHADER"))
+			if (shaderSource.Contains("VERTEX_SHADER"))
 			{
-				geometryShaderSource = "#version 410 core\n#define GEOMETRY_SHADER\n" + defines + "\n" + shaderSource;
-				sources.Add(Renderer.ShaderType.GeometryShader, geometryShaderSource);
+				sources.Add(Renderer.ShaderType.VertexShader, InsertHeader("VERTEX_SHADER", defines, shaderSource));
+				sources.Add(Renderer.ShaderType.FragmentShader, InsertHeader("FRAGMENT_SHADER", defines, shaderSource));
 			}
 
-			OutputShader(resource.Name, "vert", parameters, vertexShaderSource);
-			OutputShader(resource.Name, "frag", parameters, fragmentShaderSource);
-			OutputShader(resource.Name, "geo", parameters, geometryShaderSource);
+			if (shaderSource.Contains("GEOMETRY_SHADER"))
+			{
+				sources.Add(Renderer.ShaderType.GeometryShader, InsertHeader("GEOMETRY_SHADER", defines, shaderSource));
+			}
+
+			if (shaderSource.Contains("TESSELATION_CONTROL"))
+			{
+				sources.Add(Renderer.ShaderType.TessControlShader, InsertHeader("TESSELATION_CONTROL", defines, shaderSource));
+			}
+
+			if (shaderSource.Contains("TESSELATION_EVALUATION"))
+			{
+				sources.Add(Renderer.ShaderType.TessEvaluationShader, InsertHeader("TESSELATION_EVALUATION", defines, shaderSource));
+			}
+
+			if (shaderSource.Contains("COMPUTE"))
+			{
+				sources.Add(Renderer.ShaderType.ComputeShader, InsertHeader("COMPUTE", defines, shaderSource));
+			}
+
+			foreach (var source in sources)
+			{
+				var type = source.Key.ToString().Substring(0, 4).ToLowerInvariant();
+				OutputShader(resource.Name, type, parameters, source.Value);
+			}
 
 			resource.Parameters = parameters;
 
