@@ -42,8 +42,6 @@ namespace Triton.Graphics
 	/// </summary>
 	public class Backend : IDisposable
 	{
-		public INativeWindow Window { get; private set; }
-
 		internal Triton.Renderer.RenderSystem RenderSystem { get; private set; }
 
 		private CommandBuffer PrimaryBuffer = new CommandBuffer();
@@ -62,11 +60,6 @@ namespace Triton.Graphics
 		public bool Disposed { get; private set; }
 		private System.Diagnostics.Stopwatch Watch;
 
-		public System.Drawing.Rectangle WindowBounds { get { return Window.Bounds; } }
-
-		public bool HasFocus { get { return Window.Focused; } }
-		public bool CursorVisible { get; set; }
-
 		public float FrameTime { get; private set; }
 		public float ElapsedTime { get; private set; }
 
@@ -77,31 +70,18 @@ namespace Triton.Graphics
 		public int Width { get; private set; }
 		public int Height { get; private set; }
 
-		public int WindowWidth { get { return Window.Width; } }
-		public int WindowHeight { get { return Window.Height; } }
-
-		public Backend(ResourceManager resourceManager, int width, int height, float resolutionScale, string title, bool fullscreen)
+		public Backend(ResourceManager resourceManager, int width, int height, OpenTK.Platform.IWindowInfo windowInfo)
 		{
 			if (resourceManager == null)
 				throw new ArgumentNullException("resourceManager");
 
+			Width = width;
+			Height = height;
+
 			ResourceManager = resourceManager;
 
-			var graphicsMode = new GraphicsMode(new ColorFormat(32), 24, 0, 0);
-
-			// Create the main rendering window
-			Window = new NativeWindow(width, height, title, fullscreen ? GameWindowFlags.Fullscreen : GameWindowFlags.Default, graphicsMode, DisplayDevice.Default);
-
-			Width = (int)(WindowWidth * resolutionScale);
-			Height = (int)(WindowHeight * resolutionScale);
-
-			Window.Visible = true;
-			Window.Closing += Window_Closing;
-
-			Log.WriteLine("Window created @ {0}x{1} {2}", Window.Width, Window.Height, fullscreen ? "fullscreen" : "windowed");
-
 			// Setup the render system
-			RenderSystem = new Renderer.RenderSystem(Window.WindowInfo, ProcessQueue.Enqueue);
+			RenderSystem = new Renderer.RenderSystem(windowInfo, ProcessQueue.Enqueue);
 			Watch = new System.Diagnostics.Stopwatch();
 
 			DefaultSampler = RenderSystem.CreateSampler(new Dictionary<SamplerParameterName, int>
@@ -145,8 +125,6 @@ namespace Triton.Graphics
 				return;
 
 			RenderSystem.Dispose();
-			Window.Dispose();
-
 			Disposed = true;
 		}
 
@@ -166,16 +144,7 @@ namespace Triton.Graphics
 		{
 			Watch.Start();
 
-			Window.CursorVisible = CursorVisible;
-
-			// The renderer can be disposed manually so we check here first, just in case
-			if (!Window.Exists || IsExiting)
-				return false;
-
-			Window.ProcessEvents();
-
-			// Check again in case the window got closed in the processing
-			if (!Window.Exists || IsExiting)
+			if (IsExiting || Disposed)
 				return false;
 
 			// We process any resources first so that they are always ready before rendering the next frame
@@ -566,8 +535,8 @@ namespace Triton.Graphics
 			if (renderTarget == null)
 			{
 				PrimaryBuffer.Writer.Write(0);
-				PrimaryBuffer.Writer.Write(Window.Width);
-				PrimaryBuffer.Writer.Write(Window.Height);
+				PrimaryBuffer.Writer.Write(Width);
+				PrimaryBuffer.Writer.Write(Height);
 			}
 			else
 			{
@@ -588,8 +557,8 @@ namespace Triton.Graphics
 			if (renderTarget == null)
 			{
 				PrimaryBuffer.Writer.Write(0);
-				PrimaryBuffer.Writer.Write(Window.Width);
-				PrimaryBuffer.Writer.Write(Window.Height);
+				PrimaryBuffer.Writer.Write(Width);
+				PrimaryBuffer.Writer.Write(Height);
 			}
 			else
 			{
@@ -612,8 +581,8 @@ namespace Triton.Graphics
 			if (renderTarget == null)
 			{
 				PrimaryBuffer.Writer.Write(0);
-				PrimaryBuffer.Writer.Write(Window.Width);
-				PrimaryBuffer.Writer.Write(Window.Height);
+				PrimaryBuffer.Writer.Write(Width);
+				PrimaryBuffer.Writer.Write(Height);
 			}
 			else
 			{

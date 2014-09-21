@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Triton.Common;
 using System.Threading;
+using OpenTK.Graphics;
+using OpenTK;
 
 namespace Triton.Game
 {
@@ -52,6 +54,8 @@ namespace Triton.Game
 		private float FrameTime = 0.0f;
 		protected float ElapsedTime = 0.0f;
 
+		private OpenTK.INativeWindow Window;
+
 		private readonly string Name;
 
 		public Game(string name, string logPath = "logs/")
@@ -74,6 +78,7 @@ namespace Triton.Game
 			AudioSystem.Dispose();
 			CoreResources.Dispose();
 			GameResources.Dispose();
+			Window.Dispose();
 		}
 
 		public void Run()
@@ -89,7 +94,11 @@ namespace Triton.Game
 
 		private void RenderLoop()
 		{
-			using (GraphicsBackend = new Triton.Graphics.Backend(CoreResources, RequestedWidth, RequestedHeight, ResolutionScale, Name, false))
+			var graphicsMode = new GraphicsMode(new ColorFormat(32), 24, 0, 0);
+			Window = new NativeWindow(RequestedWidth, RequestedHeight, Name, GameWindowFlags.Default, graphicsMode, DisplayDevice.Default);
+			Window.Visible = true;
+
+			using (GraphicsBackend = new Triton.Graphics.Backend(CoreResources, Window.Width, Window.Height, Window.WindowInfo))
 			{
 				Triton.Graphics.Resources.ResourceLoaders.Init(CoreResources, GraphicsBackend, FileSystem);
 				Triton.Graphics.Resources.ResourceLoaders.Init(GameResources, GraphicsBackend, FileSystem);
@@ -98,6 +107,11 @@ namespace Triton.Game
 
 				while (Running)
 				{
+					Window.ProcessEvents();
+
+					if (!Window.Exists)
+						break;
+
 					CoreResources.TickResourceLoading(100);
 					GameResources.TickResourceLoading(10);
 					
@@ -127,7 +141,7 @@ namespace Triton.Game
 			Stage = new Graphics.Stage(GameResources);
 			Camera = new Graphics.Camera(new Vector2(GraphicsBackend.Width, GraphicsBackend.Height));
 
-			InputManager = new Input.InputManager(GraphicsBackend.WindowBounds);
+			InputManager = new Input.InputManager(Window.Bounds);
 
 			GameWorld = new World.GameWorld(Stage, InputManager, GameResources, PhysicsWorld, Camera);
 
@@ -156,7 +170,7 @@ namespace Triton.Game
 
 				ElapsedTime += FrameTime;
 
-				if (GraphicsBackend.HasFocus)
+				if (Window.Focused)
 				{
 					InputManager.Update();
 				}
@@ -193,8 +207,8 @@ namespace Triton.Game
 
 			GraphicsBackend.BeginPass(null, Vector4.Zero, false);
 
-			SpriteRenderer.RenderQuad(postProcessedResult.Textures[0], Vector2.Zero, new Vector2(GraphicsBackend.WindowWidth, GraphicsBackend.WindowHeight));
-			SpriteRenderer.Render(GraphicsBackend.WindowWidth, GraphicsBackend.WindowHeight);
+			SpriteRenderer.RenderQuad(postProcessedResult.Textures[0], Vector2.Zero, new Vector2(Window.Width, Window.Height));
+			SpriteRenderer.Render(Window.Width, Window.Height);
 
 			RenderUI(deltaTime);
 
@@ -214,7 +228,7 @@ namespace Triton.Game
 					SpriteRenderer.RenderQuad(textures[i], new Vector2(257 * i + 1, 1 + (257 * debugYOffset)), new Vector2(256, 256), Vector2.Zero, Vector2.One, Vector4.One, false, i == 0);
 				}
 
-				SpriteRenderer.Render(GraphicsBackend.WindowWidth, GraphicsBackend.WindowHeight);
+				SpriteRenderer.Render(Window.Width, Window.Height);
 				debugYOffset++;
 			}
 
@@ -226,7 +240,7 @@ namespace Triton.Game
 					SpriteRenderer.RenderQuad(textures[i], new Vector2(257 * i + 1, 1 + (257 * debugYOffset)), new Vector2(256, 256), Vector2.Zero, Vector2.One, Vector4.One, false, false);
 				}
 
-				SpriteRenderer.Render(GraphicsBackend.WindowWidth, GraphicsBackend.WindowHeight);
+				SpriteRenderer.Render(Window.Width, Window.Height);
 			}
 
 			if ((DebugFlags & Triton.Game.DebugFlags.RenderStats) == Triton.Game.DebugFlags.RenderStats)
@@ -265,7 +279,7 @@ namespace Triton.Game
 					DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\t{0} {1}ms", name, diff);
 				}
 
-				SpriteRenderer.Render(GraphicsBackend.WindowWidth, GraphicsBackend.WindowHeight);
+				SpriteRenderer.Render(Window.Width, Window.Height);
 			}
 
 			GraphicsBackend.EndScene();
