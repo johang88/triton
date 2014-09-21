@@ -10,9 +10,9 @@ This might become a game engine sometime in the future, but right now a lot of c
 * FXAA, SMAA (currently not working
 * Screen space reflections (WIP)
 * Shadow Maps
-** Point / Spot lights
-** CSM for directional lights
-** Poisson tap PCF
+    * Point / Spot lights
+    * CSM for directional lights
+    * Poisson tap PCF
 * HDR
 * Filmic tonemapping
 * Bloom + Lens flares
