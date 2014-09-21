@@ -19,7 +19,7 @@ namespace Triton.Common
 			FileSystem = fileSystem;
 		}
 
-		public ResourceManager Add(string name)
+		public ResourceManager Add(string name, int maxResourcesPerFrame = 10)
 		{
 			if (Groups.Exists(r => r.Name == name))
 				throw new ArgumentException(string.Format("resource group '{0}' already exists", name));
@@ -27,7 +27,8 @@ namespace Triton.Common
 			var group = new ResourceGroup
 			{
 				Name = name,
-				ResourceManager = new ResourceManager(FileSystem)
+				ResourceManager = new ResourceManager(FileSystem),
+				MaxResourcesPerFrame = maxResourcesPerFrame
 			};
 
 			Groups.Add(group);
@@ -46,10 +47,19 @@ namespace Triton.Common
 			throw new KeyNotFoundException(name);
 		}
 
+		public void TickResourceLoading()
+		{
+			foreach (var group in Groups)
+			{
+				group.ResourceManager.TickResourceLoading(group.MaxResourcesPerFrame);
+			}
+		}
+
 		class ResourceGroup
 		{
 			public string Name;
 			public ResourceManager ResourceManager;
+			public int MaxResourcesPerFrame;
 		}
 	}
 }
