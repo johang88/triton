@@ -55,7 +55,7 @@ namespace Triton.Graphics
 			Lights.Clear();
 		}
 
-		public void PrepareRenderOperations(Matrix4 viewMatrix, RenderOperations operations)
+		public void PrepareRenderOperations(Matrix4 viewMatrix, RenderOperations operations, bool shadowCastersOnly = false)
 		{
 			Frustum.Matrix = viewMatrix;
 			var sphere = new BoundingSphere();
@@ -64,6 +64,9 @@ namespace Triton.Graphics
 			{
 				var meshInstance = Meshes[i];
 				var subMeshes = meshInstance.Mesh.SubMeshes;
+
+				if (!meshInstance.CastShadows && shadowCastersOnly)
+					continue;
 
 				sphere.Center = Vector3.Transform(Vector3.Zero, meshInstance.World);
 

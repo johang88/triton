@@ -175,7 +175,7 @@ float get_shadows(sampler2DShadow shadowMap, float nDotL, vec3 worldPos, mat4x4 
 	float bias = shadowBias * tan(acos(nDotL));
 	bias = clamp(bias, 0.0, shadowBias * 2.0);
 	
-	return check_shadow(shadowMap, worldPos, shadowViewProj, clipPlane, bias, texelSize);
+	return check_shadow(shadowMap, worldPos, shadowViewProj, clipPlane, 0, texelSize);
 }
 
 float get_shadows_cube(samplerCubeShadow shadowMap, float nDotL, vec3 worldPos, vec2 clipPlane, float shadowBias, float texelSize, vec3 lightPosition) {
