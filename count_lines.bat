@@ -1,0 +1,1 @@
+cloc --exclude-dir=ThirdParty --match-f=.*\.cs ./
