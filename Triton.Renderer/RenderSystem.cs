@@ -55,7 +55,7 @@ namespace Triton.Renderer
 			WindowInfo = windowInfo;
 			var graphicsMode = new GraphicsMode(32, 24, 0, 0);
 
-			Context = new GraphicsContext(graphicsMode, WindowInfo, 3, 0, GraphicsContextFlags.ForwardCompatible);
+			Context = new GraphicsContext(graphicsMode, WindowInfo, 4, 3, GraphicsContextFlags.ForwardCompatible);
 			Context.MakeCurrent(WindowInfo);
 			Context.LoadAll();
 
