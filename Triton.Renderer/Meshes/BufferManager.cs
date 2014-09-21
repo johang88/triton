@@ -118,12 +118,9 @@ namespace Triton.Renderer.Meshes
 				return;
 
 			if (data == IntPtr.Zero || data == null)
-				return;	
+				return;
 
-			GL.BindBuffer(Handles[index].Target, Handles[index].BufferID);
-			GL.BufferData(Handles[index].Target, dataLength, data, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
-
-			GL.BindBuffer(Handles[index].Target, 0);
+			GL.Ext.NamedBufferData(Handles[index].BufferID, dataLength, data, (ExtDirectStateAccess)(stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw));
 		}
 
 		public void SetData<T>(int handle, T[] data, bool stream)
@@ -143,12 +140,10 @@ namespace Triton.Renderer.Meshes
 				GL.GenBuffers(1, out Handles[index].BufferID);
 			}
 
-			GL.BindBuffer(Handles[index].Target, Handles[index].BufferID);
-			GL.BufferData(Handles[index].Target, new IntPtr(data.Length * Marshal.SizeOf(typeof(T))), data, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
+			var dataLength = new IntPtr(data.Length * Marshal.SizeOf(typeof(T)));
+			GL.Ext.NamedBufferData(Handles[index].BufferID, dataLength, data, (ExtDirectStateAccess)(stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw));
 
 			Handles[index].Initialized = true;
-
-			GL.BindBuffer(Handles[index].Target, 0);
 		}
 
 		public void GetOpenGLHandle(int handle, out int glHandle, out OGL.BufferTarget target)

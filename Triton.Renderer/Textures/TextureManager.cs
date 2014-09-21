@@ -130,7 +130,7 @@ namespace Triton.Renderer.Textures
 			if (!Handles[index].Initialized)
 				GL.GenTextures(1, out Handles[index].OpenGLHandle);
 
-			Handles[index].Target = target;
+			Handles[index].Target = (OGL.TextureTarget)target;
 
 			// Upload texture data to OpenGL
 			GL.BindTexture((OGL.TextureTarget)(int)Handles[index].Target, Handles[index].OpenGLHandle);
@@ -172,7 +172,7 @@ namespace Triton.Renderer.Textures
 			int width, height;
 			DDS.LoaderDDS.LoadFromStream(data, out Handles[index].OpenGLHandle, out target, out width, out height);
 
-			Handles[index].Target = (TextureTarget)(int)target;
+			Handles[index].Target = target;
 
 			GL.Finish();
 
@@ -186,11 +186,10 @@ namespace Triton.Renderer.Textures
 
 			ActiveTextures[textureUnit] = handle;
 
-			TextureTarget target;
+			OGL.TextureTarget target;
 			var openGLHandle = GetOpenGLHande(handle, out target);
 
-			GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
-			GL.BindTexture((OpenTK.Graphics.OpenGL.TextureTarget)(int)target, openGLHandle);
+			GL.Ext.BindMultiTexture(TextureUnit.Texture0 + textureUnit, target, openGLHandle);
 		}
 
 		public int GetOpenGLHande(int handle)
@@ -204,12 +203,12 @@ namespace Triton.Renderer.Textures
 			return Handles[index].OpenGLHandle;
 		}
 
-		public int GetOpenGLHande(int handle, out TextureTarget target)
+		public int GetOpenGLHande(int handle, out OGL.TextureTarget target)
 		{
 			int index, id;
 			ExtractHandle(handle, out index, out id);
 
-			target = TextureTarget.Texture2D;
+			target = OGL.TextureTarget.Texture2D;
 
 			if (id == -1 || Handles[index].Id != id || !Handles[index].Initialized)
 				return DefaultOpenGLHandle;
@@ -223,7 +222,7 @@ namespace Triton.Renderer.Textures
 			public int OpenGLHandle;
 			public short Id;
 			public bool Initialized;
-			public TextureTarget Target;
+			public OGL.TextureTarget Target;
 		}
 	}
 }

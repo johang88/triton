@@ -153,11 +153,10 @@ namespace Triton.Renderer
 
 		public void GenreateMips(int handle)
 		{
-			TextureTarget target;
+			OGL.TextureTarget target;
 			var openGLHandle = TextureManager.GetOpenGLHande(handle, out target);
 
-			GL.BindTexture((OpenTK.Graphics.OpenGL.TextureTarget)(int)target, openGLHandle);
-			GL.GenerateMipmap((GenerateMipmapTarget)(int)target);
+			GL.Ext.GenerateTextureMipmap(openGLHandle, target);
 		}
 
 		public int CreateBuffer(BufferTarget target, VertexFormat vertexFormat = null)
@@ -188,7 +187,6 @@ namespace Triton.Renderer
 
 		public void SetBufferDataDirect(int handle, IntPtr length, IntPtr data, bool stream)
 		{
-			GL.BindVertexArray(0);
 			BufferManager.SetDataDirect(handle, length, data, stream);
 		}
 
@@ -224,7 +222,6 @@ namespace Triton.Renderer
 			int vertexBufferId, indexBufferId;
 			MeshManager.GetMeshData(handle, out vertexBufferId, out indexBufferId);
 
-			GL.BindVertexArray(0);
 			BufferManager.SetDataDirect(vertexBufferId, vertexDataLength, vertexData, stream);
 			BufferManager.SetDataDirect(indexBufferId, indexDataLength, indexData, stream);
 
