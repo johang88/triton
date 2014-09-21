@@ -29,7 +29,7 @@ namespace Triton.Graphics.Deferred
 		private readonly RenderTarget Output;
 		private readonly RenderTarget SpotShadowsRenderTarget;
 		private readonly RenderTarget PointShadowsRenderTarget;
-		public readonly RenderTarget DirectionalShadowsRenderTarget;
+		public readonly RenderTarget[] DirectionalShadowsRenderTarget;
 
 		private BatchBuffer QuadMesh;
 		private Resources.Mesh UnitSphere;
@@ -125,10 +125,22 @@ namespace Triton.Graphics.Deferred
 				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent16, Renderer.PixelType.Float, 0),
 			}, true));
 
-			DirectionalShadowsRenderTarget = Backend.CreateRenderTarget("directional_shadows", new Definition(2048, 2048, true, new List<Definition.Attachment>()
+			int cascadeResolution = 2048;
+			DirectionalShadowsRenderTarget = new RenderTarget[]
 			{
-				new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent16, Renderer.PixelType.Float, 0),
-			}));
+				Backend.CreateRenderTarget("directional_shadows_csm0", new Definition(cascadeResolution, cascadeResolution, true, new List<Definition.Attachment>()
+				{
+					new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent16, Renderer.PixelType.Float, 0),
+				})),
+				Backend.CreateRenderTarget("directional_shadows_csm1", new Definition(cascadeResolution, cascadeResolution, true, new List<Definition.Attachment>()
+				{
+					new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent16, Renderer.PixelType.Float, 0),
+				})),
+				Backend.CreateRenderTarget("directional_shadows_csm2", new Definition(cascadeResolution, cascadeResolution, true, new List<Definition.Attachment>()
+				{
+					new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent16, Renderer.PixelType.Float, 0),
+				}))
+			};
 
 			AmbientLightShader = ResourceManager.Load<Triton.Graphics.Resources.ShaderProgram>("/shaders/deferred/ambient");
 
@@ -364,7 +376,7 @@ namespace Triton.Graphics.Deferred
 
 			if (light.Type == LighType.PointLight || light.Type == LighType.SpotLight)
 			{
-				if (Vector3.DistanceSquared(light.Position, camera.Position) > Settings.ShadowRenderDistance *Settings.ShadowRenderDistance)
+				if (Vector3.DistanceSquared(light.Position, camera.Position) > Settings.ShadowRenderDistance * Settings.ShadowRenderDistance)
 				{
 					castShadows = false;
 				}
@@ -392,15 +404,55 @@ namespace Triton.Graphics.Deferred
 			Matrix4 shadowViewProjection;
 			Vector2 shadowCameraClipPlane;
 
+			Matrix4[] shadowViewProjections = null;
+			Vector4 clipDistances = Vector4.Zero;
+
 			if (castShadows)
 			{
 				if (light.Type == LighType.PointLight)
 				{
 					RenderShadowsCube(PointShadowsRenderTarget, light, stage, camera, out shadowViewProjection, out shadowCameraClipPlane);
 				}
+				else if (light.Type == LighType.SpotLight)
+				{
+					RenderShadows(SpotShadowsRenderTarget, light, stage, camera, out shadowViewProjection, out shadowCameraClipPlane);
+				}
 				else
 				{
-					RenderShadows(light.Type == LighType.Directional ? DirectionalShadowsRenderTarget : SpotShadowsRenderTarget, light, stage, camera, out shadowViewProjection, out shadowCameraClipPlane);
+					// Just to get rid of the unassigend error
+					shadowViewProjection = Matrix4.Identity;
+					shadowCameraClipPlane = Vector2.Zero;
+
+					// Do the csm
+					shadowViewProjections = new Matrix4[3];
+
+					float cameraNear = camera.NearClipDistance;
+					float cameraFar = camera.FarClipDistance;
+					float dist = cameraFar - cameraNear;
+
+					clipDistances.X = cameraNear;
+					clipDistances.Y = cameraFar * 0.1f;
+					clipDistances.Z = cameraFar * 0.4f;
+					clipDistances.W = cameraFar;
+
+					// Cascade 1
+					camera.NearClipDistance = clipDistances.X;
+					camera.FarClipDistance = clipDistances.Y;
+					RenderShadows(DirectionalShadowsRenderTarget[0], light, stage, camera, out shadowViewProjections[0], out shadowCameraClipPlane);
+
+					// Cascade 2
+					camera.NearClipDistance = clipDistances.X;
+					camera.FarClipDistance = clipDistances.Z;
+					RenderShadows(DirectionalShadowsRenderTarget[1], light, stage, camera, out shadowViewProjections[1], out shadowCameraClipPlane);
+
+					// Cascade 3
+					camera.NearClipDistance = clipDistances.X;
+					camera.FarClipDistance = clipDistances.W;
+					RenderShadows(DirectionalShadowsRenderTarget[2], light, stage, camera, out shadowViewProjections[2], out shadowCameraClipPlane);
+
+					// Restore clip plane
+					camera.NearClipDistance = cameraNear;
+					camera.FarClipDistance = cameraFar;
 				}
 				Backend.ChangeRenderTarget(LightAccumulation);
 			}
@@ -455,13 +507,19 @@ namespace Triton.Graphics.Deferred
 			int[] samplers;
 			if (castShadows)
 			{
-				var shadowMapHandle = SpotShadowsRenderTarget.Textures[0].Handle;
 				if (light.Type == LighType.Directional)
-					shadowMapHandle = DirectionalShadowsRenderTarget.Textures[0].Handle;
-				else if (light.Type == LighType.PointLight)
-					shadowMapHandle = PointShadowsRenderTarget.Textures[0].Handle;
-				textures = new int[] { GBuffer.Textures[0].Handle, GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, shadowMapHandle };
-				samplers = new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, ShadowSampler };
+				{
+					textures = new int[] { GBuffer.Textures[0].Handle, GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, DirectionalShadowsRenderTarget[0].Textures[0].Handle, DirectionalShadowsRenderTarget[1].Textures[0].Handle, DirectionalShadowsRenderTarget[2].Textures[0].Handle };
+					samplers = new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, ShadowSampler, ShadowSampler, ShadowSampler };
+				}
+				else
+				{
+					var shadowMapHandle = light.Type == LighType.PointLight ?
+					PointShadowsRenderTarget.Textures[0].Handle : SpotShadowsRenderTarget.Textures[0].Handle;
+
+					textures = new int[] { GBuffer.Textures[0].Handle, GBuffer.Textures[1].Handle, GBuffer.Textures[2].Handle, GBuffer.Textures[3].Handle, shadowMapHandle };
+					samplers = new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, ShadowSampler };
+				}
 			}
 			else
 			{
@@ -511,12 +569,23 @@ namespace Triton.Graphics.Deferred
 				Backend.BindShaderVariable(shaderParams.ClipPlane, ref shadowCameraClipPlane);
 				Backend.BindShaderVariable(shaderParams.ShadowBias, light.ShadowBias);
 
-				var texelSize = 1.0f / (light.Type == LighType.Directional ? DirectionalShadowsRenderTarget.Width : SpotShadowsRenderTarget.Width);
+				var texelSize = 1.0f / (light.Type == LighType.Directional ? DirectionalShadowsRenderTarget[0].Width : SpotShadowsRenderTarget.Width);
 				Backend.BindShaderVariable(shaderParams.TexelSize, texelSize);
 
 				if (light.Type == LighType.PointLight)
 				{
 					Backend.BindShaderVariable(shaderParams.SamplerShadowCube, 4);
+				}
+				else if (light.Type == LighType.Directional)
+				{
+					Backend.BindShaderVariable(shaderParams.SamplerShadow1, 4);
+					Backend.BindShaderVariable(shaderParams.SamplerShadow2, 5);
+					Backend.BindShaderVariable(shaderParams.SamplerShadow3, 6);
+
+					Backend.BindShaderVariable(shaderParams.ShadowViewProj1, ref shadowViewProjections[0]);
+					Backend.BindShaderVariable(shaderParams.ShadowViewProj2, ref shadowViewProjections[1]);
+					Backend.BindShaderVariable(shaderParams.ShadowViewProj3, ref shadowViewProjections[2]);
+					Backend.BindShaderVariable(shaderParams.ClipDistances, ref clipDistances);
 				}
 				else
 				{

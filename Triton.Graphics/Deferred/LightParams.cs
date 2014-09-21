@@ -28,5 +28,14 @@ namespace Triton.Graphics.Deferred
 		public int ClipPlane = 0;
 		public int TexelSize = 0;
 		public int LightInvSquareRadius = 0;
+
+		// CSM
+		public int SamplerShadow1 = 0;
+		public int SamplerShadow2 = 0;
+		public int SamplerShadow3 = 0;
+		public int ShadowViewProj1 = 0;
+		public int ShadowViewProj2 = 0;
+		public int ShadowViewProj3 = 0;
+		public int ClipDistances = 0;
 	}
 }

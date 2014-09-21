@@ -47,6 +47,17 @@ uniform mat4x4 shadowViewProj;
 uniform vec2 clipPlane;
 uniform float shadowBias;
 uniform float texelSize;
+uniform mat4x4 viewMatrix;
+
+#ifdef DIRECTIONAL_LIGHT
+uniform sampler2DShadow samplerShadow1;
+uniform sampler2DShadow samplerShadow2;
+uniform sampler2DShadow samplerShadow3;
+uniform mat4x4 shadowViewProj1;
+uniform mat4x4 shadowViewProj2;
+uniform mat4x4 shadowViewProj3;
+uniform vec4 clipDistances;
+#endif
 
 void main()
 {
@@ -93,11 +104,33 @@ void main()
 
 	if (attenuation > 0 && nDotL > 0) {
 #ifdef SHADOWS
-#ifdef SHADOWS_CUBE
+	#ifdef SHADOWS_CUBE
 		float shadow = get_shadows_cube(samplerShadowCube, nDotL, position, clipPlane, shadowBias, texelSize, lightPosition);
-#else
-		float shadow = get_shadows(samplerShadow, nDotL, position, shadowViewProj, clipPlane, shadowBias, texelSize);
-#endif
+	#else
+		#ifdef DIRECTIONAL_LIGHT
+			float shadow = 1;
+			
+			float n = clipDistances.x;
+			float f = clipDistances.w;
+			
+			float linearDepth = ((2 * n) / (f + n - depth * (f - n))) * (f + n);
+			
+			vec3 splitColor = vec3(0, 0, 0);
+			
+			if (linearDepth < clipDistances.y) {
+				shadow = get_shadows(samplerShadow1, nDotL, position, shadowViewProj1, texelSize);
+				splitColor = vec3(1, 0, 0);
+			} else if (linearDepth < clipDistances.z) {
+				shadow = get_shadows(samplerShadow2, nDotL, position, shadowViewProj2, texelSize);
+				splitColor = vec3(0, 1, 0);
+			} else {
+				shadow = get_shadows(samplerShadow3, nDotL, position, shadowViewProj3, texelSize);
+				splitColor = vec3(0, 0, 1);
+			}
+		#else
+			float shadow = get_shadows(samplerShadow, nDotL, position, shadowViewProj, texelSize);
+		#endif
+	#endif
 		attenuation *= shadow;
 #endif
 		float metallic = gbuffer2.x;

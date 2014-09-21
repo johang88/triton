@@ -50,7 +50,7 @@ uniform vec2 clipPlane;
 
 void main()
 {
-	float depth = position.z / (clipPlane.y - clipPlane.x);
+	float depth = position.z / position.w;
 	fragmentdepth = depth;
 	gl_FragDepth = depth;
 }

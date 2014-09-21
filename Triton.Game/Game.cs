@@ -206,7 +206,7 @@ namespace Triton.Game
 
 			if ((DebugFlags & DebugFlags.ShadowMaps) == DebugFlags.ShadowMaps)
 			{
-				var textures = DeferredRenderer.DirectionalShadowsRenderTarget.Textures;
+				var textures = DeferredRenderer.DirectionalShadowsRenderTarget.Select(r => r.Textures[0]).ToArray();
 				for (var i = 0; i < textures.Length; i++)
 				{
 					SpriteRenderer.RenderQuad(textures[i], new Vector2(257 * i + 1, 1 + (257 * debugYOffset)), new Vector2(256, 256), Vector2.Zero, Vector2.One, Vector4.One, false, false);

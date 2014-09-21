@@ -38,6 +38,8 @@ namespace Triton.Renderer
 		private readonly RenderStates.RenderStateManager RenderStateManager;
 		private readonly Samplers.SamplerManager SamplerManager;
 
+		private DebugProc DebugProcCallback;
+
 		private bool Disposed = false;
 		private readonly Action<Action> AddToWorkQueue;
 
@@ -83,7 +85,8 @@ namespace Triton.Renderer
 			GL.FrontFace(FrontFaceDirection.Ccw);
 			GL.Enable(EnableCap.TextureCubeMapSeamless);
 
-			GL.DebugMessageCallback(DebugCallback, IntPtr.Zero);
+			DebugProcCallback = DebugCallback;
+			GL.DebugMessageCallback(DebugProcCallback, IntPtr.Zero);
 			GL.Enable(EnableCap.DebugOutput);
 		}
 
