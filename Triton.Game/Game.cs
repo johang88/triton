@@ -191,12 +191,25 @@ namespace Triton.Game
 				GraphicsBackend.EndPass();
 			}
 
+			var debugYOffset = 0;
 			if ((DebugFlags & DebugFlags.GBuffer) == DebugFlags.GBuffer)
 			{
 				var textures = DeferredRenderer.GBuffer.Textures;
 				for (var i = 0; i < textures.Length; i++)
 				{
-					SpriteRenderer.RenderQuad(textures[i], new Vector2(257 * i + 1, 1), new Vector2(256, 256), Vector2.Zero, Vector2.One, Vector4.One, false, i == 0 || i == 3 || i == 4);
+					SpriteRenderer.RenderQuad(textures[i], new Vector2(257 * i + 1, 1 + (257 * debugYOffset)), new Vector2(256, 256), Vector2.Zero, Vector2.One, Vector4.One, false, i == 0);
+				}
+
+				SpriteRenderer.Render(GraphicsBackend.WindowWidth, GraphicsBackend.WindowHeight);
+				debugYOffset++;
+			}
+
+			if ((DebugFlags & DebugFlags.ShadowMaps) == DebugFlags.ShadowMaps)
+			{
+				var textures = DeferredRenderer.DirectionalShadowsRenderTarget.Textures;
+				for (var i = 0; i < textures.Length; i++)
+				{
+					SpriteRenderer.RenderQuad(textures[i], new Vector2(257 * i + 1, 1 + (257 * debugYOffset)), new Vector2(256, 256), Vector2.Zero, Vector2.One, Vector4.One, false, false);
 				}
 
 				SpriteRenderer.Render(GraphicsBackend.WindowWidth, GraphicsBackend.WindowHeight);

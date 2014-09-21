@@ -11,6 +11,7 @@ namespace Triton.Game
 	{
 		GBuffer = 1,
 		Physics = 2,
-		RenderStats = 4
+		RenderStats = 4,
+		ShadowMaps = 8,
 	}
 }

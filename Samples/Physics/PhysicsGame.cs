@@ -82,17 +82,22 @@ namespace Triton.Samples
 			}
 
 			// Light it
-			{
-				var sphere = GameWorld.CreateGameObject();
-				sphere.Position = new Vector3(0, 2.5f, 2);
-				sphere.Scale = new Vector3(1, 1, 1);
-				sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = "/materials/light_sphere", CastShadows = false });
-				sphere.AddComponent(new PointLight { Color = new Vector3(1f, 0.8f, 0.5f), Intensity = 2 });
-				sphere.AddComponent(new SphereRigidBody { Radius = 0.7f });
-				GameWorld.Add(sphere);
-			}
+			//{
+			//	var sphere = GameWorld.CreateGameObject();
+			//	sphere.Position = new Vector3(0, 2.5f, 2);
+			//	sphere.Scale = new Vector3(1, 1, 1);
+			//	sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = "/materials/light_sphere", CastShadows = false });
+			//	sphere.AddComponent(new PointLight { Color = new Vector3(1f, 0.8f, 0.5f), Intensity = 2 });
+			//	sphere.AddComponent(new SphereRigidBody { Radius = 0.7f });
+			//	GameWorld.Add(sphere);
+			//}
 
-			DebugFlags |= Game.DebugFlags.RenderStats | Game.DebugFlags.GBuffer;
+			Stage.CreateDirectionalLight(new Vector3(0, -1, 0), new Vector3(1, 0, 0), true);
+
+			DebugFlags |= Game.DebugFlags.RenderStats | Game.DebugFlags.GBuffer | Game.DebugFlags.ShadowMaps;
+
+			PostEffectManager.HDRSettings.EnableLensFlares = false;
+			PostEffectManager.HDRSettings.EnableBloom = false;
 
 			//HDRRenderer.AdaptationRate = 2;
 			DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.Lowest;
