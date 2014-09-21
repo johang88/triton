@@ -89,7 +89,6 @@
     <Compile Include="Post\Effects\LensFlares.cs" />
     <Compile Include="Post\Effects\ScreenSpaceReflections.cs" />
     <Compile Include="Post\Effects\SMAA.cs" />
-    <Compile Include="Post\Effects\SMAATextures.cs" />
     <Compile Include="Post\Effects\Tonemap.cs" />
     <Compile Include="Post\HDRSettings.cs" />
     <Compile Include="Post\PostEffectManager.cs" />

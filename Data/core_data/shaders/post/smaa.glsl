@@ -1,24 +1,24 @@
 /**
  * Copyright (C) 2011 Jorge Jimenez (jorge@iryoku.com)
- * Copyright (C) 2011 Jose I. Echevarria (joseignacioechevarria@gmail.com) 
  * Copyright (C) 2011 Belen Masia (bmasia@unizar.es) 
+ * Copyright (C) 2011 Jose I. Echevarria (joseignacioechevarria@gmail.com) 
  * Copyright (C) 2011 Fernando Navarro (fernandn@microsoft.com) 
  * Copyright (C) 2011 Diego Gutierrez (diegog@unizar.es)
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * 
  *    1. Redistributions of source code must retain the above copyright notice,
  *       this list of conditions and the following disclaimer.
- *
+ * 
  *    2. Redistributions in binary form must reproduce the following disclaimer
  *       in the documentation and/or other materials provided with the 
  *       distribution:
- *
+ * 
  *      "Uses SMAA. Copyright (C) 2011 by Jorge Jimenez, Jose I. Echevarria,
- *       Tiago Sousa, Belen Masia, Fernando Navarro and Diego Gutierrez."
- *
+ *       Belen Masia, Fernando Navarro and Diego Gutierrez."
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS 
  * IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
  * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
@@ -30,7 +30,7 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
- *
+ * 
  * The views and conclusions contained in the software and documentation are 
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of the copyright holders.
@@ -60,7 +60,7 @@
  *
  * The shader has three passes, chained together as follows:
  *
- *                           |input|------------------·
+ *                           |input|------------------?
  *                              v                     |
  *                    [ SMAA*EdgeDetection ]          |
  *                              v                     |
@@ -70,7 +70,7 @@
  *                              v                     |
  *                          |blendTex|                |
  *                              v                     |
- *                [ SMAANeighborhoodBlending ] <------·
+ *                [ SMAANeighborhoodBlending ] <------?
  *                              v
  *                           |output|
  *
@@ -926,6 +926,7 @@ float SMAASearchLength(SMAATexture2D searchTex, float2 e, float bias, float scal
     // e = float2(bias, 0.0) + 0.5 * SEARCH_TEX_PIXEL_SIZE + 
     //     e * float2(scale, 1.0) * float2(64.0, 32.0) * SEARCH_TEX_PIXEL_SIZE;
     e.r = bias + e.r * scale;
+	e.g = -e.g;
     return 255.0 * SMAASampleLevelZeroPoint(searchTex, e).r;
 }
 

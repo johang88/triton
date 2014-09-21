@@ -119,7 +119,7 @@ namespace Triton.Game
 			Physics.Resources.ResourceLoaders.Init(GameResources, FileSystem);
 
 			DeferredRenderer = new Graphics.Deferred.DeferredRenderer(CoreResources, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
-			PostEffectManager = new Graphics.Post.PostEffectManager(CoreResources, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
+			PostEffectManager = new Graphics.Post.PostEffectManager(FileSystem, CoreResources, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
 
 			AudioSystem = new Audio.AudioSystem(FileSystem);
 			PhysicsWorld = new Triton.Physics.World(GraphicsBackend, GameResources);

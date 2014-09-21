@@ -27,7 +27,7 @@ namespace Triton.Graphics.Post.Effects
 		private int LinearClampSampler = 0;
 		private int NearClampSampler = 0;
 
-		public SMAA(Backend backend, Common.ResourceManager resourceManager, BatchBuffer quadMesh)
+		public SMAA(Backend backend, Common.IO.FileSystem fileSystem, Common.ResourceManager resourceManager, BatchBuffer quadMesh)
 			: base(backend, resourceManager, quadMesh)
 		{
 			var width = Backend.Width;
@@ -55,8 +55,8 @@ namespace Triton.Graphics.Post.Effects
 				{ SamplerParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge }
 			});
 
-			AreaTexture = Backend.CreateTexture("/textures/smaa_area", 160, 560, PixelFormat.Rg, PixelInternalFormat.Rg8, PixelType.UnsignedByte, SMAATextures.AreaTextureData, false);
-			SearchTexture = Backend.CreateTexture("/textures/smaa_search", 66, 33, PixelFormat.Red, PixelInternalFormat.R8, PixelType.UnsignedByte, SMAATextures.SearchTextureData, false);
+			AreaTexture = Backend.CreateTexture("/textures/smaa_area", 160, 560, PixelFormat.Rg, PixelInternalFormat.Rg8, PixelType.UnsignedByte, GetRawTexture(fileSystem, "/textures/smaa_area.raw"), false);
+			SearchTexture = Backend.CreateTexture("/textures/smaa_search", 66, 33, PixelFormat.Red, PixelInternalFormat.R8, PixelType.UnsignedByte, GetRawTexture(fileSystem, "/textures/smaa_search.raw"), false);
 
 			EdgeRenderTarget = Backend.CreateRenderTarget("smaa_edge", new Definition(width, height, false, new List<Definition.Attachment>()
 			{
@@ -67,6 +67,22 @@ namespace Triton.Graphics.Post.Effects
 			{
 				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0),
 			}));
+		}
+
+		private byte[] GetRawTexture(Common.IO.FileSystem fileSystem, string path)
+		{
+			using (var stream = fileSystem.OpenRead(path))
+			{
+				var buffer = new byte[stream.Length];
+				var bytesRead = 0;
+
+				while (bytesRead < (int)stream.Length)
+				{
+					bytesRead += stream.Read(buffer, bytesRead, (int)(stream.Length - bytesRead));
+				}
+
+				return buffer;
+			}
 		}
 
 		public void Render(RenderTarget input, RenderTarget output)

@@ -32,8 +32,10 @@ namespace Triton.Graphics.Post
 		private readonly Effects.FXAA FXAA;
 		private readonly Effects.SMAA SMAA;
 
-		public PostEffectManager(Common.ResourceManager resourceManager, Backend backend, int width, int height)
+		public PostEffectManager(Common.IO.FileSystem fileSystem, Common.ResourceManager resourceManager, Backend backend, int width, int height)
 		{
+			if (fileSystem == null)
+				throw new ArgumentNullException("fileSystem");
 			if (resourceManager == null)
 				throw new ArgumentNullException("resourceManager");
 			if (backend == null)
@@ -69,7 +71,7 @@ namespace Triton.Graphics.Post
 			Tonemap = new Effects.Tonemap(Backend, ResourceManager, QuadMesh);
 			Gamma = new Effects.Gamma(Backend, ResourceManager, QuadMesh);
 			FXAA = new Effects.FXAA(Backend, ResourceManager, QuadMesh);
-			SMAA = new Effects.SMAA(Backend, ResourceManager, QuadMesh);
+			SMAA = new Effects.SMAA(Backend, fileSystem, ResourceManager, QuadMesh);
 
 			// Default settings
 			HDRSettings.KeyValue = 0.115f;
