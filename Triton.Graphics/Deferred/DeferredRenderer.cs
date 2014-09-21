@@ -597,12 +597,8 @@ namespace Triton.Graphics.Deferred
 
 				view = Matrix4.LookAt(lightPosition, lightPosition - lightDir, Vector3.UnitY);
 				projection = Matrix4.CreateOrthographic(boxSize.X, boxSize.Y, -boxSize.Z, boxSize.Z);
-				//clipPlane.X = -boxSize.Z;
-				//clipPlane.Y = boxSize.Z;
-
-				//view = Matrix4.LookAt(lightPosition, camera.Position, Vector3.UnitY);
-				projection = Matrix4.CreatePerspectiveFieldOfView(Math.Util.DegreesToRadians(20), renderTarget.Width / (float)renderTarget.Height, clipPlane.X, clipPlane.Y);
-				//projection = Matrix4.CreateOrthographic(renderTarget.Width, renderTarget.Height, clipPlane.X, clipPlane.Y * 10000);
+				clipPlane.X = -boxSize.Z;
+				clipPlane.Y = boxSize.Z;
 			}
 			else
 			{
