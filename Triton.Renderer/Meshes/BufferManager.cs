@@ -123,8 +123,6 @@ namespace Triton.Renderer.Meshes
 			GL.BindBuffer(Handles[index].Target, Handles[index].BufferID);
 			GL.BufferData(Handles[index].Target, dataLength, data, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
 
-			RenderSystem.CheckGLError();
-			
 			GL.BindBuffer(Handles[index].Target, 0);
 		}
 
@@ -148,7 +146,6 @@ namespace Triton.Renderer.Meshes
 			GL.BindBuffer(Handles[index].Target, Handles[index].BufferID);
 			GL.BufferData(Handles[index].Target, new IntPtr(data.Length * Marshal.SizeOf(typeof(T))), data, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
 
-			RenderSystem.CheckGLError();
 			Handles[index].Initialized = true;
 
 			GL.BindBuffer(Handles[index].Target, 0);

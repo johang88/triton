@@ -199,8 +199,6 @@ namespace Triton.Renderer.Shaders
 			// The shader program can now be used
 			Handles[index].Initialized = true;
 
-			RenderSystem.CheckGLError();
-
 			return true;
 		}
 

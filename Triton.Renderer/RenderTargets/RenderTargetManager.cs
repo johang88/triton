@@ -148,7 +148,6 @@ namespace Triton.Renderer.RenderTargets
 				throw new Exception("Framebuffer not complete, " + status.ToString());
 			}
 
-			RenderSystem.CheckGLError();
 			Handles[index].Initialized = true;
 
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);

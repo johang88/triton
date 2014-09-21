@@ -153,8 +153,6 @@ namespace Triton.Renderer.Textures
 
 			GL.Finish();
 
-			RenderSystem.CheckGLError();
-
 			// The texture can now be used
 			Handles[index].Initialized = true;
 		}

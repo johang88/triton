@@ -99,12 +99,10 @@ namespace Triton.Renderer.Samplers
 
 			Handles[index].SamplerObject = GL.GenSampler();
 			int sampler = Handles[index].SamplerObject;
-			RenderSystem.CheckGLError();
 
 			foreach (var setting in settings)
 			{
 				GL.SamplerParameter(sampler, (OGL.SamplerParameterName)(int)setting.Key, setting.Value);
-				RenderSystem.CheckGLError();
 			}
 
 			Handles[index].Initialized = true;

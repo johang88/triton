@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Graphics;
 using OGL = OpenTK.Graphics.OpenGL;
+using System.Runtime.InteropServices;
 
 namespace Triton.Renderer
 {
@@ -76,6 +77,9 @@ namespace Triton.Renderer
 
 			GL.FrontFace(FrontFaceDirection.Ccw);
 			GL.Enable(EnableCap.TextureCubeMapSeamless);
+
+			GL.DebugMessageCallback(DebugCallback, IntPtr.Zero);
+			GL.Enable(EnableCap.DebugOutput);
 		}
 
 		public void Dispose()
@@ -99,6 +103,12 @@ namespace Triton.Renderer
 			Context.Dispose();
 
 			Disposed = true;
+		}
+
+		private void DebugCallback(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
+		{
+			var msg = Marshal.PtrToStringAnsi(message, length);
+			Common.Log.WriteLine(string.Format("{0} {1} {2}", severity, type, msg));
 		}
 
 		public int CreateTexture(int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap, OnLoadedCallback loadedCallback)
@@ -251,8 +261,6 @@ namespace Triton.Renderer
 
 			GL.BindVertexArray(vertexArrayObjectId);
 			GL.DrawElements(PrimitiveType.Triangles, triangleCount * 3, DrawElementsType.UnsignedInt, IntPtr.Zero);
-
-			RenderSystem.CheckGLError();
 		}
 
 		public void RenderMeshInstanced(int handle, int instanceCount)
@@ -265,8 +273,6 @@ namespace Triton.Renderer
 
 			GL.BindVertexArray(vertexArrayObjectId);
 			GL.DrawElementsInstanced(PrimitiveType.Triangles, triangleCount * 3, DrawElementsType.UnsignedInt, IntPtr.Zero, instanceCount);
-
-			RenderSystem.CheckGLError();
 		}
 
 		public void BeginScene(int renderTargetHandle, int width, int height)
@@ -428,8 +434,6 @@ namespace Triton.Renderer
 				GL.DrawBuffer(DrawBufferMode.Back);
 			else
 				GL.DrawBuffers(drawBuffers.Length, drawBuffers);
-
-			CheckGLError();
 		}
 
 		public int CreateSampler(Dictionary<SamplerParameterName, int> settings)
@@ -447,15 +451,6 @@ namespace Triton.Renderer
 		public void BindSampler(int textureUnit, int handle)
 		{
 			SamplerManager.Bind(textureUnit, handle);
-		}
-
-		internal static void CheckGLError()
-		{
-			ErrorCode error;
-			while ((error = GL.GetError()) != ErrorCode.NoError)
-			{
-				throw new Exception(string.Format("OpenGL error {0}", error));
-			}
 		}
 	}
 }

@@ -141,7 +141,6 @@ namespace Triton.Renderer.Meshes
 			}
 
 			BufferManager.Bind(Handles[index].IndexBufferID);
-			RenderSystem.CheckGLError();
 
 			GL.BindVertexArray(0);
 			BufferManager.Unbind(Handles[index].VertexBufferID[0]);
@@ -173,7 +172,6 @@ namespace Triton.Renderer.Meshes
 			Handles[index].IndexBufferID = indexBufferId;
 
 			BufferManager.Bind(Handles[index].IndexBufferID);
-			RenderSystem.CheckGLError();
 
 			GL.BindVertexArray(0);
 			BufferManager.Unbind(Handles[index].IndexBufferID);
