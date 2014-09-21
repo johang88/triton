@@ -487,10 +487,7 @@ namespace Triton.Graphics.Deferred
 			{
 				var lightDirWS = light.Direction.Normalize();
 
-				var lightDirection = Vector3.Transform(light.Direction, Matrix4.Transpose(Matrix4.Invert(view)));
-				lightDirection = lightDirection.Normalize();
-
-				Backend.BindShaderVariable(shaderParams.LightDirection, ref lightDirection);
+				Backend.BindShaderVariable(shaderParams.LightDirection, ref lightDirWS);
 			}
 
 			if (light.Type == LighType.PointLight || light.Type == LighType.SpotLight)
