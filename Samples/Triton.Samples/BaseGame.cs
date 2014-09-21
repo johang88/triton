@@ -86,6 +86,13 @@ namespace Triton.Samples
 				var lastAa = (int)Graphics.Post.AntiAliasing.Last;
 				PostEffectManager.AntiAliasing = (Graphics.Post.AntiAliasing)((aa + 1) % lastAa);
 			}
+
+			if (InputManager.WasKeyPressed(Input.Key.H))
+			{
+				var aa = (int)PostEffectManager.AntiAliasingQuality;
+				var lastAa = (int)Graphics.Post.AntiAliasingQuality.Last;
+				PostEffectManager.AntiAliasingQuality = (Graphics.Post.AntiAliasingQuality)((aa + 1) % lastAa);
+			}
 		}
 
 		protected override void RenderUI(float deltaTime)
@@ -96,6 +103,8 @@ namespace Triton.Samples
 			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[c] Shadow Quality: {0}", DeferredRenderer.Settings.ShadowQuality);
 			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[v] Shadows: {0}", DeferredRenderer.Settings.EnableShadows ? "Enabled" : "Disabled");
 			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] Anti Aliasing: {0}", PostEffectManager.AntiAliasing);
+			if (PostEffectManager.AntiAliasing == Graphics.Post.AntiAliasing.SMAA)
+				DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[h] Anti Aliasing Quality: {0}", PostEffectManager.AntiAliasingQuality);
 			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[b] Bloom: {0}", PostEffectManager.HDRSettings.EnableBloom ? "Enabled" : "Disabled");
 			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[l] Lens Flares: {0}", PostEffectManager.HDRSettings.EnableLensFlares ? "Enabled" : "Disabled");
 			DebugFont.DrawText(SpriteRenderer, new Vector2(4, RequestedHeight - DebugFont.LineHeight * offsetY++), Vector4.One, "[f] Camera Position: {0}", Common.StringConverter.ToString(Camera.Position));

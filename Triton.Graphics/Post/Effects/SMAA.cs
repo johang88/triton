@@ -10,13 +10,13 @@ namespace Triton.Graphics.Post.Effects
 {
 	public class SMAA : BaseEffect
 	{
-		private Resources.ShaderProgram EdgeShader;
-		private Resources.ShaderProgram BlendShader;
-		private Resources.ShaderProgram NeighborhoodShader;
+		private Resources.ShaderProgram[] EdgeShader = new Resources.ShaderProgram[4];
+		private Resources.ShaderProgram[] BlendShader = new Resources.ShaderProgram[4];
+		private Resources.ShaderProgram[] NeighborhoodShader = new Resources.ShaderProgram[4];
 
-		private EdgeShaderParams EdgeParams;
-		private BlendShaderParams BlendParams;
-		private NeighborhoodShaderParams NeighborhoodParams;
+		private EdgeShaderParams[] EdgeParams = new EdgeShaderParams[4];
+		private BlendShaderParams[] BlendParams = new BlendShaderParams[4];
+		private NeighborhoodShaderParams[] NeighborhoodParams = new NeighborhoodShaderParams[4];
 
 		private RenderTarget EdgeRenderTarget;
 		private RenderTarget BlendRenderTarget;
@@ -33,11 +33,17 @@ namespace Triton.Graphics.Post.Effects
 			var width = Backend.Width;
 			var height = Backend.Height;
 
-			var pixelSize = string.Format("SMAA_PIXEL_SIZE float2(1.0 / {0}, 1.0 / {1})", Common.StringConverter.ToString(width), Common.StringConverter.ToString(height));
+			var pixelSizeDefine = string.Format("SMAA_PIXEL_SIZE float2(1.0 / {0}, 1.0 / {1})", Common.StringConverter.ToString(width), Common.StringConverter.ToString(height));
+			var qualities = new string[] { "SMAA_PRESET_LOW", "SMAA_PRESET_MEDIUM", "SMAA_PRESET_HIGH", "SMAA_PRESET_ULTRA" };
 
-			EdgeShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/smaa_edge", pixelSize);
-			BlendShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/smaa_blend", pixelSize);
-			NeighborhoodShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/smaa_neighborhood", pixelSize);
+			for (var i = 0; i < 4; i++ )
+			{
+				var defines = pixelSizeDefine + ";" + qualities[i] + " 1";
+
+				EdgeShader[i] = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/smaa_edge", defines);
+				BlendShader[i] = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/smaa_blend", defines);
+				NeighborhoodShader[i] = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/smaa_neighborhood", defines);
+			}
 
 			LinearClampSampler = Backend.RenderSystem.CreateSampler(new Dictionary<SamplerParameterName, int>
 			{
@@ -85,45 +91,50 @@ namespace Triton.Graphics.Post.Effects
 			}
 		}
 
-		public void Render(RenderTarget input, RenderTarget output)
+		public void Render(AntiAliasingQuality quality, RenderTarget input, RenderTarget output)
 		{
-			if (EdgeParams == null)
+			if (EdgeParams[0] == null)
 			{
-				EdgeParams = new EdgeShaderParams();
-				BlendParams = new BlendShaderParams();
-				NeighborhoodParams = new NeighborhoodShaderParams();
+				for (var i = 0; i < 4; i++)
+				{
+					EdgeParams[i] = new EdgeShaderParams();
+					BlendParams[i] = new BlendShaderParams();
+					NeighborhoodParams[i] = new NeighborhoodShaderParams();
 
-				EdgeShader.GetUniformLocations(EdgeParams);
-				BlendShader.GetUniformLocations(BlendParams);
-				NeighborhoodShader.GetUniformLocations(NeighborhoodParams);
+					EdgeShader[i].GetUniformLocations(EdgeParams[i]);
+					BlendShader[i].GetUniformLocations(BlendParams[i]);
+					NeighborhoodShader[i].GetUniformLocations(NeighborhoodParams[i]);
+				}
 			}
+
+			var index = (int)quality;
 
 			// Edge
 			Backend.BeginPass(EdgeRenderTarget, new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
-			Backend.BeginInstance(EdgeShader.Handle, new int[] { input.Textures[0].Handle },
+			Backend.BeginInstance(EdgeShader[index].Handle, new int[] { input.Textures[0].Handle },
 				samplers: new int[] { LinearClampSampler });
-			Backend.BindShaderVariable(EdgeParams.SamplerScene, 0);
+			Backend.BindShaderVariable(EdgeParams[index].SamplerScene, 0);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 			Backend.EndPass();
 
 			// Blend
 			Backend.BeginPass(BlendRenderTarget, new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
-			Backend.BeginInstance(BlendShader.Handle, new int[] { EdgeRenderTarget.Textures[0].Handle, AreaTexture.Handle, SearchTexture.Handle },
+			Backend.BeginInstance(BlendShader[index].Handle, new int[] { EdgeRenderTarget.Textures[0].Handle, AreaTexture.Handle, SearchTexture.Handle },
 				samplers: new int[] { LinearClampSampler, LinearClampSampler, NearClampSampler });
-			Backend.BindShaderVariable(BlendParams.SamplerEdge, 0);
-			Backend.BindShaderVariable(BlendParams.SamplerArea, 1);
-			Backend.BindShaderVariable(BlendParams.SamplerSearch, 2);
+			Backend.BindShaderVariable(BlendParams[index].SamplerEdge, 0);
+			Backend.BindShaderVariable(BlendParams[index].SamplerArea, 1);
+			Backend.BindShaderVariable(BlendParams[index].SamplerSearch, 2);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 			Backend.EndPass();
 
 			// Neighborhood
 			Backend.BeginPass(output, new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
-			Backend.BeginInstance(NeighborhoodShader.Handle, new int[] { input.Textures[0].Handle, BlendRenderTarget.Textures[0].Handle },
+			Backend.BeginInstance(NeighborhoodShader[index].Handle, new int[] { input.Textures[0].Handle, BlendRenderTarget.Textures[0].Handle },
 				samplers: new int[] { LinearClampSampler, LinearClampSampler });
-			Backend.BindShaderVariable(NeighborhoodParams.SamplerScene, 0);
-			Backend.BindShaderVariable(NeighborhoodParams.SamplerBlend, 1);
+			Backend.BindShaderVariable(NeighborhoodParams[index].SamplerScene, 0);
+			Backend.BindShaderVariable(NeighborhoodParams[index].SamplerBlend, 1);
 
 			Backend.DrawMesh(QuadMesh.MeshHandle);
 			Backend.EndPass();

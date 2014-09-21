@@ -19,6 +19,7 @@ namespace Triton.Graphics.Post
 
 		// Settings
 		public AntiAliasing AntiAliasing = AntiAliasing.FXAA;
+		public AntiAliasingQuality AntiAliasingQuality = AntiAliasingQuality.Ultra;
 		public HDRSettings HDRSettings = new HDRSettings();
 		public ScreenSpaceReflectionsSettings ScreenSpaceReflectionsSettings = new ScreenSpaceReflectionsSettings();
 
@@ -101,7 +102,7 @@ namespace Triton.Graphics.Post
 					SwapRenderTargets();
 					break;
 				case AntiAliasing.SMAA:
-					SMAA.Render(TemporaryRenderTargets[0], TemporaryRenderTargets[1]);
+					SMAA.Render(AntiAliasingQuality, TemporaryRenderTargets[0], TemporaryRenderTargets[1]);
 					SwapRenderTargets();
 					break;
 				case Post.AntiAliasing.Off:

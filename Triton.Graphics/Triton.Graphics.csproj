@@ -80,6 +80,7 @@
     <Compile Include="LightingMode.cs" />
     <Compile Include="MeshInstance.cs" />
     <Compile Include="Post\AntiAliasing.cs" />
+    <Compile Include="Post\AntiAliasingQuality.cs" />
     <Compile Include="Post\Effects\AdaptLuminance.cs" />
     <Compile Include="Post\Effects\BaseEffect.cs" />
     <Compile Include="Post\Effects\Bloom.cs" />
