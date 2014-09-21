@@ -65,6 +65,9 @@ namespace Triton.Graphics
 				var meshInstance = Meshes[i];
 				var subMeshes = meshInstance.Mesh.SubMeshes;
 
+				if (!meshInstance.Mesh.IsLoaded())
+					continue;
+
 				if (!meshInstance.CastShadows && shadowCastersOnly)
 					continue;
 
@@ -90,6 +93,9 @@ namespace Triton.Graphics
 				var meshInstance = Meshes[i];
 				var subMeshes = meshInstance.Mesh.SubMeshes;
 				var meshPosition = Vector3.Transform(Vector3.Zero, meshInstance.World);
+
+				if (!meshInstance.Mesh.IsLoaded())
+					continue;
 
 				if ((!shadowCastersOnly || meshInstance.CastShadows) && Math.Intersections.SphereToSphere(ref position, radius, ref meshPosition, meshInstance.Mesh.BoundingSphereRadius))
 				{

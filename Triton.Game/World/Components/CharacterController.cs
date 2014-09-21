@@ -13,9 +13,9 @@ namespace Triton.Game.World.Components
 
 		private Physics.CharacterController Controller;
 
-		public override void OnAttached(GameObject owner)
+		public override void OnActivate()
 		{
-			base.OnAttached(owner);
+			base.OnActivate();
 
 			Body = Controller = World.PhysicsWorld.CreateCharacterController(Length, Radius);
 			Controller.SetPosition(Owner.Position);

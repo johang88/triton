@@ -16,9 +16,9 @@ namespace Triton.Game.World.Components
 		public bool CastShadows = true;
 		public float Intensity = 10;
 
-		public override void OnAttached(GameObject owner)
+		public override void OnActivate()
 		{
-			base.OnAttached(owner);
+			base.OnActivate();
 
 			Light = Stage.CreatePointLight(Owner.Position, Range, Color, CastShadows, ShadowBias, Intensity);
 		}

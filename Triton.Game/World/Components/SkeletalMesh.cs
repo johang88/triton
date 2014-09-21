@@ -14,9 +14,9 @@ namespace Triton.Game.World.Components
 		private Graphics.MeshInstance MeshInstance;
 		private Graphics.SkeletalAnimation.SkeletonInstance SkeletonInstance;
 
-		public override void OnAttached(GameObject owner)
+		public override void OnActivate()
 		{
-			base.OnAttached(owner);
+			base.OnActivate();
 
 			MeshInstance = World.Stage.AddMesh(MeshFilename);
 			

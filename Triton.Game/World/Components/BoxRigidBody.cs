@@ -13,9 +13,9 @@ namespace Triton.Game.World.Components
 		public float Width = 1;
 		public bool IsStatic = false;
 
-		public override void OnAttached(GameObject owner)
+		public override void OnActivate()
 		{
-			base.OnAttached(owner);
+			base.OnActivate();
 
 			Body = World.PhysicsWorld.CreateBoxBody(Length, Height, Width, Owner.Position, IsStatic);
 		}

@@ -111,5 +111,22 @@ namespace Triton.Graphics.Resources
 			public int ItWorld = 0;
 			public int Time = 0;
 		}
+
+		public bool IsLoaded()
+		{
+			if (State != Common.ResourceLoadingState.Loaded)
+				return false;
+
+			if (Shader.State != Common.ResourceLoadingState.Loaded)
+				return false;
+			
+			foreach (var texture in Textures)
+			{
+				if (texture.Value.State != Common.ResourceLoadingState.Loaded)
+					return false;
+			}
+
+			return true;
+		}
 	}
 }

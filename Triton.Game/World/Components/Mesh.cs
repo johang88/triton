@@ -14,9 +14,9 @@ namespace Triton.Game.World.Components
 		public Graphics.MeshInstance MeshInstance;
 		public bool CastShadows = true;
 
-		public override void OnAttached(GameObject owner)
+		public override void OnActivate()
 		{
-			base.OnAttached(owner);
+			base.OnActivate();
 
 			MeshInstance = World.Stage.AddMesh(Filename, MeshParameters);
 		}
