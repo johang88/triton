@@ -7,7 +7,7 @@ This might become a game engine sometime in the future, but right now a lot of c
 ### Renderer
 * Deferred rendering
 * PBR
-* FXAA, SMAA (currently not working
+* FXAA, SMAA
 * Screen space reflections (WIP)
 * Shadow Maps
     * Point / Spot lights
