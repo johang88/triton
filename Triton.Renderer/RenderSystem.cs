@@ -333,34 +333,34 @@ namespace Triton.Renderer
 			GL.Uniform1(handle, value);
 		}
 
-		public void SetUniformVector2(int handle, int count, ref float value)
+		public unsafe void SetUniformVector2(int handle, int count, float* value)
 		{
-			GL.Uniform2(handle, count, ref value);
+			GL.Uniform2(handle, count, value);
 		}
 
-		public void SetUniformMatrix4(int handle, int count, ref float value)
+		public unsafe void SetUniformMatrix4(int handle, int count, float* value)
 		{
-			GL.UniformMatrix4(handle, count, false, ref value);
+			GL.UniformMatrix4(handle, count, false, value);
 		}
 
-		public void SetUniformVector3(int handle, int count, ref float value)
+		public unsafe void SetUniformVector3(int handle, int count, float* value)
 		{
-			GL.Uniform3(handle, count, ref value);
+			GL.Uniform3(handle, count, value);
 		}
 
-		public void SetUniformVector4(int handle, int count, ref float value)
+		public unsafe void SetUniformVector4(int handle, int count, float* value)
 		{
-			GL.Uniform4(handle, count, ref value);
+			GL.Uniform4(handle, count, value);
 		}
 
-		public void SetUniformInt(int handle, int count, ref int value)
+		public unsafe void SetUniformInt(int handle, int count, int* value)
 		{
-			GL.Uniform1(handle, count, ref value);
+			GL.Uniform1(handle, count, value);
 		}
 
-		public void SetUniformFloat(int handle, int count, ref float value)
+		public unsafe void SetUniformFloat(int handle, int count, float* value)
 		{
-			GL.Uniform1(handle, count, ref value);
+			GL.Uniform1(handle, count, value);
 		}
 
 		public void Clear(Triton.Vector4 clearColor, bool depth)

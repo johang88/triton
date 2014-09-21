@@ -70,9 +70,6 @@ namespace Triton.Graphics
 		public float FrameTime { get; private set; }
 		public float ElapsedTime { get; private set; }
 
-		// Used as a cache to prevent generation of garabage during deserialization of the OpCode stream
-		private Matrix4[] MatrixDeserializationCache = new Matrix4[64];
-
 		public readonly int DefaultSampler;
 		public readonly int DefaultSamplerNoFiltering;
 		public readonly int DefaultSamplerMipMapNearest;
@@ -106,11 +103,6 @@ namespace Triton.Graphics
 			// Setup the render system
 			RenderSystem = new Renderer.RenderSystem(Window.WindowInfo, ProcessQueue.Enqueue);
 			Watch = new System.Diagnostics.Stopwatch();
-
-			for (var i = 0; i < MatrixDeserializationCache.Length; i++)
-			{
-				MatrixDeserializationCache[i] = Matrix4.Identity;
-			}
 
 			DefaultSampler = RenderSystem.CreateSampler(new Dictionary<SamplerParameterName, int>
 			{
@@ -292,20 +284,37 @@ namespace Triton.Graphics
 						{
 							var uniformHandle = reader.ReadInt32();
 
-							reader.ReadMatrix4(ref MatrixDeserializationCache[0]);
-							RenderSystem.SetUniformMatrix4(uniformHandle, 1, ref MatrixDeserializationCache[0].Row0.X);
+							var buffer = ((MemoryStream)reader.BaseStream).GetBuffer();
+
+							unsafe
+							{
+								fixed (byte* p = buffer)
+								{
+									var m = (float*)(p + reader.BaseStream.Position);
+									RenderSystem.SetUniformMatrix4(uniformHandle, 1, m);
+								}
+							}
+
+							reader.BaseStream.Position += sizeof(float) * 16;
 						}
 						break;
 					case OpCode.BindShaderVariableMatrix4Array:
 						{
 							var uniformHandle = reader.ReadInt32();
-
 							var count = reader.ReadInt32();
-							for (var i = 0; i < count; i++)
+	
+							var buffer = ((MemoryStream)reader.BaseStream).GetBuffer();
+
+							unsafe
 							{
-								reader.ReadMatrix4(ref MatrixDeserializationCache[i]);
+								fixed (byte* p = buffer)
+								{
+									var m = (float*)(p + reader.BaseStream.Position);
+									RenderSystem.SetUniformMatrix4(uniformHandle, count, m);
+								}
 							}
-							RenderSystem.SetUniformMatrix4(uniformHandle, count, ref MatrixDeserializationCache[0].Row0.X);
+
+							reader.BaseStream.Position += sizeof(float) * 16 * count;
 						}
 						break;
 					case OpCode.BindShaderVariableInt:
@@ -318,12 +327,20 @@ namespace Triton.Graphics
 					case OpCode.BindShaderVariableIntArray:
 						{
 							var uniformHandle = reader.ReadInt32();
-
 							var count = reader.ReadInt32();
-							var v = new int[count];
-							for (var i = 0; i < count; i++)
-								v[i] = reader.ReadInt32();
-							RenderSystem.SetUniformInt(uniformHandle, v.Length, ref v[0]);
+	
+							var buffer = ((MemoryStream)reader.BaseStream).GetBuffer();
+
+							unsafe
+							{
+								fixed (byte* p = buffer)
+								{
+									var m = (int*)(p + reader.BaseStream.Position);
+									RenderSystem.SetUniformInt(uniformHandle, count, m);
+								}
+							}
+
+							reader.BaseStream.Position += sizeof(int) * 4 * count;
 						}
 						break;
 					case OpCode.BindShaderVariableFloat:
@@ -336,55 +353,111 @@ namespace Triton.Graphics
 					case OpCode.BindShaderVariableFloatArray:
 						{
 							var uniformHandle = reader.ReadInt32();
-
 							var count = reader.ReadInt32();
-							var v = new float[count];
-							for (var i = 0; i < count; i++)
-								v[i] = reader.ReadSingle();
-							RenderSystem.SetUniformFloat(uniformHandle, v.Length, ref v[0]);
+
+							var buffer = ((MemoryStream)reader.BaseStream).GetBuffer();
+
+							unsafe
+							{
+								fixed (byte* p = buffer)
+								{
+									var m = (float*)(p + reader.BaseStream.Position);
+									RenderSystem.SetUniformFloat(uniformHandle, count, m);
+								}
+							}
+
+							reader.BaseStream.Position += sizeof(float) * 4 * count;
 						}
 						break;
 					case OpCode.BindShaderVariableVector4:
 						{
 							var uniformHandle = reader.ReadInt32();
-							var v = reader.ReadVector4();
-							RenderSystem.SetUniformVector4(uniformHandle, 1, ref v.X);
+
+							var buffer = ((MemoryStream)reader.BaseStream).GetBuffer();
+
+							unsafe
+							{
+								fixed (byte* p = buffer)
+								{
+									var m = (float*)(p + reader.BaseStream.Position);
+									RenderSystem.SetUniformVector4(uniformHandle, 1, m);
+								}
+							}
+
+							reader.BaseStream.Position += sizeof(float) * 4;
 						}
 						break;
 					case OpCode.BindShaderVariableVector3:
 						{
 							var uniformHandle = reader.ReadInt32();
-							var v = reader.ReadVector3();
-							RenderSystem.SetUniformVector3(uniformHandle, 1, ref v.X);
+							
+							var buffer = ((MemoryStream)reader.BaseStream).GetBuffer();
+
+							unsafe
+							{
+								fixed (byte* p = buffer)
+								{
+									var m = (float*)(p + reader.BaseStream.Position);
+									RenderSystem.SetUniformVector3(uniformHandle, 1, m);
+								}
+							}
+
+							reader.BaseStream.Position += sizeof(float) * 3;
 						}
 						break;
 					case OpCode.BindShaderVariableVector3Array:
 						{
 							var uniformHandle = reader.ReadInt32();
-
 							var count = reader.ReadInt32();
-							var v = new Vector3[count];
-							for (var i = 0; i < count; i++)
-								v[i] = reader.ReadVector3();
-							RenderSystem.SetUniformVector3(uniformHandle, v.Length, ref v[0].X);
+
+							var buffer = ((MemoryStream)reader.BaseStream).GetBuffer();
+
+							unsafe
+							{
+								fixed (byte* p = buffer)
+								{
+									var m = (float*)(p + reader.BaseStream.Position);
+									RenderSystem.SetUniformVector3(uniformHandle, count, m);
+								}
+							}
+
+							reader.BaseStream.Position += sizeof(float) * 3 * count;
 						}
 						break;
 					case OpCode.BindShaderVariableVector4Array:
 						{
 							var uniformHandle = reader.ReadInt32();
-
 							var count = reader.ReadInt32();
-							var v = new Vector4[count];
-							for (var i = 0; i < count; i++)
-								v[i] = reader.ReadVector4();
-							RenderSystem.SetUniformVector4(uniformHandle, v.Length, ref v[0].X);
+
+							var buffer = ((MemoryStream)reader.BaseStream).GetBuffer();
+
+							unsafe
+							{
+								fixed (byte* p = buffer)
+								{
+									var m = (float*)(p + reader.BaseStream.Position);
+									RenderSystem.SetUniformVector4(uniformHandle, count, m);
+								}
+							}
+
+							reader.BaseStream.Position += sizeof(float) * 4 * count;
 						}
 						break;
 					case OpCode.BindShaderVariableVector2:
 						{
 							var uniformHandle = reader.ReadInt32();
-							var v = reader.ReadVector2();
-							RenderSystem.SetUniformVector2(uniformHandle, 1, ref v.X);
+							var buffer = ((MemoryStream)reader.BaseStream).GetBuffer();
+
+							unsafe
+							{
+								fixed (byte* p = buffer)
+								{
+									var m = (float*)(p + reader.BaseStream.Position);
+									RenderSystem.SetUniformVector2(uniformHandle, 1, m);
+								}
+							}
+
+							reader.BaseStream.Position += sizeof(float) * 2;
 						}
 						break;
 					case OpCode.DrawMesh:
