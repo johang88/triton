@@ -61,7 +61,7 @@ namespace Triton.Common
 
 			foreach (var resource in Resources.Values)
 			{
-				Unload(resource, false);
+				UnloadResource(resource, false);
 			}
 
 			Disposed = true;
@@ -137,7 +137,7 @@ namespace Triton.Common
 			}
 		}
 
-		public void Unload(Resource resource, bool async = true)
+		private void UnloadResource(Resource resource, bool async = true)
 		{
 			IResourceLoader loader = null;
 			var resourceType = resource.GetType();
@@ -211,7 +211,7 @@ namespace Triton.Common
 			}
 		}
 
-		public void Release(Resource resource)
+		public void Unload(Resource resource)
 		{
 			if (resource.ReferenceCount > 0)
 				resource.ReferenceCount -= 1;
@@ -229,7 +229,7 @@ namespace Triton.Common
 		{
 			foreach (var resource in Resources.Where(r => r.Value.ReferenceCount == 0 && r.Value.State == ResourceLoadingState.Loaded))
 			{
-				Unload(resource.Value);
+				UnloadResource(resource.Value);
 			}
 		}
 
