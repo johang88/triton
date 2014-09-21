@@ -31,8 +31,8 @@ namespace Triton.Samples
 
 			using (var stream = FileSystem.OpenRead("/terrain.raw"))
 			{
-				var material = ResourceManager.Load<Graphics.Resources.Material>("/materials/terrain");
-				var compositeMaterial = ResourceManager.Load<Graphics.Resources.Material>("/materials/terrain_composite");
+				var material = GameResources.Load<Graphics.Resources.Material>("/materials/terrain");
+				var compositeMaterial = GameResources.Load<Graphics.Resources.Material>("/materials/terrain_composite");
 
 				var terrainData = new Graphics.Terrain.TerrainData(stream, new Vector3(4096, 2048, 4096), 513);
 				Terrain = new Graphics.Terrain.Terrain(GraphicsBackend, terrainData, 10, 64, material, compositeMaterial);

@@ -12,7 +12,10 @@ namespace Triton.Game
 	{
 		public Triton.Graphics.Backend GraphicsBackend { get; private set; }
 		public Triton.Common.IO.FileSystem FileSystem { get; private set; }
-		public Triton.Common.ResourceManager ResourceManager { get; private set; }
+
+		public Triton.Common.ResourceGroupManager ResourceGroupManager { get; private set; }
+		public Triton.Common.ResourceManager CoreResources { get; private set; }
+		public Triton.Common.ResourceManager GameResources { get; private set; }
 
 		private Thread UpdateThread { get; set; }
 
@@ -58,15 +61,19 @@ namespace Triton.Game
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File(string.Format("{0}/{1}.txt", logPath, name)));
 
 			FileSystem = new Common.IO.FileSystem(MountFileSystem());
-			ResourceManager = new Triton.Common.ResourceManager(FileSystem);
+			ResourceGroupManager = new Common.ResourceGroupManager(FileSystem);
 
+			CoreResources = ResourceGroupManager.Add("core");
+			GameResources = ResourceGroupManager.Add("game");
+			
 			ResolutionScale = 1.0f; // This is default for obvious reasons
 		}
 
 		public virtual void Dispose()
 		{
 			AudioSystem.Dispose();
-			ResourceManager.Dispose();
+			CoreResources.Dispose();
+			GameResources.Dispose();
 		}
 
 		public void Run()
@@ -82,15 +89,17 @@ namespace Triton.Game
 
 		private void RenderLoop()
 		{
-			using (GraphicsBackend = new Triton.Graphics.Backend(ResourceManager, RequestedWidth, RequestedHeight, ResolutionScale, Name, false))
+			using (GraphicsBackend = new Triton.Graphics.Backend(CoreResources, RequestedWidth, RequestedHeight, ResolutionScale, Name, false))
 			{
-				Triton.Graphics.Resources.ResourceLoaders.Init(ResourceManager, GraphicsBackend, FileSystem);
+				Triton.Graphics.Resources.ResourceLoaders.Init(CoreResources, GraphicsBackend, FileSystem);
+				Triton.Graphics.Resources.ResourceLoaders.Init(GameResources, GraphicsBackend, FileSystem);
 
 				RendererReady.Set();
 
 				while (Running)
 				{
-					ResourceManager.TickResourceLoading(100);
+					CoreResources.TickResourceLoading(100);
+					GameResources.TickResourceLoading(10);
 					
 					if (!GraphicsBackend.Process())
 						break;
@@ -106,28 +115,33 @@ namespace Triton.Game
 		{
 			WaitHandle.WaitAll(new WaitHandle[] { RendererReady });
 
-			Physics.Resources.ResourceLoaders.Init(ResourceManager, FileSystem);
+			Physics.Resources.ResourceLoaders.Init(CoreResources, FileSystem);
+			Physics.Resources.ResourceLoaders.Init(GameResources, FileSystem);
+
+			DeferredRenderer = new Graphics.Deferred.DeferredRenderer(CoreResources, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
+			PostEffectManager = new Graphics.Post.PostEffectManager(CoreResources, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
 
 			AudioSystem = new Audio.AudioSystem(FileSystem);
-			PhysicsWorld = new Triton.Physics.World(GraphicsBackend, ResourceManager);
+			PhysicsWorld = new Triton.Physics.World(GraphicsBackend, GameResources);
 
-			DeferredRenderer = new Graphics.Deferred.DeferredRenderer(ResourceManager, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
-			PostEffectManager = new Graphics.Post.PostEffectManager(ResourceManager, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
-
-			Stage = new Graphics.Stage(ResourceManager);
+			Stage = new Graphics.Stage(GameResources);
 			Camera = new Graphics.Camera(new Vector2(GraphicsBackend.Width, GraphicsBackend.Height));
 
 			InputManager = new Input.InputManager(GraphicsBackend.WindowBounds);
 
-			GameWorld = new World.GameWorld(Stage, InputManager, ResourceManager, PhysicsWorld, Camera);
+			GameWorld = new World.GameWorld(Stage, InputManager, GameResources, PhysicsWorld, Camera);
 
-			LoadResources();
+			LoadCoreResources();
 
 			// Wait until all initial resources have been loaded
-			while (!ResourceManager.AllResourcesLoaded())
+			while (!CoreResources.AllResourcesLoaded())
 			{
 				Thread.Sleep(1);
 			}
+
+			Log.WriteLine("Core resources loaded");
+
+			LoadResources();
 
 			var watch = new System.Diagnostics.Stopwatch();
 			watch.Start();
@@ -271,10 +285,17 @@ namespace Triton.Game
 		/// <summary>
 		/// Preload resources before the main loop is started
 		/// </summary>
+		protected virtual void LoadCoreResources()
+		{
+			DebugFont = CoreResources.Load<Triton.Graphics.Resources.BitmapFont>("/fonts/system_font");
+			SpriteRenderer = GraphicsBackend.CreateSpriteBatch();
+		}
+
+		/// <summary>
+		/// Load resources
+		/// </summary>
 		protected virtual void LoadResources()
 		{
-			DebugFont = ResourceManager.Load<Triton.Graphics.Resources.BitmapFont>("/fonts/system_font");
-			SpriteRenderer = GraphicsBackend.CreateSpriteBatch();
 		}
 
 		/// <summary>
