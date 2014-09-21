@@ -52,6 +52,7 @@ namespace Triton.Graphics.Resources
 		}
 
 		public string Extension { get { return ".mesh"; } }
+		public string DefaultFilename { get { return ""; } }
 
 		public Common.Resource Create(string name, string parameters)
 		{

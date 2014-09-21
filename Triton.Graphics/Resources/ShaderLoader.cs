@@ -33,6 +33,7 @@ namespace Triton.Graphics.Resources
 		}
 
 		public string Extension { get { return ".glsl"; } }
+		public string DefaultFilename { get { return ""; } }
 
 		private void OutputShader(string name, string type, string parameters, string content)
 		{

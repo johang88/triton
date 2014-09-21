@@ -28,6 +28,7 @@ namespace Triton.Physics.Resources
 		}
 
 		public string Extension { get { return ".col"; } }
+		public string DefaultFilename { get { return ""; } }
 
 		public Common.Resource Create(string name, string parameters)
 		{

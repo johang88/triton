@@ -28,6 +28,7 @@ namespace Triton.Graphics.Resources
 		}
 
 		public string Extension { get { return ".mat"; } }
+		public string DefaultFilename { get { return "/materials/default.mat"; } }
 
 		public Common.Resource Create(string name, string parameters)
 		{

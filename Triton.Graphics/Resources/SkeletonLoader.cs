@@ -24,6 +24,7 @@ namespace Triton.Graphics.Resources
 		}
 
 		public string Extension { get { return ".skeleton"; } }
+		public string DefaultFilename { get { return ""; } }
 
 		public Common.Resource Create(string name, string parameters)
 		{

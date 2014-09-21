@@ -118,6 +118,11 @@ namespace Triton.Common
 		{
 			var path = resource.Name + loader.Extension;
 
+			if (!FileSystem.FileExists(path) && !string.IsNullOrWhiteSpace(loader.DefaultFilename))
+			{
+				path = loader.DefaultFilename;
+			}
+
 			using (var stream = FileSystem.OpenRead(path))
 			{
 				byte[] data = new byte[stream.Length];

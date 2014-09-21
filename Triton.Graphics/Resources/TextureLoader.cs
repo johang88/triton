@@ -26,6 +26,7 @@ namespace Triton.Graphics.Resources
 		}
 
 		public string Extension { get { return ".dds"; } }
+		public string DefaultFilename { get { return "/textures/missing_n.dds"; } }
 
 		public Common.Resource Create(string name, string parameters)
 		{
