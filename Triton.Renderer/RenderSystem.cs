@@ -312,6 +312,11 @@ namespace Triton.Renderer
 			ShaderManager.Bind(handle);
 		}
 
+		public void DispatchCompute(int numGroupsX, int numGroupsY, int numGroupsZ)
+		{
+			GL.DispatchCompute(numGroupsX, numGroupsY, numGroupsZ);
+		}
+
 		public int GetUniformLocation(int handle, string name)
 		{
 			var programHandle = ShaderManager.GetOpenGLHande(handle);

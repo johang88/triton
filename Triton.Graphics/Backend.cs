@@ -520,6 +520,15 @@ namespace Triton.Graphics
 							PrimaryProfiler.End(name);
 						}
 						break;
+					case OpCode.DispatchCompute:
+						{
+							var numGroupsX = reader.ReadInt32();
+							var numGroupsY = reader.ReadInt32();
+							var numGroupsZ = reader.ReadInt32();
+
+							RenderSystem.DispatchCompute(numGroupsX, numGroupsY, numGroupsZ);
+						}
+						break;
 				}
 			}
 		}
@@ -852,6 +861,14 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write((int)name);
 		}
 
+		public void DispatchCompute(int numGroupsX, int numGroupsY, int numGroupsZ)
+		{
+			PrimaryBuffer.Writer.Write((byte)OpCode.DispatchCompute);
+			PrimaryBuffer.Writer.Write(numGroupsX);
+			PrimaryBuffer.Writer.Write(numGroupsY);
+			PrimaryBuffer.Writer.Write(numGroupsZ);
+		}
+
 		public RenderTarget CreateRenderTarget(string name, Renderer.RenderTargets.Definition definition)
 		{
 			if (string.IsNullOrWhiteSpace(name))
@@ -949,7 +966,8 @@ namespace Triton.Graphics
 			DrawMeshInstanced,
 			GenerateMips,
 			ProfileBegin,
-			ProfileEnd
+			ProfileEnd,
+			DispatchCompute
 		}
 
 		/// <summary>
