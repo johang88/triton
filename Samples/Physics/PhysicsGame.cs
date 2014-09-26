@@ -33,42 +33,10 @@ namespace Triton.Samples
 
 			Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0);
 
-			var floor = GameWorld.CreateGameObject();
-			//floor.AddComponent(new Mesh { Filename = "/models/floor" });
-			floor.AddComponent(new BoxRigidBody { Height = 0.01f, Width = 200.0f, Length = 200.0f, IsStatic = true });
-			GameWorld.Add(floor);
-
-			//{
-			//	var wall = GameWorld.CreateGameObject();
-			//	wall.Position.Z = -7f;
-			//	wall.AddComponent(new BoxRigidBody { Height = 4.0f, Width = 1, Length = 15, IsStatic = true });
-			//	GameWorld.Add(wall);
-			//}
-
-			//{
-			//	var wall = GameWorld.CreateGameObject();
-			//	wall.Position.Z = 7f;
-			//	wall.AddComponent(new BoxRigidBody { Height = 4.0f, Width = 1, Length = 15, IsStatic = true });
-			//	GameWorld.Add(wall);
-			//}
-
-			//{
-			//	var wall = GameWorld.CreateGameObject();
-			//	wall.Position.X = -7f;
-			//	wall.AddComponent(new BoxRigidBody { Height = 4.0f, Width = 15, Length = 1, IsStatic = true });
-			//	GameWorld.Add(wall);
-			//}
-
-			//{
-			//	var wall = GameWorld.CreateGameObject();
-			//	wall.Position.X = 7f;
-			//	wall.AddComponent(new BoxRigidBody { Height = 4.0f, Width = 15, Length = 1, IsStatic = true });
-			//	GameWorld.Add(wall);
-			//}
-
 			{
 				var city = GameWorld.CreateGameObject();
 				city.AddComponent(new Mesh { Filename = "/models/city" });
+				city.AddComponent(new MeshRigidBody { Filename = "/collision/city" });
 				GameWorld.Add(city);
 			}
 

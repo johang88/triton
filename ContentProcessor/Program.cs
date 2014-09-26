@@ -43,6 +43,7 @@ namespace ContentProcessor
 			Compilers.Add("skeleton", () => new Triton.Content.Compilers.SkeletonCompiler());
 			Compilers.Add("texture", () => new Triton.Content.Compilers.TextureCompiler());
 			Compilers.Add("material", () => new Triton.Content.Compilers.MaterialCompiler());
+			Compilers.Add("collision", () => new Triton.Content.Compilers.CollisionMeshCompiler());
 
 			Application = new Triton.Common.CommandLineApplication(parameters, "ContentProcessor in=<input_dir> out=<output_dir>");
 

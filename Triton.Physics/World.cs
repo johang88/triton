@@ -55,13 +55,40 @@ namespace Triton.Physics
 			PhysicsWorld.Step(stepSize, true);
 		}
 
-		RigidBody CreateRigidBody(Jitter.Collision.Shapes.Shape shape,  bool isStatic)
+		RigidBody CreateRigidBody(Jitter.Collision.Shapes.Shape shape, bool isStatic)
 		{
 			var body = new RigidBody(shape);
-			body.IsActive = true;
-			body.IsStatic = isStatic;
-			body.EnableDebugDraw = true;
-			body.Material.KineticFriction = 1.0f;
+
+			if (isStatic)
+			{
+				body.IsStatic = true;
+				body.EnableDebugDraw = true;
+				body.Material.KineticFriction = 1.0f;
+			}
+			else
+			{
+				body.IsActive = true;
+				body.EnableDebugDraw = true;
+				body.Material.KineticFriction = 1.0f;
+				body.IsStatic = false;
+			}
+			
+			return body;
+		}
+
+		public Body CreateMeshBody(Resources.Mesh mesh, Vector3 position, bool isStatic = false)
+		{
+			var shape = mesh.Shape;
+			var rigidBody = CreateRigidBody(shape, isStatic);
+
+			rigidBody.Position = Conversion.ToJitterVector(ref position);
+
+			var body = new Body(rigidBody);
+			rigidBody.Tag = body;
+
+			Bodies.Add(body);
+
+			PhysicsWorld.AddBody(rigidBody);
 
 			return body;
 		}
@@ -128,6 +155,7 @@ namespace Triton.Physics
 			foreach (RigidBody body in PhysicsWorld.RigidBodies)
 			{
 				DebugDrawer.Color = DebugColors[count % DebugColors.Length];
+				DebugDrawer.ClockWise = body.Shape is TriangleMeshShape;
 				body.DebugDraw(DebugDrawer);
 				count++;
 			}

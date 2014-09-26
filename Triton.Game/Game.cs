@@ -158,6 +158,11 @@ namespace Triton.Game
 
 			LoadResources();
 
+			while (!GameResources.AllResourcesLoaded())
+			{
+				Thread.Sleep(1);
+			}
+
 			var watch = new System.Diagnostics.Stopwatch();
 			watch.Start();
 

@@ -61,8 +61,8 @@ namespace Triton.Physics.Resources
 					throw new ArgumentException("invalid mesh, unknown version");
 
 				var isConvexHull = reader.ReadBoolean();
-				var vertexCount = reader.ReadInt32() / sizeof(float);
-				var indexCount = reader.ReadInt32() / sizeof(int);
+				var vertexCount = reader.ReadInt32();
+				var indexCount = reader.ReadInt32();
 
 				var vertices = new List<JVector>();
 				var indices = new List<TriangleVertexIndices>();
@@ -72,9 +72,13 @@ namespace Triton.Physics.Resources
 					vertices.Add(new JVector(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
 				}
 
-				for (var i = 0; i < indexCount; i++)
+				for (var i = 0; i < indexCount; i += 3)
 				{
-					indices.Add(new TriangleVertexIndices(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32()));
+					var i0 = reader.ReadInt32();
+					var i1 = reader.ReadInt32();
+					var i2 = reader.ReadInt32();
+
+					indices.Add(new TriangleVertexIndices(i0, i2, i1));
 				}
 
 				mesh.Build(isConvexHull, vertices, indices);

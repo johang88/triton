@@ -19,6 +19,8 @@ namespace Triton.Physics
 		private int TriangleIndex = 0;
 		private int RenderStateId;
 
+		public bool ClockWise = false;
+
 		public DebugDrawer(Backend backend, ResourceManager resourceManager)
 		{
 			if (backend == null)
@@ -29,6 +31,7 @@ namespace Triton.Physics
 				{
 					new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Position, Renderer.VertexPointerType.Float, 3, 0),
 					new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Color, Renderer.VertexPointerType.Float, 3, sizeof(float) * 3),
+					new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Normal, Renderer.VertexPointerType.Float, 3, sizeof(float) * 6),
 				}));
 			Batch.Begin();
 
@@ -48,16 +51,25 @@ namespace Triton.Physics
 
 		public void DrawTriangle(Jitter.LinearMath.JVector pos1, Jitter.LinearMath.JVector pos2, Jitter.LinearMath.JVector pos3)
 		{
+			var n = Jitter.LinearMath.JVector.Cross(pos2 - pos1, pos3 - pos1);
+
 			Batch.AddVector3(pos1.X, pos1.Y, pos1.Z);
 			Batch.AddVector3(ref Color);
+			Batch.AddVector3(n.X, n.Y, n.Z);
 
 			Batch.AddVector3(pos2.X, pos2.Y, pos2.Z);
 			Batch.AddVector3(ref Color);
+			Batch.AddVector3(n.X, n.Y, n.Z);
 
 			Batch.AddVector3(pos3.X, pos3.Y, pos3.Z);
 			Batch.AddVector3(ref Color);
+			Batch.AddVector3(n.X, n.Y, n.Z);
 
-			Batch.AddTriangle(TriangleIndex + 0, TriangleIndex + 2, TriangleIndex + 1);
+			if (!ClockWise)
+				Batch.AddTriangle(TriangleIndex + 0, TriangleIndex + 1, TriangleIndex + 2);
+			else
+				Batch.AddTriangle(TriangleIndex + 0, TriangleIndex + 2, TriangleIndex + 1);
+
 			TriangleIndex += 3;
 		}
 
