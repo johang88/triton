@@ -97,6 +97,7 @@ namespace Triton.Game
 			var graphicsMode = new GraphicsMode(new ColorFormat(32), 24, 0, 0);
 			Window = new NativeWindow(RequestedWidth, RequestedHeight, Name, GameWindowFlags.Default, graphicsMode, DisplayDevice.Default);
 			Window.Visible = true;
+			Window.CursorVisible = false;
 
 			using (GraphicsBackend = new Triton.Graphics.Backend(CoreResources, Window.Width, Window.Height, Window.WindowInfo))
 			{
