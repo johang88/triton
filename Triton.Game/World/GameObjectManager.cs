@@ -9,7 +9,7 @@ using Triton.Input;
 
 namespace Triton.Game.World
 {
-	public class GameWorld
+	public class GameObjectManager
 	{
 		private readonly List<GameObject> GameObjects = new List<GameObject>();
 		private readonly HashSet<GameObject> GameObjectsToAdd = new HashSet<GameObject>();
@@ -26,7 +26,7 @@ namespace Triton.Game.World
 
 		public Graphics.Camera Camera { get; private set; }
 
-		public GameWorld(Stage stage, InputManager inputManager, ResourceManager resourceManager, Triton.Physics.World physicsWorld, Graphics.Camera camera)
+		public GameObjectManager(Stage stage, InputManager inputManager, ResourceManager resourceManager, Triton.Physics.World physicsWorld, Graphics.Camera camera)
 		{
 			if (stage == null)
 				throw new ArgumentNullException("stage");
@@ -62,7 +62,7 @@ namespace Triton.Game.World
 		}
 
 		/// <summary>
-		/// Creates a new empty game object, the game object has to be added to the world using <see cref="GameWorld.Add"/>
+		/// Creates a new empty game object, the game object has to be added to the world using <see cref="GameObjectManager.Add"/>
 		/// </summary>
 		/// <returns></returns>
 		public GameObject CreateGameObject()

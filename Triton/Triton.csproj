@@ -63,11 +63,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Engine.cs" />
+    <Compile Include="GameWorld.cs" />
     <Compile Include="ITask.cs" />
-    <Compile Include="IWindowProvider.cs" />
+    <Compile Include="Windowing\IWindowProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RendererImplementation.cs" />
     <Compile Include="TaskList.cs" />
+    <Compile Include="Windowing\NativeWindowProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ThirdParty\sharpfilesystem\SharpFileSystem\SharpFileSystem.csproj">

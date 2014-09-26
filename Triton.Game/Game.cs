@@ -43,7 +43,7 @@ namespace Triton.Game
 
 		public Audio.AudioSystem AudioSystem { get; private set; }
 
-		public World.GameWorld GameWorld;
+		public World.GameObjectManager GameWorld;
 
 		public Graphics.SpriteBatch SpriteRenderer;
 		public Graphics.Resources.BitmapFont DebugFont;
@@ -143,7 +143,7 @@ namespace Triton.Game
 
 			InputManager = new Input.InputManager(Window.Bounds);
 
-			GameWorld = new World.GameWorld(Stage, InputManager, GameResources, PhysicsWorld, Camera);
+			GameWorld = new World.GameObjectManager(Stage, InputManager, GameResources, PhysicsWorld, Camera);
 
 			LoadCoreResources();
 

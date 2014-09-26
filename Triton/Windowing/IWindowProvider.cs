@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Triton
+namespace Triton.Windowing
 {
 	public delegate void WindowResizeDelegate(int width, int height);
 
@@ -24,7 +24,7 @@ namespace Triton
 
 		// Resizing
 		bool CanResize { get; }
-		void Resize(float width, float height);
+		void Resize(int width, int height);
 
 		WindowResizeDelegate OnResize { get; set; }
 

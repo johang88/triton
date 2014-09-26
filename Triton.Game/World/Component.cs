@@ -9,7 +9,7 @@ namespace Triton.Game.World
 	public class Component : IComponent
 	{
 		public GameObject Owner { get; private set; }
-		protected GameWorld World { get; private set; }
+		protected GameObjectManager World { get; private set; }
 		protected Graphics.Stage Stage { get; private set; }
 		protected GameObject Parent { get { return Owner.Parent; } }
 

@@ -17,7 +17,7 @@ namespace Triton.Graphics
 
 		public float Fov;
 
-		public Vector2 Viewport { get; private set; }
+		public Vector2 Viewport;
 
 		Vector3 Look = Vector3.UnitZ;
 		Vector3 Up = Vector3.UnitY;

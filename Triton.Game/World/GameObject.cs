@@ -13,14 +13,14 @@ namespace Triton.Game.World
 		public GameObject Parent { get; private set; }
 
 		public readonly int Id;
-		public readonly GameWorld World;
+		public readonly GameObjectManager World;
 		public bool Active { get; private set; }
 
 		public Vector3 Position = Vector3.Zero;
 		public Matrix4 Orientation = Matrix4.Identity;
 		public Vector3 Scale = new Vector3(1, 1, 1);
 
-		public GameObject(GameWorld world, int id)
+		public GameObject(GameObjectManager world, int id)
 		{
 			if (world == null)
 				throw new ArgumentNullException("world");
