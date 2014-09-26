@@ -8,7 +8,7 @@ namespace Triton.Game.World.Components
 {
 	public class RigidBody : Component
 	{
-		protected Physics.Body Body;
+		public Physics.Body Body;
 
 		public override void OnDetached()
 		{

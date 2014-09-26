@@ -119,14 +119,8 @@ namespace Triton.Samples
 			PlayerCharacter.Move(movement, InputManager.IsKeyDown(Key.Space));
 			Camera.Position = Player.Position;
 
-			if (InputManager.IsMouseButtonDown(MouseButton.Left))
+			if (InputManager.WasKeyPressed(Key.ControlLeft))
 			{
-				IsMouseLeftDown = true;
-			}
-			else if (IsMouseLeftDown)
-			{
-				IsMouseLeftDown = false;
-
 				var crate = GameWorld.CreateGameObject();
 				crate.Position = Player.Position + Vector3.Transform(new Vector3(0, -0.5f, 1.5f), Camera.Orientation);
 				crate.AddComponent(new Mesh { Filename = "/models/crate" });
@@ -136,6 +130,30 @@ namespace Triton.Samples
 				var force = Vector3.Transform(new Vector3(0, 200, 800), Camera.Orientation);
 				crate.GetComponent<BoxRigidBody>().AddForce(force);
 			}
+
+			if (InputManager.IsMouseButtonDown(MouseButton.Left))
+			{
+				IsMouseLeftDown = true;
+			}
+			else if (IsMouseLeftDown)
+			{
+				IsMouseLeftDown = false;
+
+				var rayPosition = PlayerCharacter.Owner.Position;
+				var rayDirection = Vector3.Transform(Vector3.UnitZ, Camera.Orientation);
+
+				Physics.Body body; Vector3 normal; float fraction;
+				if (PhysicsWorld.Raycast(rayPosition, rayDirection, RaycastCallback, out body, out normal, out fraction))
+				{
+					var force = Vector3.Transform(new Vector3(0, 200, 800), Camera.Orientation);
+					body.AddForce(force);
+				}
+			}
+		}
+
+		private bool RaycastCallback(Physics.Body body, Vector3 normal, float fraction)
+		{
+			return body != PlayerCharacter.Body;
 		}
 	}
 }
