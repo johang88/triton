@@ -14,7 +14,7 @@ namespace Triton.Content.Compilers
 	{
 		private Factory<string, IMeshImporter> ImporterFactory;
 
-		const int Version = 0x0130;
+		const int Version = 0x0140;
 
 		public MeshCompiler()
 		{
@@ -44,6 +44,17 @@ namespace Triton.Content.Compilers
 
 				// Version
 				writer.Write(Version);
+
+				// Skeleton link
+				if (!string.IsNullOrWhiteSpace(mesh.SkeletonPath))
+				{
+					writer.Write(true);
+					writer.Write(mesh.SkeletonPath);
+				}
+				else
+				{
+					writer.Write(false);
+				}
 
 				// Sub mesh count
 				writer.Write(mesh.SubMeshes.Count);

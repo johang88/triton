@@ -80,7 +80,7 @@ namespace Triton.Graphics
 					sphere.Radius = subMesh.BoundingSphereRadius;
 					if (Frustum.Intersects(sphere))
 					{
-						operations.Add(subMesh.Handle, meshInstance.World, subMesh.Material, null, false, meshInstance.CastShadows);
+						operations.Add(subMesh.Handle, meshInstance.World, subMesh.Material, meshInstance.Skeleton, false, meshInstance.CastShadows);
 					}
 				}
 			}
@@ -102,7 +102,7 @@ namespace Triton.Graphics
 					for (var j = 0; j < subMeshes.Length; j++)
 					{
 						var subMesh = subMeshes[j];
-						operations.Add(subMesh.Handle, meshInstance.World, subMesh.Material, null, false, meshInstance.CastShadows);
+						operations.Add(subMesh.Handle, meshInstance.World, subMesh.Material, meshInstance.Skeleton, false, meshInstance.CastShadows);
 					}
 				}
 			}

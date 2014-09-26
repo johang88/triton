@@ -32,7 +32,8 @@ namespace Triton.Graphics.Resources
 
 		public Common.Resource Create(string name, string parameters)
 		{
-			return new Material(name, parameters, ResourceManager, false);
+			var isSkinned = parameters.Contains("SKINNED");
+			return new Material(name, parameters, ResourceManager, isSkinned);
 		}
 
 		public void Load(Common.Resource resource, byte[] data)
@@ -59,7 +60,7 @@ namespace Triton.Graphics.Resources
 					throw new ArgumentException("invalid material, unknown version");
 
 				var shaderPath = reader.ReadString();
-				material.Shader = ResourceManager.Load<ShaderProgram>(shaderPath);
+				material.Shader = ResourceManager.Load<ShaderProgram>(shaderPath, material.IsSkinned ? "SKINNED" : "");
 
 				var samplerCount = reader.ReadInt32();
 				for (var i = 0; i < samplerCount; i++)

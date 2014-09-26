@@ -31,7 +31,7 @@ namespace Triton.Graphics.Resources
 	class MeshLoader : Triton.Common.IResourceLoader<Mesh>
 	{
 		static readonly char[] Magic = new char[] { 'M', 'E', 'S', 'H' };
-		const int Version_1_3 = 0x0130;
+		const int Version_1_4 = 0x0140;
 
 		private readonly Backend Backend;
 		private readonly Triton.Common.IO.FileSystem FileSystem;
@@ -80,10 +80,20 @@ namespace Triton.Graphics.Resources
 
 				var version = reader.ReadInt32();
 
-				var validVersions = new int[] { Version_1_3 };
+				var validVersions = new int[] { Version_1_4 };
 
 				if (!validVersions.Contains(version))
 					throw new ArgumentException("invalid mesh, unknown version");
+
+				var materialFlags = "";
+
+				bool hasSkeleton = reader.ReadBoolean();
+				if (hasSkeleton)
+				{
+					var skeletonPath = reader.ReadString();
+					mesh.Skeleton = ResourceManager.Load<SkeletalAnimation.Skeleton>(skeletonPath);
+					materialFlags = "SKINNED";
+				}
 
 				var meshCount = reader.ReadInt32();
 				mesh.SubMeshes = new SubMesh[meshCount];
@@ -97,7 +107,7 @@ namespace Triton.Graphics.Resources
 
 					Material material = null;
 					if (materialName != "no_material")
-						material = ResourceManager.Load<Material>(materialName);
+						material = ResourceManager.Load<Material>(materialName, materialFlags);
 
 					var triangleCount = reader.ReadInt32();
 					var vertexCount = reader.ReadInt32();

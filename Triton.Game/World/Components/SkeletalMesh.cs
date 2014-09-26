@@ -9,7 +9,6 @@ namespace Triton.Game.World.Components
 	public class SkeletalMesh : Component
 	{
 		public string MeshFilename;
-		public string SkeletonFilename;
 
 		private Graphics.MeshInstance MeshInstance;
 		private Graphics.SkeletalAnimation.SkeletonInstance SkeletonInstance;
@@ -19,11 +18,11 @@ namespace Triton.Game.World.Components
 			base.OnActivate();
 
 			MeshInstance = World.Stage.AddMesh(MeshFilename);
-			
-			var skeleton = World.ResourceManager.Load<Graphics.SkeletalAnimation.Skeleton>(SkeletonFilename);
-			SkeletonInstance = new Graphics.SkeletalAnimation.SkeletonInstance(skeleton);
 
+			SkeletonInstance = new Graphics.SkeletalAnimation.SkeletonInstance(MeshInstance.Mesh);
 			MeshInstance.Skeleton = SkeletonInstance;
+
+			SkeletonInstance.Play("run");
 		}
 
 		public override void OnDetached()

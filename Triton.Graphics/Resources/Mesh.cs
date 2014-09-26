@@ -11,6 +11,7 @@ namespace Triton.Graphics.Resources
 		public SubMesh[] SubMeshes { get; internal set; }
 		public float BoundingSphereRadius;
 		private bool IsLoadedCache = false;
+		public SkeletalAnimation.Skeleton Skeleton = null;
 
 		public Mesh(string name, string parameters)
 			: base(name, parameters)
@@ -24,6 +25,9 @@ namespace Triton.Graphics.Resources
 				return true;
 
 			if (State != Common.ResourceLoadingState.Loaded)
+				return false;
+
+			if (Skeleton != null && Skeleton.State != Common.ResourceLoadingState.Loaded)
 				return false;
 
 			foreach (var subMesh in SubMeshes)

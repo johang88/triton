@@ -96,7 +96,7 @@ namespace Triton.Samples
 				GameWorld.Add(sphere);
 			}
 
-			for (var i = 0; i < 200; i++)
+			for (var i = 0; i < 0; i++)
 			{
 				var x = (float)(-6.0 + RNG.NextDouble() * 15.0);
 				var z = (float)(-8.0 + RNG.NextDouble() * 20.0);

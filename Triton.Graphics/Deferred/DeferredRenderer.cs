@@ -19,6 +19,7 @@ namespace Triton.Graphics.Deferred
 		private RenderShadowsParams RenderShadowsParams = new RenderShadowsParams();
 		private RenderShadowsParams RenderShadowsCubeParams = new RenderShadowsParams();
 		private RenderShadowsParams RenderShadowsSkinnedParams = new RenderShadowsParams();
+		private RenderShadowsParams RenderShadowsSkinnedCubeParams = new RenderShadowsParams();
 		private FogParams FogParams = new FogParams();
 
 		private Vector2 ScreenSize;
@@ -41,6 +42,7 @@ namespace Triton.Graphics.Deferred
 		private Resources.ShaderProgram RenderShadowsShader;
 		private Resources.ShaderProgram RenderShadowsCubeShader;
 		private Resources.ShaderProgram RenderShadowsSkinnedShader;
+		private Resources.ShaderProgram RenderShadowsSkinnedCubeShader;
 		private Resources.ShaderProgram FogShader;
 
 		// Used for point light shadows
@@ -175,6 +177,7 @@ namespace Triton.Graphics.Deferred
 			RenderShadowsShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows");
 			RenderShadowsSkinnedShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows", "SKINNED");
 			RenderShadowsCubeShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows_cube");
+			RenderShadowsSkinnedCubeShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows_cube", "SKINNED");
 			FogShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/fog");
 
 			RandomNoiseTexture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("/textures/random_n");
@@ -216,6 +219,7 @@ namespace Triton.Graphics.Deferred
 			RenderShadowsShader.GetUniformLocations(RenderShadowsParams);
 			RenderShadowsSkinnedShader.GetUniformLocations(RenderShadowsSkinnedParams);
 			RenderShadowsCubeShader.GetUniformLocations(RenderShadowsCubeParams);
+			RenderShadowsSkinnedCubeShader.GetUniformLocations(RenderShadowsSkinnedCubeParams);
 			FogShader.GetUniformLocations(FogParams);
 		}
 
@@ -690,9 +694,28 @@ namespace Triton.Graphics.Deferred
 
 				modelViewProjection = world * view * projection;
 
-				Backend.BeginInstance(RenderShadowsShader.Handle, new int[] { }, null, ShadowsRenderState);
-				Backend.BindShaderVariable(RenderShadowsParams.ModelViewProjection, ref modelViewProjection);
-				Backend.BindShaderVariable(RenderShadowsParams.ClipPlane, ref clipPlane);
+				Resources.ShaderProgram program;
+				RenderShadowsParams shadowParams;
+
+				if (operations[i].Skeleton != null)
+				{
+					program = RenderShadowsSkinnedShader;
+					shadowParams = RenderShadowsSkinnedParams;
+				}
+				else
+				{
+					program = RenderShadowsShader;
+					shadowParams = RenderShadowsParams;
+				}
+
+				Backend.BeginInstance(program.Handle, new int[] { }, null, ShadowsRenderState);
+				Backend.BindShaderVariable(shadowParams.ModelViewProjection, ref modelViewProjection);
+				Backend.BindShaderVariable(shadowParams.ClipPlane, ref clipPlane);
+
+				if (operations[i].Skeleton != null)
+				{
+					Backend.BindShaderVariable(shadowParams.Bones, ref operations[i].Skeleton.FinalBoneTransforms);
+				}
 
 				Backend.DrawMesh(operations[i].MeshHandle);
 
@@ -739,11 +762,30 @@ namespace Triton.Graphics.Deferred
 			{
 				var world = operations[i].WorldMatrix;
 
-				Backend.BeginInstance(RenderShadowsCubeShader.Handle, new int[] { }, null, ShadowsRenderState);
-				Backend.BindShaderVariable(RenderShadowsCubeParams.Model, ref world);
-				Backend.BindShaderVariable(RenderShadowsCubeParams.ClipPlane, ref clipPlane);
-				Backend.BindShaderVariable(RenderShadowsCubeParams.ViewProjectionMatrices, ref viewProjectionMatrices);
-				Backend.BindShaderVariable(RenderShadowsCubeParams.LightPosition, ref light.Position);
+				Resources.ShaderProgram program;
+				RenderShadowsParams shadowParams;
+
+				if (operations[i].Skeleton != null)
+				{
+					program = RenderShadowsSkinnedCubeShader;
+					shadowParams = RenderShadowsSkinnedCubeParams;
+				}
+				else
+				{
+					program = RenderShadowsCubeShader;
+					shadowParams = RenderShadowsCubeParams;
+				}
+
+				Backend.BeginInstance(program.Handle, new int[] { }, null, ShadowsRenderState);
+				Backend.BindShaderVariable(shadowParams.Model, ref world);
+				Backend.BindShaderVariable(shadowParams.ClipPlane, ref clipPlane);
+				Backend.BindShaderVariable(shadowParams.ViewProjectionMatrices, ref viewProjectionMatrices);
+				Backend.BindShaderVariable(shadowParams.LightPosition, ref light.Position);
+
+				if (operations[i].Skeleton != null)
+				{
+					Backend.BindShaderVariable(shadowParams.Bones, ref operations[i].Skeleton.FinalBoneTransforms);
+				}
 
 				Backend.DrawMesh(operations[i].MeshHandle);
 

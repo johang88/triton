@@ -8,7 +8,9 @@ namespace Triton.Graphics.SkeletalAnimation
 {
 	public class SkeletonInstance
 	{
-		public readonly Skeleton Skeleton;
+		public Skeleton Skeleton { get; private set; }
+		private readonly Resources.Mesh Mesh;
+
 		public Matrix4[] FinalBoneTransforms;
 
 		private Transform[] BoneTransforms;
@@ -17,14 +19,24 @@ namespace Triton.Graphics.SkeletalAnimation
 
 		private float Time = 0.0f;
 		private Animation CurrentAnimation = null;
+		private string CurrentAnimationName = null;
+		private bool Initialized = false;
 
 		public SkeletonInstance(Skeleton skeleton)
 		{
 			Skeleton = skeleton;
+		}
 
-			BoneTransforms = skeleton.GetInitialPose();
-			WorldTransforms = skeleton.GetInitialPose();
-			InverseTransforms = skeleton.GetInitialPose();
+		public SkeletonInstance(Resources.Mesh mesh)
+		{
+			Mesh = mesh;
+		}
+
+		private void Init()
+		{
+			BoneTransforms = Skeleton.GetInitialPose();
+			WorldTransforms = Skeleton.GetInitialPose();
+			InverseTransforms = Skeleton.GetInitialPose();
 
 			FinalBoneTransforms = new Matrix4[BoneTransforms.Length];
 
@@ -42,10 +54,22 @@ namespace Triton.Graphics.SkeletalAnimation
 				InverseTransforms[i].Orientation = Quaternion.Invert(InverseTransforms[i].Orientation);
 				InverseTransforms[i].Position = -InverseTransforms[i].Position;
 			}
+
+			Initialized = true;
+
+			if (!string.IsNullOrWhiteSpace(CurrentAnimationName))
+			{
+				Play(CurrentAnimationName);
+			}
 		}
 
 		public void Play(string animation)
 		{
+			CurrentAnimationName = animation;
+
+			if (!Initialized)
+				return;
+
 			CurrentAnimation = Skeleton.Animations.FirstOrDefault(a => a.Name == animation);
 			Time = 0.0f;
 
@@ -61,6 +85,23 @@ namespace Triton.Graphics.SkeletalAnimation
 
 		public void Update(float stepSize)
 		{
+			if (!Initialized)
+			{
+				if (Mesh != null && Mesh.State == Common.ResourceLoadingState.Loaded && Skeleton == null)
+				{
+					Skeleton = Mesh.Skeleton;
+				}
+
+				if (Skeleton != null && Skeleton.State == Common.ResourceLoadingState.Loaded)
+				{
+					Init();
+				}
+				else
+				{
+					return;
+				}
+			}
+
 			if (CurrentAnimation == null)
 				return;
 
@@ -122,7 +163,7 @@ namespace Triton.Graphics.SkeletalAnimation
 			for (var i = 1; i < BoneTransforms.Length; i++)
 			{
 				var parentIndex = Skeleton.BoneParents[i];
-				
+
 				Quaternion.Multiply(ref WorldTransforms[parentIndex].Orientation, ref BoneTransforms[i].Orientation, out WorldTransforms[i].Orientation);
 
 				Vector3 transformedPosition;
