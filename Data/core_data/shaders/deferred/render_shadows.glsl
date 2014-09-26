@@ -15,9 +15,11 @@ uniform mat4x4 modelViewProjection;
 uniform mat4x4[64] bones;
 #endif
 
+uniform float shadowBias = 0.05;
+
 void main()
 {
-	vec3 offset = normalize(iNormal) * 0.05;
+	vec3 offset = normalize(iNormal) * shadowBias;
 	
 #ifdef SKINNED
 	vec4 blendPos = vec4(0, 0, 0, 0);
