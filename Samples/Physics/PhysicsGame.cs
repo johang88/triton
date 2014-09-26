@@ -139,7 +139,7 @@ namespace Triton.Samples
 			{
 				IsMouseLeftDown = false;
 
-				var rayPosition = PlayerCharacter.Owner.Position;
+				var rayPosition = Camera.Position;
 				var rayDirection = Vector3.Transform(Vector3.UnitZ, Camera.Orientation);
 
 				Physics.Body body; Vector3 normal; float fraction;
@@ -153,7 +153,7 @@ namespace Triton.Samples
 
 		private bool RaycastCallback(Physics.Body body, Vector3 normal, float fraction)
 		{
-			return body != PlayerCharacter.Body;
+			return PlayerCharacter != null && body != PlayerCharacter.Body;
 		}
 	}
 }

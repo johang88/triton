@@ -36,6 +36,8 @@ namespace Triton.Content.Compilers
 			List<Vector3> vertices = new List<Vector3>();
 			List<int> indices = new List<int>();
 
+			var indexOffset = 0;
+
 			foreach (var subMesh in mesh.SubMeshes)
 			{
 				var indexData = subMesh.Indices;
@@ -55,30 +57,32 @@ namespace Triton.Content.Compilers
 				var indexReader = new System.IO.BinaryReader(new System.IO.MemoryStream(indexData));
 				var vertexReader = new System.IO.BinaryReader(new System.IO.MemoryStream(vertexData));
 
-				int triangleCount = subMesh.Indices.Length / sizeof(int) / 3;
+				int triangleCount = subMesh.TriangleCount;
 				for (int i = 0; i < triangleCount; i++)
 				{
 					var i0 = indexReader.ReadInt32();
 					var i1 = indexReader.ReadInt32();
 					var i2 = indexReader.ReadInt32();
 
-					indices.Add(i0);
-					indices.Add(i1);
-					indices.Add(i2);
+					indices.Add(i0 + indexOffset);
+					indices.Add(i1 + indexOffset);
+					indices.Add(i2 + indexOffset);
 				}
 
-				var vertexCount = vertexReader.BaseStream.Length / vertexFromat.Size;
+				var vertexCount = triangleCount * 3;
 				vertexReader.BaseStream.Position = positionElement.Offset;
 				for (int i = 0; i < vertexCount; i++)
 				{
 					var vertex = vertexReader.ReadVector3();
 					vertices.Add(vertex);
 
-					vertexReader.BaseStream.Position += vertexFromat.Size;
+					vertexReader.BaseStream.Position += vertexFromat.Size - sizeof(float) * 3;
 				}
 
 				indexReader.Dispose();
 				vertexReader.Dispose();
+
+				indexOffset += vertexCount;
 			}
 
 			using (var stream = File.Open(outputPath, FileMode.Create))
