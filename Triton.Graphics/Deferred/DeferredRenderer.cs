@@ -419,7 +419,7 @@ namespace Triton.Graphics.Deferred
 				}
 				else if (light.Type == LighType.SpotLight)
 				{
-					RenderShadows(SpotShadowsRenderTarget, light, stage, camera, out shadowViewProjection, out shadowCameraClipPlane);
+					RenderShadows(SpotShadowsRenderTarget, light, stage, camera, 0, out shadowViewProjection, out shadowCameraClipPlane);
 				}
 				else
 				{
@@ -442,17 +442,17 @@ namespace Triton.Graphics.Deferred
 					// Cascade 1
 					camera.NearClipDistance = clipDistances.X;
 					camera.FarClipDistance = clipDistances.Y;
-					RenderShadows(DirectionalShadowsRenderTarget[0], light, stage, camera, out shadowViewProjections[0], out shadowCameraClipPlane);
+					RenderShadows(DirectionalShadowsRenderTarget[0], light, stage, camera, 0, out shadowViewProjections[0], out shadowCameraClipPlane);
 
 					// Cascade 2
 					camera.NearClipDistance = clipDistances.X;
 					camera.FarClipDistance = clipDistances.Z;
-					RenderShadows(DirectionalShadowsRenderTarget[1], light, stage, camera, out shadowViewProjections[1], out shadowCameraClipPlane);
+					RenderShadows(DirectionalShadowsRenderTarget[1], light, stage, camera, 1, out shadowViewProjections[1], out shadowCameraClipPlane);
 
 					// Cascade 3
 					camera.NearClipDistance = clipDistances.X;
 					camera.FarClipDistance = clipDistances.W;
-					RenderShadows(DirectionalShadowsRenderTarget[2], light, stage, camera, out shadowViewProjections[2], out shadowCameraClipPlane);
+					RenderShadows(DirectionalShadowsRenderTarget[2], light, stage, camera, 2, out shadowViewProjections[2], out shadowCameraClipPlane);
 
 					// Restore clip plane
 					camera.NearClipDistance = cameraNear;
@@ -633,7 +633,7 @@ namespace Triton.Graphics.Deferred
 			return (distanceFromLight <= (light.Range + clipRangeFix.Length)) && angle <= attAngle;
 		}
 
-		private void RenderShadows(RenderTarget renderTarget, Light light, Stage stage, Camera camera, out Matrix4 viewProjection, out Vector2 clipPlane)
+		private void RenderShadows(RenderTarget renderTarget, Light light, Stage stage, Camera camera, int cascadeIndex, out Matrix4 viewProjection, out Vector2 clipPlane)
 		{
 			Backend.BeginPass(renderTarget, new Vector4(0, 0, 0, 1), true);
 
@@ -711,6 +711,12 @@ namespace Triton.Graphics.Deferred
 				Backend.BeginInstance(program.Handle, new int[] { }, null, ShadowsRenderState);
 				Backend.BindShaderVariable(shadowParams.ModelViewProjection, ref modelViewProjection);
 				Backend.BindShaderVariable(shadowParams.ClipPlane, ref clipPlane);
+
+				if (light.Type == LighType.Directional)
+				{
+					float shadowBias = 0.05f * (cascadeIndex + 1);
+					Backend.BindShaderVariable(shadowParams.ShadowBias, shadowBias);
+				}
 
 				if (operations[i].Skeleton != null)
 				{
