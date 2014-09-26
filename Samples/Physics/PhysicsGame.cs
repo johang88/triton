@@ -100,6 +100,7 @@ namespace Triton.Samples
 
 			Stage.AmbientColor = Vector3.Zero;
 			Stage.CreateDirectionalLight(new Vector3(-0.3f, -0.8f, 0.66f), new Vector3(1f, 0.8f, 0.5f), true, intensity: 2);
+			Stage.CreateDirectionalLight(new Vector3(0.3f, -0.8f, -0.66f), new Vector3(0.8f, 0.7f, 1.0f), false, intensity: 0.8f);
 			Camera.FarClipDistance = 200;
 
 			//DebugFlags |= Game.DebugFlags.RenderStats | Game.DebugFlags.GBuffer | Game.DebugFlags.ShadowMaps;
