@@ -217,6 +217,7 @@ namespace Triton.Game
 			SpriteRenderer.Render(Window.Width, Window.Height);
 
 			RenderUI(deltaTime);
+			SpriteRenderer.Render(Window.Width, Window.Height);
 
 			if ((DebugFlags & DebugFlags.Physics) == DebugFlags.Physics)
 			{

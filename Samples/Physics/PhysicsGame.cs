@@ -71,13 +71,13 @@ namespace Triton.Samples
 			Stage.CreateDirectionalLight(new Vector3(0.3f, -0.8f, -0.66f), new Vector3(0.8f, 0.7f, 1.0f), false, intensity: 0.8f);
 			Camera.FarClipDistance = 200;
 
-			//DebugFlags |= Game.DebugFlags.RenderStats | Game.DebugFlags.GBuffer | Game.DebugFlags.ShadowMaps;
+			//DebugFlags |= Game.DebugFlags.RenderStats;
 
-			PostEffectManager.HDRSettings.EnableLensFlares = false;
-			PostEffectManager.HDRSettings.EnableBloom = false;
+			PostEffectManager.HDRSettings.EnableLensFlares = true;
+			PostEffectManager.HDRSettings.EnableBloom = true;
 
 			//HDRRenderer.AdaptationRate = 2;
-			DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.Lowest;
+			DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.Medium;
 		}
 
 		protected override void Update(float frameTime)
