@@ -27,8 +27,13 @@ uniform vec3 ambientColor;
 void main()
 {
 	vec4 gbuffer0 = texture2D(samplerGBuffer0, texCoord);
+	vec4 gbuffer1 = texture2D(samplerGBuffer1, texCoord);
+	
 	vec3 diffuse = decodeDiffuse(gbuffer0.xyz);
 	
-	oColor = vec4(ambientColor * diffuse, 1.0);
+	if (gbuffer1.w == 0)
+		oColor = vec4(diffuse, 1.0);
+	else
+		oColor = vec4(ambientColor * diffuse, 1.0);
 }
 #endif

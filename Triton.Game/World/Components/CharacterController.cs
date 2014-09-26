@@ -9,7 +9,7 @@ namespace Triton.Game.World.Components
 	public class CharacterController : RigidBody
 	{
 		public float Length = 1.5f;
-		public float Radius = 0.5f;
+		public float Radius = 0.15f;
 
 		private Physics.CharacterController Controller;
 

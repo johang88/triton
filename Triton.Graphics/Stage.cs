@@ -55,7 +55,7 @@ namespace Triton.Graphics
 			Lights.Clear();
 		}
 
-		public void PrepareRenderOperations(Matrix4 viewMatrix, RenderOperations operations, bool shadowCastersOnly = false)
+		public void PrepareRenderOperations(Matrix4 viewMatrix, RenderOperations operations, bool shadowCastersOnly = false, bool frustumCull = true)
 		{
 			Frustum.Matrix = viewMatrix;
 			var sphere = new BoundingSphere();
@@ -78,7 +78,7 @@ namespace Triton.Graphics
 					var subMesh = subMeshes[j];
 
 					sphere.Radius = subMesh.BoundingSphereRadius;
-					if (Frustum.Intersects(sphere))
+					if (!frustumCull || Frustum.Intersects(sphere))
 					{
 						operations.Add(subMesh.Handle, meshInstance.World, subMesh.Material, meshInstance.Skeleton, false, meshInstance.CastShadows);
 					}

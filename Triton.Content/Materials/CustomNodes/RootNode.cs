@@ -31,7 +31,8 @@ namespace Triton.Content.Materials.CustomNodes
 			this.m_Connectors.Add(new NodeGraphConnector("Metallic", this, ConnectorType.InputConnector, 2, "Float"));
 			this.m_Connectors.Add(new NodeGraphConnector("Roughness", this, ConnectorType.InputConnector, 3, "Float"));
 			this.m_Connectors.Add(new NodeGraphConnector("Specular", this, ConnectorType.InputConnector, 4, "Float"));
-			this.Height = 116;
+			this.m_Connectors.Add(new NodeGraphConnector("LightModel", this, ConnectorType.InputConnector, 5, "Float"));
+			this.Height = 136;
 		}
 
 		private string BuildShader(ShaderData shaderData, bool gammaCorrect = false)
@@ -60,6 +61,7 @@ namespace Triton.Content.Materials.CustomNodes
 			Context.Reset();
 
 			NodeGraphListData inputData = this.GetInputData();
+			var defines = new List<string>();
 
 			string diffuseShader = "return vec4(0.5, 0.5, 0.5, 1);";
 			if (inputData.Data[0] is ShaderData)
@@ -91,6 +93,12 @@ namespace Triton.Content.Materials.CustomNodes
 				specularShader = BuildShader(inputData.Data[4] as DataTypes.ShaderData);
 			}
 
+			if (inputData.Data[5] is ShaderData)
+			{
+				// If set then always == UNLIT
+				defines.Add("UNLIT");
+			}
+
 			var shaderBuilder = new StringBuilder();
 
 			foreach (var sampler in Context.Samplers)
@@ -115,7 +123,7 @@ namespace Triton.Content.Materials.CustomNodes
 				.AppendLine(specularShader)
 				.AppendLine("}");
 
-			return new BuildShaderData(shaderBuilder.ToString());
+			return new BuildShaderData(shaderBuilder.ToString(), defines);
 		}
 	}
 }

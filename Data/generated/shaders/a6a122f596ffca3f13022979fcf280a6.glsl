@@ -1,4 +1,3 @@
-#define UNLIT
 import(/shaders/core);
 
 uniform float time;
@@ -103,19 +102,29 @@ uniform mat4x4 itWorld;
 
 uniform vec3 cameraPosition;
 
+uniform sampler2D sampler_10;
+uniform sampler2D sampler_11;
 vec4 get_diffuse() {
-vec4 v_0 = vec4(10, 10, 10, 1);
+vec4 v_0 = texture(sampler_10, texCoord);
 return pow(v_0, vec4(2.2));
 
 }
 vec3 get_normals() {
-return normalize(normal);
+vec4 v_1 = texture(sampler_11, texCoord);
+mat3x3 tbn_3 = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
+vec3 normals_2 = normalize(tbn_3 * normalize(v_1.xyz * 2.0 - 1.0));
+return normals_2;
+
 }
 float get_metallic() {
-return 0.5;
+float f_4 = 1;
+return f_4;
+
 }
 float get_roughness() {
-return 0.5;
+float f_5 = 0.7;
+return f_5;
+
 }
 float get_specular() {
 return 0.5;

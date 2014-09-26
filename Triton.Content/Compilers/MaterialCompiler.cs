@@ -50,6 +50,7 @@ namespace Triton.Content.Compilers
 
 				material = new Material();
 				material.ShaderSource = result.Value;
+				material.Defines = result.Defines;
 				material.Samplers = new Dictionary<string, string>(Context.Samplers);
 			}
 
@@ -63,6 +64,8 @@ namespace Triton.Content.Compilers
 
 			var template = context.GetShaderTemplate();
 			material.ShaderSource = template.Replace("//__MATERIAL__PLACEHOLDER__", material.ShaderSource);
+			if (material.Defines.Count > 0)
+				material.ShaderSource = material.Defines.Select(d => "#define " + d).Aggregate((a, b) => a + "\n" + b) + "\n" + material.ShaderSource;
 
 			using (var stream = context.OpenOutput(shaderPath + ".glsl"))
 			using (var writer = new StreamWriter(stream))

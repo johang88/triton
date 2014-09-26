@@ -67,6 +67,9 @@ void main()
 	vec4 gbuffer1 = texture2D(samplerGBuffer1, project); // normal
 	vec4 gbuffer2 = texture2D(samplerGBuffer2, project); // specular stuff
 	
+	if (gbuffer1.w == 0)
+		discard;
+	
 	float depth = texture2D(samplerDepth, project).x;
 	vec3 position = decodeWorldPosition(project, depth);
 	

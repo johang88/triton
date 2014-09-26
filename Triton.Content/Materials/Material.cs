@@ -10,5 +10,6 @@ namespace Triton.Content.Materials
 	{
 		public Dictionary<string, string> Samplers = new Dictionary<string, string>();
 		public string ShaderSource { get; set; }
+		public List<string> Defines { get; set; }
 	}
 }

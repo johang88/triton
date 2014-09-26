@@ -104,7 +104,7 @@ uniform mat4x4 itWorld;
 uniform vec3 cameraPosition;
 
 vec4 get_diffuse() {
-vec4 v_0 = vec4(10, 10, 10, 1);
+vec4 v_0 = vec4(0.2156863, 0.2156863, 0.2156863, 1);
 return pow(v_0, vec4(2.2));
 
 }

@@ -682,11 +682,11 @@ namespace Triton.Graphics.Deferred
 			viewProjection = view * projection;
 
 			ShadowRenderOperations.Reset();
-			stage.PrepareRenderOperations(view, ShadowRenderOperations);
+			stage.PrepareRenderOperations(view, ShadowRenderOperations, true, false);
 
 			RenderOperation[] operations;
 			int count;
-			RenderOperations.GetOperations(out operations, out count);
+			ShadowRenderOperations.GetOperations(out operations, out count);
 
 			for (var i = 0; i < count; i++)
 			{

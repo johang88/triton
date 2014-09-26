@@ -27,11 +27,20 @@ namespace Triton.Samples
 		{
 		}
 
+		private void CreateContainer(Vector3 position)
+		{
+			var container = GameWorld.CreateGameObject();
+			container.Position = position;
+			container.AddComponent(new Mesh { Filename = "/models/container" });
+			container.AddComponent(new MeshRigidBody { Filename = "/collision/container" });
+			GameWorld.Add(container);
+		}
+
 		protected override void LoadResources()
 		{
 			base.LoadResources();
 
-			Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0);
+			Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0) * 0.1f;
 
 			{
 				var city = GameWorld.CreateGameObject();
@@ -55,28 +64,27 @@ namespace Triton.Samples
 				GameWorld.Add(crate);
 			}
 
-			// Light it
-			//{
-			//	var sphere = GameWorld.CreateGameObject();
-			//	sphere.Position = new Vector3(0, 2.5f, 2);
-			//	sphere.Scale = new Vector3(1, 1, 1);
-			//	sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = "/materials/light_sphere", CastShadows = false });
-			//	sphere.AddComponent(new PointLight { Color = new Vector3(1f, 0.8f, 0.5f), Intensity = 2 });
-			//	sphere.AddComponent(new SphereRigidBody { Radius = 0.7f });
-			//	GameWorld.Add(sphere);
-			//}
+			CreateContainer(new Vector3(0, 0, 4 + 4 * 0));
+			CreateContainer(new Vector3(0, 0, 4 + 4 * 1));
+			CreateContainer(new Vector3(0, 0, 4 + 4 * 2));
+			CreateContainer(new Vector3(6, 0, 4 + 4 * 2));
+
+			CreateContainer(new Vector3(0, 2, 5 + 2 * 0));
+			CreateContainer(new Vector3(0, 2, 5 + 2 * 1));
+			CreateContainer(new Vector3(0, 2, 5 + 2 * 2));
+			CreateContainer(new Vector3(0, 2, 5 + 2 * 3));
 
 			Stage.AmbientColor = Vector3.Zero;
-			Stage.CreateDirectionalLight(new Vector3(-0.3f, -0.8f, 0.66f), new Vector3(1f, 0.8f, 0.5f), true, intensity: 2);
-			Stage.CreateDirectionalLight(new Vector3(0.3f, -0.8f, -0.66f), new Vector3(0.8f, 0.7f, 1.0f), false, intensity: 0.8f);
+			Stage.CreateDirectionalLight(new Vector3(-0.3f, -0.8f, 0.66f), new Vector3(1f, 0.8f, 0.5f), true, intensity: 1);
+			Stage.CreateDirectionalLight(new Vector3(0.3f, -0.8f, -0.66f), new Vector3(0.8f, 0.7f, 1.0f), false, intensity: 0.2f);
 			Camera.FarClipDistance = 200;
 
-			//DebugFlags |= Game.DebugFlags.RenderStats;
+			DebugFlags |= Game.DebugFlags.RenderStats;
 
 			PostEffectManager.HDRSettings.EnableLensFlares = true;
 			PostEffectManager.HDRSettings.EnableBloom = true;
+			PostEffectManager.HDRSettings.AdaptationRate = 2;
 
-			//HDRRenderer.AdaptationRate = 2;
 			DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.Medium;
 		}
 
@@ -139,15 +147,15 @@ namespace Triton.Samples
 			{
 				IsMouseLeftDown = false;
 
-				var rayPosition = Camera.Position;
-				var rayDirection = Vector3.Transform(Vector3.UnitZ, Camera.Orientation);
+				var sphere = GameWorld.CreateGameObject();
+				sphere.Position = Player.Position + Vector3.Transform(new Vector3(0, -0.5f, 1.5f), Camera.Orientation);
+				sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = "/materials/light_sphere", CastShadows = false });
+				sphere.AddComponent(new PointLight { Range = 2 + (float)RNG.NextDouble() * 8, CastShadows = true, Color = new Vector3(0.1f + (float)RNG.NextDouble() * 0.9f, 0.1f + (float)RNG.NextDouble() * 0.9f, 0.1f + (float)RNG.NextDouble() * 0.9f), Intensity = 0.2f + (float)RNG.NextDouble() * 1.5f });
+				sphere.AddComponent(new SphereRigidBody { Radius = 0.4f });
+				GameWorld.Add(sphere);
 
-				Physics.Body body; Vector3 normal; float fraction;
-				if (PhysicsWorld.Raycast(rayPosition, rayDirection, RaycastCallback, out body, out normal, out fraction))
-				{
-					var force = Vector3.Transform(new Vector3(0, 200, 800), Camera.Orientation);
-					body.AddForce(force);
-				}
+				var force = Vector3.Transform(new Vector3(0, 100, 200), Camera.Orientation);
+				sphere.GetComponent<SphereRigidBody>().AddForce(force);
 			}
 		}
 
