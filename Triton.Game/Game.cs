@@ -171,7 +171,6 @@ namespace Triton.Game
 			while (Running)
 			{
 				FrameCount++;
-				FrameTime = (float)watch.Elapsed.TotalSeconds;
 				watch.Restart();
 
 				ElapsedTime += FrameTime;
@@ -194,7 +193,10 @@ namespace Triton.Game
 
 				Update(FrameTime);
 
-				RenderScene(FrameTime);
+				RenderScene(FrameTime, watch);
+				FrameTime = (float)watch.Elapsed.TotalSeconds;
+				GraphicsBackend.EndScene();
+
 				Thread.Sleep(1);
 			}
 		}
@@ -203,11 +205,13 @@ namespace Triton.Game
 		/// Feed render commands to the graphics backend.
 		/// Only override this method if you wish to customize the rendering pipeline.
 		/// </summary>
-		protected virtual void RenderScene(float deltaTime)
+		protected virtual void RenderScene(float deltaTime, System.Diagnostics.Stopwatch watch)
 		{
 			GraphicsBackend.BeginScene();
 
+			var timeStart = watch.ElapsedMilliseconds;
 			var lightOutput = DeferredRenderer.Render(Stage, Camera);
+			var deferredRenderTime = watch.ElapsedMilliseconds - timeStart;
 
 			var postProcessedResult = PostEffectManager.Render(Camera, DeferredRenderer.GBuffer, lightOutput, deltaTime);
 
@@ -260,7 +264,9 @@ namespace Triton.Game
 				var offsetY = 1;
 
 				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4), Vector4.One, "Frame stats:");
-				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tFrame time: {0:0.00}ms", GraphicsBackend.FrameTime * 1000.0f);
+				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tGraphics Frame time: {0:0.00}ms", GraphicsBackend.FrameTime * 1000.0f);
+				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tUpdate Frame time: {0:0.00}ms", FrameTime * 1000.0f);
+				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tDeferred Submit Time: {0}ms", deferredRenderTime);
 				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tAverage FPS: {0:0}", averageFPS);
 				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tFPS: {0:0}", fps);
 				DebugFont.DrawText(SpriteRenderer, new Vector2(4, 4 + DebugFont.LineHeight * offsetY++), Vector4.One, "\tLights: {0}", DeferredRenderer.RenderedLights);
@@ -288,8 +294,6 @@ namespace Triton.Game
 
 				SpriteRenderer.Render(Window.Width, Window.Height);
 			}
-
-			GraphicsBackend.EndScene();
 		}
 
 		protected virtual void RenderUI(float deltaTime)

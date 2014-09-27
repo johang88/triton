@@ -519,6 +519,14 @@ namespace Triton
 			CreateFromAxisAngle(ref axis, angle, out m);
 		}
 
+		public static void Transpose(ref Matrix4 mat, out Matrix4 o)
+		{
+			o.Row0 = mat.Column0;
+			o.Row1 = mat.Column1;
+			o.Row2 = mat.Column2;
+			o.Row3 = mat.Column3;
+		}
+
 		public static Matrix4 Transpose(Matrix4 mat)
 		{
 			return new Matrix4(mat.Column0, mat.Column1, mat.Column2, mat.Column3);

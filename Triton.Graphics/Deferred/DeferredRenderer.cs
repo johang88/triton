@@ -296,7 +296,6 @@ namespace Triton.Graphics.Deferred
 
 		private void RenderScene(Stage stage, Camera camera, ref Matrix4 view, ref Matrix4 projection)
 		{
-			var modelViewProjection = Matrix4.Identity;
 			var viewProjection = view * projection;
 
 			RenderOperations.Reset();
@@ -306,18 +305,25 @@ namespace Triton.Graphics.Deferred
 			int count;
 			RenderOperations.GetOperations(out operations, out count);
 
+			Resources.Material activeMaterial = null;
+			Matrix4 worldView, world, itWorld, worldViewProjection;
+
 			for (var i = 0; i < count; i++)
 			{
-				var world = operations[i].WorldMatrix;
+				world = operations[i].WorldMatrix;
 
-				modelViewProjection = world * viewProjection;
+				Matrix4.Mult(ref world, ref viewProjection, out worldViewProjection);
+				Matrix4.Mult(ref world, ref view, out worldView);
 
-				var worldView = world * view;
-				var itWorld = Matrix4.Transpose(Matrix4.Invert(world));
+				itWorld = Matrix4.Transpose(Matrix4.Invert(world));
 
-				operations[i].Material.BindMaterial(Backend, camera, ref world, ref worldView, ref itWorld, ref modelViewProjection, operations[i].Skeleton, 0);
+				if (activeMaterial == null || activeMaterial.Id != operations[i].Material.Id)
+				{
+					operations[i].Material.BeginInstance(Backend, camera, 0);
+				}
+
+				operations[i].Material.BindPerObject(Backend, ref world, ref worldView, ref itWorld, ref worldViewProjection, operations[i].Skeleton);
 				Backend.DrawMesh(operations[i].MeshHandle);
-				Backend.EndInstance();
 			}
 		}
 
@@ -708,7 +714,7 @@ namespace Triton.Graphics.Deferred
 					shadowParams = RenderShadowsParams;
 				}
 
-				Backend.BeginInstance(program.Handle, new int[] { }, null, ShadowsRenderState);
+				Backend.BeginInstance(program.Handle, null, null, ShadowsRenderState);
 				Backend.BindShaderVariable(shadowParams.ModelViewProjection, ref modelViewProjection);
 				Backend.BindShaderVariable(shadowParams.ClipPlane, ref clipPlane);
 
@@ -782,7 +788,7 @@ namespace Triton.Graphics.Deferred
 					shadowParams = RenderShadowsCubeParams;
 				}
 
-				Backend.BeginInstance(program.Handle, new int[] { }, null, ShadowsRenderState);
+				Backend.BeginInstance(program.Handle, null, null, ShadowsRenderState);
 				Backend.BindShaderVariable(shadowParams.Model, ref world);
 				Backend.BindShaderVariable(shadowParams.ClipPlane, ref clipPlane);
 				Backend.BindShaderVariable(shadowParams.ViewProjectionMatrices, ref viewProjectionMatrices);

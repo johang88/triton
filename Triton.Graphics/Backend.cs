@@ -614,11 +614,18 @@ namespace Triton.Graphics
 			PrimaryBuffer.Writer.Write((byte)OpCode.BeginInstance);
 
 			PrimaryBuffer.Writer.Write(shaderHandle);
-			PrimaryBuffer.Writer.Write(textures.Length);
-
-			for (var i = 0; i < textures.Length; i++)
+			if (textures != null)
 			{
-				PrimaryBuffer.Writer.Write(textures[i]);
+				PrimaryBuffer.Writer.Write(textures.Length);
+
+				for (var i = 0; i < textures.Length; i++)
+				{
+					PrimaryBuffer.Writer.Write(textures[i]);
+				}
+			}
+			else
+			{
+				PrimaryBuffer.Writer.Write(0);
 			}
 
 			PrimaryBuffer.Writer.Write(renderStateId);
@@ -639,7 +646,8 @@ namespace Triton.Graphics
 
 		public void EndInstance()
 		{
-			PrimaryBuffer.Writer.Write((byte)OpCode.EndInstance);
+			// no op
+			//PrimaryBuffer.Writer.Write((byte)OpCode.EndInstance);
 		}
 
 		/// <summary>

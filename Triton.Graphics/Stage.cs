@@ -59,6 +59,7 @@ namespace Triton.Graphics
 		{
 			Frustum.Matrix = viewMatrix;
 			var sphere = new BoundingSphere();
+			var zero = Vector3.Zero;
 
 			for (var i = 0; i < Meshes.Count; i++)
 			{
@@ -71,7 +72,7 @@ namespace Triton.Graphics
 				if (!meshInstance.CastShadows && shadowCastersOnly)
 					continue;
 
-				sphere.Center = Vector3.Transform(Vector3.Zero, meshInstance.World);
+				Vector3.Transform(ref zero, ref meshInstance.World, out sphere.Center);
 
 				for (var j = 0; j < subMeshes.Length; j++)
 				{
@@ -88,11 +89,15 @@ namespace Triton.Graphics
 
 		public void PrepareRenderOperations(Vector3 position, float radius, RenderOperations operations, bool shadowCastersOnly = false)
 		{
+			var zero = Vector3.Zero;
+			Vector3 meshPosition;
+
 			for (var i = 0; i < Meshes.Count; i++)
 			{
 				var meshInstance = Meshes[i];
 				var subMeshes = meshInstance.Mesh.SubMeshes;
-				var meshPosition = Vector3.Transform(Vector3.Zero, meshInstance.World);
+				
+				Vector3.Transform(ref zero, ref meshInstance.World, out meshPosition);
 
 				if (!meshInstance.Mesh.IsLoaded())
 					continue;

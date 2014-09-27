@@ -63,6 +63,23 @@ namespace Triton.Graphics.Resources
 			Textures.Clear();
 		}
 
+		public void BeginInstance(Backend backend, Camera camera, int renderStateId)
+		{
+			if (!Initialized)
+			{
+				Initialize(backend);
+			}
+
+			backend.BeginInstance(Shader.Handle, TextureHandles, samplers: Samplers, renderStateId: renderStateId);
+			for (var i = 0; i < SamplerToTexture.Length; i++)
+			{
+				backend.BindShaderVariable(SamplerToTexture[i], i);
+			}
+
+			backend.BindShaderVariable(Handles.Time, backend.ElapsedTime);
+			backend.BindShaderVariable(Handles.CameraPosition, ref camera.Position);
+		}
+
 		/// <summary>
 		/// Bind the material, this will call BeginInstance on the backend
 		/// It is up to the caller to call EndInstance
@@ -72,27 +89,12 @@ namespace Triton.Graphics.Resources
 		/// <param name="worldView"></param>
 		/// <param name="itWorldView"></param>
 		/// <param name="modelViewProjection"></param>
-		public void BindMaterial(Backend backend, Camera camera, ref Matrix4 world, ref Matrix4 worldView, ref Matrix4 itWorld, ref Matrix4 modelViewProjection, SkeletalAnimation.SkeletonInstance skeleton, int renderStateId)
+		public void BindPerObject(Backend backend, ref Matrix4 world, ref Matrix4 worldView, ref Matrix4 itWorld, ref Matrix4 modelViewProjection, SkeletalAnimation.SkeletonInstance skeleton)
 		{
-			if (!Initialized)
-			{
-				Initialize(backend);
-			}
-
-			backend.BeginInstance(Shader.Handle, TextureHandles, samplers: Samplers, renderStateId: renderStateId);
-
 			backend.BindShaderVariable(Handles.ModelViewProjection, ref modelViewProjection);
 			backend.BindShaderVariable(Handles.World, ref world);
 			backend.BindShaderVariable(Handles.WorldView, ref worldView);
 			backend.BindShaderVariable(Handles.ItWorld, ref itWorld);
-
-			for (var i = 0; i < SamplerToTexture.Length; i++)
-			{
-				backend.BindShaderVariable(SamplerToTexture[i], i);
-			}
-
-			backend.BindShaderVariable(Handles.Time, backend.ElapsedTime);
-			backend.BindShaderVariable(Handles.CameraPosition, ref camera.Position);
 
 			if (skeleton != null)
 			{

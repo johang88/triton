@@ -85,12 +85,7 @@ namespace Triton.Samples
 			PostEffectManager.HDRSettings.EnableBloom = true;
 			PostEffectManager.HDRSettings.AdaptationRate = 2;
 
-			for (var i = 0; i < 1000; i++ )
-			{
-				Stage.AddMesh("/models/crate").World = Matrix4.CreateTranslation(0.1f * i, 0, 0);
-			}
-
-				DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.Medium;
+			DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.Medium;
 		}
 
 		protected override void Update(float frameTime)
