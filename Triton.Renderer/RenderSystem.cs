@@ -258,14 +258,7 @@ namespace Triton.Renderer
 
 		public void RenderMesh(int handle)
 		{
-			int triangleCount, vertexArrayObjectId;
-
-			MeshManager.GetRenderData(handle, out triangleCount, out vertexArrayObjectId);
-			if (triangleCount <= 0)
-				return;
-
-			GL.BindVertexArray(vertexArrayObjectId);
-			GL.DrawElements(PrimitiveType.Triangles, triangleCount * 3, DrawElementsType.UnsignedInt, IntPtr.Zero);
+			MeshManager.Render(handle);
 		}
 
 		public void RenderMeshInstanced(int handle, int instanceCount)

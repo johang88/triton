@@ -16,6 +16,7 @@ namespace Triton.Renderer.Meshes
 		private bool Disposed = false;
 		private readonly object Lock = new object();
 		private readonly BufferManager BufferManager;
+		private int ActiveMeshHandle = 0;
 
 		public MeshManager(BufferManager bufferManager)
 		{
@@ -143,6 +144,8 @@ namespace Triton.Renderer.Meshes
 			BufferManager.Bind(Handles[index].IndexBufferID);
 
 			GL.BindVertexArray(0);
+			ActiveMeshHandle = 0;
+
 			BufferManager.Unbind(Handles[index].VertexBufferID[0]);
 			BufferManager.Unbind(Handles[index].IndexBufferID);
 
@@ -174,6 +177,7 @@ namespace Triton.Renderer.Meshes
 			BufferManager.Bind(Handles[index].IndexBufferID);
 
 			GL.BindVertexArray(0);
+			ActiveMeshHandle = 0;
 			BufferManager.Unbind(Handles[index].IndexBufferID);
 		}
 
@@ -188,6 +192,25 @@ namespace Triton.Renderer.Meshes
 				GL.VertexAttribPointer(index, element.Count, (VertexAttribPointerType)(int)element.Type, false, vertexFormat.Size, element.Offset);
 				GL.VertexAttribDivisor(index, element.Divisor);
 			}
+		}
+
+		public void Render(int handle)
+		{
+			int index, id;
+			ExtractHandle(handle, out index, out id);
+
+			if (id == -1 || Handles[index].Id != id || !Handles[index].Initialized)
+			{
+				return;
+			}
+
+			if (ActiveMeshHandle != handle)
+			{
+				GL.BindVertexArray(Handles[index].VertexArrayObjectID);
+				ActiveMeshHandle = handle;
+			}
+
+			GL.DrawElements(PrimitiveType.Triangles, Handles[index].TriangleCount * 3, DrawElementsType.UnsignedInt, IntPtr.Zero);
 		}
 
 		public void GetRenderData(int handle, out int triangleCount, out int vertexArrayObjectId)
