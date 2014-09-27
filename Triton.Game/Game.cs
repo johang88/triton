@@ -195,7 +195,6 @@ namespace Triton.Game
 
 				RenderScene(FrameTime, watch);
 				FrameTime = (float)watch.Elapsed.TotalSeconds;
-				GraphicsBackend.EndScene();
 
 				Thread.Sleep(1);
 			}
@@ -294,6 +293,8 @@ namespace Triton.Game
 
 				SpriteRenderer.Render(Window.Width, Window.Height);
 			}
+
+			GraphicsBackend.EndScene();
 		}
 
 		protected virtual void RenderUI(float deltaTime)

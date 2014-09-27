@@ -42,6 +42,7 @@ namespace Triton.Graphics.Terrain
 
 			Mesh = new Resources.Mesh("terrain", "");
 			Mesh.SubMeshes = Chunks.Select(c => c.Mesh).ToArray();
+			Mesh.State = Common.ResourceLoadingState.Loaded;
 		}
 
 		public void Update(Vector3 cameraPosition)

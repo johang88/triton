@@ -84,6 +84,7 @@ namespace Triton.Graphics.Terrain
 			Terrain.Backend.RenderSystem.SetBufferData(Mesh.IndexBufferHandle, indices, false, true);
 
 			Mesh.Handle = Terrain.Backend.RenderSystem.CreateMesh(indices.Length / 3, Mesh.VertexBufferHandle, Mesh.IndexBufferHandle, true);
+			Mesh.BoundingSphereRadius = 10000;
 		}
 
 		public void Update(Vector3 cameraPosition)

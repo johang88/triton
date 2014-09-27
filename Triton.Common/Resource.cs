@@ -13,7 +13,7 @@ namespace Triton.Common
 	public abstract class Resource
 	{
 		public readonly string Name;
-		public ResourceLoadingState State { get; internal set; }
+		public ResourceLoadingState State { get; set; }
 		public int ReferenceCount { get; internal set; }
 		public string Parameters { get; set; }
 
