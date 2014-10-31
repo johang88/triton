@@ -120,7 +120,7 @@ namespace Triton.Renderer.Meshes
 			if (data == IntPtr.Zero || data == null)
 				return;
 
-			GL.Ext.NamedBufferData(Handles[index].BufferID, dataLength, data, (ExtDirectStateAccess)(stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw));
+			GL.Ext.NamedBufferData(Handles[index].BufferID, dataLength, data, (ExtDirectStateAccess)(stream ? BufferUsageHint.DynamicDraw : BufferUsageHint.StaticDraw));
 		}
 
 		public void SetData<T>(int handle, T[] data, bool stream)
@@ -141,7 +141,7 @@ namespace Triton.Renderer.Meshes
 			}
 
 			var dataLength = new IntPtr(data.Length * Marshal.SizeOf(typeof(T)));
-			GL.Ext.NamedBufferData(Handles[index].BufferID, dataLength, data, (ExtDirectStateAccess)(stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw));
+			GL.Ext.NamedBufferData(Handles[index].BufferID, dataLength, data, (ExtDirectStateAccess)(stream ? BufferUsageHint.DynamicDraw : BufferUsageHint.StaticDraw));
 
 			Handles[index].Initialized = true;
 		}
