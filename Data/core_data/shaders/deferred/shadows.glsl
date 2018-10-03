@@ -180,7 +180,7 @@ float get_shadows_cube(samplerCubeShadow shadowMap, float nDotL, vec3 worldPos, 
 		return 0;
 		
 	float bias = 0.005 * tan(acos(nDotL));
-	bias= clamp(bias, 0, 0.01);
+	bias= clamp(bias, 0.0, 0.01);
 
 	return check_shadow_cube(shadowMap, worldPos, clipPlane, 0, texelSize, lightPosition);
 }
