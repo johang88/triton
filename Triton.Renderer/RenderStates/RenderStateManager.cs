@@ -82,7 +82,7 @@ namespace Triton.Renderer.RenderStates
 
 			if (oldState == null || (oldState.BlendingSrc != state.BlendingSrc || oldState.BlendingDest != state.BlendingDest))
 			{
-				GL.BlendFunc((OpenTK.Graphics.OpenGL.BlendingFactorSrc)(int)state.BlendingSrc, (OpenTK.Graphics.OpenGL.BlendingFactorDest)(int)state.BlendingDest);
+				GL.BlendFunc((OpenTK.Graphics.OpenGL.BlendingFactor)(int)state.BlendingSrc, (OpenTK.Graphics.OpenGL.BlendingFactor)(int)state.BlendingDest);
 			}
 
 			if (oldState == null || oldState.CullFace != state.CullFace)

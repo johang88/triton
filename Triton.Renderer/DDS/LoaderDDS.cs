@@ -23,7 +23,7 @@ namespace Triton.Renderer.DDS
 		private static int _Width, _Height, _Depth, _MipMapCount;
 		private static int _BytesForMainSurface; // must be handled with care when implementing uncompressed formats!
 		private static byte _BytesPerBlock;
-		private static OpenTK.Graphics.OpenGL.PixelInternalFormat _PixelInternalFormat;
+		private static OpenTK.Graphics.OpenGL.InternalFormat _PixelInternalFormat;
 		#endregion Simplified In-Memory representation of the Image
 
 		#region Flag Enums
@@ -183,7 +183,7 @@ namespace Triton.Renderer.DDS
 			_MipMapCount = 0;
 			_BytesForMainSurface = 0;
 			_BytesPerBlock = 0;
-			_PixelInternalFormat = OGL.PixelInternalFormat.Rgba8;
+			_PixelInternalFormat = OGL.InternalFormat.Rgba8;
 			#endregion
 
 			#region Try
@@ -267,19 +267,19 @@ namespace Triton.Renderer.DDS
 					switch ((eFOURCC)pfFourCC)
 					{
 						case eFOURCC.DXT1:
-							_PixelInternalFormat = (OGL.PixelInternalFormat)ExtTextureCompressionS3tc.CompressedRgbS3tcDxt1Ext;
+							_PixelInternalFormat = (OGL.InternalFormat)ExtTextureCompressionS3tc.CompressedRgbS3tcDxt1Ext;
 							_BytesPerBlock = 8;
 							_IsCompressed = true;
 							break;
 						//case eFOURCC.DXT2:
 						case eFOURCC.DXT3:
-							_PixelInternalFormat = (OGL.PixelInternalFormat)ExtTextureCompressionS3tc.CompressedRgbaS3tcDxt3Ext;
+							_PixelInternalFormat = (OGL.InternalFormat)ExtTextureCompressionS3tc.CompressedRgbaS3tcDxt3Ext;
 							_BytesPerBlock = 16;
 							_IsCompressed = true;
 							break;
 						//case eFOURCC.DXT4:
 						case eFOURCC.DXT5:
-							_PixelInternalFormat = (OGL.PixelInternalFormat)ExtTextureCompressionS3tc.CompressedRgbaS3tcDxt5Ext;
+							_PixelInternalFormat = (OGL.InternalFormat)ExtTextureCompressionS3tc.CompressedRgbaS3tcDxt5Ext;
 							_BytesPerBlock = 16;
 							_IsCompressed = true;
 							break;
