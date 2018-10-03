@@ -235,7 +235,7 @@ namespace Triton.Game
 
             var lightOutput = DeferredRenderer.Render(Stage, Camera);
 
-            var postProcessedResult = PostEffectManager.Render(Camera, DeferredRenderer.GBuffer, lightOutput, deltaTime);
+            var postProcessedResult = PostEffectManager.Render(Camera, Stage, DeferredRenderer.GBuffer, lightOutput, deltaTime);
 
             GraphicsBackend.BeginPass(null, Vector4.Zero, ClearFlags.Color);
 

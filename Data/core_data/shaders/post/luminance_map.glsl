@@ -1,5 +1,5 @@
-import(/shaders/core);
-import(/shaders/post/postcommon);
+#include "/shaders/core"
+#include "/shaders/post/postcommon"
 #ifdef VERTEX_SHADER
 
 layout(location = ATTRIB_POSITION) in vec3 iPosition;

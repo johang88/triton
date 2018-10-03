@@ -3,178 +3,202 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Graphics.Post.Effects;
 using Triton.Renderer.RenderTargets;
 
 namespace Triton.Graphics.Post
 {
-	public class PostEffectManager
-	{
-		private readonly RenderTarget[] TemporaryRenderTargets = new RenderTarget[2];
-		private readonly RenderTargetManager RenderTargetManager;
-		private readonly Backend Backend;
-		private readonly Common.ResourceManager ResourceManager;
+    public class PostEffectManager
+    {
+        private readonly RenderTarget[] _temporaryRenderTargets = new RenderTarget[2];
+        private readonly RenderTargetManager _renderTargetManager;
+        private readonly Backend _backend;
 
-		private BatchBuffer QuadMesh;
-		private SpriteBatch Sprite;
+        private readonly BatchBuffer _quadMesh;
+        private SpriteBatch _sprite;
 
-		// Settings
-		public AntiAliasing AntiAliasing = AntiAliasing.FXAA;
-		public AntiAliasingQuality AntiAliasingQuality = AntiAliasingQuality.Ultra;
-		public HDRSettings HDRSettings = new HDRSettings();
-		public ScreenSpaceReflectionsSettings ScreenSpaceReflectionsSettings = new ScreenSpaceReflectionsSettings();
+        // Settings
+        public AntiAliasing AntiAliasing { get; set; }
+        public AntiAliasingQuality AntiAliasingQuality { get; set; }
+        public HDRSettings HDRSettings { get; set; }
+        public DofSettings DofSettings { get; set; }
+        private RenderTarget _ssaoOutput;
 
-		// Effects
-		private readonly Effects.ScreenSpaceReflections ScreenSpaceReflections;
-		private readonly Effects.AdaptLuminance AdaptLuminance;
-		private readonly Effects.Bloom Bloom;
-		private readonly Effects.LensFlares LensFlares;
-		private readonly Effects.Tonemap Tonemap;
-		private readonly Effects.Gamma Gamma;
-		private readonly Effects.FXAA FXAA;
-		private readonly Effects.SMAA SMAA;
+        public VisualizationMode VisualizationMode = Post.VisualizationMode.None;
 
-		public PostEffectManager(Common.IO.FileSystem fileSystem, Common.ResourceManager resourceManager, Backend backend, int width, int height)
-		{
-			if (fileSystem == null)
-				throw new ArgumentNullException("fileSystem");
-			if (resourceManager == null)
-				throw new ArgumentNullException("resourceManager");
-			if (backend == null)
-				throw new ArgumentNullException("backend");
+        // Effects
+        private readonly Effects.AdaptLuminance _adaptLuminance;
+        private readonly Effects.Bloom _bloom;
+        private readonly Effects.Tonemap _tonemap;
+        private readonly Effects.Gamma _gamma;
+        private readonly Effects.FXAA _fxaa;
+        private readonly Effects.SMAA _smaa;
+        private readonly Effects.Fog _fog;
+        private readonly Effects.Visualize _visualize;
 
-			ResourceManager = resourceManager;
-			Backend = backend;
+        public bool EnablePostEffects = true;
 
-			RenderTargetManager = new Post.RenderTargetManager(Backend);
+        private List<BaseEffect> _effects = new List<BaseEffect>();
 
-			TemporaryRenderTargets[0] = Backend.CreateRenderTarget("post_0", new Definition(width, height, false, new List<Definition.Attachment>()
-			{
-				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0)
-			}));
+        public PostEffectManager(Common.IO.FileSystem fileSystem, Common.ResourceManager resourceManager, Backend backend, int width, int height)
+        {
+            if (fileSystem == null) throw new ArgumentNullException("fileSystem");
+            _backend = backend ?? throw new ArgumentNullException("backend");
 
-			TemporaryRenderTargets[1] = Backend.CreateRenderTarget("post_1", new Definition(width, height, false, new List<Definition.Attachment>()
-			{
-				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0)
-			}));
+            _renderTargetManager = new Post.RenderTargetManager(_backend);
 
-			QuadMesh = Backend.CreateBatchBuffer();
-			QuadMesh.Begin();
-			QuadMesh.AddQuad(new Vector2(-1, -1), new Vector2(2, 2), Vector2.Zero, new Vector2(1, 1));
-			QuadMesh.End();
+            _temporaryRenderTargets[0] = _backend.CreateRenderTarget("post_0", new Definition(width, height, false, new List<Definition.Attachment>()
+            {
+                new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0)
+            }));
 
-			Sprite = Backend.CreateSpriteBatch();
+            _temporaryRenderTargets[1] = _backend.CreateRenderTarget("post_1", new Definition(width, height, false, new List<Definition.Attachment>()
+            {
+                new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0)
+            }));
 
-			// Setup effects
-			ScreenSpaceReflections = new Effects.ScreenSpaceReflections(Backend, ResourceManager, QuadMesh);
-			AdaptLuminance = new Effects.AdaptLuminance(Backend, ResourceManager, QuadMesh);
-			Bloom = new Effects.Bloom(Backend, ResourceManager, QuadMesh);
-			LensFlares = new Effects.LensFlares(Backend, ResourceManager, QuadMesh);
-			Tonemap = new Effects.Tonemap(Backend, ResourceManager, QuadMesh);
-			Gamma = new Effects.Gamma(Backend, ResourceManager, QuadMesh);
-			FXAA = new Effects.FXAA(Backend, ResourceManager, QuadMesh);
-			SMAA = new Effects.SMAA(Backend, fileSystem, ResourceManager, QuadMesh);
+            _quadMesh = _backend.CreateBatchBuffer();
+            _quadMesh.Begin();
+            _quadMesh.AddQuad(new Vector2(-1, -1), new Vector2(2, 2), Vector2.Zero, new Vector2(1, 1));
+            _quadMesh.End();
 
-			// Default settings
-			HDRSettings.KeyValue = 0.115f;
-			HDRSettings.AdaptationRate = 0.5f;
-			HDRSettings.BlurSigma = 3.0f;
-			HDRSettings.BloomThreshold = 9.0f;
-			HDRSettings.EnableBloom = true;
-			HDRSettings.EnableLensFlares = true;
+            // Setup effects
+            _adaptLuminance = new Effects.AdaptLuminance(_backend, _quadMesh);
+            _bloom = new Effects.Bloom(_backend, _quadMesh);
+            _tonemap = new Effects.Tonemap(_backend, _quadMesh);
+            _gamma = new Effects.Gamma(_backend, _quadMesh);
+            _fxaa = new Effects.FXAA(_backend, _quadMesh);
+            _smaa = new Effects.SMAA(_backend, fileSystem, _quadMesh);
+            _fog = new Fog(_backend, _quadMesh);
+            _visualize = new Visualize(_backend, _quadMesh);
 
-			ScreenSpaceReflectionsSettings.Enable = false;
-		}
+            _effects.Add(_adaptLuminance);
+            _effects.Add(_bloom);
+            _effects.Add(_tonemap);
+            _effects.Add(_gamma);
+            _effects.Add(_fxaa);
+            _effects.Add(_smaa);
+            _effects.Add(_fog);
+            _effects.Add(_visualize);
 
-		void SwapRenderTargets()
-		{
-			var tmp = TemporaryRenderTargets[0];
-			TemporaryRenderTargets[0] = TemporaryRenderTargets[1];
-			TemporaryRenderTargets[1] = tmp;
-		}
+            // Default settings
+            AntiAliasing = AntiAliasing.FXAA;
 
-		private void ApplyAA()
-		{
-			Backend.ProfileBeginSection(Profiler.AntiAliasing);
-			switch (AntiAliasing)
-			{
-				case AntiAliasing.FXAA:
-					FXAA.Render(TemporaryRenderTargets[0], TemporaryRenderTargets[1]);
-					SwapRenderTargets();
-					break;
-				case AntiAliasing.SMAA:
-					SMAA.Render(AntiAliasingQuality, TemporaryRenderTargets[0], TemporaryRenderTargets[1]);
-					SwapRenderTargets();
-					break;
-				case Post.AntiAliasing.Off:
-				default:
-					break;
-			}
-			Backend.ProfileEndSection(Profiler.AntiAliasing);
-		}
+            HDRSettings = new HDRSettings
+            {
+                KeyValue = 0.115f,
+                AdaptationRate = 0.5f,
+                BlurSigma = 3.0f,
+                BloomThreshold = 9.0f,
+                EnableBloom = true,
+                TonemapOperator = TonemapOperator.Uncharted
+            };
 
-		private void ApplyLumianceBloomAndTonemap(float deltaTime)
-		{
-			RenderTarget bloom = null, lensFlares = null;
+            DofSettings = new DofSettings { Enable = false, CameraHeight = 720.0f, CocScale = 12.0f, FocusPlane = 1.0f };
 
-			Backend.ProfileBeginSection(Profiler.LuminanceAdaptation);
-			var luminance = AdaptLuminance.Render(HDRSettings, TemporaryRenderTargets[0], deltaTime);
-			Backend.ProfileEndSection(Profiler.LuminanceAdaptation);
+            LoadResources(resourceManager);
+        }
 
-			if (HDRSettings.EnableBloom)
-			{
-				Backend.ProfileBeginSection(Profiler.Bloom);
-				bloom = Bloom.Render(HDRSettings, TemporaryRenderTargets[0], luminance);
-				Backend.ProfileEndSection(Profiler.Bloom);
-			}
+        void LoadResources(Common.ResourceManager resourceManager)
+        {
+            _sprite = _backend.CreateSpriteBatch();
 
-			if (HDRSettings.EnableLensFlares)
-			{
-				Backend.ProfileBeginSection(Profiler.LensFlares);
-				lensFlares = LensFlares.Render(HDRSettings, TemporaryRenderTargets[0], luminance);
-				Backend.ProfileEndSection(Profiler.LensFlares);
-			}
+            foreach (var effect in _effects)
+            {
+                effect.LoadResources(resourceManager);
+            }
+        }
 
-			Backend.ProfileBeginSection(Profiler.Tonemap);
-			Tonemap.Render(HDRSettings, TemporaryRenderTargets[0], TemporaryRenderTargets[1], bloom, lensFlares, luminance);
-			Backend.ProfileEndSection(Profiler.Tonemap);
+        void SwapRenderTargets()
+        {
+            var tmp = _temporaryRenderTargets[0];
+            _temporaryRenderTargets[0] = _temporaryRenderTargets[1];
+            _temporaryRenderTargets[1] = tmp;
+        }
 
-			SwapRenderTargets();
-		}
+        private void ApplyAA()
+        {
+            switch (AntiAliasing)
+            {
+                case AntiAliasing.FXAA:
+                    _fxaa.Render(_temporaryRenderTargets[0], _temporaryRenderTargets[1]);
+                    SwapRenderTargets();
+                    break;
+                case AntiAliasing.SMAA:
+                    _smaa.Render(AntiAliasingQuality, _temporaryRenderTargets[0], _temporaryRenderTargets[1]);
+                    SwapRenderTargets();
+                    break;
+                case Post.AntiAliasing.Off:
+                default:
+                    break;
+            }
+        }
 
-		private void ApplyScreenSpaceReflections(Camera camera, RenderTarget gbuffer)
-		{
-			if (!ScreenSpaceReflectionsSettings.Enable)
-				return;
+        private void ApplyLumianceBloomAndTonemap(float deltaTime)
+        {
+            RenderTarget bloom = null, lensFlares = null;
 
-			ScreenSpaceReflections.Render(camera, gbuffer, TemporaryRenderTargets[0], TemporaryRenderTargets[1]);
-			SwapRenderTargets();
-		}
+            var luminance = _adaptLuminance.Render(HDRSettings, _temporaryRenderTargets[0], deltaTime);
 
-		public RenderTarget Render(Camera camera, RenderTarget gbuffer, RenderTarget input, float deltaTime)
-		{
-			// We always start by rendering the input texture to a temporary render target
-			Backend.BeginPass(TemporaryRenderTargets[1], Vector4.Zero);
+            if (HDRSettings.EnableBloom)
+            {
+                bloom = _bloom.Render(HDRSettings, _temporaryRenderTargets[0], luminance);
+            }
 
-			Sprite.RenderQuad(input.Textures[0], Vector2.Zero);
-			Sprite.Render(TemporaryRenderTargets[1].Width, TemporaryRenderTargets[1].Height);
+            _tonemap.Render(HDRSettings, _temporaryRenderTargets[0], _temporaryRenderTargets[1], bloom, lensFlares, luminance);
 
-			SwapRenderTargets();
+            SwapRenderTargets();
+        }
 
-			ApplyScreenSpaceReflections(camera, gbuffer);
-			ApplyLumianceBloomAndTonemap(deltaTime);
+        private void ApplyFog(Camera camera, RenderTarget gbuffer, Stage stage)
+        {
+            _fog.Render(camera, stage, gbuffer, _temporaryRenderTargets[0], _temporaryRenderTargets[1]);
+            SwapRenderTargets();
+        }
 
-			ApplyAA();
+        public RenderTarget Render(Camera camera, Stage stage, RenderTarget gbuffer, RenderTarget input, float deltaTime)
+        {
+            _backend.ProfileBeginSection(Profiler.Post);
 
-			// linear -> to gamma space
-			Gamma.Render(TemporaryRenderTargets[0], TemporaryRenderTargets[1]);
-			SwapRenderTargets();
+            // We always start by rendering the input texture to a temporary render target
+            _backend.BeginPass(_temporaryRenderTargets[1], Vector4.Zero);
 
-			return TemporaryRenderTargets[0];
-		}
+            _sprite.RenderQuad(input.Textures[0], Vector2.Zero);
+            _sprite.Render(_temporaryRenderTargets[1].Width, _temporaryRenderTargets[1].Height);
 
-		public void Resize(int newWidth, int newHeight)
-		{
-			// TODO ...
-		}
-	}
+            SwapRenderTargets();
+
+            if (EnablePostEffects)
+            {
+                ApplyLumianceBloomAndTonemap(deltaTime);
+                ApplyAA();
+            }
+
+            // linear -> to gamma space
+            _gamma.Render(_temporaryRenderTargets[0], _temporaryRenderTargets[1]);
+            SwapRenderTargets();
+
+            if (VisualizationMode != VisualizationMode.None)
+            {
+                // Visualize does it's own gamma, but only if it wants to (some things are linear)
+                _visualize.Render(VisualizationMode, gbuffer, _ssaoOutput, _temporaryRenderTargets[0], _temporaryRenderTargets[1]);
+                SwapRenderTargets();
+            }
+
+            _backend.ProfileEndSection(Profiler.Post);
+            return _temporaryRenderTargets[0];
+        }
+
+        public void Resize(int width, int height)
+        {
+            _backend.ResizeRenderTarget(_temporaryRenderTargets[0], width, height);
+            _backend.ResizeRenderTarget(_temporaryRenderTargets[1], width, height);
+            _bloom.Resize(width, height);
+            _adaptLuminance.Resize(width, height);
+            _gamma.Resize(width, height);
+            _smaa.Resize(width, height);
+            _fxaa.Resize(width, height);
+            _tonemap.Resize(width, height);
+        }
+    }
 }

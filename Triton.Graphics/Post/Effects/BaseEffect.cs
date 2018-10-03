@@ -8,22 +8,22 @@ namespace Triton.Graphics.Post.Effects
 {
 	public class BaseEffect
 	{
-		protected readonly Backend Backend;
-		protected readonly BatchBuffer QuadMesh;
-		protected readonly Common.ResourceManager ResourceManager;
+		protected readonly Backend _backend;
+		protected readonly BatchBuffer _quadMesh;
 
-		public BaseEffect(Backend backend, Common.ResourceManager resourceManager, BatchBuffer quadMesh)
+		public BaseEffect(Backend backend, BatchBuffer quadMesh)
 		{
-			if (backend == null)
-				throw new ArgumentNullException("backend");
-			if (resourceManager == null)
-				throw new ArgumentNullException("resourceManager");
-			if (quadMesh == null)
-				throw new ArgumentNullException("quadMesh");
+            _backend = backend ?? throw new ArgumentNullException("backend");
+			_quadMesh = quadMesh ?? throw new ArgumentNullException("quadMesh");
+		}
 
-			Backend = backend;
-			ResourceManager = resourceManager;
-			QuadMesh = quadMesh;
+		internal virtual void LoadResources(Common.ResourceManager resourceManager)
+		{
+		}
+
+		public virtual void Resize(int width, int height)
+		{
+
 		}
 	}
 }

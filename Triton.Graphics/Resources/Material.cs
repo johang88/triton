@@ -37,7 +37,7 @@ namespace Triton.Graphics.Resources
 			Initialized = true;
 
 			Handles = new ShaderHandles();
-			Shader.GetUniformLocations(Handles);
+			Shader.BindUniformLocations(Handles);
 
 			TextureHandles = new int[Textures.Count];
 			SamplerToTexture = new int[Textures.Count];

@@ -98,7 +98,7 @@ namespace Triton.Graphics
 			if (Params == null)
 			{
 				Params = new ShaderParams();
-				Shader.GetUniformLocations(Params);
+				Shader.BindUniformLocations(Params);
 			}
 
 			if (LastQuad == 0) // Bail out

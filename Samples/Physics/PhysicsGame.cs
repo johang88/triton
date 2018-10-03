@@ -81,7 +81,6 @@ namespace Triton.Samples
 
 			DebugFlags |= Game.DebugFlags.RenderStats;
 
-			PostEffectManager.HDRSettings.EnableLensFlares = true;
 			PostEffectManager.HDRSettings.EnableBloom = true;
 			PostEffectManager.HDRSettings.AdaptationRate = 2;
 

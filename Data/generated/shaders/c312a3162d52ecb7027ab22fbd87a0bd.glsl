@@ -1,5 +1,5 @@
 #define UNLIT
-import(/shaders/core);
+#include "/shaders/core"
 
 uniform float time;
 uniform vec2 uvAnimation;
@@ -84,7 +84,7 @@ void main()
 
 #else
 
-import(/shaders/deferred/brdf);
+#include "/shaders/deferred/brdf"
 
 in vec3 normal;
 in vec3 tangent;

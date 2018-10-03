@@ -6,14 +6,24 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.Post
 {
-	public struct HDRSettings
-	{
-		public float KeyValue;
-		public float AdaptationRate;
-		public float BlurSigma;
-		public float BloomThreshold;
+    public class HDRSettings
+    {
+        public float KeyValue;
+        public float AdaptationRate;
+        public float BlurSigma;
+        public float BloomThreshold;
 
-		public bool EnableBloom;
-		public bool EnableLensFlares;
-	}
+        public bool EnableBloom;
+
+        public TonemapOperator TonemapOperator;
+    }
+
+    public enum TonemapOperator
+    {
+        Reinhard,
+        Uncharted,
+        UnchartedVar1,
+        UnchartedVar2,
+        FilmicALU,
+    }
 }

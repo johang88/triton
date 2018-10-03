@@ -79,7 +79,7 @@ namespace Triton.Game
             if (Params == null)
             {
                 Params = new ShaderParams();
-                _shader.GetUniformLocations(Params);
+                _shader.BindUniformLocations(Params);
             }
 
             var io = ImGui.GetIO();

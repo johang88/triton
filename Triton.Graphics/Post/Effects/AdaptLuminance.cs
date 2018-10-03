@@ -9,78 +9,84 @@ namespace Triton.Graphics.Post.Effects
 {
 	public class AdaptLuminance : BaseEffect
 	{
-		private Resources.ShaderProgram LuminanceMapShader;
-		private Resources.ShaderProgram AdaptLuminanceShader;
+		private Resources.ShaderProgram _luminanceMapShader;
+		private Resources.ShaderProgram _adaptLuminanceShader;
 
-		private LuminanceMapShaderParams LuminanceMapParams;
-		private AdaptLuminanceShaderParams AdaptLuminanceParams;
+		private LuminanceMapShaderParams _luminanceMapParams;
+		private AdaptLuminanceShaderParams _adaptLuminanceParams;
 
-		private RenderTarget LuminanceTarget;
-		private RenderTarget[] AdaptLuminanceTargets;
+		private readonly RenderTarget _luminanceTarget;
+		private readonly RenderTarget[] _adaptLuminanceTargets;
 
-		private int CurrentLuminanceTarget = 0;
+		private int _currentLuminanceTarget = 0;
 
-		public AdaptLuminance(Backend backend, Common.ResourceManager resourceManager, BatchBuffer quadMesh)
-			: base(backend, resourceManager, quadMesh)
+		public AdaptLuminance(Backend backend, BatchBuffer quadMesh)
+			: base(backend, quadMesh)
 		{
-			LuminanceMapShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/luminance_map");
-			AdaptLuminanceShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/adapt_luminance");
-
 			// Setup render targets
-			LuminanceTarget = Backend.CreateRenderTarget("avg_luminance", new Definition(1024, 1024, false, new List<Definition.Attachment>()
+			_luminanceTarget = _backend.CreateRenderTarget("avg_luminance", new Definition(1024, 1024, false, new List<Definition.Attachment>()
 			{
 				new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.R32f, Renderer.PixelType.Float, 0, true),
 			}));
 
-			AdaptLuminanceTargets = new RenderTarget[]
+			_adaptLuminanceTargets = new RenderTarget[]
 			{
-				Backend.CreateRenderTarget("adapted_luminance_0", new Definition(1, 1, false, new List<Definition.Attachment>()
+				_backend.CreateRenderTarget("adapted_luminance_0", new Definition(1, 1, false, new List<Definition.Attachment>()
 				{
 					new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.R16f, Renderer.PixelType.Float, 0),
 				})),
-				Backend.CreateRenderTarget("adapted_luminance_1", new Definition(1, 1, false, new List<Definition.Attachment>()
+				_backend.CreateRenderTarget("adapted_luminance_1", new Definition(1, 1, false, new List<Definition.Attachment>()
 				{
 					new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.R16f, Renderer.PixelType.Float, 0),
 				}))
 			};
 		}
 
+		internal override void LoadResources(Common.ResourceManager resourceManager)
+		{
+			base.LoadResources(resourceManager);
+
+			_luminanceMapShader = resourceManager.Load<Resources.ShaderProgram>("/shaders/post/luminance_map");
+			_adaptLuminanceShader = resourceManager.Load<Resources.ShaderProgram>("/shaders/post/adapt_luminance");
+		}
+
 		public RenderTarget Render(HDRSettings settings, RenderTarget input, float deltaTime)
 		{
-			if (LuminanceMapParams == null)
+			if (_luminanceMapParams == null)
 			{
-				LuminanceMapParams = new LuminanceMapShaderParams();
-				AdaptLuminanceParams = new AdaptLuminanceShaderParams();
+				_luminanceMapParams = new LuminanceMapShaderParams();
+				_adaptLuminanceParams = new AdaptLuminanceShaderParams();
 
-				LuminanceMapShader.GetUniformLocations(LuminanceMapShader);
-				AdaptLuminanceShader.GetUniformLocations(AdaptLuminanceParams);
+				_luminanceMapShader.BindUniformLocations(_luminanceMapShader);
+				_adaptLuminanceShader.BindUniformLocations(_adaptLuminanceParams);
 			}
 
 			// Calculate luminance
-			Backend.BeginPass(LuminanceTarget);
-			Backend.BeginInstance(LuminanceMapShader.Handle, new int[] { input.Textures[0].Handle },
-				samplers: new int[] { Backend.DefaultSamplerNoFiltering });
-			Backend.BindShaderVariable(LuminanceMapParams.SamplerScene, 0);
+			_backend.BeginPass(_luminanceTarget);
+			_backend.BeginInstance(_luminanceMapShader.Handle, new int[] { input.Textures[0].Handle },
+				samplers: new int[] { _backend.DefaultSamplerNoFiltering });
+			_backend.BindShaderVariable(_luminanceMapParams.SamplerScene, 0);
 
-			Backend.DrawMesh(QuadMesh.MeshHandle);
-			Backend.EndPass();
-			Backend.GenerateMips(LuminanceTarget.Textures[0].Handle);
+			_backend.DrawMesh(_quadMesh.MeshHandle);
+			_backend.EndPass();
+
+			_backend.GenerateMips(_luminanceTarget.Textures[0].Handle);
 
 			// Adapt luminace
-			var adaptedLuminanceTarget = AdaptLuminanceTargets[CurrentLuminanceTarget];
-			var adaptedLuminanceSource = AdaptLuminanceTargets[CurrentLuminanceTarget == 0 ? 1 : 0];
-			CurrentLuminanceTarget = (CurrentLuminanceTarget + 1) % 2;
+			var adaptedLuminanceTarget = _adaptLuminanceTargets[_currentLuminanceTarget];
+			var adaptedLuminanceSource = _adaptLuminanceTargets[_currentLuminanceTarget == 0 ? 1 : 0];
+			_currentLuminanceTarget = (_currentLuminanceTarget + 1) % 2;
 
-			Backend.BeginPass(adaptedLuminanceTarget);
-			Backend.BeginInstance(AdaptLuminanceShader.Handle, new int[] { adaptedLuminanceSource.Textures[0].Handle, LuminanceTarget.Textures[0].Handle },
-				samplers: new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerMipMapNearest });
-			Backend.BindShaderVariable(AdaptLuminanceParams.SamplerLastLuminacne, 0);
-			Backend.BindShaderVariable(AdaptLuminanceParams.SamplerCurrentLuminance, 1);
-			Backend.BindShaderVariable(AdaptLuminanceParams.TimeDelta, deltaTime);
-			Backend.BindShaderVariable(AdaptLuminanceParams.Tau, settings.AdaptationRate);
+			_backend.BeginPass(adaptedLuminanceTarget);
+			_backend.BeginInstance(_adaptLuminanceShader.Handle, new int[] { adaptedLuminanceSource.Textures[0].Handle, _luminanceTarget.Textures[0].Handle },
+				samplers: new int[] { _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerMipMapNearest });
+			_backend.BindShaderVariable(_adaptLuminanceParams.SamplerLastLuminacne, 0);
+			_backend.BindShaderVariable(_adaptLuminanceParams.SamplerCurrentLuminance, 1);
+			_backend.BindShaderVariable(_adaptLuminanceParams.TimeDelta, deltaTime);
+			_backend.BindShaderVariable(_adaptLuminanceParams.Tau, settings.AdaptationRate);
 
-			Backend.DrawMesh(QuadMesh.MeshHandle);
-			Backend.EndPass();
+			_backend.DrawMesh(_quadMesh.MeshHandle);
+			_backend.EndPass();
 
 			return adaptedLuminanceTarget;
 		}

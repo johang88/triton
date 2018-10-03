@@ -1,7 +1,7 @@
-import(/shaders/core);
+#include "/shaders/core"
 #ifdef VERTEX_SHADER
 
-import(/shaders/post/smaa_vert);
+#include "/shaders/post/smaa_vert"
 
 layout(location = ATTRIB_POSITION) in vec3 iPosition;
 layout(location = ATTRIB_TEXCOORD_0) in vec2 iTexCoord;
@@ -22,7 +22,7 @@ void main()
 
 #else
 
-import(/shaders/post/smaa_frag);
+#include "/shaders/post/smaa_frag"
 
 in vec2 texCoord;
 in vec4 offset[3];
