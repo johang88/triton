@@ -115,6 +115,9 @@ namespace Triton.Renderer
 
 		private void DebugCallback(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
 		{
+            if (severity <= DebugSeverity.DebugSeverityNotification)
+                return;
+
 			var msg = Marshal.PtrToStringAnsi(message, length);
 			Common.Log.WriteLine(string.Format("{0} {1} {2}", severity, type, msg));
 		}
