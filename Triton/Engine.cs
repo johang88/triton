@@ -39,7 +39,7 @@ namespace Triton
 			GameResources = ResourceGroupManager.Add("game", 10);
 
 			// Setup graphics core
-			GraphicsBackend = new Graphics.Backend(CoreResources, WindowProvider.Width, WindowProvider.Height, WindowProvider.WindowInfo);
+			GraphicsBackend = new Graphics.Backend(CoreResources, WindowProvider.Width, WindowProvider.Height, null);
 
 			// Init resource loaders
 			RegisterResourceLoaders(CoreResources);

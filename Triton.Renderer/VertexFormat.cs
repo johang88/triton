@@ -22,11 +22,13 @@ namespace Triton.Renderer
 
 			foreach (var element in Elements)
 			{
-				if (element.Type == VertexPointerType.Float || element.Type == VertexPointerType.Int)
-					Size += 4 * element.Count;
-				else if (element.Type == VertexPointerType.Short)
-					Size += 2 * element.Count;
-			}
+                if (element.Type == VertexPointerType.Float || element.Type == VertexPointerType.Int)
+                    Size += 4 * element.Count;
+                else if (element.Type == VertexPointerType.Short)
+                    Size += 2 * element.Count;
+                else if (element.Type == VertexPointerType.Byte || element.Type == VertexPointerType.UnsignedByte)
+                    Size += 1 * element.Count;
+            }
 		}
 	}
 }

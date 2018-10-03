@@ -242,14 +242,14 @@ namespace Triton.Graphics.Deferred
 			var clearColor = stage.ClearColor;
 			clearColor.W = 0;
 			Backend.ProfileBeginSection(Profiler.GBuffer);
-			Backend.BeginPass(GBuffer, clearColor, true);
+			Backend.BeginPass(GBuffer, clearColor, ClearFlags.All);
 			RenderScene(stage, camera, ref view, ref projection);
 			Backend.EndPass();
 			Backend.ProfileEndSection(Profiler.GBuffer);
 
 			// Render light accumulation
 			Backend.ProfileBeginSection(Profiler.Lighting);
-			Backend.BeginPass(LightAccumulation, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), true);
+			Backend.BeginPass(LightAccumulation, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), ClearFlags.All);
 
 			RenderAmbientLight(stage);
 			RenderLights(camera, ref view, ref projection, stage.GetLights(), stage);
@@ -262,7 +262,7 @@ namespace Triton.Graphics.Deferred
 
 			if (FogSettings.Enable)
 			{
-				Backend.BeginPass(currentRenderTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
+				Backend.BeginPass(currentRenderTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), ClearFlags.Color);
 
 				Backend.BeginInstance(FogShader.Handle, new int[] { currentSource.Textures[0].Handle, GBuffer.Textures[2].Handle }, new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering }, LightAccumulatinRenderState);
 				Backend.BindShaderVariable(FogParams.SamplerScene, 0);
@@ -283,7 +283,7 @@ namespace Triton.Graphics.Deferred
 				currentSource = tmp;
 			}
 
-			Backend.BeginPass(Output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), false);
+			Backend.BeginPass(Output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), ClearFlags.Color);
 
 			Backend.BeginInstance(CombineShader.Handle, new int[] { currentSource.Textures[0].Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, LightAccumulatinRenderState);
 			Backend.BindShaderVariable(CombineParams.SamplerLight, 0);
@@ -641,7 +641,7 @@ namespace Triton.Graphics.Deferred
 
 		private void RenderShadows(RenderTarget renderTarget, Light light, Stage stage, Camera camera, int cascadeIndex, out Matrix4 viewProjection, out Vector2 clipPlane)
 		{
-			Backend.BeginPass(renderTarget, new Vector4(0, 0, 0, 1), true);
+			Backend.BeginPass(renderTarget, new Vector4(0, 0, 0, 1), ClearFlags.All);
 
 			var modelViewProjection = Matrix4.Identity;
 
@@ -739,7 +739,7 @@ namespace Triton.Graphics.Deferred
 
 		private void RenderShadowsCube(RenderTarget renderTarget, Light light, Stage stage, Camera camera, out Matrix4 viewProjection, out Vector2 clipPlane)
 		{
-			Backend.BeginPass(renderTarget, new Vector4(0, 0, 0, 1), true);
+			Backend.BeginPass(renderTarget, new Vector4(0, 0, 0, 1), ClearFlags.All);
 
 			var modelViewProjection = Matrix4.Identity;
 

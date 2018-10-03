@@ -137,8 +137,8 @@ namespace Triton.Graphics.Resources
 
 					var subMesh = new SubMesh();
 
-					subMesh.VertexBufferHandle = Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, vertexFormat);
-					subMesh.IndexBufferHandle = Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ElementArrayBuffer);
+					subMesh.VertexBufferHandle = Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, false, vertexFormat);
+					subMesh.IndexBufferHandle = Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ElementArrayBuffer, false);
 					Backend.RenderSystem.SetBufferData(subMesh.VertexBufferHandle, vertices, false, false);
 					Backend.RenderSystem.SetBufferData(subMesh.IndexBufferHandle, indices, false, false);
 

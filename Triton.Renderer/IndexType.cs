@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 
 namespace Triton.Renderer
 {
-	public enum VertexPointerType : int
-	{
-        Byte = 5120,
+    public enum IndexType
+    {
         UnsignedByte = 5121,
-        Short = 5122,
-        Int = 5124,
-        Float = 5126,
+        UnsignedShort = 5123,
+        UnsignedInt = 5125
     }
 }
