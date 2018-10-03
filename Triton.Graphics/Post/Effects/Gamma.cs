@@ -8,30 +8,35 @@ namespace Triton.Graphics.Post.Effects
 {
 	public class Gamma : BaseEffect
 	{
-		private Resources.ShaderProgram Shader;
-		private GammaShaderParams ShaderParams;
+		private Resources.ShaderProgram _shader;
+		private GammaShaderParams _shaderParams;
 
-		public Gamma(Backend backend, Common.ResourceManager resourceManager, BatchBuffer quadMesh)
-			: base(backend, resourceManager, quadMesh)
+		public Gamma(Backend backend, BatchBuffer quadMesh)
+			: base(backend, quadMesh)
 		{
-			Shader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/gamma");
+		}
+
+		internal override void LoadResources(Common.ResourceManager resourceManager)
+		{
+			base.LoadResources(resourceManager);
+			_shader = resourceManager.Load<Resources.ShaderProgram>("/shaders/post/gamma");
 		}
 
 		public void Render(RenderTarget input, RenderTarget output)
 		{
-			if (ShaderParams == null)
+			if (_shaderParams == null)
 			{
-				ShaderParams = new GammaShaderParams();
-				Shader.GetUniformLocations(ShaderParams);
+				_shaderParams = new GammaShaderParams();
+				_shader.BindUniformLocations(_shaderParams);
 			}
 
-			Backend.BeginPass(output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-			Backend.BeginInstance(Shader.Handle, new int[] { input.Textures[0].Handle },
-				samplers: new int[] { Backend.DefaultSamplerNoFiltering });
-			Backend.BindShaderVariable(ShaderParams.SamplerScene, 0);
+			_backend.BeginPass(output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+			_backend.BeginInstance(_shader.Handle, new int[] { input.Textures[0].Handle },
+				samplers: new int[] { _backend.DefaultSamplerNoFiltering });
+			_backend.BindShaderVariable(_shaderParams.SamplerScene, 0);
 
-			Backend.DrawMesh(QuadMesh.MeshHandle);
-			Backend.EndPass();
+			_backend.DrawMesh(_quadMesh.MeshHandle);
+			_backend.EndPass();
 		}
 
 		class GammaShaderParams

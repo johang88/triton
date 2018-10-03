@@ -1,4 +1,4 @@
-import(/shaders/core);
+#include "/shaders/core"
 #ifdef VERTEX_SHADER
 
 layout(location = ATTRIB_POSITION) in vec3 iPosition;
@@ -14,7 +14,7 @@ void main()
 {
 	texCoord = iTexCoord;
 	color = iColor;
-	gl_Position = modelViewProjection * vec4(iPosition, 1);
+	gl_Position = modelViewProjection * vec4(iPosition.xy, 0, 1);
 }
 
 #else
@@ -28,7 +28,7 @@ uniform sampler2D samplerDiffuse;
 
 void main()
 {
-	vec4 diffuse = texture2D(samplerDiffuse, texCoord) * color;
+	vec4 diffuse = texture(samplerDiffuse, texCoord) * color;
 	
 #ifdef SRGB
 	oColor.xyz = pow(diffuse.xyz, vec3(1.0 / 2.2));

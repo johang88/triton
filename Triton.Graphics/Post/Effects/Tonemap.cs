@@ -9,20 +9,16 @@ namespace Triton.Graphics.Post.Effects
 {
 	public class Tonemap : BaseEffect
 	{
-		private Resources.ShaderProgram Shader;
-		private TonemapShaderParams ShaderParams;
+		private Resources.ShaderProgram _shader;
+		private TonemapShaderParams _shaderParams;
 
-		private int BlurSampler;
+		private readonly int[] _textures = new int[4];
+		private readonly int[] _samplers;
 
-		private int[] Textures = new int[4];
-		private int[] Samplers;
-
-		public Tonemap(Backend backend, Common.ResourceManager resourceManager, BatchBuffer quadMesh)
-			: base(backend, resourceManager, quadMesh)
+		public Tonemap(Backend backend, BatchBuffer quadMesh)
+			: base(backend, quadMesh)
 		{
-			Shader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/post/tonemap");
-
-			BlurSampler = Backend.RenderSystem.CreateSampler(new Dictionary<SamplerParameterName, int>
+			int blurSampler = _backend.RenderSystem.CreateSampler(new Dictionary<SamplerParameterName, int>
 			{
 				{ SamplerParameterName.TextureMinFilter, (int)TextureMinFilter.Linear },
 				{ SamplerParameterName.TextureMagFilter, (int)TextureMagFilter.Linear },
@@ -30,40 +26,43 @@ namespace Triton.Graphics.Post.Effects
 				{ SamplerParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge }
 			});
 
-			Samplers = new int[] { Backend.DefaultSamplerNoFiltering, Backend.DefaultSamplerNoFiltering, BlurSampler, BlurSampler };
+			_samplers = new int[] { _backend.DefaultSamplerNoFiltering, _backend.DefaultSampler, blurSampler, blurSampler };
+		}
+
+		internal override void LoadResources(Common.ResourceManager resourceManager)
+		{
+			base.LoadResources(resourceManager);
+			_shader = resourceManager.Load<Resources.ShaderProgram>("/shaders/post/tonemap");
 		}
 
 		public void Render(HDRSettings settings, RenderTarget input, RenderTarget output, RenderTarget bloom, RenderTarget lensFlares, RenderTarget luminance)
 		{
-			if (ShaderParams == null)
+			if (_shaderParams == null)
 			{
-				ShaderParams = new TonemapShaderParams();
-				Shader.GetUniformLocations(ShaderParams);
+				_shaderParams = new TonemapShaderParams();
+				_shader.BindUniformLocations(_shaderParams);
 			}
 
-			Backend.BeginPass(output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+			_backend.BeginPass(output, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 
-			
-			Textures[0] = input.Textures[0].Handle;
-			Textures[1] = luminance.Textures[0].Handle;
+			_textures[0] = input.Textures[0].Handle;
+			_textures[1] = luminance.Textures[0].Handle;
 
 			var activeTexture = 2;
 			if (settings.EnableBloom)
-				Textures[activeTexture++] = bloom.Textures[0].Handle;
-			if (settings.EnableLensFlares)
-				Textures[activeTexture++] = lensFlares.Textures[0].Handle;
+				_textures[activeTexture++] = bloom.Textures[0].Handle;
 
-			Backend.BeginInstance(Shader.Handle, Textures, samplers: Samplers);
-			Backend.BindShaderVariable(ShaderParams.SamplerScene, 0);
-			Backend.BindShaderVariable(ShaderParams.SamplerBloom, 2);
-			Backend.BindShaderVariable(ShaderParams.SamplerLensFlares, 3);
-			Backend.BindShaderVariable(ShaderParams.SamplerLuminance, 1);
-			Backend.BindShaderVariable(ShaderParams.KeyValue, settings.KeyValue);
-			Backend.BindShaderVariable(ShaderParams.EnableBloom, settings.EnableBloom ? 1 : 0);
-			Backend.BindShaderVariable(ShaderParams.EnableLensFlares, settings.EnableLensFlares ? 1 : 0);
+			_backend.BeginInstance(_shader.Handle, _textures, samplers: _samplers);
+			_backend.BindShaderVariable(_shaderParams.SamplerScene, 0);
+			_backend.BindShaderVariable(_shaderParams.SamplerBloom, 2);
+			_backend.BindShaderVariable(_shaderParams.SamplerLensFlares, 3);
+			_backend.BindShaderVariable(_shaderParams.SamplerLuminance, 1);
+			_backend.BindShaderVariable(_shaderParams.KeyValue, settings.KeyValue);
+			_backend.BindShaderVariable(_shaderParams.EnableBloom, settings.EnableBloom ? 1 : 0);
+			_backend.BindShaderVariable(_shaderParams.TonemapOperator, (int)settings.TonemapOperator);
 
-			Backend.DrawMesh(QuadMesh.MeshHandle);
-			Backend.EndPass();
+			_backend.DrawMesh(_quadMesh.MeshHandle);
+			_backend.EndPass();
 		}
 
 		class TonemapShaderParams
@@ -75,6 +74,7 @@ namespace Triton.Graphics.Post.Effects
 			public int KeyValue = 0;
 			public int EnableBloom = 0;
 			public int EnableLensFlares = 0;
+			public int TonemapOperator = 0;
 		}
 	}
 }

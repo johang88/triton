@@ -78,7 +78,7 @@ namespace Triton.Physics
 			if (Params == null)
 			{
 				Params = new ShaderParams();
-				Shader.GetUniformLocations(Params);
+				Shader.BindUniformLocations(Params);
 			}
 
 			Matrix4 viewMatrix;

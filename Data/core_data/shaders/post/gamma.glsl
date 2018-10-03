@@ -1,5 +1,5 @@
-import(/shaders/core);
-import(/shaders/post/postcommon);
+#include "/shaders/core"
+#include "/shaders/post/postcommon"
 #ifdef VERTEX_SHADER
 
 layout(location = ATTRIB_POSITION) in vec3 iPosition;
@@ -23,7 +23,7 @@ uniform sampler2D samplerScene;
 
 void main()
 {
-	vec3 color = texture2D(samplerScene, texCoord).xyz;
+	vec3 color = texture(samplerScene, texCoord).xyz;
 
 	oColor.xyz  = pow(color, vec3(1.0 / 2.2));
 	oColor.w = 1;

@@ -8,10 +8,10 @@ namespace Triton.Graphics
 {
 	public class Stage
 	{
-		private readonly Common.ResourceManager ResourceManager;
+		private readonly Common.ResourceManager _resourceManager;
 
-		private readonly List<MeshInstance> Meshes = new List<MeshInstance>();
-		private readonly List<Light> Lights = new List<Light>();
+		private readonly List<MeshInstance> _meshes = new List<MeshInstance>();
+		private readonly List<Light> _lights = new List<Light>();
 
 		public Vector3 AmbientColor = new Vector3(0.2f, 0.2f, 0.2f);
 		public Vector4 ClearColor = Vector4.Zero;
@@ -20,15 +20,12 @@ namespace Triton.Graphics
 
 		public Stage(Common.ResourceManager resourceManager)
 		{
-			if (resourceManager == null)
-				throw new ArgumentNullException("resourceManager");
-
-			ResourceManager = resourceManager;
+            _resourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");
 		}
 
 		public MeshInstance AddMesh(string mesh, string parameters = "")
 		{
-			return AddMesh(ResourceManager.Load<Resources.Mesh>(mesh, parameters));
+			return AddMesh(_resourceManager.Load<Resources.Mesh>(mesh, parameters));
 		}
 
 		public MeshInstance AddMesh(Resources.Mesh mesh)
@@ -38,21 +35,21 @@ namespace Triton.Graphics
 				Mesh = mesh
 			};
 
-			Meshes.Add(instance);
+			_meshes.Add(instance);
 
 			return instance;
 		}
 
 		public void RemoveMesh(MeshInstance mesh)
 		{
-			Meshes.Remove(mesh);
-			ResourceManager.Unload(mesh.Mesh);
+			_meshes.Remove(mesh);
+			_resourceManager.Unload(mesh.Mesh);
 		}
 
 		public void Clear()
 		{
-			Meshes.Clear();
-			Lights.Clear();
+			_meshes.Clear();
+			_lights.Clear();
 		}
 
 		public void PrepareRenderOperations(Matrix4 viewMatrix, RenderOperations operations, bool shadowCastersOnly = false, bool frustumCull = true)
@@ -61,9 +58,9 @@ namespace Triton.Graphics
 			var sphere = new BoundingSphere();
 			var zero = Vector3.Zero;
 
-			for (var i = 0; i < Meshes.Count; i++)
+			for (var i = 0; i < _meshes.Count; i++)
 			{
-				var meshInstance = Meshes[i];
+				var meshInstance = _meshes[i];
 				var subMeshes = meshInstance.Mesh.SubMeshes;
 
 				if (!meshInstance.Mesh.IsLoaded())
@@ -92,9 +89,9 @@ namespace Triton.Graphics
 			var zero = Vector3.Zero;
 			Vector3 meshPosition;
 
-			for (var i = 0; i < Meshes.Count; i++)
+			for (var i = 0; i < _meshes.Count; i++)
 			{
-				var meshInstance = Meshes[i];
+				var meshInstance = _meshes[i];
 				var subMeshes = meshInstance.Mesh.SubMeshes;
 				
 				Vector3.Transform(ref zero, ref meshInstance.World, out meshPosition);
@@ -126,7 +123,7 @@ namespace Triton.Graphics
 				Intensity = intensity
 			};
 
-			Lights.Add(light);
+			_lights.Add(light);
 
 			return light;
 		}
@@ -144,7 +141,7 @@ namespace Triton.Graphics
 				Intensity = intensity
 			};
 
-			Lights.Add(light);
+			_lights.Add(light);
 
 			return light;
 		}
@@ -166,19 +163,30 @@ namespace Triton.Graphics
 				Intensity = intensity
 			};
 
-			Lights.Add(light);
+			_lights.Add(light);
 
 			return light;
 		}
 
 		public void RemoveLight(Light light)
 		{
-			Lights.Remove(light);
+			_lights.Remove(light);
 		}
 
-		public IReadOnlyCollection<Light> GetLights()
+        public Light GetSunLight()
+        {
+            foreach (var light in _lights)
+            {
+                if (light.Type == LighType.Directional)
+                    return light;
+            }
+
+            return null;
+        }
+
+        public IReadOnlyCollection<Light> GetLights()
 		{
-			return Lights;
+			return _lights;
 		}
 	}
 }
