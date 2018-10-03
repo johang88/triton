@@ -55,28 +55,28 @@ namespace Triton.Game.World.Components
 			float y;
 			switch (WaveFunction)
 			{
-				case Components.WaveFunction.Sin:
+				case WaveFunction.Sin:
 					y = (float)System.Math.Sin(x * 2 * System.Math.PI);
 					break;
-				case Components.WaveFunction.Triangle:
+				case WaveFunction.Triangle:
 					if (x < 0.5f)
 						y = 4.0f * x - 1.0f;
 					else
 						y = -4.0f * x + 3.0f;
 					break;
-				case Components.WaveFunction.Square:
+				case WaveFunction.Square:
 					if (x < 0.05f)
 						y = 1.0f;
 					else
 						y = -1.0f;
 					break;
-				case Components.WaveFunction.Sawtooth:
+				case WaveFunction.Sawtooth:
 					y = x;
 					break;
-				case Components.WaveFunction.InvertedSawtooth:
+				case WaveFunction.InvertedSawtooth:
 					y = 1.0f - x;
 					break;
-				case Components.WaveFunction.Noise:
+				case WaveFunction.Noise:
 					y = 1.0f - (float)RNG.NextDouble() * 2.0f;
 					break;
 				default:

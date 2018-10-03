@@ -28,22 +28,11 @@ namespace Triton.Game.World
 
 		public GameObjectManager(Stage stage, InputManager inputManager, ResourceManager resourceManager, Triton.Physics.World physicsWorld, Graphics.Camera camera)
 		{
-			if (stage == null)
-				throw new ArgumentNullException("stage");
-			if (inputManager == null)
-				throw new ArgumentNullException("inputManager");
-			if (resourceManager == null)
-				throw new ArgumentNullException("resourceManager");
-			if (physicsWorld == null)
-				throw new ArgumentNullException("physicsWorld");
-			if (camera == null)
-				throw new ArgumentNullException("camera");
-
-			Stage = stage;
-			InputManager = inputManager;
-			ResourceManager = resourceManager;
-			PhysicsWorld = physicsWorld;
-			Camera = camera;
+            Stage = stage ?? throw new ArgumentNullException("stage");
+			InputManager = inputManager ?? throw new ArgumentNullException("inputManager");
+			ResourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");
+			PhysicsWorld = physicsWorld ?? throw new ArgumentNullException("physicsWorld");
+			Camera = camera ?? throw new ArgumentNullException("camera");
 		}
 
 		/// <summary>
@@ -66,34 +55,21 @@ namespace Triton.Game.World
 		/// </summary>
 		/// <returns></returns>
 		public GameObject CreateGameObject()
-		{
-			var gameObject = new GameObject(this, LastGameObjectId++);
-			return gameObject;
-		}
+		    => new GameObject(this, LastGameObjectId++);
 
-		/// <summary>
-		/// Add a game object to the world, the game object will be added in the next frame.
-		/// </summary>
-		/// <param name="gameObject"></param>
-		public void Add(GameObject gameObject)
-		{
-			if (gameObject == null)
-				throw new ArgumentNullException();
+        /// <summary>
+        /// Add a game object to the world, the game object will be added in the next frame.
+        /// </summary>
+        /// <param name="gameObject"></param>
+        public void Add(GameObject gameObject)
+		    => GameObjectsToAdd.Add(gameObject ?? throw new ArgumentNullException(nameof(gameObject)));
 
-			GameObjectsToAdd.Add(gameObject);
-		}
-
-		/// <summary>
-		/// Removes a game object from the world, the game object will be removed in the next frame.
-		/// </summary>
-		/// <param name="gameObject"></param>
-		public void Remove(GameObject gameObject)
-		{
-			if (gameObject == null)
-				throw new ArgumentNullException();
-
-			GameObjectsToRemove.Add(gameObject);
-		}
+        /// <summary>
+        /// Removes a game object from the world, the game object will be removed in the next frame.
+        /// </summary>
+        /// <param name="gameObject"></param>
+        public void Remove(GameObject gameObject)
+		    => GameObjectsToRemove.Add(gameObject ?? throw new ArgumentNullException(nameof(gameObject)));
 
 		/// <summary>
 		/// Update all active game objects and their components
