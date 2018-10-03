@@ -164,3 +164,6 @@ $RECYCLE.BIN/
 # Mac desktop service store files
 .DS_Store
 Logs/ContentProcessor.txt
+
+
+.vs/
