@@ -30,18 +30,16 @@ namespace Triton.Physics.Resources
 		public string Extension { get { return ".col"; } }
 		public string DefaultFilename { get { return ""; } }
 
-		public Common.Resource Create(string name, string parameters)
+		public object Create(string name, string parameters)
 		{
 			return new Mesh(name, parameters);
 		}
 
-		public void Load(Common.Resource resource, byte[] data)
+		public void Load(object resource, byte[] data)
 		{
 			Unload(resource);
 
 			var mesh = (Mesh)resource;
-
-			var filename = resource.Name + ".col";
 
 			using (var stream = new System.IO.MemoryStream(data))
 			using (var reader = new System.IO.BinaryReader(stream))
@@ -85,7 +83,7 @@ namespace Triton.Physics.Resources
 			}
 		}
 
-		public void Unload(Common.Resource resource)
+		public void Unload(object resource)
 		{
 			var mesh = (Mesh)resource;
 		}

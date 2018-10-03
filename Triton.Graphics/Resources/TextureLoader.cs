@@ -28,20 +28,20 @@ namespace Triton.Graphics.Resources
 		public string Extension { get { return ".dds"; } }
 		public string DefaultFilename { get { return "/textures/missing_n.dds"; } }
 
-		public Common.Resource Create(string name, string parameters)
+		public object Create(string name, string parameters)
 		{
 			return new Texture(name, parameters);
 		}
 
-		public void Load(Common.Resource resource, byte[] data)
+		public void Load(object resource, byte[] data)
 		{
 			var texture = (Texture)resource;
-			var filename = resource.Name + ".dds";
+			var filename = texture.Name + ".dds";
 			if (!FileSystem.FileExists(filename))
 			{
 				Common.Log.WriteLine(string.Format("Missing texture {0}", filename), Common.LogLevel.Error);
 
-				if (resource.Name.EndsWith("_n"))
+				if (texture.Name.EndsWith("_n"))
 					filename = "/textures/missing_n.dds";
 				else
 					filename = "/textures/missing.dds";
@@ -50,7 +50,7 @@ namespace Triton.Graphics.Resources
             texture.Handle = Backend.RenderSystem.CreateFromDDS(data, out texture.Width, out texture.Height);
         }
 
-		public void Unload(Common.Resource resource)
+		public void Unload(object resource)
 		{
 			var texture = (Texture)resource;
 			Backend.RenderSystem.DestroyTexture(texture.Handle);

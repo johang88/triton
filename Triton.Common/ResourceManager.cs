@@ -25,15 +25,15 @@ namespace Triton.Common
 	/// Care has to be taken for threading issues in the resource loaders, for example, opengl resources has to be created
 	/// on a valid context, that is active on the processing thread.
 	/// 
-	/// 
 	/// Future features:
 	///		Per resource type memory budgets
 	/// </summary>
 	public class ResourceManager : IDisposable
 	{
-		private readonly ConcurrentDictionary<string, Resource> Resources = new ConcurrentDictionary<string, Resource>();
-		private readonly Dictionary<Type, IResourceLoader> ResourceLoaders = new Dictionary<Type, IResourceLoader>();
-		private readonly ConcurrentQueue<ResourceToLoad> ResourcesToLoad = new ConcurrentQueue<ResourceToLoad>();
+		private readonly ConcurrentDictionary<string, ResourceReference> _resources = new ConcurrentDictionary<string, ResourceReference>();
+        private readonly ConcurrentDictionary<object, ResourceReference> _instanceToReference = new ConcurrentDictionary<object, ResourceReference>();
+		private readonly Dictionary<Type, IResourceLoader> _resourceLoaders = new Dictionary<Type, IResourceLoader>();
+		private readonly ConcurrentQueue<ResourceToLoad> _resourcesToLoad = new ConcurrentQueue<ResourceToLoad>();
 
 		private readonly IO.FileSystem FileSystem;
 
@@ -56,61 +56,67 @@ namespace Triton.Common
 			if (!isDisposing || Disposed)
 				return;
 
-			foreach (var resource in Resources.Values)
+			foreach (var resource in _resources.Values)
 			{
 				UnloadResource(resource, false);
 			}
 
-			Disposed = true;
+            _instanceToReference.Clear();
+            _resources.Clear();
+
+            Disposed = true;
 		}
 
-		public TResource Load<TResource>(string name, string parameters = "") where TResource : Resource
+		public TResource Load<TResource>(string name, string parameters = "") where TResource : class
 		{
-			if (!ResourceLoaders.ContainsKey(typeof(TResource)))
+			if (!_resourceLoaders.ContainsKey(typeof(TResource)))
 				throw new InvalidOperationException("no resource loader for the specified type");
 
 			var identifier = name + "?" + parameters;
 
 			lock (LoadingLock)
 			{
-				var loader = ResourceLoaders[typeof(TResource)];
+				var loader = _resourceLoaders[typeof(TResource)];
 
                 // Get or create the resource
-                if (!Resources.TryGetValue(identifier, out var resource))
+                if (!_resources.TryGetValue(identifier, out var resourceReference))
                 {
-                    resource = loader.Create(name, parameters);
-                    Resources.AddOrUpdate(identifier, resource, (key, existingVal) => existingVal);
+                    resourceReference = new ResourceReference(name, parameters);
+                    resourceReference.Resource = loader.Create(name, parameters);
+
+                    _resources.AddOrUpdate(identifier, resourceReference, (key, existingVal) => existingVal);
+                    _instanceToReference.AddOrUpdate(resourceReference.Resource, resourceReference, (key, existingVal) => existingVal);
                 }
 
-                resource.ReferenceCount += 1;
+                resourceReference.ReferenceCount += 1;
 
 				// Load the resource if neccecary
-				if (resource.State == ResourceLoadingState.Unloaded)
+				if (resourceReference.State == ResourceLoadingState.Unloaded)
 				{
-					resource.State = ResourceLoadingState.Loading;
+                    resourceReference.State = ResourceLoadingState.Loading;
 
 					Task.Factory.StartNew(async () =>
 					{
-						await LoadResource(resource, loader);
+						await LoadResource(resourceReference, loader);
 					});
 				}
 
-				return (TResource)resource;
+				return resourceReference.Resource as TResource;
 			}
 		}
 
-		private async Task LoadResource(Resource resource, IResourceLoader loader)
+		private async Task LoadResource(ResourceReference resource, IResourceLoader loader)
 		{
 			var data = await LoadDataForResource(resource, loader);
-			ResourcesToLoad.Enqueue(new ResourceToLoad
+			_resourcesToLoad.Enqueue(new ResourceToLoad
 			{
-				Resource = resource,
+				ResourceReference = resource,
 				Loader = loader,
 				Data = data
 			});
 		}
 
-		private async Task<byte[]> LoadDataForResource(Resource resource, IResourceLoader loader)
+		private async Task<byte[]> LoadDataForResource(ResourceReference resource, IResourceLoader loader)
 		{
 			var path = resource.Name + loader.Extension;
 
@@ -133,15 +139,15 @@ namespace Triton.Common
 			}
 		}
 
-		private void UnloadResource(Resource resource, bool async = true)
+		private void UnloadResource(ResourceReference resourceReference, bool async = true)
 		{
 			IResourceLoader loader = null;
-			var resourceType = resource.GetType();
+			var resourceType = resourceReference.Resource.GetType();
 			while (loader == null && resourceType != typeof(object))
 			{
-				if (ResourceLoaders.ContainsKey(resourceType))
+				if (_resourceLoaders.ContainsKey(resourceType))
 				{
-					loader = ResourceLoaders[resourceType];
+					loader = _resourceLoaders[resourceType];
 					break;
 				}
 
@@ -153,15 +159,15 @@ namespace Triton.Common
 
 			lock (LoadingLock)
 			{
-				if (resource.State == ResourceLoadingState.Loaded)
+				if (resourceReference.State == ResourceLoadingState.Loaded)
 				{
-					resource.State = ResourceLoadingState.Unloading;
+					resourceReference.State = ResourceLoadingState.Unloading;
 
                     void unloadAction()
                     {
-                        loader.Unload(resource);
-                        resource.State = ResourceLoadingState.Unloaded;
-                        Log.WriteLine("Unloaded {0} of type {1}", resource.Name, resource.GetType());
+                        loader.Unload(resourceReference.Resource);
+                        resourceReference.State = ResourceLoadingState.Unloaded;
+                        Log.WriteLine("Unloaded {0} of type {1}", resourceReference.Name, resourceReference.GetType());
                     }
 
                     var task = new Task(unloadAction);
@@ -178,64 +184,95 @@ namespace Triton.Common
 		/// </summary>
 		public void TickResourceLoading(int maxResourcesPerFrame = 10)
 		{
-			while (maxResourcesPerFrame > 0 && ResourcesToLoad.Count > 0)
+			while (maxResourcesPerFrame > 0 && _resourcesToLoad.Count > 0)
 			{
-				if (ResourcesToLoad.TryDequeue(out var resourceToLoad))
+				if (_resourcesToLoad.TryDequeue(out var resourceToLoad))
 				{
-					resourceToLoad.Loader.Load(resourceToLoad.Resource, resourceToLoad.Data);
-					resourceToLoad.Resource.State = ResourceLoadingState.Loaded;
+					resourceToLoad.Loader.Load(resourceToLoad.ResourceReference.Resource, resourceToLoad.Data);
+					resourceToLoad.ResourceReference.State = ResourceLoadingState.Loaded;
 
-					if (!string.IsNullOrWhiteSpace(resourceToLoad.Resource.Parameters))
-						Log.WriteLine("Loaded {0}?{2} of type {1}", resourceToLoad.Resource.Name, resourceToLoad.Resource.GetType(), resourceToLoad.Resource.Parameters);
+					if (!string.IsNullOrWhiteSpace(resourceToLoad.ResourceReference.Parameters))
+						Log.WriteLine("Loaded {0}?{2} of type {1}", resourceToLoad.ResourceReference.Name, resourceToLoad.ResourceReference.GetType(), resourceToLoad.ResourceReference.Parameters);
 					else
-						Log.WriteLine("Loaded {0} of type {1}", resourceToLoad.Resource.Name, resourceToLoad.Resource.GetType());
+						Log.WriteLine("Loaded {0} of type {1}", resourceToLoad.ResourceReference.Name, resourceToLoad.ResourceReference.GetType());
 				}
 			}
 		}
 
-		public void Manage(Resource resource)
-		{
+		public void Manage<TResource>(string name, TResource resource) where TResource : class
+        {
 			if (resource == null)
 				throw new ArgumentNullException("resource");
 
 			lock (LoadingLock)
 			{
-				Resources.AddOrUpdate(resource.Name, resource, (key, existingVal) => existingVal);
-				resource.State = ResourceLoadingState.Loaded;
-				resource.ReferenceCount += 1;
+                var resourceReference = new ResourceReference(name, null)
+                {
+                    Resource = resource,
+                    State = ResourceLoadingState.Loaded,
+                    ReferenceCount = 1
+                };
+
+                _resources.AddOrUpdate(name, resourceReference, (key, existingVal) => existingVal);
+                _instanceToReference.AddOrUpdate(resource, resourceReference, (key, existingVal) => existingVal);
 			}
 		}
 
-		public void Unload(Resource resource)
-		{
-			if (resource.ReferenceCount > 0)
-				resource.ReferenceCount -= 1;
+		public void Unload<TResource>(TResource resource) where TResource : class
+        {
+            if (_instanceToReference.TryGetValue(resource, out var resourceReference))
+            {
+                resourceReference.ReferenceCount -= 1;
+            }
 		}
 
-		public void AddResourceLoader<TResource>(IResourceLoader<TResource> loader) where TResource : Resource
+		public void AddResourceLoader<TResource>(IResourceLoader<TResource> loader) where TResource : class
 		{
 			if (loader == null)
 				throw new ArgumentNullException("loader");
 
-			ResourceLoaders.Add(typeof(TResource), loader);
+			_resourceLoaders.Add(typeof(TResource), loader);
 		}
 
 		public void UnloadUnusedResources()
 		{
-			foreach (var resource in Resources.Where(r => r.Value.ReferenceCount == 0 && r.Value.State == ResourceLoadingState.Loaded))
+			foreach (var resource in _resources.Where(r => r.Value.ReferenceCount == 0 && r.Value.State == ResourceLoadingState.Loaded))
 			{
 				UnloadResource(resource.Value);
 			}
 		}
 
 		public bool AllResourcesLoaded()
-            => Resources.All(r => r.Value.State == ResourceLoadingState.Loaded);
+            => _resources.All(r => r.Value.State == ResourceLoadingState.Loaded);
 
 		struct ResourceToLoad
 		{
-			public Resource Resource;
+			public ResourceReference ResourceReference;
 			public IResourceLoader Loader;
 			public byte[] Data;
 		}
-	}
+
+        private class ResourceReference
+        {
+            public string Name { get; set; }
+            public ResourceLoadingState State { get; set; }
+            public int ReferenceCount { get; set; }
+            public string Parameters { get; set; }
+            public object Resource { get; set; }
+
+            public ResourceReference(string name, string parameters)
+            {
+                Name = name;
+                Parameters = parameters;
+            }
+        }
+
+        public enum ResourceLoadingState
+        {
+            Unloaded,
+            Loading,
+            Loaded,
+            Unloading
+        }
+    }
 }

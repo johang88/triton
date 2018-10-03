@@ -54,19 +54,17 @@ namespace Triton.Graphics.Resources
 		public string Extension { get { return ".mesh"; } }
 		public string DefaultFilename { get { return ""; } }
 
-		public Common.Resource Create(string name, string parameters)
+		public object Create(string name, string parameters)
 		{
-			return new Mesh(name, parameters);
+			return new Mesh();
 		}
 
-		public void Load(Common.Resource resource, byte[] data)
+		public void Load(object resource, byte[] data)
 		{
 			// Destroy any existing mesh handles
 			Unload(resource);
 
 			var mesh = (Mesh)resource;
-
-			var overrideMaterial = resource.Parameters;
 
 			using (var stream = new System.IO.MemoryStream(data))
 			using (var reader = new System.IO.BinaryReader(stream))
@@ -101,9 +99,6 @@ namespace Triton.Graphics.Resources
 				for (var i = 0; i < meshCount; i++)
 				{
 					var materialName = reader.ReadString();
-
-					if (!string.IsNullOrWhiteSpace(overrideMaterial))
-						materialName = overrideMaterial;
 
 					Material material = null;
 					if (materialName != "no_material")
@@ -153,7 +148,7 @@ namespace Triton.Graphics.Resources
 			}
 		}
 
-		public void Unload(Common.Resource resource)
+		public void Unload(object resource)
 		{
 			var mesh = (Mesh)resource;
 			foreach (var subMesh in mesh.SubMeshes)

@@ -51,7 +51,7 @@ namespace Triton.Graphics.Resources
 			}
 		}
 
-		public Common.Resource Create(string name, string parameters)
+		public object Create(string name, string parameters)
 		{
 			return new ShaderProgram(name, parameters, Backend);
 		}
@@ -61,14 +61,14 @@ namespace Triton.Graphics.Resources
 			return string.Format("#version 410 core\n#define {0}\n{1}\n", type, defines) + source;
 		}
 
-		public void Load(Common.Resource resource, byte[] data)
+		public void Load(object resource, byte[] data)
 		{
 			var shader = (ShaderProgram)resource;
 
 			// This will reset some cache data like uniform locations
 			shader.Reset();
 
-			var filename = resource.Name + ".glsl";
+			var filename = shader.Name + ".glsl";
 
 			var shaderSource = Encoding.ASCII.GetString(data); // Complete source of both shaders before splitting them
 
@@ -78,7 +78,7 @@ namespace Triton.Graphics.Resources
 
 			var defines = "";
 
-			var parameters = resource.Parameters;
+			var parameters = shader.Parameters;
 
 			if (!string.IsNullOrWhiteSpace(parameters))
 			{
@@ -122,10 +122,10 @@ namespace Triton.Graphics.Resources
 			foreach (var source in sources)
 			{
 				var type = source.Key.ToString().Substring(0, 4).ToLowerInvariant();
-				OutputShader(resource.Name, type, parameters, source.Value);
+				OutputShader(shader.Name, type, parameters, source.Value);
 			}
 
-			resource.Parameters = parameters;
+            shader.Parameters = parameters;
 
 			if (shader.Handle == -1)
 				shader.Handle = Backend.RenderSystem.CreateShader();
@@ -142,7 +142,7 @@ namespace Triton.Graphics.Resources
 				Common.Log.WriteLine(shader.Name + ": " + errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
 		}
 
-		public void Unload(Common.Resource resource)
+		public void Unload(object resource)
 		{
 			var shader = (ShaderProgram)resource;
 			Backend.RenderSystem.DestroyShader(shader.Handle);

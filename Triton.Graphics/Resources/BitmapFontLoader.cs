@@ -26,12 +26,12 @@ namespace Triton.Graphics.Resources
 		public string Extension { get { return ".fnt"; } }
 		public string DefaultFilename { get { return ""; } }
 
-		public Common.Resource Create(string name, string parameters)
+		public object Create(string name, string parameters)
 		{
-			return new BitmapFont(name, parameters);
+			return new BitmapFont();
 		}
 
-		public void Load(Common.Resource resource, byte[] data)
+		public void Load(object resource, byte[] data)
 		{
 			var bitmapFont = (BitmapFont)resource;
 
@@ -117,7 +117,7 @@ namespace Triton.Graphics.Resources
 			});
 		}
 
-		public void Unload(Common.Resource resource)
+		public void Unload(object resource)
 		{
 			var bitmapFont = (BitmapFont)resource;
 			foreach (var texture in bitmapFont.Textures)

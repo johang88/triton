@@ -30,13 +30,13 @@ namespace Triton.Graphics.Resources
 		public string Extension { get { return ".mat"; } }
 		public string DefaultFilename { get { return "/materials/default.mat"; } }
 
-		public Common.Resource Create(string name, string parameters)
+		public object Create(string name, string parameters)
 		{
 			var isSkinned = parameters.Contains("SKINNED");
-			return new Material(name, parameters, ResourceManager, isSkinned);
+			return new Material(ResourceManager, isSkinned);
 		}
 
-		public void Load(Common.Resource resource, byte[] data)
+		public void Load(object resource, byte[] data)
 		{
 			Unload(resource);
 
@@ -73,7 +73,7 @@ namespace Triton.Graphics.Resources
 			}
 		}
 
-		public void Unload(Common.Resource resource)
+		public void Unload(object resource)
 		{
 			var material = (Material)resource;
 			material.Unload();

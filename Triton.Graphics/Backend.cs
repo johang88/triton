@@ -1008,7 +1008,7 @@ namespace Triton.Graphics
                 texture.Width = definition.Width;
                 texture.Height = definition.Height;
 
-                _resourceManager.Manage(texture);
+                _resourceManager.Manage(texture.Name, texture);
 
                 textures[i] = texture;
             }
@@ -1048,7 +1048,7 @@ namespace Triton.Graphics
             texture.PixelInternalFormat = interalFormat;
             texture.PixelFormat = pixelFormat;
 
-            _resourceManager.Manage(texture);
+            _resourceManager.Manage(texture.Name, texture);
 
             return texture;
         }

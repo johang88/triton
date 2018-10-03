@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.Resources
 {
-	public class Material : Triton.Common.Resource
+	public class Material
 	{
 		private bool Initialized = false;
 
@@ -25,12 +25,11 @@ namespace Triton.Graphics.Resources
 		private static int LastId = 0;
 		public readonly int Id = LastId++;
 
-		public Material(string name, string parameters, Common.ResourceManager resourceManager, bool isSkinned)
-			: base(name, parameters)
+		public Material(Common.ResourceManager resourceManager, bool isSkinned)
 		{
 			IsSkinned = isSkinned;
 			ResourceManager = resourceManager;
-		}
+        }
 
 		public void Initialize(Backend backend)
 		{
@@ -112,23 +111,6 @@ namespace Triton.Graphics.Resources
 			public int CameraPosition = 0;
 			public int ItWorld = 0;
 			public int Time = 0;
-		}
-
-		public bool IsLoaded()
-		{
-			if (State != Common.ResourceLoadingState.Loaded)
-				return false;
-
-			if (Shader.State != Common.ResourceLoadingState.Loaded)
-				return false;
-			
-			foreach (var texture in Textures)
-			{
-				if (texture.Value.State != Common.ResourceLoadingState.Loaded)
-					return false;
-			}
-
-			return true;
 		}
 	}
 }

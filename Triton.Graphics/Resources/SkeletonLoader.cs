@@ -26,12 +26,12 @@ namespace Triton.Graphics.Resources
 		public string Extension { get { return ".skeleton"; } }
 		public string DefaultFilename { get { return ""; } }
 
-		public Common.Resource Create(string name, string parameters)
+		public object Create(string name, string parameters)
 		{
-			return new Skeleton(name, parameters);
+			return new Skeleton();
 		}
 
-		public void Load(Common.Resource resource, byte[] data)
+		public void Load(object resource, byte[] data)
 		{
 			// Destroy any existing mesh handles
 			Unload(resource);
@@ -102,7 +102,7 @@ namespace Triton.Graphics.Resources
 			}
 		}
 
-		public void Unload(Common.Resource resource)
+		public void Unload(object resource)
 		{
 			// Nothing to do here ..
 		}

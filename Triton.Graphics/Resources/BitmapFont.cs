@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.Resources
 {
-	public class BitmapFont : Triton.Common.Resource
+	public class BitmapFont
 	{
 		internal List<Texture> Textures = new List<Texture>();
 		internal Dictionary<char, Glyph> Glyphs = new Dictionary<char, Glyph>();
@@ -22,11 +22,6 @@ namespace Triton.Graphics.Resources
 			Colors.Add("green", new Vector4(0, 1, 0, 1));
 			Colors.Add("white", new Vector4(1, 1, 1, 1));
 			Colors.Add("black", new Vector4(0, 0, 0, 1));
-		}
-
-		public BitmapFont(string name, string parameters)
-			: base(name, parameters)
-		{
 		}
 
 		public void DrawText(SpriteBatch sprite, Vector2 position, Vector4 color, string text, params object[] parameters)

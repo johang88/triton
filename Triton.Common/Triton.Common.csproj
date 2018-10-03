@@ -76,7 +76,6 @@
     <Compile Include="LogLevel.cs" />
     <Compile Include="LogOutputHandlers\Console.cs" />
     <Compile Include="LogOutputHandlers\File.cs" />
-    <Compile Include="Resource.cs" />
     <Compile Include="ResourceGroupManager.cs" />
     <Compile Include="ResourceManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
