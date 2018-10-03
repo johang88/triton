@@ -8,221 +8,227 @@ using System.Threading.Tasks;
 
 namespace Triton.Renderer.Textures
 {
-	class TextureManager : IDisposable
-	{
-		const int MaxHandles = 4096;
-		private readonly TextureData[] Handles = new TextureData[MaxHandles];
-		private short NextFree = 0;
-		private readonly int DefaultOpenGLHandle = 0;
-		private bool Disposed = false;
-		private readonly object Lock = new object();
+    class TextureManager : IDisposable
+    {
+        const int MaxHandles = 4096;
+        private readonly TextureData[] _handles = new TextureData[MaxHandles];
+        private short _nextFree = 0;
+        private readonly int _defaultOpenGlHandle = 0;
+        private bool _disposed = false;
+        private readonly object _lock = new object();
 
-		private int[] ActiveTextures;
+        private readonly int[] _activeTextures;
 
-		public TextureManager()
-		{
-			// Each empty handle will store the location of the next empty handle 
-			for (var i = 0; i < Handles.Length; i++)
-			{
-				Handles[i].Id = (short)(i + 1);
-			}
+        public TextureManager()
+        {
+            // Each empty handle will store the location of the next empty handle 
+            for (var i = 0; i < _handles.Length; i++)
+            {
+                _handles[i].Id = (short)(i + 1);
+            }
 
-			Handles[Handles.Length - 1].Id = -1;
+            _handles[_handles.Length - 1].Id = -1;
 
-			// Create default texture
-			GL.GenTextures(1, out DefaultOpenGLHandle);
+            // Create default texture
+            GL.GenTextures(1, out _defaultOpenGlHandle);
 
-			GL.BindTexture(OGL.TextureTarget.Texture2D, DefaultOpenGLHandle);
-			GL.TexImage2D(OGL.TextureTarget.Texture2D, 0, OGL.PixelInternalFormat.Rgb8, 1, 1, 0, OGL.PixelFormat.Rgba, OGL.PixelType.Byte, new byte[] { 0, 255, 255 });
-			GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-			GL.Finish();
+            GL.BindTexture(OGL.TextureTarget.Texture2D, _defaultOpenGlHandle);
+            GL.TexImage2D(OGL.TextureTarget.Texture2D, 0, OGL.PixelInternalFormat.Rgb8, 1, 1, 0, OGL.PixelFormat.Rgba, OGL.PixelType.Byte, new byte[] { 0, 255, 255 });
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
-			ActiveTextures = new int[20];
-			for (var i = 0; i < ActiveTextures.Length; i++)
-			{
-				ActiveTextures[i] = -1;
-			}
-		}
+            _activeTextures = new int[20];
+            for (var i = 0; i < _activeTextures.Length; i++)
+            {
+                _activeTextures[i] = -1;
+            }
+        }
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		protected virtual void Dispose(bool isDisposing)
-		{
-			if (!isDisposing || Disposed)
-				return;
+        protected virtual void Dispose(bool isDisposing)
+        {
+            if (!isDisposing || _disposed)
+                return;
 
-			for (var i = 0; i < Handles.Length; i++)
-			{
-				if (Handles[i].Initialized)
-					GL.DeleteTexture(Handles[i].OpenGLHandle);
-				Handles[i].Initialized = false;
-			}
+            for (var i = 0; i < _handles.Length; i++)
+            {
+                if (_handles[i].Initialized)
+                    GL.DeleteTexture(_handles[i].OpenGLHandle);
+                _handles[i].Initialized = false;
+            }
 
-			GL.DeleteTexture(DefaultOpenGLHandle);
+            GL.DeleteTexture(_defaultOpenGlHandle);
 
-			Disposed = true;
-		}
+            _disposed = true;
+        }
 
-		int CreateHandle(int index, int id)
-		{
-			return (index << 16) | id;
-		}
+        int CreateHandle(int index, int id)
+        {
+            return (index << 16) | id;
+        }
 
-		void ExtractHandle(int handle, out int index, out int id)
-		{
-			id = handle & 0x0000FFFF;
-			index = handle >> 16;
-		}
+        void ExtractHandle(int handle, out int index, out int id)
+        {
+            id = handle & 0x0000FFFF;
+            index = handle >> 16;
+        }
 
-		public int Create()
-		{
-			if (NextFree == -1)
-			{
-				return CreateHandle(-1, -1);
-			}
+        public int Create()
+        {
+            if (_nextFree == -1)
+            {
+                return CreateHandle(-1, -1);
+            }
 
-			int index;
-			lock (Lock)
-			{
-				index = NextFree;
-				NextFree = Handles[NextFree].Id;
-			}
+            int index;
+            lock (_lock)
+            {
+                index = _nextFree;
+                _nextFree = _handles[_nextFree].Id;
+            }
 
-			var id = ++Handles[index].Id;
-			Handles[index].Initialized = false;
-			Handles[index].OpenGLHandle = 0;
+            var id = ++_handles[index].Id;
+            _handles[index].Initialized = false;
+            _handles[index].OpenGLHandle = 0;
 
-			return CreateHandle(index, id);
-		}
+            return CreateHandle(index, id);
+        }
 
-		public void Destroy(int handle)
-		{
-			int index, id;
-			ExtractHandle(handle, out index, out id);
+        public void Destroy(int handle)
+        {
+            int index, id;
+            ExtractHandle(handle, out index, out id);
 
-			if (id == -1 || Handles[index].Id != id)
-				return;
+            if (id == -1 || _handles[index].Id != id)
+                return;
 
-			lock (Lock)
-			{
-				Handles[index].Id = NextFree;
-				NextFree = (short)index;
-			}
+            lock (_lock)
+            {
+                _handles[index].Id = _nextFree;
+                _nextFree = (short)index;
+            }
 
-			if (Handles[index].Initialized)
-				GL.DeleteTexture(Handles[index].OpenGLHandle);
+            if (_handles[index].Initialized)
+                GL.DeleteTexture(_handles[index].OpenGLHandle);
 
-			Handles[index].Initialized = false;
-		}
+            _handles[index].Initialized = false;
+        }
 
-		public void SetPixelData(int handle, TextureTarget target, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap = true)
-		{
-			int index, id;
-			ExtractHandle(handle, out index, out id);
+        public void SetPixelData(int handle, TextureTarget target, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap = true)
+        {
+            int index, id;
+            ExtractHandle(handle, out index, out id);
 
-			if (id == -1 || Handles[index].Id != id)
-				return;
+            if (id == -1 || _handles[index].Id != id)
+                return;
 
-			if (!Handles[index].Initialized)
-				GL.GenTextures(1, out Handles[index].OpenGLHandle);
+            if (!_handles[index].Initialized)
+                GL.GenTextures(1, out _handles[index].OpenGLHandle);
 
-			Handles[index].Target = (OGL.TextureTarget)target;
+            _handles[index].Target = (OGL.TextureTarget)target;
 
-			// Upload texture data to OpenGL
-			GL.BindTexture((OGL.TextureTarget)(int)Handles[index].Target, Handles[index].OpenGLHandle);
+            // Upload texture data to OpenGL
+            GL.BindTexture((OGL.TextureTarget)(int)_handles[index].Target, _handles[index].OpenGLHandle);
 
-			if (target == TextureTarget.TextureCubeMap)
-			{
-				for (var i = 0; i < 6; i++)
-				{
-					GL.TexImage2D(OGL.TextureTarget.TextureCubeMapPositiveX + i, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
-				}
-				if (mipmap)
-					GL.GenerateMipmap(GenerateMipmapTarget.TextureCubeMap);
-			}
-			else
-			{
-				GL.TexImage2D((OGL.TextureTarget)(int)Handles[index].Target, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
-				if (mipmap)
-					GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-			}
+            if (target == TextureTarget.TextureCubeMap)
+            {
+                for (var i = 0; i < 6; i++)
+                {
+                    GL.TexImage2D(OGL.TextureTarget.TextureCubeMapPositiveX + i, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
+                }
+                if (mipmap)
+                    GL.GenerateMipmap(GenerateMipmapTarget.TextureCubeMap);
+            }
+            else
+            {
+                GL.TexImage2D((OGL.TextureTarget)(int)_handles[index].Target, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
+                if (mipmap)
+                    GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            }
 
-			GL.Finish();
+            // The texture can now be used
+            _handles[index].Initialized = true;
+        }
 
-			// The texture can now be used
-			Handles[index].Initialized = true;
-		}
+        public void LoadDDS(int handle, byte[] data, out int width, out int height)
+        {
+            int index, id;
+            ExtractHandle(handle, out index, out id);
 
-		public void LoadDDS(int handle, byte[] data)
-		{
-			int index, id;
-			ExtractHandle(handle, out index, out id);
+            width = height = 0;
 
-			if (id == -1 || Handles[index].Id != id)
-				return;
+            if (id == -1 || _handles[index].Id != id)
+                return;
 
-			if (Handles[index].Initialized)
-				return; // TODO ?
+            if (_handles[index].Initialized)
+                return; // TODO ?
 
-			OGL.TextureTarget target;
-			int width, height;
-			DDS.LoaderDDS.LoadFromStream(data, out Handles[index].OpenGLHandle, out target, out width, out height);
+            OGL.TextureTarget target;
+            DDS.LoaderDDS.LoadFromStream(data, out _handles[index].OpenGLHandle, out target, out width, out height);
 
-			Handles[index].Target = target;
+            _handles[index].Target = target;
 
-			GL.Finish();
+            GL.Finish();
 
-			Handles[index].Initialized = true;
-		}
+            _handles[index].Initialized = true;
+        }
 
-		public void Bind(int textureUnit, int handle)
-		{
-			if (ActiveTextures[textureUnit] == handle)
-				return;
+        public int GetActiveTexture(int textureUnit)
+        {
+            int index, id;
+            ExtractHandle(_activeTextures[textureUnit], out index, out id);
 
-			ActiveTextures[textureUnit] = handle;
+            return _handles[index].OpenGLHandle;
+        }
 
-			OGL.TextureTarget target;
-			var openGLHandle = GetOpenGLHande(handle, out target);
+        public void Bind(int textureUnit, int handle)
+        {
+            if (_activeTextures[textureUnit] == handle)
+                return;
 
-			GL.Ext.BindMultiTexture(TextureUnit.Texture0 + textureUnit, target, openGLHandle);
-		}
+            _activeTextures[textureUnit] = handle;
 
-		public int GetOpenGLHande(int handle)
-		{
-			int index, id;
-			ExtractHandle(handle, out index, out id);
+            OGL.TextureTarget target;
+            var openGLHandle = GetOpenGLHande(handle, out target);
 
-			if (id == -1 || Handles[index].Id != id || !Handles[index].Initialized)
-				return DefaultOpenGLHandle;
+            GLWrapper.BindMultiTexture(TextureUnit.Texture0 + textureUnit, target, openGLHandle);
+        }
 
-			return Handles[index].OpenGLHandle;
-		}
+        public int GetOpenGLHande(int handle)
+        {
+            int index, id;
+            ExtractHandle(handle, out index, out id);
 
-		public int GetOpenGLHande(int handle, out OGL.TextureTarget target)
-		{
-			int index, id;
-			ExtractHandle(handle, out index, out id);
+            if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
+                return _defaultOpenGlHandle;
 
-			target = OGL.TextureTarget.Texture2D;
+            return _handles[index].OpenGLHandle;
+        }
 
-			if (id == -1 || Handles[index].Id != id || !Handles[index].Initialized)
-				return DefaultOpenGLHandle;
+        public int GetOpenGLHande(int handle, out OGL.TextureTarget target)
+        {
+            int index, id;
+            ExtractHandle(handle, out index, out id);
 
-			target = Handles[index].Target;
-			return Handles[index].OpenGLHandle;
-		}
+            target = OGL.TextureTarget.Texture2D;
 
-		struct TextureData
-		{
-			public int OpenGLHandle;
-			public short Id;
-			public bool Initialized;
-			public OGL.TextureTarget Target;
-		}
-	}
+            if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
+                return _defaultOpenGlHandle;
+
+            target = _handles[index].Target;
+            return _handles[index].OpenGLHandle;
+        }
+
+        struct TextureData
+        {
+            public int OpenGLHandle;
+            public short Id;
+            public bool Initialized;
+            public OGL.TextureTarget Target;
+        }
+    }
 }

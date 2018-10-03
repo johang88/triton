@@ -77,8 +77,8 @@ namespace Triton.Graphics.Terrain
 			}
 
 			// Upload mesh data
-			Mesh.VertexBufferHandle = Terrain.Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, vertexFormat);
-			Mesh.IndexBufferHandle = Terrain.Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ElementArrayBuffer);
+			Mesh.VertexBufferHandle = Terrain.Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, false, vertexFormat);
+			Mesh.IndexBufferHandle = Terrain.Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ElementArrayBuffer, false);
 
 			Terrain.Backend.RenderSystem.SetBufferData(Mesh.VertexBufferHandle, vertices, false, true);
 			Terrain.Backend.RenderSystem.SetBufferData(Mesh.IndexBufferHandle, indices, false, true);

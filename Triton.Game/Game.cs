@@ -7,6 +7,7 @@ using Triton.Common;
 using System.Threading;
 using OpenTK.Graphics;
 using OpenTK;
+using Triton.Renderer;
 
 namespace Triton.Game
 {
@@ -58,7 +59,9 @@ namespace Triton.Game
 
 		private readonly string Name;
 
-		public Game(string name, string logPath = "logs/")
+        public bool CursorVisible { get; set; } = false;
+
+        public Game(string name, string logPath = "logs/")
 		{
 			Name = name;
 			Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
@@ -94,13 +97,25 @@ namespace Triton.Game
 
 		private void RenderLoop()
 		{
-			var graphicsMode = new GraphicsMode(new ColorFormat(32), 24, 0, 0);
-			Window = new NativeWindow(RequestedWidth, RequestedHeight, Name, GameWindowFlags.Default, graphicsMode, DisplayDevice.Default);
-			Window.Visible = true;
-			Window.CursorVisible = false;
+            var graphicsMode = new GraphicsMode(new ColorFormat(32), 24, 0, 0);
+            Window = new NativeWindow(RequestedWidth, RequestedHeight, Name, GameWindowFlags.Default, graphicsMode, DisplayDevice.Default)
+            {
+                Visible = true,
+                CursorVisible = CursorVisible
+            };
 
-			using (GraphicsBackend = new Triton.Graphics.Backend(CoreResources, Window.Width, Window.Height, Window.WindowInfo))
-			{
+            var context = new GraphicsContext(graphicsMode, Window.WindowInfo, 4, 5, GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug);
+            context.MakeCurrent(Window.WindowInfo);
+            context.LoadAll();
+
+            var ctx = new ContextReference
+            {
+                Context = context,
+                SwapBuffers = context.SwapBuffers
+            };
+
+            using (GraphicsBackend = new Triton.Graphics.Backend(CoreResources, Window.Width, Window.Height, ctx))
+            {
 				Triton.Graphics.Resources.ResourceLoaders.Init(CoreResources, GraphicsBackend, FileSystem);
 				Triton.Graphics.Resources.ResourceLoaders.Init(GameResources, GraphicsBackend, FileSystem);
 
@@ -214,7 +229,7 @@ namespace Triton.Game
 
 			var postProcessedResult = PostEffectManager.Render(Camera, DeferredRenderer.GBuffer, lightOutput, deltaTime);
 
-			GraphicsBackend.BeginPass(null, Vector4.Zero, false);
+			GraphicsBackend.BeginPass(null, Vector4.Zero, ClearFlags.Color);
 
 			SpriteRenderer.RenderQuad(postProcessedResult.Textures[0], Vector2.Zero, new Vector2(Window.Width, Window.Height));
 			SpriteRenderer.Render(Window.Width, Window.Height);

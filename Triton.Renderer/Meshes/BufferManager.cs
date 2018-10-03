@@ -9,200 +9,234 @@ using OGL = OpenTK.Graphics.OpenGL;
 
 namespace Triton.Renderer.Meshes
 {
-	public class BufferManager : IDisposable
-	{
-		const int MaxHandles = 8192;
-		private readonly BufferData[] Handles = new BufferData[MaxHandles];
-		private int NextFree = 0;
-		private bool Disposed = false;
-		private readonly object Lock = new object();
+    public class BufferManager : IDisposable
+    {
+        const int MaxHandles = 8192;
+        private readonly BufferData[] _handles = new BufferData[MaxHandles];
+        private int _nextFree = 0;
+        private bool _disposed = false;
+        private readonly object _lock = new object();
 
-		public BufferManager()
-		{
-			// Each empty handle will store the location of the next empty handle 
-			for (var i = 0; i < Handles.Length; i++)
-			{
-				Handles[i].Id = (short)(i + 1);
-			}
+        public BufferManager()
+        {
+            // Each empty handle will store the location of the next empty handle 
+            for (var i = 0; i < _handles.Length; i++)
+            {
+                _handles[i].Id = (short)(i + 1);
+            }
 
-			Handles[Handles.Length - 1].Id = -1;
-		}
+            _handles[_handles.Length - 1].Id = -1;
+        }
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		protected virtual void Dispose(bool isDisposing)
-		{
-			if (!isDisposing || Disposed)
-				return;
+        protected virtual void Dispose(bool isDisposing)
+        {
+            if (!isDisposing || _disposed)
+                return;
 
-			for (var i = 0; i < Handles.Length; i++)
-			{
-				if (Handles[i].Initialized)
-				{
-					GL.DeleteBuffers(1, new int[] { Handles[i].BufferID });
-				}
-				Handles[i].Initialized = false;
-			}
+            for (var i = 0; i < _handles.Length; i++)
+            {
+                if (_handles[i].Initialized)
+                {
+                    GL.DeleteBuffers(1, new int[] { _handles[i].BufferID });
+                }
+                _handles[i].Initialized = false;
+            }
 
-			Disposed = true;
-		}
+            _disposed = true;
+        }
 
-		int CreateHandle(int index, int id)
-		{
-			return (index << 16) | id;
-		}
+        int CreateHandle(int index, int id)
+        {
+            return (index << 16) | id;
+        }
 
-		void ExtractHandle(int handle, out int index, out int id)
-		{
-			id = handle & 0x0000FFFF;
-			index = handle >> 16;
-		}
+        void ExtractHandle(int handle, out int index, out int id)
+        {
+            id = handle & 0x0000FFFF;
+            index = handle >> 16;
+        }
 
-		public int Create(BufferTarget target, VertexFormat vertexFormat = null)
-		{
-			if (target == BufferTarget.ArrayBuffer && vertexFormat == null)
-				throw new Exception("missing vertex format");
+        public int Create(BufferTarget target, bool mutable, VertexFormat vertexFormat = null)
+        {
+            if (target == BufferTarget.ArrayBuffer && vertexFormat == null)
+                throw new Exception("missing vertex format");
 
-			if (NextFree == -1)
-			{
-				CreateHandle(-1, -1);
-			}
+            if (_nextFree == -1)
+            {
+                CreateHandle(-1, -1);
+            }
 
-			int index;
-			lock (Lock)
-			{
-				index = NextFree;
-				NextFree = Handles[NextFree].Id;
-			}
+            int index;
+            lock (_lock)
+            {
+                index = _nextFree;
+                _nextFree = _handles[_nextFree].Id;
+            }
 
-			var id = ++Handles[index].Id;
-			Handles[index].Initialized = false;
-			Handles[index].Target = (OGL.BufferTarget)(int)target;
-			Handles[index].VertexFormat = vertexFormat;
+            var id = ++_handles[index].Id;
+            _handles[index].Initialized = false;
+            _handles[index].Target = (OGL.BufferTarget)(int)target;
+            _handles[index].VertexFormat = vertexFormat;
+            _handles[index].Mutable = mutable;
 
-			return CreateHandle(index, id);
-		}
+            return CreateHandle(index, id);
+        }
 
-		public void Destroy(int handle)
-		{
-			int index, id;
-			ExtractHandle(handle, out index, out id);
+        public void Destroy(int handle)
+        {
+            int index, id;
+            ExtractHandle(handle, out index, out id);
 
-			if (id == -1 || Handles[index].Id != id)
-				return;
+            if (id == -1 || _handles[index].Id != id)
+                return;
 
-			lock (Lock)
-			{
-				Handles[index].Id = (short)NextFree;
-				NextFree = index;
-			}
+            lock (_lock)
+            {
+                _handles[index].Id = (short)_nextFree;
+                _nextFree = index;
+            }
 
-			if (Handles[index].Initialized)
-			{
-				GL.DeleteBuffers(1, new int[] { Handles[index].BufferID });
-			}
+            if (_handles[index].Initialized)
+            {
+                GL.DeleteBuffers(1, new int[] { _handles[index].BufferID });
+            }
 
-			Handles[index].Initialized = false;
-		}
+            _handles[index].Initialized = false;
+        }
 
-		public void SetDataDirect(int handle, IntPtr dataLength, IntPtr data, bool stream)
-		{
-			int index, id;
-			ExtractHandle(handle, out index, out id);
+        public void SetDataDirect(int handle, IntPtr dataLength, IntPtr data, bool stream)
+        {
+            int index, id;
+            ExtractHandle(handle, out index, out id);
 
-			if (id == -1 || Handles[index].Id != id || !Handles[index].Initialized)
-				return;
+            if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
+                return;
 
-			if (data == IntPtr.Zero || data == null)
-				return;
+            if (data == IntPtr.Zero)
+                return;
 
-			GL.Ext.NamedBufferData(Handles[index].BufferID, dataLength, data, (ExtDirectStateAccess)(stream ? BufferUsageHint.DynamicDraw : BufferUsageHint.StaticDraw));
-		}
+            //GL.InvalidateBufferData(_handles[index].BufferID);
+            //if (_handles[index].Size >= (int)dataLength)
+            //{
+            //	GLWrapper.NamedBufferSubData(_handles[index].Target, _handles[index].BufferID, IntPtr.Zero, dataLength, data);
+            //}
+            //else
+            {
+                GLWrapper.NamedBufferData(_handles[index].Target, _handles[index].BufferID, dataLength, data, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
+            }
 
-		public void SetData<T>(int handle, T[] data, bool stream)
-			where T : struct
-		{
-			int index, id;
-			ExtractHandle(handle, out index, out id);
+            _handles[index].Size = (int)dataLength;
+        }
 
-			if (id == -1 || Handles[index].Id != id)
-				return;
+        public void SetData<T>(int handle, T[] data, bool stream)
+            where T : struct
+        {
+            int index, id;
+            ExtractHandle(handle, out index, out id);
 
-			if (data == null)
-				return;
+            if (id == -1 || _handles[index].Id != id)
+                return;
 
-			if (!Handles[index].Initialized)
-			{
-				GL.GenBuffers(1, out Handles[index].BufferID);
-			}
+            if (data == null)
+                return;
 
-			var dataLength = new IntPtr(data.Length * Marshal.SizeOf(typeof(T)));
-			GL.Ext.NamedBufferData(Handles[index].BufferID, dataLength, data, (ExtDirectStateAccess)(stream ? BufferUsageHint.DynamicDraw : BufferUsageHint.StaticDraw));
+            if (!_handles[index].Initialized)
+            {
+                GL.GenBuffers(1, out _handles[index].BufferID);
+            }
 
-			Handles[index].Initialized = true;
-		}
+            var dataLength = new IntPtr(data.Length * Marshal.SizeOf(typeof(T)));
+            _handles[index].Size = (int)dataLength;
 
-		public void GetOpenGLHandle(int handle, out int glHandle, out OGL.BufferTarget target)
-		{
-			int index, id;
-			ExtractHandle(handle, out index, out id);
+            if (_handles[index].Mutable)
+            {
+                GLWrapper.NamedBufferData(_handles[index].Target, _handles[index].BufferID, dataLength, data, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
+            }
+            else
+            {
+                GLWrapper.NamedBufferData(_handles[index].Target, _handles[index].BufferID, dataLength, data, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
+                GLWrapper.NamedBufferStorage(_handles[index].Target, _handles[index].BufferID, (IntPtr)dataLength, data, 0);
+            }
 
-			if (id == -1 || Handles[index].Id != id || !Handles[index].Initialized)
-			{
-				glHandle = -1;
-				target = OGL.BufferTarget.ArrayBuffer;
-				return;
-			}
+            _handles[index].Initialized = true;
+        }
 
-			glHandle = Handles[index].BufferID;
-			target = Handles[index].Target;
-		}
+        public void GetOpenGLHandle(int handle, out int glHandle, out OGL.BufferTarget target)
+        {
+            int index, id;
+            ExtractHandle(handle, out index, out id);
 
-		public VertexFormat GetVertexFormat(int handle)
-		{
-			int index, id;
-			ExtractHandle(handle, out index, out id);
+            if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
+            {
+                glHandle = -1;
+                target = OGL.BufferTarget.ArrayBuffer;
+                return;
+            }
 
-			if (id == -1 || Handles[index].Id != id)
-				return null;
+            glHandle = _handles[index].BufferID;
+            target = _handles[index].Target;
+        }
 
-			return Handles[index].VertexFormat;
-		}
+        public int GetOpenGLHandle(int handle)
+        {
+            int index, id;
+            ExtractHandle(handle, out index, out id);
 
-		public void Bind(int handle)
-		{
-			int index, id;
-			ExtractHandle(handle, out index, out id);
+            if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
+                return -1;
 
-			if (id == -1 || Handles[index].Id != id || !Handles[index].Initialized)
-				return;
+            return _handles[index].BufferID;
+        }
 
-			GL.BindBuffer(Handles[index].Target, Handles[index].BufferID);
-		}
+        public VertexFormat GetVertexFormat(int handle)
+        {
+            int index, id;
+            ExtractHandle(handle, out index, out id);
 
-		public void Unbind(int handle)
-		{
-			int index, id;
-			ExtractHandle(handle, out index, out id);
+            if (id == -1 || _handles[index].Id != id)
+                return null;
 
-			if (id == -1 || Handles[index].Id != id || !Handles[index].Initialized)
-				return;
+            return _handles[index].VertexFormat;
+        }
 
-			GL.BindBuffer(Handles[index].Target, 0);
-		}
+        public void Bind(int handle)
+        {
+            int index, id;
+            ExtractHandle(handle, out index, out id);
 
-		struct BufferData
-		{
-			public bool Initialized;
-			public short Id;
+            if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
+                return;
 
-			public int BufferID;
-			public OGL.BufferTarget Target;
-			public VertexFormat VertexFormat;
-		}
-	}
+            GL.BindBuffer(_handles[index].Target, _handles[index].BufferID);
+        }
+
+        public void Unbind(int handle)
+        {
+            int index, id;
+            ExtractHandle(handle, out index, out id);
+
+            if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
+                return;
+
+            GL.BindBuffer(_handles[index].Target, 0);
+        }
+
+        struct BufferData
+        {
+            public bool Initialized;
+            public short Id;
+
+            public int BufferID;
+            public OGL.BufferTarget Target;
+            public VertexFormat VertexFormat;
+            public bool Mutable;
+            public int Size;
+        }
+    }
 }

@@ -13,8 +13,8 @@ namespace Triton.Graphics
 	public class RenderTarget
 	{
 		internal int Handle;
-		internal readonly int Width;
-		internal readonly int Height;
+		internal int Width;
+		internal int Height;
 		public Resources.Texture[] Textures { get; internal set; }
 
 		public bool IsReady { get; internal set; }

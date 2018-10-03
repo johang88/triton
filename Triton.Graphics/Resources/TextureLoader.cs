@@ -47,8 +47,8 @@ namespace Triton.Graphics.Resources
 					filename = "/textures/missing.dds";
 			}
 
-			texture.Handle = Backend.RenderSystem.CreateFromDDS(data);
-		}
+            texture.Handle = Backend.RenderSystem.CreateFromDDS(data, out texture.Width, out texture.Height);
+        }
 
 		public void Unload(Common.Resource resource)
 		{

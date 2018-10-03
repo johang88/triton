@@ -66,9 +66,12 @@
     <Compile Include="BlendingFactorDest.cs" />
     <Compile Include="BlendingFactorSrc.cs" />
     <Compile Include="BufferTarget.cs" />
+    <Compile Include="ClearFlags.cs" />
     <Compile Include="CullFaceMode.cs" />
     <Compile Include="DDS\LoaderDDS.cs" />
     <Compile Include="DepthFunction.cs" />
+    <Compile Include="GLWrapper.cs" />
+    <Compile Include="IndexType.cs" />
     <Compile Include="Meshes\BufferManager.cs" />
     <Compile Include="Meshes\MeshManager.cs" />
     <Compile Include="RenderStates\RenderStateManager.cs" />

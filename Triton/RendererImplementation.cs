@@ -49,7 +49,7 @@ namespace Triton
 			var postProcessedResult = PostEffectManager.Render(camera, DeferredRenderer.GBuffer, lightOutput, deltaTime);
 
 			// Blit renderer output to window
-			GraphicsBackend.BeginPass(null, Vector4.Zero, false);
+			GraphicsBackend.BeginPass(null, Vector4.Zero, Renderer.ClearFlags.Color);
 
 			SpriteRenderer.RenderQuad(postProcessedResult.Textures[0], Vector2.Zero, new Vector2(GraphicsBackend.Width, GraphicsBackend.Height));
 			SpriteRenderer.Render(GraphicsBackend.Width, GraphicsBackend.Height);

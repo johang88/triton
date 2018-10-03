@@ -55,8 +55,8 @@ namespace Triton.Graphics
 				});
 			}
 
-			VertexBufferHandle = RenderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, VertexFormat);
-			IndexBufferHandle = RenderSystem.CreateBuffer(Renderer.BufferTarget.ElementArrayBuffer);
+			VertexBufferHandle = RenderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, true, VertexFormat);
+			IndexBufferHandle = RenderSystem.CreateBuffer(Renderer.BufferTarget.ElementArrayBuffer, true);
 
 			RenderSystem.SetBufferData(VertexBufferHandle, new byte[0], true, true);
 			RenderSystem.SetBufferData(IndexBufferHandle, new byte[0], true, true);
