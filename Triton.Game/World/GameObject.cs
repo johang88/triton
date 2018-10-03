@@ -22,10 +22,7 @@ namespace Triton.Game.World
 
 		public GameObject(GameObjectManager world, int id)
 		{
-			if (world == null)
-				throw new ArgumentNullException("world");
-
-			World = world;
+            World = world ?? throw new ArgumentNullException("world");
 			Id = id;
 		}
 
@@ -47,8 +44,15 @@ namespace Triton.Game.World
 
 		public void Update(float stepSize)
 		{
-			Components.ForEach(c => c.Update(stepSize));
-			Children.ForEach(c => c.Update(stepSize));
+            foreach (var component in Components)
+            {
+                component.Update(stepSize);
+            }
+
+            foreach (var child in Children)
+            {
+                child.Update(stepSize);
+            }
 		}
 
 		public void AddComponent(IComponent component)
@@ -93,32 +97,24 @@ namespace Triton.Game.World
 		}
 
 		public bool HasComponent<TComponentType>()
-		{
-			return Components.Exists(c => c is TComponentType);
-		}
+		    => Components.Exists(c => c is TComponentType);
 
-		public bool HasComponent(Type type)
-		{
-			return Components.Exists(c => type.IsInstanceOfType(c));
-		}
+        public bool HasComponent(Type type) 
+            => Components.Exists(c => type.IsInstanceOfType(c));
 
-		public TComponentType GetComponent<TComponentType>()
-		{
-			return (TComponentType)Components.First(c => c is TComponentType);
-		}
+        public TComponentType GetComponent<TComponentType>() 
+            => (TComponentType)Components.First(c => c is TComponentType);
 
-		public IEnumerable<TComponentType> GetComponents<TComponentType>() where TComponentType : class
+        public IEnumerable<TComponentType> GetComponents<TComponentType>() where TComponentType : class
 		{
 			foreach (var component in Components.FindAll(c => c is TComponentType))
 				yield return component as TComponentType;
 		}
 
-		public IEnumerable<IComponent> GetComponents()
-		{
-			return Components;
-		}
+        public IEnumerable<IComponent> GetComponents() 
+            => Components;
 
-		public void AddChild(GameObject gameObject)
+        public void AddChild(GameObject gameObject)
 		{
 			if (gameObject == null)
 				throw new ArgumentNullException("gameObject");
@@ -138,9 +134,7 @@ namespace Triton.Game.World
 			gameObject.Parent = null;
 		}
 
-		public IEnumerable<GameObject> GetChildren()
-		{
-			return Children;
-		}
-	}
+        public IEnumerable<GameObject> GetChildren() 
+            => Children;
+    }
 }
