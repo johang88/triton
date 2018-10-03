@@ -42,10 +42,7 @@ namespace Triton.Common
 
 		public ResourceManager(IO.FileSystem fileSystem)
 		{
-			if (fileSystem == null)
-				throw new ArgumentNullException("fileSystem");
-
-			FileSystem = fileSystem;
+            FileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
 		}
 
 		public void Dispose()
@@ -78,15 +75,14 @@ namespace Triton.Common
 			{
 				var loader = ResourceLoaders[typeof(TResource)];
 
-				// Get or create the resource
-				Resource resource = null;
-				if (!Resources.TryGetValue(identifier, out resource))
-				{
-					resource = loader.Create(name, parameters);
-					Resources.AddOrUpdate(identifier, resource, (key, existingVal) => existingVal);
-				}
+                // Get or create the resource
+                if (!Resources.TryGetValue(identifier, out var resource))
+                {
+                    resource = loader.Create(name, parameters);
+                    Resources.AddOrUpdate(identifier, resource, (key, existingVal) => existingVal);
+                }
 
-				resource.ReferenceCount += 1;
+                resource.ReferenceCount += 1;
 
 				// Load the resource if neccecary
 				if (resource.State == ResourceLoadingState.Unloaded)
@@ -161,14 +157,14 @@ namespace Triton.Common
 				{
 					resource.State = ResourceLoadingState.Unloading;
 
-					Action unloadAction = () =>
-					{
-						loader.Unload(resource);
-						resource.State = ResourceLoadingState.Unloaded;
-						Log.WriteLine("Unloaded {0} of type {1}", resource.Name, resource.GetType());
-					};
+                    void unloadAction()
+                    {
+                        loader.Unload(resource);
+                        resource.State = ResourceLoadingState.Unloaded;
+                        Log.WriteLine("Unloaded {0} of type {1}", resource.Name, resource.GetType());
+                    }
 
-					var task = new Task(unloadAction);
+                    var task = new Task(unloadAction);
 					if (async)
 						task.Start();
 					else
@@ -184,8 +180,7 @@ namespace Triton.Common
 		{
 			while (maxResourcesPerFrame > 0 && ResourcesToLoad.Count > 0)
 			{
-				ResourceToLoad resourceToLoad;
-				if (ResourcesToLoad.TryDequeue(out resourceToLoad))
+				if (ResourcesToLoad.TryDequeue(out var resourceToLoad))
 				{
 					resourceToLoad.Loader.Load(resourceToLoad.Resource, resourceToLoad.Data);
 					resourceToLoad.Resource.State = ResourceLoadingState.Loaded;
@@ -234,9 +229,7 @@ namespace Triton.Common
 		}
 
 		public bool AllResourcesLoaded()
-		{
-			return Resources.All(r => r.Value.State == ResourceLoadingState.Loaded);
-		}
+            => Resources.All(r => r.Value.State == ResourceLoadingState.Loaded);
 
 		struct ResourceToLoad
 		{

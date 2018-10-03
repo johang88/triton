@@ -15,10 +15,7 @@ namespace Triton.Game.World
 
 		public virtual void OnAttached(GameObject owner)
 		{
-			if (owner == null)
-				throw new ArgumentNullException("owner");
-
-			Owner = owner;
+            Owner = owner ?? throw new ArgumentNullException("owner");
 			World = Owner.World;
 			Stage = World.Stage;
 		}

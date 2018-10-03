@@ -84,7 +84,6 @@
     <Compile Include="StringConverter.cs" />
     <Compile Include="Utility\Hex.cs" />
     <Compile Include="Utility\ReflectionHelper.cs" />
-    <Compile Include="WorkerThread.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ThirdParty\sharpfilesystem\SharpFileSystem\SharpFileSystem.csproj">

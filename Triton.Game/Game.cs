@@ -75,31 +75,39 @@ namespace Triton.Game
 
 		public virtual void Dispose()
 		{
-			AudioSystem.Dispose();
-			CoreResources.Dispose();
-			GameResources.Dispose();
-			Window.Dispose();
-		}
+			AudioSystem?.Dispose();
+			CoreResources?.Dispose();
+			GameResources?.Dispose();
+			Window?.Dispose();
+
+            AudioSystem = null;
+            CoreResources = null;
+            GameResources = null;
+            Window = null;
+        }
 
 		public void Run()
 		{
 			Running = true;
 
-			UpdateThread = new Thread(UpdateLoop);
-			UpdateThread.Name = "Update Thread";
-			UpdateThread.Start();
+            UpdateThread = new Thread(UpdateLoop)
+            {
+                Name = "Update Thread"
+            };
+            UpdateThread.Start();
 
 			RenderLoop();
 		}
 
 		private void RenderLoop()
 		{
-			var graphicsMode = new GraphicsMode(new ColorFormat(32), 24, 0, 0);
-			Window = new NativeWindow(RequestedWidth, RequestedHeight, Name, GameWindowFlags.Default, graphicsMode, DisplayDevice.Default);
-			Window.Visible = true;
-			Window.CursorVisible = false;
+            Window = new NativeWindow(RequestedWidth, RequestedHeight, Name, GameWindowFlags.Default, GraphicsMode.Default, DisplayDevice.Default)
+            {
+                Visible = true,
+                CursorVisible = false
+            };
 
-			using (GraphicsBackend = new Triton.Graphics.Backend(CoreResources, Window.Width, Window.Height, Window.WindowInfo))
+            using (GraphicsBackend = new Triton.Graphics.Backend(CoreResources, Window.Width, Window.Height, Window.WindowInfo))
 			{
 				Triton.Graphics.Resources.ResourceLoaders.Init(CoreResources, GraphicsBackend, FileSystem);
 				Triton.Graphics.Resources.ResourceLoaders.Init(GameResources, GraphicsBackend, FileSystem);
