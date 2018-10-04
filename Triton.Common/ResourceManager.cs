@@ -35,14 +35,16 @@ namespace Triton.Common
 		private readonly Dictionary<Type, IResourceLoader> _resourceLoaders = new Dictionary<Type, IResourceLoader>();
 		private readonly ConcurrentQueue<ResourceToLoad> _resourcesToLoad = new ConcurrentQueue<ResourceToLoad>();
 
-		private readonly IO.FileSystem FileSystem;
+		private readonly IO.FileSystem _fileSystem;
 
-		private bool Disposed = false;
-		private object LoadingLock = new object();
+		private bool _isDispoed = false;
+		private readonly object _loadingLock = new object();
+
+        public IResourceLoader DefaultResourceLoader { get; set; } = new GenericResourceLoader();
 
 		public ResourceManager(IO.FileSystem fileSystem)
 		{
-            FileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
+            _fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
 		}
 
 		public void Dispose()
@@ -53,7 +55,7 @@ namespace Triton.Common
 
 		protected virtual void Dispose(bool isDisposing)
 		{
-			if (!isDisposing || Disposed)
+			if (!isDisposing || _isDispoed)
 				return;
 
 			foreach (var resource in _resources.Values)
@@ -64,7 +66,7 @@ namespace Triton.Common
             _instanceToReference.Clear();
             _resources.Clear();
 
-            Disposed = true;
+            _isDispoed = true;
 		}
 
 		public TResource Load<TResource>(string name, string parameters = "") where TResource : class
@@ -73,16 +75,21 @@ namespace Triton.Common
 				throw new InvalidOperationException("no resource loader for the specified type");
 
 			var identifier = name + "?" + parameters;
+            var resourceType = typeof(TResource);
 
-			lock (LoadingLock)
+			lock (_loadingLock)
 			{
-				var loader = _resourceLoaders[typeof(TResource)];
+                IResourceLoader loader = DefaultResourceLoader;
+                if (_resourceLoaders.ContainsKey(resourceType))
+				    loader = _resourceLoaders[resourceType];
 
                 // Get or create the resource
                 if (!_resources.TryGetValue(identifier, out var resourceReference))
                 {
-                    resourceReference = new ResourceReference(name, parameters);
-                    resourceReference.Resource = loader.Create(typeof(TResource));
+                    resourceReference = new ResourceReference(name, parameters)
+                    {
+                        Resource = loader.Create(typeof(TResource))
+                    };
 
                     _resources.AddOrUpdate(identifier, resourceReference, (key, existingVal) => existingVal);
                     _instanceToReference.AddOrUpdate(resourceReference.Resource, resourceReference, (key, existingVal) => existingVal);
@@ -125,12 +132,12 @@ namespace Triton.Common
 
 			var path = resource.Name + loader.Extension;
 
-			if (!FileSystem.FileExists(path) && !string.IsNullOrWhiteSpace(loader.DefaultFilename))
+			if (!_fileSystem.FileExists(path) && !string.IsNullOrWhiteSpace(loader.DefaultFilename))
 			{
 				path = loader.DefaultFilename;
 			}
 
-			using (var stream = FileSystem.OpenRead(path))
+			using (var stream = _fileSystem.OpenRead(path))
 			{
 				byte[] data = new byte[stream.Length];
 
@@ -146,23 +153,16 @@ namespace Triton.Common
 
 		private void UnloadResource(ResourceReference resourceReference, bool async = true)
 		{
-			IResourceLoader loader = null;
 			var resourceType = resourceReference.Resource.GetType();
-			while (loader == null && resourceType != typeof(object))
-			{
-				if (_resourceLoaders.ContainsKey(resourceType))
-				{
-					loader = _resourceLoaders[resourceType];
-					break;
-				}
 
-				resourceType = resourceType.BaseType;
-			}
+            IResourceLoader loader = DefaultResourceLoader;
+            if (_resourceLoaders.ContainsKey(resourceType))
+                loader = _resourceLoaders[resourceType];
 
 			if (loader == null)
 				throw new InvalidOperationException("no resource loader for the specified type");
 
-			lock (LoadingLock)
+			lock (_loadingLock)
 			{
 				if (resourceReference.State == ResourceLoadingState.Loaded)
 				{
@@ -209,7 +209,7 @@ namespace Triton.Common
 			if (resource == null)
 				throw new ArgumentNullException("resource");
 
-			lock (LoadingLock)
+			lock (_loadingLock)
 			{
                 var resourceReference = new ResourceReference(name, null)
                 {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,17 +13,19 @@ namespace Triton.Common
         public string DefaultFilename => "missing.v";
         public bool SupportsStreaming => false;
 
+        public object DataContractJsonSerializer { get; private set; }
+
         public object Create(Type type)
             => Activator.CreateInstance(type);
 
         public void Load(object resource, byte[] data)
         {
-            throw new NotImplementedException();
+            JsonConvert.PopulateObject(Encoding.UTF8.GetString(data), resource);
         }
 
         public void Unload(object resource)
         {
-            throw new NotImplementedException();
+            // NOP
         }
     }
 }
