@@ -16,7 +16,9 @@ namespace Triton.Graphics.Resources
 
 		private const string DefaultShader = "/shaders/deferred/gbuffer";
 
-		public MaterialLoader(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
+        public bool SupportsStreaming => false;
+
+        public MaterialLoader(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
 		{
 			if (resourceManager == null)
 				throw new ArgumentNullException("resourceManager");

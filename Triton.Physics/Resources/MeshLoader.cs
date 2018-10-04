@@ -16,6 +16,8 @@ namespace Triton.Physics.Resources
 		private readonly Triton.Common.IO.FileSystem FileSystem;
 		private readonly Triton.Common.ResourceManager ResourceManager;
 
+        public bool SupportsStreaming => false;
+
 		public MeshLoader(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
 		{
 			if (fileSystem == null)

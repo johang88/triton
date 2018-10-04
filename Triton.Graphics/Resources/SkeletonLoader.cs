@@ -15,7 +15,9 @@ namespace Triton.Graphics.Resources
 
 		private readonly Triton.Common.IO.FileSystem FileSystem;
 
-		public SkeletonLoader(Triton.Common.IO.FileSystem fileSystem)
+        public bool SupportsStreaming => false;
+
+        public SkeletonLoader(Triton.Common.IO.FileSystem fileSystem)
 		{
 			if (fileSystem == null)
 				throw new ArgumentNullException("fileSystem");

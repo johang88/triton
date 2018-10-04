@@ -118,6 +118,11 @@ namespace Triton.Common
 
 		private async Task<byte[]> LoadDataForResource(ResourceReference resource, IResourceLoader loader)
 		{
+            if (loader.SupportsStreaming)
+            {
+                return null;
+            }
+
 			var path = resource.Name + loader.Extension;
 
 			if (!FileSystem.FileExists(path) && !string.IsNullOrWhiteSpace(loader.DefaultFilename))

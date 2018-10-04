@@ -21,7 +21,9 @@ namespace Triton.Graphics.Resources
 		private readonly Dictionary<string, ShaderProgram> Shaders = new Dictionary<string, ShaderProgram>();
 		private object ReloadLock = new object();
 
-		public ShaderLoader(Backend backend, Triton.Common.IO.FileSystem fileSystem)
+        public bool SupportsStreaming => false;
+
+        public ShaderLoader(Backend backend, Triton.Common.IO.FileSystem fileSystem)
 		{
 			if (backend == null)
 				throw new ArgumentNullException("backend");

@@ -18,6 +18,7 @@ namespace Triton.Common
 	{
 		string Extension { get; }
 		string DefaultFilename { get; }
+        bool SupportsStreaming { get; }
 
 		object Create(string name, string parameters);
 		void Load(object resource, byte[] data);

@@ -12,7 +12,9 @@ namespace Triton.Graphics.Resources
 		private readonly Triton.Common.IO.FileSystem FileSystem;
 		private readonly Triton.Common.ResourceManager ResourceManager;
 
-		public BitmapFontLoader(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
+        public bool SupportsStreaming => false;
+
+        public BitmapFontLoader(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
 		{
 			if (resourceManager == null)
 				throw new ArgumentNullException("resourceManager");

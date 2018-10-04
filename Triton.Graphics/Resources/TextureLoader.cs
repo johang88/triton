@@ -14,7 +14,9 @@ namespace Triton.Graphics.Resources
 		private readonly Backend Backend;
 		private readonly Triton.Common.IO.FileSystem FileSystem;
 
-		public TextureLoader(Backend backend, Triton.Common.IO.FileSystem fileSystem)
+        public bool SupportsStreaming => false;
+
+        public TextureLoader(Backend backend, Triton.Common.IO.FileSystem fileSystem)
 		{
 			if (backend == null)
 				throw new ArgumentNullException("backend");
