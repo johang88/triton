@@ -20,7 +20,7 @@ namespace Triton.Common
 		string DefaultFilename { get; }
         bool SupportsStreaming { get; }
 
-		object Create(string name, string parameters);
+		object Create(Type type);
 		void Load(object resource, byte[] data);
 		void Unload(object resource);
 	}

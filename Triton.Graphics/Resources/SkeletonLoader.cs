@@ -28,10 +28,8 @@ namespace Triton.Graphics.Resources
 		public string Extension { get { return ".skeleton"; } }
 		public string DefaultFilename { get { return ""; } }
 
-		public object Create(string name, string parameters)
-		{
-			return new Skeleton();
-		}
+		public object Create(Type type)
+		=> new Skeleton();
 
 		public void Load(object resource, byte[] data)
 		{

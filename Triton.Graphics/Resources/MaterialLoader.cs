@@ -8,11 +8,11 @@ namespace Triton.Graphics.Resources
 {
 	class MaterialLoader : Triton.Common.IResourceLoader<Material>
 	{
-		static readonly char[] Magic = new char[] { 'M', 'A', 'T', 'E' };
-		const int Version_1_0 = 0x01;
+        private static readonly char[] Magic = new char[] { 'M', 'A', 'T', 'E' };
+		private const int Version_1_0 = 0x01;
 
-		private readonly Triton.Common.IO.FileSystem FileSystem;
-		private readonly Triton.Common.ResourceManager ResourceManager;
+		private readonly Triton.Common.IO.FileSystem _fileSystem;
+		private readonly Triton.Common.ResourceManager _resourceManager;
 
 		private const string DefaultShader = "/shaders/deferred/gbuffer";
 
@@ -20,31 +20,25 @@ namespace Triton.Graphics.Resources
 
         public MaterialLoader(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
 		{
-			if (resourceManager == null)
-				throw new ArgumentNullException("resourceManager");
-			if (fileSystem == null)
-				throw new ArgumentNullException("fileSystem");
-
-			FileSystem = fileSystem;
-			ResourceManager = resourceManager;
+            _fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
+			_resourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");
 		}
 
 		public string Extension { get { return ".mat"; } }
 		public string DefaultFilename { get { return "/materials/default.mat"; } }
 
-		public object Create(string name, string parameters)
-		{
-			var isSkinned = parameters.Contains("SKINNED");
-			return new Material(ResourceManager, isSkinned);
-		}
+        public object Create(Type type)
+            => new Material(_resourceManager);
 
 		public void Load(object resource, byte[] data)
 		{
 			Unload(resource);
 
-			var material = (Material)resource;
+            var material = (Material)resource;
+            var (_, parameters) = _resourceManager.GetResourceProperties(material);
+            material.IsSkinned = parameters.Contains("SKINNED");
 
-			using (var stream = new System.IO.MemoryStream(data))
+            using (var stream = new System.IO.MemoryStream(data))
 			using (var reader = new System.IO.BinaryReader(stream))
 			{
 				var magic = reader.ReadChars(4);
@@ -62,7 +56,7 @@ namespace Triton.Graphics.Resources
 					throw new ArgumentException("invalid material, unknown version");
 
 				var shaderPath = reader.ReadString();
-				material.Shader = ResourceManager.Load<ShaderProgram>(shaderPath, material.IsSkinned ? "SKINNED" : "");
+				material._shader = _resourceManager.Load<ShaderProgram>(shaderPath, material.IsSkinned ? "SKINNED" : "");
 
 				var samplerCount = reader.ReadInt32();
 				for (var i = 0; i < samplerCount; i++)
@@ -70,7 +64,7 @@ namespace Triton.Graphics.Resources
 					var samplerName = reader.ReadString();
 					var texturePath = reader.ReadString();
 
-					material.Textures.Add(samplerName, ResourceManager.Load<Texture>(texturePath));
+					material.Textures.Add(samplerName, _resourceManager.Load<Texture>(texturePath));
 				}
 			}
 		}

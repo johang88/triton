@@ -14,14 +14,10 @@ namespace Triton.Graphics.Resources
 		public int Height;
 		public Renderer.PixelInternalFormat PixelInternalFormat;
 		public Renderer.PixelFormat PixelFormat;
-        public string Name { get; }
-        public string Parameters { get; }
 
-		public Texture(string name, string parameters)
+		public Texture()
 		{
 			Handle = -1;
-            Name = name;
-            Parameters = parameters;
 		}
 	}
 }

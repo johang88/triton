@@ -28,10 +28,8 @@ namespace Triton.Graphics.Resources
 		public string Extension { get { return ".fnt"; } }
 		public string DefaultFilename { get { return ""; } }
 
-		public object Create(string name, string parameters)
-		{
-			return new BitmapFont();
-		}
+        public object Create(Type type)
+             => new BitmapFont();
 
 		public void Load(object resource, byte[] data)
 		{

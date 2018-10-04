@@ -82,7 +82,7 @@ namespace Triton.Common
                 if (!_resources.TryGetValue(identifier, out var resourceReference))
                 {
                     resourceReference = new ResourceReference(name, parameters);
-                    resourceReference.Resource = loader.Create(name, parameters);
+                    resourceReference.Resource = loader.Create(typeof(TResource));
 
                     _resources.AddOrUpdate(identifier, resourceReference, (key, existingVal) => existingVal);
                     _instanceToReference.AddOrUpdate(resourceReference.Resource, resourceReference, (key, existingVal) => existingVal);
@@ -250,7 +250,13 @@ namespace Triton.Common
 		public bool AllResourcesLoaded()
             => _resources.All(r => r.Value.State == ResourceLoadingState.Loaded);
 
-		struct ResourceToLoad
+        public (string name, string parameters) GetResourceProperties<TResource>(TResource resource) where TResource : class
+        {
+            var reference = _instanceToReference[resource];
+            return (reference.Name, reference.Parameters);
+        }
+
+        struct ResourceToLoad
 		{
 			public ResourceReference ResourceReference;
 			public IResourceLoader Loader;

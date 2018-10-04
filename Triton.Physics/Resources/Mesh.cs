@@ -13,10 +13,6 @@ namespace Triton.Physics.Resources
 	{
 		internal Shape Shape;
 
-		public Mesh(string name, string parameters)
-		{
-		}
-
 		internal void Build(bool isConvexHull, List<JVector> vertices, List<TriangleVertexIndices> indices)
 		{
 			if (isConvexHull)

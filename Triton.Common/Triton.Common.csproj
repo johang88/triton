@@ -66,6 +66,7 @@
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="ConfigSection.cs" />
+    <Compile Include="GenericResourceLoader.cs" />
     <Compile Include="ILogOutputHandler.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Factory.cs" />

@@ -32,10 +32,8 @@ namespace Triton.Physics.Resources
 		public string Extension { get { return ".col"; } }
 		public string DefaultFilename { get { return ""; } }
 
-		public object Create(string name, string parameters)
-		{
-			return new Mesh(name, parameters);
-		}
+        public object Create(Type type)
+            => new Mesh();
 
 		public void Load(object resource, byte[] data)
 		{

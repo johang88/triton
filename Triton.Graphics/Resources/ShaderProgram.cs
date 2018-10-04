@@ -19,15 +19,10 @@ namespace Triton.Graphics.Resources
         private object _mutex = new object();
         private readonly List<object> _boundHandles = new List<object>();
 
-        public string Name { get; }
-        public string Parameters { get; internal set; }
-
-        public ShaderProgram(string name, string parameters, Backend backend)
+        public ShaderProgram(Backend backend)
         {
             Handle = -1;
             _backend = backend;
-            Name = name;
-            Parameters = parameters;
         }
 
         internal void Reset()
