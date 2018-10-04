@@ -33,40 +33,31 @@ namespace Triton.Graphics.Resources
 		static readonly char[] Magic = new char[] { 'M', 'E', 'S', 'H' };
 		const int Version_1_4 = 0x0140;
 
-		private readonly Backend Backend;
-		private readonly Triton.Common.IO.FileSystem FileSystem;
+		private readonly Backend _backend;
+		private readonly Triton.Common.IO.FileSystem _fileSystem;
 		private readonly Triton.Common.ResourceManager ResourceManager;
 
-		public MeshLoader(Backend backend, Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
-		{
-			if (backend == null)
-				throw new ArgumentNullException("backend");
-			if (fileSystem == null)
-				throw new ArgumentNullException("fileSystem");
-			if (resourceManager == null)
-				throw new ArgumentNullException("resourceManager");
+        public bool SupportsStreaming => false;
 
-			Backend = backend;
-			FileSystem = fileSystem;
-			ResourceManager = resourceManager;
+        public MeshLoader(Backend backend, Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
+		{
+            _backend = backend ?? throw new ArgumentNullException("backend");
+			_fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
+			ResourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");
 		}
 
 		public string Extension { get { return ".mesh"; } }
 		public string DefaultFilename { get { return ""; } }
 
-		public Common.Resource Create(string name, string parameters)
-		{
-			return new Mesh(name, parameters);
-		}
+        public object Create(Type type)
+             => new Mesh();
 
-		public void Load(Common.Resource resource, byte[] data)
+		public void Load(object resource, byte[] data)
 		{
 			// Destroy any existing mesh handles
 			Unload(resource);
 
 			var mesh = (Mesh)resource;
-
-			var overrideMaterial = resource.Parameters;
 
 			using (var stream = new System.IO.MemoryStream(data))
 			using (var reader = new System.IO.BinaryReader(stream))
@@ -102,9 +93,6 @@ namespace Triton.Graphics.Resources
 				{
 					var materialName = reader.ReadString();
 
-					if (!string.IsNullOrWhiteSpace(overrideMaterial))
-						materialName = overrideMaterial;
-
 					Material material = null;
 					if (materialName != "no_material")
 						material = ResourceManager.Load<Material>(materialName, materialFlags);
@@ -137,12 +125,12 @@ namespace Triton.Graphics.Resources
 
 					var subMesh = new SubMesh();
 
-					subMesh.VertexBufferHandle = Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, false, vertexFormat);
-					subMesh.IndexBufferHandle = Backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ElementArrayBuffer, false);
-					Backend.RenderSystem.SetBufferData(subMesh.VertexBufferHandle, vertices, false, false);
-					Backend.RenderSystem.SetBufferData(subMesh.IndexBufferHandle, indices, false, false);
+					subMesh.VertexBufferHandle = _backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, false, vertexFormat);
+					subMesh.IndexBufferHandle = _backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ElementArrayBuffer, false);
+					_backend.RenderSystem.SetBufferData(subMesh.VertexBufferHandle, vertices, false, false);
+					_backend.RenderSystem.SetBufferData(subMesh.IndexBufferHandle, indices, false, false);
 
-					subMesh.Handle = Backend.RenderSystem.CreateMesh(triangleCount, subMesh.VertexBufferHandle, subMesh.IndexBufferHandle, false);
+					subMesh.Handle = _backend.RenderSystem.CreateMesh(triangleCount, subMesh.VertexBufferHandle, subMesh.IndexBufferHandle, false);
 					subMesh.Material = material;
 					subMesh.BoundingSphereRadius = boundingSphereRadius;
 
@@ -153,12 +141,12 @@ namespace Triton.Graphics.Resources
 			}
 		}
 
-		public void Unload(Common.Resource resource)
+		public void Unload(object resource)
 		{
 			var mesh = (Mesh)resource;
 			foreach (var subMesh in mesh.SubMeshes)
 			{
-				Backend.RenderSystem.DestroyMesh(subMesh.Handle);
+				_backend.RenderSystem.DestroyMesh(subMesh.Handle);
 
 				if (subMesh.Material != null)
 				{

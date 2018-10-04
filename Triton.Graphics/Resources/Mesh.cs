@@ -6,39 +6,15 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.Resources
 {
-	public class Mesh : Triton.Common.Resource
+	public class Mesh
 	{
 		public SubMesh[] SubMeshes { get; internal set; }
 		public float BoundingSphereRadius;
-		private bool IsLoadedCache = false;
 		public SkeletalAnimation.Skeleton Skeleton = null;
 
-		public Mesh(string name, string parameters)
-			: base(name, parameters)
+		public Mesh()
 		{
 			SubMeshes = new SubMesh[0];
-		}
-
-		public bool IsLoaded()
-		{
-			if (IsLoadedCache)
-				return true;
-
-			if (State != Common.ResourceLoadingState.Loaded)
-				return false;
-
-			if (Skeleton != null && Skeleton.State != Common.ResourceLoadingState.Loaded)
-				return false;
-
-			foreach (var subMesh in SubMeshes)
-			{
-				if (!subMesh.Material.IsLoaded())
-					return false;
-			}
-
-			IsLoadedCache = true;
-
-			return true;
 		}
 	}
 

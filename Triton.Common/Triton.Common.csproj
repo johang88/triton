@@ -49,6 +49,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
@@ -66,6 +69,7 @@
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="ConfigSection.cs" />
+    <Compile Include="GenericResourceLoader.cs" />
     <Compile Include="ILogOutputHandler.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Factory.cs" />
@@ -76,7 +80,6 @@
     <Compile Include="LogLevel.cs" />
     <Compile Include="LogOutputHandlers\Console.cs" />
     <Compile Include="LogOutputHandlers\File.cs" />
-    <Compile Include="Resource.cs" />
     <Compile Include="ResourceGroupManager.cs" />
     <Compile Include="ResourceManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -94,6 +97,9 @@
       <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>
       <Name>Triton.Math</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

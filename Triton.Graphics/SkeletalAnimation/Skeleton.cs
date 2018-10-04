@@ -6,16 +6,11 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.SkeletalAnimation
 {
-	public class Skeleton : Common.Resource
+	public class Skeleton
 	{
 		internal Animation[] Animations;
 		internal Transform[] BindPose;
 		internal int[] BoneParents;
-
-		public Skeleton(string name, string parameters)
-			: base(name, parameters)
-		{
-		}
 
 		public Transform[] GetInitialPose()
 		{

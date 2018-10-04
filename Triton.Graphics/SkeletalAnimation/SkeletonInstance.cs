@@ -87,12 +87,12 @@ namespace Triton.Graphics.SkeletalAnimation
 		{
 			if (!Initialized)
 			{
-				if (Mesh != null && Mesh.State == Common.ResourceLoadingState.Loaded && Skeleton == null)
+				if (Mesh != null && Skeleton == null)
 				{
 					Skeleton = Mesh.Skeleton;
 				}
 
-				if (Skeleton != null && Skeleton.State == Common.ResourceLoadingState.Loaded)
+				if (Skeleton != null)
 				{
 					Init();
 				}

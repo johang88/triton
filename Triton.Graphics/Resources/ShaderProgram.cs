@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Triton.Graphics.Resources
 {
-    public class ShaderProgram : Triton.Common.Resource
+    public class ShaderProgram
     {
         public int Handle { get; internal set; }
         public Dictionary<Common.HashedString, int> Uniforms = new Dictionary<Common.HashedString, int>();
@@ -19,8 +19,7 @@ namespace Triton.Graphics.Resources
         private object _mutex = new object();
         private readonly List<object> _boundHandles = new List<object>();
 
-        public ShaderProgram(string name, string parameters, Backend backend)
-            : base(name, parameters)
+        public ShaderProgram(Backend backend)
         {
             Handle = -1;
             _backend = backend;

@@ -1003,12 +1003,14 @@ namespace Triton.Graphics
             var textures = new Resources.Texture[textureHandles.Length];
             for (var i = 0; i < textureHandles.Length; i++)
             {
-                var texture = new Resources.Texture("_sys/render_targets/" + name + "_" + StringConverter.ToString(i), "");
-                texture.Handle = textureHandles[i];
-                texture.Width = definition.Width;
-                texture.Height = definition.Height;
+                var texture = new Resources.Texture
+                {
+                    Handle = textureHandles[i],
+                    Width = definition.Width,
+                    Height = definition.Height
+                };
 
-                _resourceManager.Manage(texture);
+                _resourceManager.Manage("_sys/render_targets/" + name + "_" + StringConverter.ToString(i), texture);
 
                 textures[i] = texture;
             }
@@ -1041,14 +1043,16 @@ namespace Triton.Graphics
         {
             var handle = RenderSystem.CreateTexture(width, height, data, pixelFormat, interalFormat, pixelType, mipmap, null);
 
-            var texture = new Resources.Texture(name, "");
-            texture.Handle = handle;
-            texture.Width = width;
-            texture.Height = height;
-            texture.PixelInternalFormat = interalFormat;
-            texture.PixelFormat = pixelFormat;
+            var texture = new Resources.Texture
+            {
+                Handle = handle,
+                Width = width,
+                Height = height,
+                PixelInternalFormat = interalFormat,
+                PixelFormat = pixelFormat
+            };
 
-            _resourceManager.Manage(texture);
+            _resourceManager.Manage(name, texture);
 
             return texture;
         }

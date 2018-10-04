@@ -9,14 +9,9 @@ using System.Threading.Tasks;
 
 namespace Triton.Physics.Resources
 {
-	public class Mesh : Triton.Common.Resource
+	public class Mesh
 	{
 		internal Shape Shape;
-
-		public Mesh(string name, string parameters)
-			: base(name, parameters)
-		{
-		}
 
 		internal void Build(bool isConvexHull, List<JVector> vertices, List<TriangleVertexIndices> indices)
 		{

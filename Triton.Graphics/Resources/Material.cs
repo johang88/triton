@@ -6,49 +6,47 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.Resources
 {
-	public class Material : Triton.Common.Resource
+	public class Material
 	{
 		private bool Initialized = false;
 
 		public readonly Dictionary<string, Texture> Textures = new Dictionary<string, Texture>();
 
-		public ShaderProgram Shader;
-		private ShaderHandles Handles;
-		private Common.ResourceManager ResourceManager;
+		public ShaderProgram _shader;
+		private ShaderHandles _handles;
+		private Common.ResourceManager _resourceManager;
 		public bool IsSkinned;
 
-		private int[] TextureHandles;
-		private int[] SamplerToTexture;
-		private int[] Samplers;
+		private int[] _textureHandles;
+		private int[] _samplerToTexture;
+		private int[] _samplers;
 
 		// Not an awesome solution
 		private static int LastId = 0;
 		public readonly int Id = LastId++;
 
-		public Material(string name, string parameters, Common.ResourceManager resourceManager, bool isSkinned)
-			: base(name, parameters)
+		public Material(Common.ResourceManager resourceManager)
 		{
-			IsSkinned = isSkinned;
-			ResourceManager = resourceManager;
-		}
+			_resourceManager = resourceManager;
+        }
 
 		public void Initialize(Backend backend)
 		{
 			Initialized = true;
 
-			Handles = new ShaderHandles();
-			Shader.BindUniformLocations(Handles);
+			_handles = new ShaderHandles();
+			_shader.BindUniformLocations(_handles);
 
-			TextureHandles = new int[Textures.Count];
-			SamplerToTexture = new int[Textures.Count];
-			Samplers = new int[Textures.Count];
+			_textureHandles = new int[Textures.Count];
+			_samplerToTexture = new int[Textures.Count];
+			_samplers = new int[Textures.Count];
 
 			var i = 0;
 			foreach (var samplerInfo in Textures)
 			{
-				TextureHandles[i] = samplerInfo.Value.Handle;
-				Samplers[i] = backend.DefaultSampler;
-				SamplerToTexture[i] = Shader.GetUniform(samplerInfo.Key);
+				_textureHandles[i] = samplerInfo.Value.Handle;
+				_samplers[i] = backend.DefaultSampler;
+				_samplerToTexture[i] = _shader.GetUniform(samplerInfo.Key);
 				i++;
 			}
 		}
@@ -57,7 +55,7 @@ namespace Triton.Graphics.Resources
 		{
 			foreach (var samplerInfo in Textures)
 			{
-				ResourceManager.Unload(samplerInfo.Value);
+				_resourceManager.Unload(samplerInfo.Value);
 			}
 
 			Textures.Clear();
@@ -70,14 +68,14 @@ namespace Triton.Graphics.Resources
 				Initialize(backend);
 			}
 
-			backend.BeginInstance(Shader.Handle, TextureHandles, samplers: Samplers, renderStateId: renderStateId);
-			for (var i = 0; i < SamplerToTexture.Length; i++)
+			backend.BeginInstance(_shader.Handle, _textureHandles, samplers: _samplers, renderStateId: renderStateId);
+			for (var i = 0; i < _samplerToTexture.Length; i++)
 			{
-				backend.BindShaderVariable(SamplerToTexture[i], i);
+				backend.BindShaderVariable(_samplerToTexture[i], i);
 			}
 
-			backend.BindShaderVariable(Handles.Time, backend.ElapsedTime);
-			backend.BindShaderVariable(Handles.CameraPosition, ref camera.Position);
+			backend.BindShaderVariable(_handles.Time, backend.ElapsedTime);
+			backend.BindShaderVariable(_handles.CameraPosition, ref camera.Position);
 		}
 
 		/// <summary>
@@ -91,14 +89,14 @@ namespace Triton.Graphics.Resources
 		/// <param name="modelViewProjection"></param>
 		public void BindPerObject(Backend backend, ref Matrix4 world, ref Matrix4 worldView, ref Matrix4 itWorld, ref Matrix4 modelViewProjection, SkeletalAnimation.SkeletonInstance skeleton)
 		{
-			backend.BindShaderVariable(Handles.ModelViewProjection, ref modelViewProjection);
-			backend.BindShaderVariable(Handles.World, ref world);
-			backend.BindShaderVariable(Handles.WorldView, ref worldView);
-			backend.BindShaderVariable(Handles.ItWorld, ref itWorld);
+			backend.BindShaderVariable(_handles.ModelViewProjection, ref modelViewProjection);
+			backend.BindShaderVariable(_handles.World, ref world);
+			backend.BindShaderVariable(_handles.WorldView, ref worldView);
+			backend.BindShaderVariable(_handles.ItWorld, ref itWorld);
 
 			if (skeleton != null)
 			{
-				backend.BindShaderVariable(Handles.Bones, ref skeleton.FinalBoneTransforms);
+				backend.BindShaderVariable(_handles.Bones, ref skeleton.FinalBoneTransforms);
 			}
 		}
 
@@ -112,23 +110,6 @@ namespace Triton.Graphics.Resources
 			public int CameraPosition = 0;
 			public int ItWorld = 0;
 			public int Time = 0;
-		}
-
-		public bool IsLoaded()
-		{
-			if (State != Common.ResourceLoadingState.Loaded)
-				return false;
-
-			if (Shader.State != Common.ResourceLoadingState.Loaded)
-				return false;
-			
-			foreach (var texture in Textures)
-			{
-				if (texture.Value.State != Common.ResourceLoadingState.Loaded)
-					return false;
-			}
-
-			return true;
 		}
 	}
 }

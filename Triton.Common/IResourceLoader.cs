@@ -18,17 +18,18 @@ namespace Triton.Common
 	{
 		string Extension { get; }
 		string DefaultFilename { get; }
+        bool SupportsStreaming { get; }
 
-		Resource Create(string name, string parameters);
-		void Load(Resource resource, byte[] data);
-		void Unload(Resource resource);
+		object Create(Type type);
+		void Load(object resource, byte[] data);
+		void Unload(object resource);
 	}
 
 	/// <summary>
 	/// Generic interface to implement resource loaders, this is the prefered interface to implement
 	/// </summary>
 	/// <typeparam name="TResource"></typeparam>
-	public interface IResourceLoader<TResource> : IResourceLoader where TResource : Resource
+	public interface IResourceLoader<TResource> : IResourceLoader where TResource : class
 	{
 	}
 }

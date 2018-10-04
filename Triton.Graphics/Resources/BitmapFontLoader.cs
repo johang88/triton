@@ -12,7 +12,9 @@ namespace Triton.Graphics.Resources
 		private readonly Triton.Common.IO.FileSystem FileSystem;
 		private readonly Triton.Common.ResourceManager ResourceManager;
 
-		public BitmapFontLoader(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
+        public bool SupportsStreaming => false;
+
+        public BitmapFontLoader(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
 		{
 			if (resourceManager == null)
 				throw new ArgumentNullException("resourceManager");
@@ -26,12 +28,10 @@ namespace Triton.Graphics.Resources
 		public string Extension { get { return ".fnt"; } }
 		public string DefaultFilename { get { return ""; } }
 
-		public Common.Resource Create(string name, string parameters)
-		{
-			return new BitmapFont(name, parameters);
-		}
+        public object Create(Type type)
+             => new BitmapFont();
 
-		public void Load(Common.Resource resource, byte[] data)
+		public void Load(object resource, byte[] data)
 		{
 			var bitmapFont = (BitmapFont)resource;
 
@@ -117,7 +117,7 @@ namespace Triton.Graphics.Resources
 			});
 		}
 
-		public void Unload(Common.Resource resource)
+		public void Unload(object resource)
 		{
 			var bitmapFont = (BitmapFont)resource;
 			foreach (var texture in bitmapFont.Textures)

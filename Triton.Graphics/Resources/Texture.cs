@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.Resources
 {
-	public class Texture : Triton.Common.Resource
+	public class Texture
 	{
 		public int Handle { get; internal set; }
 
@@ -15,8 +15,7 @@ namespace Triton.Graphics.Resources
 		public Renderer.PixelInternalFormat PixelInternalFormat;
 		public Renderer.PixelFormat PixelFormat;
 
-		public Texture(string name, string parameters)
-			: base(name, parameters)
+		public Texture()
 		{
 			Handle = -1;
 		}

@@ -46,7 +46,7 @@ namespace Triton
 
 			// Render the complete scene
 			var lightOutput = DeferredRenderer.Render(stage, camera);
-			var postProcessedResult = PostEffectManager.Render(camera, DeferredRenderer.GBuffer, lightOutput, deltaTime);
+			var postProcessedResult = PostEffectManager.Render(camera, stage, DeferredRenderer.GBuffer, lightOutput, deltaTime);
 
 			// Blit renderer output to window
 			GraphicsBackend.BeginPass(null, Vector4.Zero, Renderer.ClearFlags.Color);

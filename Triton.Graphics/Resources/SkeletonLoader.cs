@@ -15,7 +15,9 @@ namespace Triton.Graphics.Resources
 
 		private readonly Triton.Common.IO.FileSystem FileSystem;
 
-		public SkeletonLoader(Triton.Common.IO.FileSystem fileSystem)
+        public bool SupportsStreaming => false;
+
+        public SkeletonLoader(Triton.Common.IO.FileSystem fileSystem)
 		{
 			if (fileSystem == null)
 				throw new ArgumentNullException("fileSystem");
@@ -26,12 +28,10 @@ namespace Triton.Graphics.Resources
 		public string Extension { get { return ".skeleton"; } }
 		public string DefaultFilename { get { return ""; } }
 
-		public Common.Resource Create(string name, string parameters)
-		{
-			return new Skeleton(name, parameters);
-		}
+		public object Create(Type type)
+		=> new Skeleton();
 
-		public void Load(Common.Resource resource, byte[] data)
+		public void Load(object resource, byte[] data)
 		{
 			// Destroy any existing mesh handles
 			Unload(resource);
@@ -102,7 +102,7 @@ namespace Triton.Graphics.Resources
 			}
 		}
 
-		public void Unload(Common.Resource resource)
+		public void Unload(object resource)
 		{
 			// Nothing to do here ..
 		}
