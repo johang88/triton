@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Renderer;
 
 namespace Triton.Graphics.Resources
 {
@@ -12,7 +13,7 @@ namespace Triton.Graphics.Resources
 		public float BoundingSphereRadius;
 		public SkeletalAnimation.Skeleton Skeleton = null;
 
-		public Mesh()
+        public Mesh()
 		{
 			SubMeshes = new SubMesh[0];
 		}
@@ -22,9 +23,13 @@ namespace Triton.Graphics.Resources
 	{
 		public Material Material;
 		public float BoundingSphereRadius;
+        public VertexFormat VertexFormat;
+        public int TriangleCount;
+        public byte[] VertexData;
+        public byte[] IndexData;
 
-		public int VertexBufferHandle;
-		public int IndexBufferHandle;
-		public int Handle;
+        internal int VertexBufferHandle;
+		internal int IndexBufferHandle;
+		internal int Handle;
 	}
 }

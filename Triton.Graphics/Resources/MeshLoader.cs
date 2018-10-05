@@ -123,16 +123,23 @@ namespace Triton.Graphics.Resources
 					var vertices = reader.ReadBytes(vertexCount);
 					var indices = reader.ReadBytes(indexCount);
 
-					var subMesh = new SubMesh();
+                    var subMesh = new SubMesh
+                    {
+                        VertexFormat = vertexFormat,
+                        IndexData = indices,
+                        VertexData = vertices,
+                        TriangleCount = triangleCount,
+                        Material = material,
+                        BoundingSphereRadius = boundingSphereRadius,
 
-					subMesh.VertexBufferHandle = _backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, false, vertexFormat);
-					subMesh.IndexBufferHandle = _backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ElementArrayBuffer, false);
-					_backend.RenderSystem.SetBufferData(subMesh.VertexBufferHandle, vertices, false, false);
+                        VertexBufferHandle = _backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, false, vertexFormat),
+                        IndexBufferHandle = _backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ElementArrayBuffer, false)
+                    };
+
+                    _backend.RenderSystem.SetBufferData(subMesh.VertexBufferHandle, vertices, false, false);
 					_backend.RenderSystem.SetBufferData(subMesh.IndexBufferHandle, indices, false, false);
 
 					subMesh.Handle = _backend.RenderSystem.CreateMesh(triangleCount, subMesh.VertexBufferHandle, subMesh.IndexBufferHandle, false);
-					subMesh.Material = material;
-					subMesh.BoundingSphereRadius = boundingSphereRadius;
 
 					mesh.SubMeshes[i] = subMesh;
 				}
@@ -144,9 +151,17 @@ namespace Triton.Graphics.Resources
 		public void Unload(object resource)
 		{
 			var mesh = (Mesh)resource;
+
+            if (mesh.Skeleton != null)
+            {
+
+            }
+
 			foreach (var subMesh in mesh.SubMeshes)
 			{
-				_backend.RenderSystem.DestroyMesh(subMesh.Handle);
+                _backend.RenderSystem.DestroyBuffer(subMesh.VertexBufferHandle);
+                _backend.RenderSystem.DestroyBuffer(subMesh.IndexBufferHandle);
+                _backend.RenderSystem.DestroyMesh(subMesh.Handle);
 
 				if (subMesh.Material != null)
 				{
