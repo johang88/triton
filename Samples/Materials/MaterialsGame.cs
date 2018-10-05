@@ -23,6 +23,7 @@ namespace Triton.Samples
 		public MaterialsGame()
 			: base("Materials")
 		{
+            CursorVisible = false;
 		}
 
 		protected override void LoadResources()
@@ -57,7 +58,7 @@ namespace Triton.Samples
 
 				var cube = GameWorld.CreateGameObject();
 				cube.Position = new Vector3(-3 + i * 1.5f, 1.0f, 2);
-				cube.AddComponent(new Mesh { Filename = "/models/crate", MeshParameters = materialName });
+				cube.AddComponent(new Mesh { Filename = "/models/crate", Material = materialName });
 				GameWorld.Add(cube);
 			}
 
@@ -67,7 +68,7 @@ namespace Triton.Samples
 
 				var cube = GameWorld.CreateGameObject();
 				cube.Position = new Vector3(-3 + i * 1.5f, 1.0f, -2);
-				cube.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = materialName });
+				cube.AddComponent(new Mesh { Filename = "/models/sphere", Material = materialName });
 				GameWorld.Add(cube);
 			}
 
@@ -113,12 +114,7 @@ namespace Triton.Samples
 				GameWorld.Add(sphere);
 			}
 
-			//Stage.AddMesh("/models/skybox");
-			//Stage.SetSkyBox("/models/skybox");
-
-			PostEffectManager.HDRSettings.AdaptationRate = 2;
-			PostEffectManager.HDRSettings.KeyValue = 0.1f;
-			DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.Lowest;
+			DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.High;
 
 			DebugFlags |= Game.DebugFlags.RenderStats;
 		}
@@ -129,7 +125,7 @@ namespace Triton.Samples
 
 			if (InputManager.IsKeyDown(Triton.Input.Key.Escape))
 			{
-				Running = false;
+				CursorVisible = !CursorVisible;
 			}
 
 			// Player input

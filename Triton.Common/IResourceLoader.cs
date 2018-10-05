@@ -21,7 +21,7 @@ namespace Triton.Common
         bool SupportsStreaming { get; }
 
 		object Create(Type type);
-		void Load(object resource, byte[] data);
+		Task Load(object resource, byte[] data);
 		void Unload(object resource);
 	}
 

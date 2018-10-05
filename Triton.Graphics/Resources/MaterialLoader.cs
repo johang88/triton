@@ -30,7 +30,7 @@ namespace Triton.Graphics.Resources
         public object Create(Type type)
             => new Material(_resourceManager);
 
-		public void Load(object resource, byte[] data)
+		public async Task Load(object resource, byte[] data)
 		{
 			Unload(resource);
 
@@ -56,7 +56,7 @@ namespace Triton.Graphics.Resources
 					throw new ArgumentException("invalid material, unknown version");
 
 				var shaderPath = reader.ReadString();
-				material._shader = _resourceManager.Load<ShaderProgram>(shaderPath, material.IsSkinned ? "SKINNED" : "");
+				material.Shader = await _resourceManager.LoadAsync<ShaderProgram>(shaderPath, material.IsSkinned ? "SKINNED" : "");
 
 				var samplerCount = reader.ReadInt32();
 				for (var i = 0; i < samplerCount; i++)
@@ -64,7 +64,7 @@ namespace Triton.Graphics.Resources
 					var samplerName = reader.ReadString();
 					var texturePath = reader.ReadString();
 
-					material.Textures.Add(samplerName, _resourceManager.Load<Texture>(texturePath));
+					material.Textures.Add(samplerName, await _resourceManager.LoadAsync<Texture>(texturePath));
 				}
 			}
 		}

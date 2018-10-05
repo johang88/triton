@@ -31,7 +31,7 @@ namespace Triton.Graphics.Resources
 		public object Create(Type type)
 		=> new Skeleton();
 
-		public void Load(object resource, byte[] data)
+		public Task Load(object resource, byte[] data)
 		{
 			// Destroy any existing mesh handles
 			Unload(resource);
@@ -100,7 +100,9 @@ namespace Triton.Graphics.Resources
 					skeleton.Animations[i] = animation;
 				}
 			}
-		}
+
+            return Task.FromResult(0);
+        }
 
 		public void Unload(object resource)
 		{

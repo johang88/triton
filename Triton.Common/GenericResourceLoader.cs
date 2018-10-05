@@ -18,9 +18,10 @@ namespace Triton.Common
         public object Create(Type type)
             => Activator.CreateInstance(type);
 
-        public void Load(object resource, byte[] data)
+        public Task Load(object resource, byte[] data)
         {
             JsonConvert.PopulateObject(Encoding.UTF8.GetString(data), resource);
+            return Task.FromResult(0);
         }
 
         public void Unload(object resource)

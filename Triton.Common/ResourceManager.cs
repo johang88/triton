@@ -38,7 +38,8 @@ namespace Triton.Common
 		private readonly IO.FileSystem _fileSystem;
 
 		private bool _isDispoed = false;
-		private readonly object _loadingLock = new object();
+		//private readonly object _loadingLock = new object();
+        private SemaphoreSlim _loadingLock = new SemaphoreSlim(1);
 
         public IResourceLoader DefaultResourceLoader { get; set; } = new GenericResourceLoader();
 
@@ -69,59 +70,60 @@ namespace Triton.Common
             _isDispoed = true;
 		}
 
-		public TResource Load<TResource>(string name, string parameters = "") where TResource : class
-		{
-			if (!_resourceLoaders.ContainsKey(typeof(TResource)))
-				throw new InvalidOperationException("no resource loader for the specified type");
+        public TResource Load<TResource>(string name, string parameters = "") where TResource : class
+             => LoadAsync<TResource>(name, parameters).Result;
 
+        public async Task<TResource> LoadAsync<TResource>(string name, string parameters = "") where TResource : class
+		{
 			var identifier = name + "?" + parameters;
             var resourceType = typeof(TResource);
 
-			lock (_loadingLock)
-			{
-                IResourceLoader loader = DefaultResourceLoader;
-                if (_resourceLoaders.ContainsKey(resourceType))
-				    loader = _resourceLoaders[resourceType];
+            // Fetch loader
+            IResourceLoader loader = DefaultResourceLoader;
+            if (_resourceLoaders.ContainsKey(resourceType))
+                loader = _resourceLoaders[resourceType];
 
-                // Get or create the resource
-                if (!_resources.TryGetValue(identifier, out var resourceReference))
+            await _loadingLock.WaitAsync();
+
+            // Get or create the resource
+            if (!_resources.TryGetValue(identifier, out var resourceReference))
+            {
+                resourceReference = new ResourceReference(name, parameters)
                 {
-                    resourceReference = new ResourceReference(name, parameters)
-                    {
-                        Resource = loader.Create(typeof(TResource))
-                    };
+                    Resource = loader.Create(typeof(TResource))
+                };
 
-                    _resources.AddOrUpdate(identifier, resourceReference, (key, existingVal) => existingVal);
-                    _instanceToReference.AddOrUpdate(resourceReference.Resource, resourceReference, (key, existingVal) => existingVal);
-                }
+                _resources.AddOrUpdate(identifier, resourceReference, (key, existingVal) => existingVal);
+                _instanceToReference.AddOrUpdate(resourceReference.Resource, resourceReference, (key, existingVal) => existingVal);
+            }
 
-                resourceReference.ReferenceCount += 1;
+            resourceReference.AddReference();
 
-				// Load the resource if neccecary
-				if (resourceReference.State == ResourceLoadingState.Unloaded)
-				{
-                    resourceReference.State = ResourceLoadingState.Loading;
+            // Load the resource if neccecary
+            if (resourceReference.State == ResourceLoadingState.Unloaded)
+            {
+                resourceReference.State = ResourceLoadingState.Loading;
+                resourceReference.LoadingTask = LoadResource(resourceReference, loader);
+            }
 
-					Task.Factory.StartNew(async () =>
-					{
-						await LoadResource(resourceReference, loader);
-					});
-				}
+            _loadingLock.Release();
+            await resourceReference.LoadingTask;
 
-				return resourceReference.Resource as TResource;
-			}
+            return (TResource)resourceReference.Resource;
 		}
 
 		private async Task LoadResource(ResourceReference resource, IResourceLoader loader)
 		{
-			var data = await LoadDataForResource(resource, loader);
-			_resourcesToLoad.Enqueue(new ResourceToLoad
-			{
-				ResourceReference = resource,
-				Loader = loader,
-				Data = data
-			});
-		}
+            var data = await await Concurrency.TaskHelpers.RunOnIOThread(() => LoadDataForResource(resource, loader));
+            await await Concurrency.TaskHelpers.RunOnMainThread(() => loader.Load(resource.Resource, data));
+
+            resource.State = ResourceLoadingState.Loaded;
+
+            if (!string.IsNullOrWhiteSpace(resource.Parameters))
+                Log.WriteLine("Loaded {0}?{2} of type {1}", resource.Name, resource.Resource.GetType(), resource.Parameters);
+            else
+                Log.WriteLine("Loaded {0} of type {1}", resource.Name, resource.Resource.GetType());
+        }
 
 		private async Task<byte[]> LoadDataForResource(ResourceReference resource, IResourceLoader loader)
 		{
@@ -184,26 +186,6 @@ namespace Triton.Common
 			}
 		}
 
-		/// <summary>
-		/// Should be called on the main thread
-		/// </summary>
-		public void TickResourceLoading(int maxResourcesPerFrame = 10)
-		{
-			while (maxResourcesPerFrame > 0 && _resourcesToLoad.Count > 0)
-			{
-				if (_resourcesToLoad.TryDequeue(out var resourceToLoad))
-				{
-					resourceToLoad.Loader.Load(resourceToLoad.ResourceReference.Resource, resourceToLoad.Data);
-					resourceToLoad.ResourceReference.State = ResourceLoadingState.Loaded;
-
-					if (!string.IsNullOrWhiteSpace(resourceToLoad.ResourceReference.Parameters))
-						Log.WriteLine("Loaded {0}?{2} of type {1}", resourceToLoad.ResourceReference.Name, resourceToLoad.ResourceReference.GetType(), resourceToLoad.ResourceReference.Parameters);
-					else
-						Log.WriteLine("Loaded {0} of type {1}", resourceToLoad.ResourceReference.Name, resourceToLoad.ResourceReference.GetType());
-				}
-			}
-		}
-
 		public void Manage<TResource>(string name, TResource resource) where TResource : class
         {
 			if (resource == null)
@@ -215,8 +197,9 @@ namespace Triton.Common
                 {
                     Resource = resource,
                     State = ResourceLoadingState.Loaded,
-                    ReferenceCount = 1
                 };
+
+                resourceReference.AddReference();
 
                 _resources.AddOrUpdate(name, resourceReference, (key, existingVal) => existingVal);
                 _instanceToReference.AddOrUpdate(resource, resourceReference, (key, existingVal) => existingVal);
@@ -227,7 +210,7 @@ namespace Triton.Common
         {
             if (_instanceToReference.TryGetValue(resource, out var resourceReference))
             {
-                resourceReference.ReferenceCount -= 1;
+                resourceReference.RemoveReference();
             }
 		}
 
@@ -261,21 +244,31 @@ namespace Triton.Common
 			public ResourceReference ResourceReference;
 			public IResourceLoader Loader;
 			public byte[] Data;
-		}
+
+            public SemaphoreSlim Event { get; internal set; }
+        }
 
         private class ResourceReference
         {
             public string Name { get; set; }
             public ResourceLoadingState State { get; set; }
-            public int ReferenceCount { get; set; }
+            private int _referenceCount = 0;
+            public int ReferenceCount => _referenceCount;
             public string Parameters { get; set; }
             public object Resource { get; set; }
+            public Task LoadingTask { get; set; }
 
             public ResourceReference(string name, string parameters)
             {
                 Name = name;
                 Parameters = parameters;
             }
+
+            internal void AddReference()
+                => Interlocked.Increment(ref _referenceCount);
+
+            internal void RemoveReference()
+                => Interlocked.Decrement(ref _referenceCount);
         }
 
         public enum ResourceLoadingState

@@ -31,7 +31,7 @@ namespace Triton.Graphics.Resources
         public object Create(Type type)
              => new BitmapFont();
 
-		public void Load(object resource, byte[] data)
+		public async Task Load(object resource, byte[] data)
 		{
 			var bitmapFont = (BitmapFont)resource;
 
@@ -53,7 +53,7 @@ namespace Triton.Graphics.Resources
 							ParseCommonInfo(bitmapFont, ParseCommands(commands));
 							break;
 						case "page":
-							ParsePageInfo(bitmapFont, ParseCommands(commands));
+							await ParsePageInfo(bitmapFont, ParseCommands(commands));
 							break;
 						case "chars": // Ignore
 							break;
@@ -86,10 +86,10 @@ namespace Triton.Graphics.Resources
 			bitmapFont.Scale = new Vector2(StringConverter.Parse<float>(commands["scaleW"]), StringConverter.Parse<float>(commands["scaleH"]));
 		}
 
-		private void ParsePageInfo(BitmapFont bitmapFont, Dictionary<string, string> commands)
+		private async Task ParsePageInfo(BitmapFont bitmapFont, Dictionary<string, string> commands)
 		{
 			var filename = commands["file"].Replace("\"", "");
-			bitmapFont.Textures.Add(ResourceManager.Load<Texture>(filename));
+			bitmapFont.Textures.Add(await ResourceManager.LoadAsync<Texture>(filename));
 		}
 
 		private void ParseCharInfo(BitmapFont bitmapFont, Dictionary<string, string> commands)

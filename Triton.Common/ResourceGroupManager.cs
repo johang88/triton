@@ -47,14 +47,6 @@ namespace Triton.Common
 			throw new KeyNotFoundException(name);
 		}
 
-		public void TickResourceLoading()
-		{
-			foreach (var group in Groups)
-			{
-				group.ResourceManager.TickResourceLoading(group.MaxResourcesPerFrame);
-			}
-		}
-
 		class ResourceGroup
 		{
 			public string Name;

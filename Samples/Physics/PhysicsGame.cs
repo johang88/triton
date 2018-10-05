@@ -148,7 +148,7 @@ namespace Triton.Samples
 
 				var sphere = GameWorld.CreateGameObject();
 				sphere.Position = Player.Position + Vector3.Transform(new Vector3(0, -0.5f, 1.5f), Camera.Orientation);
-				sphere.AddComponent(new Mesh { Filename = "/models/sphere", MeshParameters = "/materials/light_sphere", CastShadows = false });
+				sphere.AddComponent(new Mesh { Filename = "/models/sphere", Material = "/materials/light_sphere", CastShadows = false });
 				sphere.AddComponent(new PointLight { Range = 2 + (float)RNG.NextDouble() * 8, CastShadows = true, Color = new Vector3(0.1f + (float)RNG.NextDouble() * 0.9f, 0.1f + (float)RNG.NextDouble() * 0.9f, 0.1f + (float)RNG.NextDouble() * 0.9f), Intensity = 0.2f + (float)RNG.NextDouble() * 1.5f });
 				sphere.AddComponent(new SphereRigidBody { Radius = 0.4f });
 				GameWorld.Add(sphere);

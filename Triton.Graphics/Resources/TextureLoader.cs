@@ -30,10 +30,12 @@ namespace Triton.Graphics.Resources
         public object Create(Type type)
             => new Texture();
 
-		public void Load(object resource, byte[] data)
+		public Task Load(object resource, byte[] data)
 		{
             var texture = (Texture)resource;
             texture.Handle = _backend.RenderSystem.CreateFromDDS(data, out texture.Width, out texture.Height);
+
+            return Task.FromResult(0);
         }
 
 		public void Unload(object resource)

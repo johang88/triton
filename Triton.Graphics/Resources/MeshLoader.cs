@@ -35,7 +35,7 @@ namespace Triton.Graphics.Resources
 
 		private readonly Backend _backend;
 		private readonly Triton.Common.IO.FileSystem _fileSystem;
-		private readonly Triton.Common.ResourceManager ResourceManager;
+		private readonly Triton.Common.ResourceManager _resourceManager;
 
         public bool SupportsStreaming => false;
 
@@ -43,7 +43,7 @@ namespace Triton.Graphics.Resources
 		{
             _backend = backend ?? throw new ArgumentNullException("backend");
 			_fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
-			ResourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");
+			_resourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");
 		}
 
 		public string Extension { get { return ".mesh"; } }
@@ -52,12 +52,14 @@ namespace Triton.Graphics.Resources
         public object Create(Type type)
              => new Mesh();
 
-		public void Load(object resource, byte[] data)
+		public async Task Load(object resource, byte[] data)
 		{
 			// Destroy any existing mesh handles
 			Unload(resource);
 
 			var mesh = (Mesh)resource;
+
+            var (_, overrideMaterial) = _resourceManager.GetResourceProperties(mesh);
 
 			using (var stream = new System.IO.MemoryStream(data))
 			using (var reader = new System.IO.BinaryReader(stream))
@@ -82,7 +84,7 @@ namespace Triton.Graphics.Resources
 				if (hasSkeleton)
 				{
 					var skeletonPath = reader.ReadString();
-					mesh.Skeleton = ResourceManager.Load<SkeletalAnimation.Skeleton>(skeletonPath);
+					mesh.Skeleton = await _resourceManager.LoadAsync<SkeletalAnimation.Skeleton>(skeletonPath);
 					materialFlags = "SKINNED";
 				}
 
@@ -93,9 +95,12 @@ namespace Triton.Graphics.Resources
 				{
 					var materialName = reader.ReadString();
 
-					Material material = null;
+                    if (!string.IsNullOrEmpty(overrideMaterial))
+                        materialName = overrideMaterial;
+
+                    Material material = null;
 					if (materialName != "no_material")
-						material = ResourceManager.Load<Material>(materialName, materialFlags);
+						material = await _resourceManager.LoadAsync<Material>(materialName, materialFlags);
 
 					var triangleCount = reader.ReadInt32();
 					var vertexCount = reader.ReadInt32();
@@ -154,7 +159,7 @@ namespace Triton.Graphics.Resources
 
             if (mesh.Skeleton != null)
             {
-
+                _resourceManager.Unload(mesh.Skeleton);
             }
 
 			foreach (var subMesh in mesh.SubMeshes)
@@ -165,7 +170,7 @@ namespace Triton.Graphics.Resources
 
 				if (subMesh.Material != null)
 				{
-					ResourceManager.Unload(subMesh.Material);
+					_resourceManager.Unload(subMesh.Material);
 					subMesh.Material = null;
 				}
 			}

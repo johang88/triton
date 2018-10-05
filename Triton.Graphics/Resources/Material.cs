@@ -12,7 +12,7 @@ namespace Triton.Graphics.Resources
 
 		public readonly Dictionary<string, Texture> Textures = new Dictionary<string, Texture>();
 
-		public ShaderProgram _shader;
+		public ShaderProgram Shader;
 		private ShaderHandles _handles;
 		private Common.ResourceManager _resourceManager;
 		public bool IsSkinned;
@@ -35,7 +35,7 @@ namespace Triton.Graphics.Resources
 			Initialized = true;
 
 			_handles = new ShaderHandles();
-			_shader.BindUniformLocations(_handles);
+			Shader.BindUniformLocations(_handles);
 
 			_textureHandles = new int[Textures.Count];
 			_samplerToTexture = new int[Textures.Count];
@@ -46,7 +46,7 @@ namespace Triton.Graphics.Resources
 			{
 				_textureHandles[i] = samplerInfo.Value.Handle;
 				_samplers[i] = backend.DefaultSampler;
-				_samplerToTexture[i] = _shader.GetUniform(samplerInfo.Key);
+				_samplerToTexture[i] = Shader.GetUniform(samplerInfo.Key);
 				i++;
 			}
 		}
@@ -68,7 +68,7 @@ namespace Triton.Graphics.Resources
 				Initialize(backend);
 			}
 
-			backend.BeginInstance(_shader.Handle, _textureHandles, samplers: _samplers, renderStateId: renderStateId);
+			backend.BeginInstance(Shader.Handle, _textureHandles, samplers: _samplers, renderStateId: renderStateId);
 			for (var i = 0; i < _samplerToTexture.Length; i++)
 			{
 				backend.BindShaderVariable(_samplerToTexture[i], i);

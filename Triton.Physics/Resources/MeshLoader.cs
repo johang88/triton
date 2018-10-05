@@ -13,20 +13,13 @@ namespace Triton.Physics.Resources
 		static readonly char[] Magic = new char[] { 'C', 'O', 'L', 'M' };
 		const int Version_1_0 = 0x0100;
 
-		private readonly Triton.Common.IO.FileSystem FileSystem;
-		private readonly Triton.Common.ResourceManager ResourceManager;
+		private readonly Triton.Common.IO.FileSystem _fileSystem;
 
         public bool SupportsStreaming => false;
 
-		public MeshLoader(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
+		public MeshLoader(Triton.Common.IO.FileSystem fileSystem)
 		{
-			if (fileSystem == null)
-				throw new ArgumentNullException("fileSystem");
-			if (resourceManager == null)
-				throw new ArgumentNullException("resourceManager");
-
-			FileSystem = fileSystem;
-			ResourceManager = resourceManager;
+            _fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
 		}
 
 		public string Extension { get { return ".col"; } }
@@ -35,7 +28,7 @@ namespace Triton.Physics.Resources
         public object Create(Type type)
             => new Mesh();
 
-		public void Load(object resource, byte[] data)
+		public Task Load(object resource, byte[] data)
 		{
 			Unload(resource);
 
@@ -81,6 +74,8 @@ namespace Triton.Physics.Resources
 
 				mesh.Build(isConvexHull, vertices, indices);
 			}
+
+            return Task.FromResult(0);
 		}
 
 		public void Unload(object resource)

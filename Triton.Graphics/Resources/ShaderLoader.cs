@@ -59,7 +59,7 @@ namespace Triton.Graphics.Resources
             return string.Format("#version 410 core\n#define {0}\n{1}\n", type, defines) + source;
         }
 
-        public void Load(object resource, byte[] data)
+        public Task Load(object resource, byte[] data)
         {
             var shader = (ShaderProgram)resource;
             var (name, parameters) = _resourceManager.GetResourceProperties(shader);
@@ -134,6 +134,8 @@ namespace Triton.Graphics.Resources
 
             if (!string.IsNullOrWhiteSpace(errors))
                 Common.Log.WriteLine(name + ": " + errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
+
+            return Task.FromResult(0);
         }
 
         public void Unload(object resource)

@@ -9,7 +9,7 @@ namespace Triton.Game.World.Components
 	public class Mesh : Component
 	{
 		public string Filename;
-		public string MeshParameters;
+		public string Material;
 
 		public Graphics.MeshInstance MeshInstance;
 		public bool CastShadows = true;
@@ -18,7 +18,7 @@ namespace Triton.Game.World.Components
 		{
 			base.OnActivate();
 
-			MeshInstance = World.Stage.AddMesh(Filename, MeshParameters);
+			MeshInstance = World.Stage.AddMesh(Filename, Material);
 		}
 
 		public override void OnDetached()

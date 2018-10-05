@@ -67,6 +67,8 @@
     <Compile Include="BinaryWriterExtensions.cs" />
     <Compile Include="CommandLineApplication.cs" />
     <Compile Include="CommandLineParser.cs" />
+    <Compile Include="Concurrency\SingleThreadScheduler.cs" />
+    <Compile Include="Concurrency\TaskHelpers.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="ConfigSection.cs" />
     <Compile Include="GenericResourceLoader.cs" />

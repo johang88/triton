@@ -10,7 +10,7 @@ namespace Triton.Physics.Resources
 	{
 		public static void Init(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
 		{
-			resourceManager.AddResourceLoader<Mesh>(new MeshLoader(resourceManager, fileSystem));
+			resourceManager.AddResourceLoader<Mesh>(new MeshLoader(fileSystem));
 		}
 	}
 }
