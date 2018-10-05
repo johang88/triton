@@ -9,21 +9,24 @@ namespace Triton.Game.World
 	public class Component : IComponent
 	{
 		public GameObject Owner { get; private set; }
-		protected GameObjectManager World { get; private set; }
-		protected Graphics.Stage Stage { get; private set; }
-		protected GameObject Parent { get { return Owner.Parent; } }
+        protected GameObjectManager World => Owner.World;
+        protected Graphics.Stage Stage => Owner.World.Stage;
+        protected GameObject Parent => Owner.Parent;
 
 		public virtual void OnAttached(GameObject owner)
 		{
             Owner = owner ?? throw new ArgumentNullException("owner");
-			World = Owner.World;
-			Stage = World.Stage;
 		}
 
 		public virtual void OnActivate()
 		{
 
 		}
+
+        public virtual void OnDeactivate()
+        {
+
+        }
 
 		public virtual void OnDetached()
 		{
@@ -34,10 +37,5 @@ namespace Triton.Game.World
 		{
 
 		}
-
-        public virtual void FixedUpdate(float dt)
-        {
-
-        }
 	}
 }

@@ -30,7 +30,7 @@ namespace Triton.Physics
             _ghostObject.CollisionShape = _shape;
             _ghostObject.CollisionFlags = CollisionFlags.CharacterObject;
 
-            _kinematicCharacterController = new KinematicCharacterController(_ghostObject, _shape, 0.05f);
+            _kinematicCharacterController = new KinematicCharacterController(_ghostObject, _shape, 0.1f);
 
             _world.AddCollisionObject(_ghostObject, CollisionFilterGroups.CharacterFilter, CollisionFilterGroups.StaticFilter | CollisionFilterGroups.DefaultFilter);
             _world.AddAction(_kinematicCharacterController);

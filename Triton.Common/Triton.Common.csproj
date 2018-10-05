@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="BinaryReaderExtensions.cs" />
     <Compile Include="BinaryWriterExtensions.cs" />
+    <Compile Include="Collections\TrackingCollection.cs" />
     <Compile Include="CommandLineApplication.cs" />
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="Concurrency\SingleThreadScheduler.cs" />

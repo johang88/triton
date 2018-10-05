@@ -23,9 +23,9 @@ namespace Triton.Game.World.Components
 			Light = Stage.CreatePointLight(Owner.Position, Range, Color, CastShadows, ShadowBias, Intensity);
 		}
 
-		public override void OnDetached()
+		public override void OnDeactivate()
 		{
-			base.OnDetached();
+			base.OnDeactivate();
 
 			Stage.RemoveLight(Light);
 		}

@@ -16,14 +16,8 @@ namespace Triton.Game.World.Components
 		{
 			base.OnActivate();
 
-			Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, IsStatic);
-		}
-
-		public override void OnAttached(GameObject owner)
-		{
-			base.OnAttached(owner);
-
-			Mesh = World.ResourceManager.Load<Physics.Resources.Mesh>(Filename);
+            Mesh = World.ResourceManager.Load<Physics.Resources.Mesh>(Filename);
+            Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, IsStatic);
 		}
 	}
 }

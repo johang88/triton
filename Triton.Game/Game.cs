@@ -213,9 +213,14 @@ namespace Triton.Game
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
 
+            var stepSize = 1.0f / 60.0f;
+            var accumulator = 0.0f;
+
             while (Running)
             {
                 _frameCount++;
+
+                _frameTime = (float)watch.Elapsed.TotalSeconds;
                 watch.Restart();
 
                 ElapsedTime += _frameTime;
@@ -225,7 +230,13 @@ namespace Triton.Game
                     InputManager.Update();
                 }
 
-                PhysicsWorld.Update(_frameTime);
+                accumulator += _frameTime;
+                while (accumulator >= stepSize)
+                {
+                    accumulator -= stepSize;
+                    PhysicsWorld.Update(stepSize);
+                }
+                
                 AudioSystem.Update();
 
                 GameWorld.Update(_frameTime);
@@ -233,9 +244,8 @@ namespace Triton.Game
                 Update(_frameTime);
 
                 RenderScene(_frameTime, watch);
-                _frameTime = (float)watch.Elapsed.TotalSeconds;
 
-                Thread.Sleep(1);
+                Thread.Sleep(0);
             }
         }
 
@@ -287,27 +297,34 @@ namespace Triton.Game
 
         void UpdateImGuiInput(IO io)
         {
-            MouseState cursorState = Mouse.GetCursorState();
-            MouseState mouseState = Mouse.GetState();
-
-            if (_window.Bounds.Contains(cursorState.X, cursorState.Y))
+            try
             {
-                Point windowPoint = _window.PointToClient(new Point(cursorState.X, cursorState.Y));
-                io.MousePosition = new System.Numerics.Vector2(windowPoint.X / io.DisplayFramebufferScale.X, windowPoint.Y / io.DisplayFramebufferScale.Y);
+                MouseState cursorState = Mouse.GetCursorState();
+                MouseState mouseState = Mouse.GetState();
+
+                if (_window.Bounds.Contains(cursorState.X, cursorState.Y))
+                {
+                    Point windowPoint = _window.PointToClient(new Point(cursorState.X, cursorState.Y));
+                    io.MousePosition = new System.Numerics.Vector2(windowPoint.X / io.DisplayFramebufferScale.X, windowPoint.Y / io.DisplayFramebufferScale.Y);
+                }
+                else
+                {
+                    io.MousePosition = new System.Numerics.Vector2(-1f, -1f);
+                }
+
+                io.MouseDown[0] = mouseState.LeftButton == ButtonState.Pressed;
+                io.MouseDown[1] = mouseState.RightButton == ButtonState.Pressed;
+                io.MouseDown[2] = mouseState.MiddleButton == ButtonState.Pressed;
+
+                float newWheelPos = mouseState.WheelPrecise;
+                float delta = newWheelPos - _wheelPosition;
+                _wheelPosition = newWheelPos;
+                io.MouseWheel = delta;
             }
-            else
+            catch
             {
-                io.MousePosition = new System.Numerics.Vector2(-1f, -1f);
+                // Awesome!!
             }
-
-            io.MouseDown[0] = mouseState.LeftButton == ButtonState.Pressed;
-            io.MouseDown[1] = mouseState.RightButton == ButtonState.Pressed;
-            io.MouseDown[2] = mouseState.MiddleButton == ButtonState.Pressed;
-
-            float newWheelPos = mouseState.WheelPrecise;
-            float delta = newWheelPos - _wheelPosition;
-            _wheelPosition = newWheelPos;
-            io.MouseWheel = delta;
         }
 
         protected virtual void RenderUI(float deltaTime)

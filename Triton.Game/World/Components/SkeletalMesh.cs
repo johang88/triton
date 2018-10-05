@@ -25,9 +25,9 @@ namespace Triton.Game.World.Components
 			SkeletonInstance.Play("run");
 		}
 
-		public override void OnDetached()
+		public override void OnDeactivate()
 		{
-			base.OnDetached();
+			base.OnDeactivate();
 
 			World.Stage.RemoveMesh(MeshInstance);
 			World.ResourceManager.Unload(SkeletonInstance.Skeleton);

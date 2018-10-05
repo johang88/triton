@@ -20,10 +20,6 @@ namespace Triton.Game.World
 		public ResourceManager ResourceManager { get; private set; }
 		public Triton.Physics.World PhysicsWorld { get; private set; }
 
-		Dictionary<int, GameObject> GameObjectsById = new Dictionary<int, GameObject>();
-
-		private int LastGameObjectId = 0;
-
 		public Graphics.Camera Camera { get; private set; }
 
 		public GameObjectManager(Stage stage, InputManager inputManager, ResourceManager resourceManager, Triton.Physics.World physicsWorld, Graphics.Camera camera)
@@ -43,19 +39,11 @@ namespace Triton.Game.World
 		{
 			foreach (var gameOject in GameObjects)
 			{
-				gameOject.OnDetached();
+                gameOject.World = null;
 			}
 
 			GameObjects.Clear();
-			GameObjectsById.Clear();
 		}
-
-		/// <summary>
-		/// Creates a new empty game object, the game object has to be added to the world using <see cref="GameObjectManager.Add"/>
-		/// </summary>
-		/// <returns></returns>
-		public GameObject CreateGameObject()
-		    => new GameObject(this, LastGameObjectId++);
 
         /// <summary>
         /// Add a game object to the world, the game object will be added in the next frame.
@@ -81,17 +69,15 @@ namespace Triton.Game.World
 			foreach (var gameObject in GameObjectsToAdd)
 			{
 				GameObjects.Add(gameObject);
-				GameObjectsById.Add(gameObject.Id, gameObject);
-				gameObject.OnAttached();
-			}
+                gameObject.World = this;
+            }
 			GameObjectsToAdd.Clear();
 
 			foreach (var gameObject in GameObjectsToRemove)
 			{
 				if (GameObjects.Remove(gameObject))
 				{
-					GameObjectsById.Remove(gameObject.Id);
-					gameObject.OnDetached();
+                    gameObject.World = null;
 				}
 			}
 			GameObjectsToRemove.Clear();

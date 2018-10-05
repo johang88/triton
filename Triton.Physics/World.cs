@@ -64,7 +64,7 @@ namespace Triton.Physics
                 body.Update(stepSize);
             }
 
-            _world.StepSimulation(stepSize, 10);
+            _world.StepSimulation(stepSize, 2);
         }
 
         RigidBody CreateRigidBody(CollisionShape shape, bool isStatic, Matrix4 startTransform, float mass)

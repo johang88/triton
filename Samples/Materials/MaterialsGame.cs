@@ -33,15 +33,15 @@ namespace Triton.Samples
             Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0);
             Stage.AmbientColor = Vector3.Zero;
 
-            var room = GameWorld.CreateGameObject();
-            room.AddComponent(new Mesh { Filename = "/models/room" });
-            room.AddComponent(new MeshRigidBody { Filename = "/collision/room", IsStatic = true });
+            var room = new GameObject();
+            room.Components.Add(new Mesh { Filename = "/models/room" });
+            room.Components.Add(new MeshRigidBody { Filename = "/collision/room", IsStatic = true });
             GameWorld.Add(room);
 
-            Player = GameWorld.CreateGameObject();
+            Player = new GameObject();
             Player.Position = new Vector3(0, 2f, 0);
             PlayerCharacter = new CharacterController();
-            Player.AddComponent(PlayerCharacter);
+            Player.Components.Add(PlayerCharacter);
             GameWorld.Add(Player);
 
             var materials = new string[]
@@ -58,10 +58,10 @@ namespace Triton.Samples
             {
                 var materialName = materials[i % materials.Length];
 
-                var cube = GameWorld.CreateGameObject();
+                var cube = new GameObject();
                 cube.Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
-                cube.AddComponent(new Mesh { Filename = "/models/sphere", Material = materialName });
-                cube.AddComponent(new SphereRigidBody { Radius = 0.5f });
+                cube.Components.Add(new Mesh { Filename = "/models/sphere", Material = materialName });
+                cube.Components.Add(new SphereRigidBody { Radius = 0.5f });
                 GameWorld.Add(cube);
             }
 
@@ -69,60 +69,60 @@ namespace Triton.Samples
             {
                 var materialName = materials[i % materials.Length];
 
-                var cube = GameWorld.CreateGameObject();
+                var cube = new GameObject();
                 cube.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
-                cube.AddComponent(new Mesh { Filename = "/models/sphere", Material = materialName });
-                cube.AddComponent(new SphereRigidBody { Radius = 0.5f });
+                cube.Components.Add(new Mesh { Filename = "/models/sphere", Material = materialName });
+                cube.Components.Add(new SphereRigidBody { Radius = 0.5f });
                 GameWorld.Add(cube);
             }
 
             var lightColor = new Vector3(1.1f, 1f, 1f);
 
             {
-                var sphere = GameWorld.CreateGameObject();
+                var sphere = new GameObject();
                 sphere.Position = new Vector3(2, 2.5f, 0);
                 sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.AddComponent(new PointLight { Color = lightColor, Intensity = 2, Range = 16 });
+                sphere.Components.Add(new PointLight { Color = lightColor, Intensity = 2, Range = 16 });
                 GameWorld.Add(sphere);
             }
 
             {
-                var sphere = GameWorld.CreateGameObject();
+                var sphere = new GameObject();
                 sphere.Position = new Vector3(6, 2.5f, 0);
                 sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.AddComponent(new PointLight { Color = lightColor, Intensity = 1, Range = 16, CastShadows = false });
+                sphere.Components.Add(new PointLight { Color = lightColor, Intensity = 1, Range = 16, CastShadows = false });
                 GameWorld.Add(sphere);
             }
 
             {
-                var sphere = GameWorld.CreateGameObject();
+                var sphere = new GameObject();
                 sphere.Position = new Vector3(2, 2.5f, -4);
                 sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.AddComponent(new PointLight { Color = lightColor, Intensity = 1, Range = 16, CastShadows = false });
+                sphere.Components.Add(new PointLight { Color = lightColor, Intensity = 1, Range = 16, CastShadows = false });
                 GameWorld.Add(sphere);
             }
 
             {
-                var sphere = GameWorld.CreateGameObject();
+                var sphere = new GameObject();
                 sphere.Position = new Vector3(2, 2.5f, 4);
                 sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.AddComponent(new PointLight { Color = lightColor, Intensity = 1, Range = 16, CastShadows = false });
+                sphere.Components.Add(new PointLight { Color = lightColor, Intensity = 1, Range = 16, CastShadows = false });
                 GameWorld.Add(sphere);
             }
 
             {
-                var sphere = GameWorld.CreateGameObject();
+                var sphere = new GameObject();
                 sphere.Position = new Vector3(-10, 2.5f, 1);
                 sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.AddComponent(new PointLight { Color = new Vector3(1f, 1f, 1f), Intensity = 2 });
+                sphere.Components.Add(new PointLight { Color = new Vector3(1f, 1f, 1f), Intensity = 2 });
                 GameWorld.Add(sphere);
             }
 
             {
-                var sphere = GameWorld.CreateGameObject();
+                var sphere = new GameObject();
                 sphere.Position = new Vector3(-18, 2.5f, -5);
                 sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.AddComponent(new PointLight { Color = new Vector3(1f, 1f, 1f), Intensity = 1.5f, Range = 8 });
+                sphere.Components.Add(new PointLight { Color = new Vector3(1f, 1f, 1f), Intensity = 1.5f, Range = 8 });
                 GameWorld.Add(sphere);
             }
 
@@ -131,9 +131,9 @@ namespace Triton.Samples
                 var x = (float)(-6.0 + RNG.NextDouble() * 15.0);
                 var z = (float)(-8.0 + RNG.NextDouble() * 20.0);
 
-                var sphere = GameWorld.CreateGameObject();
+                var sphere = new GameObject();
                 sphere.Position = new Vector3(x, 0.5f, z);
-                sphere.AddComponent(new PointLight
+                sphere.Components.Add(new PointLight
                 {
                     Color = new Vector3(0.1f + (float)RNG.NextDouble() * 0.9f, 0.1f + (float)RNG.NextDouble() * 0.9f, 0.1f + (float)RNG.NextDouble() * 0.9f),
                     Intensity = 0.3f + (float)RNG.NextDouble() * 0.6f,

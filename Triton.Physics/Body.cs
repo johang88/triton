@@ -26,7 +26,7 @@ namespace Triton.Physics
 		{
             if (RigidBody == null) return;
 
-            var bulletWorldMatrix = RigidBody.WorldTransform;
+            var bulletWorldMatrix = RigidBody.MotionState.WorldTransform;
             var world = Conversion.ToTritonMatrix(ref bulletWorldMatrix);
 
             Position = Conversion.ToTritonVector(bulletWorldMatrix.Origin);

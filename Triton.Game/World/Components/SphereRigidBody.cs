@@ -12,9 +12,9 @@ namespace Triton.Game.World.Components
 		public bool IsStatic = false;
         public float Mass = 1.0f;
 
-		public override void OnAttached(GameObject owner)
+		public override void OnActivate()
 		{
-			base.OnAttached(owner);
+			base.OnActivate();
 
 			Body = World.PhysicsWorld.CreateSphereBody(Radius, Owner.Position, IsStatic, Mass);
 		}

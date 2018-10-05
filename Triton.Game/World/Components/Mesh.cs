@@ -21,9 +21,9 @@ namespace Triton.Game.World.Components
 			MeshInstance = World.Stage.AddMesh(Filename, Material);
 		}
 
-		public override void OnDetached()
+		public override void OnDeactivate()
 		{
-			base.OnDetached();
+			base.OnDeactivate();
 
 			World.Stage.RemoveMesh(MeshInstance);
 		}
