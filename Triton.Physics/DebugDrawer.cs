@@ -9,104 +9,100 @@ using Triton.Common;
 
 namespace Triton.Physics
 {
-	class DebugDrawer : Jitter.IDebugDrawer
-	{
-		private readonly Backend Backend;
-		private readonly BatchBuffer Batch;
-		private readonly Graphics.Resources.ShaderProgram Shader;
-		private ShaderParams Params = null;
-		public Vector3 Color = new Vector3(0, 1, 0);
-		private int TriangleIndex = 0;
-		private int RenderStateId;
+    class DebugDrawer : Jitter.IDebugDrawer
+    {
+        private readonly Backend Backend;
+        private readonly BatchBuffer Batch;
+        private readonly Graphics.Resources.ShaderProgram Shader;
+        private ShaderParams Params = null;
+        public Vector3 Color = new Vector3(0, 1, 0);
+        private int TriangleIndex = 0;
+        private int RenderStateId;
 
-		public bool ClockWise = false;
+        public bool ClockWise = false;
 
-		public DebugDrawer(Backend backend, ResourceManager resourceManager)
-		{
-			if (backend == null)
-				throw new ArgumentNullException("backend");
+        public DebugDrawer(Backend backend, ResourceManager resourceManager)
+        {
+            Backend = backend ?? throw new ArgumentNullException("backend");
 
-			Backend = backend;
-			Batch = Backend.CreateBatchBuffer(new Renderer.VertexFormat(new Renderer.VertexFormatElement[]
-				{
-					new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Position, Renderer.VertexPointerType.Float, 3, 0),
-					new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Color, Renderer.VertexPointerType.Float, 3, sizeof(float) * 3),
-					new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Normal, Renderer.VertexPointerType.Float, 3, sizeof(float) * 6),
-				}));
-			Batch.Begin();
+            Batch = Backend.CreateBatchBuffer(new Renderer.VertexFormat(new Renderer.VertexFormatElement[]
+                {
+                    new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Position, Renderer.VertexPointerType.Float, 3, 0),
+                    new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Color, Renderer.VertexPointerType.Float, 3, sizeof(float) * 3),
+                    new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Normal, Renderer.VertexPointerType.Float, 3, sizeof(float) * 6),
+                }));
+            Batch.Begin();
 
-			Shader = resourceManager.Load<Graphics.Resources.ShaderProgram>("/shaders/physic_debug_drawer");
-			RenderStateId = backend.CreateRenderState(false, true, true, BlendingFactorSrc.One, BlendingFactorDest.One);
-		}
+            Shader = resourceManager.Load<Graphics.Resources.ShaderProgram>("/shaders/physic_debug_drawer");
+            RenderStateId = backend.CreateRenderState(false, true, true, BlendingFactorSrc.One, BlendingFactorDest.One, wireFrame: true);
+        }
 
-		public void DrawLine(Jitter.LinearMath.JVector start, Jitter.LinearMath.JVector end)
-		{
-			// TODO
-		}
+        public void DrawLine(Jitter.LinearMath.JVector start, Jitter.LinearMath.JVector end)
+        {
+            // TODO
+        }
 
-		public void DrawPoint(Jitter.LinearMath.JVector pos)
-		{
-			// TODO
-		}
+        public void DrawPoint(Jitter.LinearMath.JVector pos)
+        {
+            // TODO
+        }
 
-		public void DrawTriangle(Jitter.LinearMath.JVector pos1, Jitter.LinearMath.JVector pos2, Jitter.LinearMath.JVector pos3)
-		{
-			var n = Jitter.LinearMath.JVector.Cross(pos2 - pos1, pos3 - pos1);
+        public void DrawTriangle(Jitter.LinearMath.JVector pos1, Jitter.LinearMath.JVector pos2, Jitter.LinearMath.JVector pos3)
+        {
+            var n = Jitter.LinearMath.JVector.Cross(pos2 - pos1, pos3 - pos1);
 
-			Batch.AddVector3(pos1.X, pos1.Y, pos1.Z);
-			Batch.AddVector3(ref Color);
-			Batch.AddVector3(n.X, n.Y, n.Z);
+            Batch.AddVector3(pos1.X, pos1.Y, pos1.Z);
+            Batch.AddVector3(ref Color);
+            Batch.AddVector3(n.X, n.Y, n.Z);
 
-			Batch.AddVector3(pos2.X, pos2.Y, pos2.Z);
-			Batch.AddVector3(ref Color);
-			Batch.AddVector3(n.X, n.Y, n.Z);
+            Batch.AddVector3(pos2.X, pos2.Y, pos2.Z);
+            Batch.AddVector3(ref Color);
+            Batch.AddVector3(n.X, n.Y, n.Z);
 
-			Batch.AddVector3(pos3.X, pos3.Y, pos3.Z);
-			Batch.AddVector3(ref Color);
-			Batch.AddVector3(n.X, n.Y, n.Z);
+            Batch.AddVector3(pos3.X, pos3.Y, pos3.Z);
+            Batch.AddVector3(ref Color);
+            Batch.AddVector3(n.X, n.Y, n.Z);
 
-			if (!ClockWise)
-				Batch.AddTriangle(TriangleIndex + 0, TriangleIndex + 1, TriangleIndex + 2);
-			else
-				Batch.AddTriangle(TriangleIndex + 0, TriangleIndex + 2, TriangleIndex + 1);
+            if (!ClockWise)
+                Batch.AddTriangle(TriangleIndex + 0, TriangleIndex + 1, TriangleIndex + 2);
+            else
+                Batch.AddTriangle(TriangleIndex + 0, TriangleIndex + 2, TriangleIndex + 1);
 
-			TriangleIndex += 3;
-		}
+            TriangleIndex += 3;
+        }
 
-		public void Render(Camera camera)
-		{
-			if (Params == null)
-			{
-				Params = new ShaderParams();
-				Shader.BindUniformLocations(Params);
-			}
+        public void Render(Camera camera)
+        {
+            if (Params == null)
+            {
+                Params = new ShaderParams();
+                Shader.BindUniformLocations(Params);
+            }
 
-			Matrix4 viewMatrix;
-			camera.GetViewMatrix(out viewMatrix);
+            camera.GetViewMatrix(out Matrix4 viewMatrix);
 
-			Matrix4 projectionMatrix;
-			camera.GetProjectionMatrix(out projectionMatrix);
+            camera.GetProjectionMatrix(out Matrix4 projectionMatrix);
 
-			var modelViewProjectionMatrix = viewMatrix * projectionMatrix;
+            var modelViewProjectionMatrix = viewMatrix * projectionMatrix;
 
-			Batch.End();
+            Batch.End();
 
-			Backend.BeginInstance(Shader.Handle, new int[0], null, RenderStateId);
+            Backend.BeginInstance(Shader.Handle, new int[0], null, RenderStateId);
 
-			Backend.BindShaderVariable(Params.HandleModelViewProjection, ref modelViewProjectionMatrix);
-			Backend.BindShaderVariable(Params.HandleColor, ref Color);
+            Backend.BindShaderVariable(Params.HandleModelViewProjection, ref modelViewProjectionMatrix);
+            Backend.BindShaderVariable(Params.HandleColor, ref Color);
 
-			Backend.DrawMesh(Batch.MeshHandle);
-			Backend.EndInstance();
+            Backend.DrawMesh(Batch.MeshHandle);
+            Backend.EndInstance();
 
-			TriangleIndex = 0;
-			Batch.Begin();
-		}
+            TriangleIndex = 0;
+            Batch.Begin();
+        }
 
-		class ShaderParams
-		{
-			public int HandleModelViewProjection = 0;
-			public int HandleColor = 0;
-		}
-	}
+        class ShaderParams
+        {
+            public int HandleModelViewProjection = 0;
+            public int HandleColor = 0;
+        }
+    }
 }

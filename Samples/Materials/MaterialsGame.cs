@@ -72,28 +72,28 @@ namespace Triton.Samples
 				GameWorld.Add(cube);
 			}
 
-			{
-				var sphere = GameWorld.CreateGameObject();
-				sphere.Position = new Vector3(2, 2.5f, 0);
-				sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-				sphere.AddComponent(new PointLight { Color = new Vector3(0.8f, 0.3f, 0.35f), Intensity = 2, Range = 8 });
-				sphere.AddComponent(new LightAnimator() { WaveFunction = WaveFunction.Sin, Phase = 0.4f, Base = 0.1f });
-				GameWorld.Add(sphere);
-			}
+            //{
+            //	var sphere = GameWorld.CreateGameObject();
+            //	sphere.Position = new Vector3(2, 2.5f, 0);
+            //	sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
+            //	sphere.AddComponent(new PointLight { Color = new Vector3(0.8f, 0.3f, 0.35f), Intensity = 2, Range = 8 });
+            //	sphere.AddComponent(new LightAnimator() { WaveFunction = WaveFunction.Sin, Phase = 0.4f, Base = 0.1f });
+            //	GameWorld.Add(sphere);
+            //}
 
-			{
-				var sphere = GameWorld.CreateGameObject();
-				sphere.Position = new Vector3(-10, 2.5f, 1);
-				sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-				sphere.AddComponent(new PointLight { Color = new Vector3(0.55f, 0.5f, 0.8f), Intensity = 2 });
-				GameWorld.Add(sphere);
-			}
+            {
+                var sphere = GameWorld.CreateGameObject();
+                sphere.Position = new Vector3(-10, 2.5f, 1);
+                //sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
+                sphere.AddComponent(new PointLight { Color = new Vector3(1.1f, 1.1f, 1.1f), Intensity = 1.5f, Range = 80 });
+                GameWorld.Add(sphere);
+            }
 
-			{
+            {
 				var sphere = GameWorld.CreateGameObject();
 				sphere.Position = new Vector3(-18, 2.5f, -5);
-				sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-				sphere.AddComponent(new PointLight { Color = new Vector3(0.55f, 0.5f, 0.8f), Intensity = 1.5f, Range = 8 });
+				//sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
+				sphere.AddComponent(new PointLight { Color = new Vector3(1.1f, 1.1f, 1.1f), Intensity = 1.5f, Range = 80 });
 				GameWorld.Add(sphere);
 			}
 
@@ -123,40 +123,43 @@ namespace Triton.Samples
 		{
 			base.Update(frameTime);
 
-			if (InputManager.IsKeyDown(Triton.Input.Key.Escape))
+			if (InputManager.WasKeyPressed(Triton.Input.Key.Escape))
 			{
 				CursorVisible = !CursorVisible;
 			}
 
-			// Player input
-			var movement = Vector3.Zero;
-			if (InputManager.IsKeyDown(Key.W))
-				movement.Z = 1.0f;
-			else if (InputManager.IsKeyDown(Key.S))
-				movement.Z = -1.0f;
+            if (!CursorVisible)
+            {
+                // Player input
+                var movement = Vector3.Zero;
+                if (InputManager.IsKeyDown(Key.W))
+                    movement.Z = 1.0f;
+                else if (InputManager.IsKeyDown(Key.S))
+                    movement.Z = -1.0f;
 
-			if (InputManager.IsKeyDown(Key.A))
-				movement.X = 1.0f;
-			else if (InputManager.IsKeyDown(Key.D))
-				movement.X = -1.0f;
+                if (InputManager.IsKeyDown(Key.A))
+                    movement.X = 1.0f;
+                else if (InputManager.IsKeyDown(Key.D))
+                    movement.X = -1.0f;
 
-			if (movement.LengthSquared > 0.0f)
-			{
-				movement = movement.Normalize();
-			}
+                if (movement.LengthSquared > 0.0f)
+                {
+                    movement = movement.Normalize();
+                }
 
-			var movementDir = Quaternion.FromAxisAngle(Vector3.UnitY, CameraYaw);
-			movement = Vector3.Transform(movement * MovementSpeed, movementDir);
+                var movementDir = Quaternion.FromAxisAngle(Vector3.UnitY, CameraYaw);
+                movement = Vector3.Transform(movement * MovementSpeed, movementDir);
 
-			CameraYaw += -InputManager.MouseDelta.X * MouseSensitivity;
-			CameraPitch += InputManager.MouseDelta.Y * MouseSensitivity;
+                CameraYaw += -InputManager.MouseDelta.X * MouseSensitivity;
+                CameraPitch += InputManager.MouseDelta.Y * MouseSensitivity;
 
-			Camera.Orientation = Quaternion.Identity;
-			Camera.Yaw(CameraYaw);
-			Camera.Pitch(CameraPitch);
+                Camera.Orientation = Quaternion.Identity;
+                Camera.Yaw(CameraYaw);
+                Camera.Pitch(CameraPitch);
 
-			PlayerCharacter.Move(movement, InputManager.IsKeyDown(Key.Space));
-			Camera.Position = Player.Position;
+                PlayerCharacter.Move(movement, InputManager.IsKeyDown(Key.Space));
+                Camera.Position = Player.Position;
+            }
 		}
 	}
 }
