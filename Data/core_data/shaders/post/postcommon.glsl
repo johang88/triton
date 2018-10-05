@@ -71,11 +71,21 @@ vec3 filmicalu(vec3 c) {
 	return pow(c, vec3(2.2));
 }
 
+vec3 asecFilm(vec3 x) {
+    float a = 2.51f;
+    float b = 0.03f;
+    float c = 2.43f;
+    float d = 0.59f;
+    float e = 0.14f;
+    return min(vec3(1.0), max(vec3(0.0), (x*(a*x+b))/(x*(c*x+d)+e)));
+}
+
 #define TONEMAP_REINHARD 0
 #define TONEMAP_UNCHARTED 1
 #define TONEMAP_UNCHARTED_2 2
 #define TONEMAP_UNCHARTED_3 3
 #define TONEMAP_FILMICALU 4
+#define TONEMAP_ASEC 5
 
 vec3 tonemap(vec3 color, float averageLuminance, float threshold) {
 	color = calc_exposed_color(color, averageLuminance, threshold);
@@ -91,6 +101,8 @@ vec3 tonemap(vec3 color, float averageLuminance, float threshold) {
 			return uncharted2_3tonemap(color) / uncharted2_3tonemap(vec3(linearWhite));
 		case TONEMAP_FILMICALU:
 			return filmicalu(color);
+		case TONEMAP_ASEC:
+			return asecFilm(color);
 		default:
 			return filmicalu(color);
 	}

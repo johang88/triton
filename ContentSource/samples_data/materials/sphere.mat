@@ -7,7 +7,7 @@
                <Triton.Content.Materials.CustomNodes.NormalMapNode Name="Normal map" X="-337" Y="53" Width="140" Height="64" Comment="" CanBeSelected="True" />
                <Triton.Content.Materials.CustomNodes.TextureConstNode Name="Texture: /textures/metalgrid_n" X="-402" Y="141" Width="210" Height="116" Comment="" CanBeSelected="True" Value="/textures/metalgrid_n" />
                <Triton.Content.Materials.CustomNodes.FloatConstNode Name="Float: 1" X="-51" Y="266" Width="80" Height="45" Comment="" CanBeSelected="True" Value="1" />
-               <Triton.Content.Materials.CustomNodes.TextureConstNode Name="Texture: /textures/metalgrid_rm" X="-371" Y="380" Width="210" Height="116" Comment="" CanBeSelected="True" Value="/textures/metalgrid_rm" />
+               <Triton.Content.Materials.CustomNodes.TextureConstNode Name="Texture: /textures/metalgrid_rm" X="-359" Y="328" Width="210" Height="116" Comment="" CanBeSelected="True" Value="/textures/metalgrid_rm" />
           </NodeGraphNodeCollection>
           <NodeGraphLinkCollection>
                <NodeGraphControl.NodeGraphLink InputNodeId="3" OutputNodeId="2" InputNodeConnectorIdx="0" OutputNodeConnectorIdx="0" />

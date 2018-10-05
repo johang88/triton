@@ -28,7 +28,8 @@ namespace ContentProcessor
 			var extensionToType = new Dictionary<string, string>();
 			extensionToType.Add(".mesh", "mesh");
 			extensionToType.Add(".mesh.xml", "mesh");
-			extensionToType.Add(".dae", "mesh");
+            extensionToType.Add(".col.xml", "collision");
+            extensionToType.Add(".dae", "mesh");
 			extensionToType.Add(".fbx", "mesh");
 			extensionToType.Add(".skeleton", "skeleton");
 			extensionToType.Add(".skeleton.xml", "skeleton");

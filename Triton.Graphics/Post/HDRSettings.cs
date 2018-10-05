@@ -25,5 +25,6 @@ namespace Triton.Graphics.Post
         UnchartedVar1,
         UnchartedVar2,
         FilmicALU,
+        ASEC
     }
 }

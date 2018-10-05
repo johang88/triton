@@ -33,88 +33,117 @@ namespace Triton.Samples
 			Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0);
 			Stage.AmbientColor = Vector3.Zero;
 
-			var floor = GameWorld.CreateGameObject();
-			floor.AddComponent(new Mesh { Filename = "/models/room" });
-			floor.AddComponent(new BoxRigidBody { Height = 0.01f, Width = 400.0f, Length = 400.0f, IsStatic = true });
-			GameWorld.Add(floor);
+            var room = GameWorld.CreateGameObject();
+            room.AddComponent(new Mesh { Filename = "/models/room" });
+            room.AddComponent(new MeshRigidBody { Filename = "/collision/room", IsStatic = true });
+            GameWorld.Add(room);
 
-			Player = GameWorld.CreateGameObject();
+            Player = GameWorld.CreateGameObject();
 			Player.Position = new Vector3(0, 2f, 0);
 			PlayerCharacter = new CharacterController();
 			Player.AddComponent(PlayerCharacter);
 			GameWorld.Add(Player);
 
-			var materials = new string[]
-			{
-				"/materials/sphere",
-				"/materials/gold",
-				"/materials/iron",
-				"/materials/wood",
-			};
+            var materials = new string[]
+            {
+                "/materials/sphere",
+                //"/materials/gold",
+                //"/materials/iron",
+                //"/materials/wood",
+            };
 
-			for (int i = 0; i < 5; i++)
-			{
-				var materialName = materials[i % materials.Length];
+            var rng = new System.Random();
 
-				var cube = GameWorld.CreateGameObject();
-				cube.Position = new Vector3(-3 + i * 1.5f, 1.0f, 2);
-				cube.AddComponent(new Mesh { Filename = "/models/crate", Material = materialName });
-				GameWorld.Add(cube);
-			}
+            for (int i = 0; i < 5; i++)
+            {
+                var materialName = materials[i % materials.Length];
 
-			for (int i = 0; i < 5; i++)
-			{
-				var materialName = materials[i % materials.Length];
+                var cube = GameWorld.CreateGameObject();
+                cube.Position = new Vector3(-3 + i * 1.5f, 0.5f, 2);
+                cube.AddComponent(new Mesh { Filename = "/models/crate", Material = materialName });
+                cube.AddComponent(new BoxRigidBody { Height = 1, Width = 1, Length = 1 });
+                GameWorld.Add(cube);
+            }
 
-				var cube = GameWorld.CreateGameObject();
-				cube.Position = new Vector3(-3 + i * 1.5f, 1.0f, -2);
-				cube.AddComponent(new Mesh { Filename = "/models/sphere", Material = materialName });
-				GameWorld.Add(cube);
-			}
+            for (int i = 0; i < 5; i++)
+            {
+                var materialName = materials[i % materials.Length];
 
-            //{
-            //	var sphere = GameWorld.CreateGameObject();
-            //	sphere.Position = new Vector3(2, 2.5f, 0);
-            //	sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-            //	sphere.AddComponent(new PointLight { Color = new Vector3(0.8f, 0.3f, 0.35f), Intensity = 2, Range = 8 });
-            //	sphere.AddComponent(new LightAnimator() { WaveFunction = WaveFunction.Sin, Phase = 0.4f, Base = 0.1f });
-            //	GameWorld.Add(sphere);
-            //}
+                var cube = GameWorld.CreateGameObject();
+                cube.Position = new Vector3(-3 + i * 1.5f, 0.5f, -2);
+                cube.AddComponent(new Mesh { Filename = "/models/sphere", Material = materialName });
+                cube.AddComponent(new SphereRigidBody { Radius = 0.5f });
+                GameWorld.Add(cube);
+            }
+
+            var lightColor = new Vector3(1.1f, 1f, 1f);
 
             {
                 var sphere = GameWorld.CreateGameObject();
-                sphere.Position = new Vector3(-10, 2.5f, 1);
-                //sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.AddComponent(new PointLight { Color = new Vector3(1.1f, 1.1f, 1.1f), Intensity = 1.5f, Range = 80 });
+                sphere.Position = new Vector3(2, 2.5f, 0);
+                sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
+                sphere.AddComponent(new PointLight { Color = lightColor, Intensity = 2, Range = 16 });
                 GameWorld.Add(sphere);
             }
 
             {
-				var sphere = GameWorld.CreateGameObject();
-				sphere.Position = new Vector3(-18, 2.5f, -5);
-				//sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-				sphere.AddComponent(new PointLight { Color = new Vector3(1.1f, 1.1f, 1.1f), Intensity = 1.5f, Range = 80 });
-				GameWorld.Add(sphere);
-			}
+                var sphere = GameWorld.CreateGameObject();
+                sphere.Position = new Vector3(6, 2.5f, 0);
+                sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
+                sphere.AddComponent(new PointLight { Color = lightColor, Intensity = 1, Range = 16, CastShadows = false });
+                GameWorld.Add(sphere);
+            }
 
-			for (var i = 0; i < 0; i++)
-			{
-				var x = (float)(-6.0 + RNG.NextDouble() * 15.0);
-				var z = (float)(-8.0 + RNG.NextDouble() * 20.0);
+            {
+                var sphere = GameWorld.CreateGameObject();
+                sphere.Position = new Vector3(2, 2.5f, -4);
+                sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
+                sphere.AddComponent(new PointLight { Color = lightColor, Intensity = 1, Range = 16, CastShadows = false });
+                GameWorld.Add(sphere);
+            }
 
-				var sphere = GameWorld.CreateGameObject();
-				sphere.Position = new Vector3(x, 0.5f, z);
-				sphere.AddComponent(new PointLight
-				{
-					Color = new Vector3(0.1f + (float)RNG.NextDouble() * 0.9f, 0.1f + (float)RNG.NextDouble() * 0.9f, 0.1f + (float)RNG.NextDouble() * 0.9f),
-					Intensity = 0.3f + (float)RNG.NextDouble() * 0.6f,
-					Range = 0.7f + (float)RNG.NextDouble() * 0.9f,
-					CastShadows = false
-				});
-				GameWorld.Add(sphere);
-			}
+            {
+                var sphere = GameWorld.CreateGameObject();
+                sphere.Position = new Vector3(2, 2.5f, 4);
+                sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
+                sphere.AddComponent(new PointLight { Color = lightColor, Intensity = 1, Range = 16, CastShadows = false });
+                GameWorld.Add(sphere);
+            }
 
-			DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.High;
+            {
+                var sphere = GameWorld.CreateGameObject();
+                sphere.Position = new Vector3(-10, 2.5f, 1);
+                sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
+                sphere.AddComponent(new PointLight { Color = new Vector3(1f, 1f, 1f), Intensity = 2 });
+                GameWorld.Add(sphere);
+            }
+
+            {
+                var sphere = GameWorld.CreateGameObject();
+                sphere.Position = new Vector3(-18, 2.5f, -5);
+                sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
+                sphere.AddComponent(new PointLight { Color = new Vector3(1f, 1f, 1f), Intensity = 1.5f, Range = 8 });
+                GameWorld.Add(sphere);
+            }
+
+            for (var i = 0; i < 0; i++)
+            {
+                var x = (float)(-6.0 + RNG.NextDouble() * 15.0);
+                var z = (float)(-8.0 + RNG.NextDouble() * 20.0);
+
+                var sphere = GameWorld.CreateGameObject();
+                sphere.Position = new Vector3(x, 0.5f, z);
+                sphere.AddComponent(new PointLight
+                {
+                    Color = new Vector3(0.1f + (float)RNG.NextDouble() * 0.9f, 0.1f + (float)RNG.NextDouble() * 0.9f, 0.1f + (float)RNG.NextDouble() * 0.9f),
+                    Intensity = 0.3f + (float)RNG.NextDouble() * 0.6f,
+                    Range = 0.7f + (float)RNG.NextDouble() * 0.9f,
+                    CastShadows = false
+                });
+                GameWorld.Add(sphere);
+            }
+
+            DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.High;
 
 			DebugFlags |= Game.DebugFlags.RenderStats;
 		}
@@ -158,7 +187,7 @@ namespace Triton.Samples
                 Camera.Pitch(CameraPitch);
 
                 PlayerCharacter.Move(movement, InputManager.IsKeyDown(Key.Space));
-                Camera.Position = Player.Position;
+                Camera.Position = Player.Position + new Vector3(0, 0.7f, 0);
             }
 		}
 	}
