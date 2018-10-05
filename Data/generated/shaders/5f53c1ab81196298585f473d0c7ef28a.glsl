@@ -3,6 +3,8 @@
 uniform float time;
 uniform vec2 uvAnimation;
 
+uniform mat4x4 itWorld;
+
 #ifdef VERTEX_SHADER
 
 layout(location = ATTRIB_POSITION) in vec3 iPosition;
@@ -67,6 +69,11 @@ void main()
 	normal = normalize(blendNormal);
 	tangent = normalize(iTangent);
 	bitangent = cross(normal, tangent);
+	
+	normal = mat3(itWorld) * normal;
+	tangent = mat3(itWorld) * tangent;
+	bitangent = mat3(itWorld) * bitangent;
+	
 	position = world * blendPos;
 
 	gl_Position = modelViewProjection * blendPos;
@@ -83,7 +90,7 @@ void main()
 
 #else
 
-#include "/shaders/deferred/brdf"
+#include "/shaders/brdf"
 
 in vec3 normal;
 in vec3 tangent;
@@ -97,8 +104,6 @@ in vec4 position;
 layout(location = 0) out vec4 oColor;
 layout(location = 1) out vec4 oNormal;
 layout(location = 2) out vec4 oSpecular;
-
-uniform mat4x4 itWorld;
 
 uniform vec3 cameraPosition;
 
@@ -136,7 +141,7 @@ return 0.5;
 void main() {
 	vec3 normals = get_normals();
 	
-	normals = normalize(mat3x3(itWorld) * normals);
+	//normals = normalize(mat3x3(itWorld) * normals);
 	
 	vec3 diffuse = get_diffuse().xyz;
 	

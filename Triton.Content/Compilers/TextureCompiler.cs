@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
+using ImageMagick;
+using ImageMagick.Defines;
 
 namespace Triton.Content.Compilers
 {
@@ -22,31 +24,25 @@ namespace Triton.Content.Compilers
 
 			outputPath += ".dds";
 
-			TextureSettings settings = new TextureSettings();
+			var settings = new TextureSettings();
 			settings.IsNormalMap = filename.EndsWith("_n");
 
 			if (extension != ".dds")
 			{
-				var arguments = "";
-				if (settings.IsNormalMap)
-				{
-					arguments += "-normal ";
-					arguments += "-bc3 ";
-				}
-				else
-				{
-					arguments += "-color ";
-					arguments += "-bc3 ";
-				}
+                using (var image = new MagickImage(inputPath))
+                {
+                    image.Format = MagickFormat.Dds;
 
-				arguments += inputPath + " ";
-				arguments += outputPath;
+                    var defines = new DdsWriteDefines
+                    {
+                        Compression = image.HasAlpha ? DdsCompression.None : DdsCompression.Dxt1, // Wat, why no dxt5???
+                        WeightByAlpha = image.HasAlpha,
+                        Mipmaps = 1 + (int)System.Math.Floor(System.Math.Log(System.Math.Max(image.Width, image.Height), 2))
+                    };
 
-				var startInfo = new ProcessStartInfo(@"nvcompress", arguments);
-				startInfo.UseShellExecute = false;
-				var process = Process.Start(startInfo);
-				process.WaitForExit();
-			}
+                    image.Write(outputPath, defines);
+                }
+            }
 			else
 			{
 				File.Copy(inputPath, outputPath, true);
