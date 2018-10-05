@@ -17,7 +17,7 @@ namespace Triton.Game.World
 		public bool Active { get; private set; }
 
 		public Vector3 Position = Vector3.Zero;
-		public Matrix4 Orientation = Matrix4.Identity;
+		public Quaternion Orientation = Quaternion.Identity;
 		public Vector3 Scale = new Vector3(1, 1, 1);
 
 		public GameObject(GameObjectManager world, int id)
@@ -42,16 +42,16 @@ namespace Triton.Game.World
 			Active = false;
 		}
 
-		public void Update(float stepSize)
+		public void Update(float dt)
 		{
             foreach (var component in Components)
             {
-                component.Update(stepSize);
+                component.Update(dt);
             }
 
             foreach (var child in Children)
             {
-                child.Update(stepSize);
+                child.Update(dt);
             }
 		}
 

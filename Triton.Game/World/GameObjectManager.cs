@@ -76,7 +76,7 @@ namespace Triton.Game.World
 		/// Any game objects pending for removal / adding will be removed / added.
 		/// </summary>
 		/// <param name="stepSize"></param>
-		public void Update(float stepSize)
+		public void Update(float dt)
 		{
 			foreach (var gameObject in GameObjectsToAdd)
 			{
@@ -98,8 +98,8 @@ namespace Triton.Game.World
 
 			foreach (var gameObject in GameObjects)
 			{
-				gameObject.Update(stepSize);
+				gameObject.Update(dt);
 			}
 		}
-	}
+    }
 }

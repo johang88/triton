@@ -43,8 +43,6 @@ namespace Triton.Game
 
         public Triton.Physics.World PhysicsWorld { get; private set; }
 
-        public float PhysicsStepSize = 1.0f / 100.0f;
-
         public Audio.AudioSystem AudioSystem { get; private set; }
 
         public World.GameObjectManager GameWorld;
@@ -89,12 +87,14 @@ namespace Triton.Game
             _mainThreadScheduler = new Common.Concurrency.SingleThreadScheduler(System.Threading.Thread.CurrentThread);
             _ioThreadScheduler = new Common.Concurrency.SingleThreadScheduler(_ioThread);
             Common.Concurrency.TaskHelpers.Initialize(_mainThreadScheduler, _ioThreadScheduler);
-            
+
             Running = true;
         }
 
         public virtual void Dispose()
         {
+            GameWorld?.Clear();
+            PhysicsWorld?.Dispose();
             AudioSystem.Dispose();
             Resources.Dispose();
             _window.Dispose();
@@ -138,6 +138,7 @@ namespace Triton.Game
             var context = new GraphicsContext(graphicsMode, _window.WindowInfo, 4, 5, GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug);
             context.MakeCurrent(_window.WindowInfo);
             context.LoadAll();
+            context.SwapInterval = 0;
 
             var ctx = new ContextReference
             {
@@ -212,8 +213,6 @@ namespace Triton.Game
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
 
-            var accumulator = 0.0f;
-
             while (Running)
             {
                 _frameCount++;
@@ -226,13 +225,7 @@ namespace Triton.Game
                     InputManager.Update();
                 }
 
-                accumulator += _frameTime;
-                while (accumulator >= PhysicsStepSize)
-                {
-                    PhysicsWorld.Update(PhysicsStepSize);
-                    accumulator -= PhysicsStepSize;
-                }
-
+                PhysicsWorld.Update(_frameTime);
                 AudioSystem.Update();
 
                 GameWorld.Update(_frameTime);

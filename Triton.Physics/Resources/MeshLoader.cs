@@ -1,6 +1,4 @@
-﻿using Jitter.Collision;
-using Jitter.LinearMath;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -55,12 +53,12 @@ namespace Triton.Physics.Resources
 				var vertexCount = reader.ReadInt32();
 				var indexCount = reader.ReadInt32();
 
-				var vertices = new List<JVector>();
-				var indices = new List<TriangleVertexIndices>();
+				var vertices = new List<BulletSharp.Math.Vector3>();
+				var indices = new List<int>();
 
 				for (var i = 0; i < vertexCount; i++)
 				{
-					vertices.Add(new JVector(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
+					vertices.Add(new BulletSharp.Math.Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
 				}
 
 				for (var i = 0; i < indexCount; i += 3)
@@ -69,7 +67,9 @@ namespace Triton.Physics.Resources
 					var i1 = reader.ReadInt32();
 					var i2 = reader.ReadInt32();
 
-					indices.Add(new TriangleVertexIndices(i0, i2, i1));
+                    indices.Add(i0);
+                    indices.Add(i2);
+                    indices.Add(i1);
 				}
 
 				mesh.Build(isConvexHull, vertices, indices);

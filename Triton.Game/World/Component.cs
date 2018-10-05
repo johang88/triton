@@ -30,9 +30,14 @@ namespace Triton.Game.World
 
 		}
 
-		public virtual void Update(float stepSize)
+		public virtual void Update(float dt)
 		{
 
 		}
+
+        public virtual void FixedUpdate(float dt)
+        {
+
+        }
 	}
 }

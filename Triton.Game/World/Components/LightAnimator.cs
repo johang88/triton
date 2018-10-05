@@ -39,11 +39,11 @@ namespace Triton.Game.World.Components
 			LightIntensity = Light.Intensity;
 		}
 
-		public override void Update(float stepSize)
+		public override void Update(float dt)
 		{
-			base.Update(stepSize);
+			base.Update(dt);
 
-			ElapsedTime += stepSize;
+			ElapsedTime += dt;
 			Light.Intensity = LightIntensity * EvaluateWave();
 		}
 

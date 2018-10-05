@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 using Triton.Graphics;
 using Triton.Renderer;
 using Triton.Common;
+using BulletSharp;
+using BulletSharp.Math;
 
 namespace Triton.Physics
 {
-    class DebugDrawer : Jitter.IDebugDrawer
+    internal class DebugDrawer : BulletSharp.DebugDraw
     {
         private readonly Backend Backend;
         private readonly BatchBuffer Batch;
@@ -20,6 +22,8 @@ namespace Triton.Physics
         private int RenderStateId;
 
         public bool ClockWise = false;
+
+        public override DebugDrawModes DebugMode { get; set; }
 
         public DebugDrawer(Backend backend, ResourceManager resourceManager)
         {
@@ -35,40 +39,8 @@ namespace Triton.Physics
 
             Shader = resourceManager.Load<Graphics.Resources.ShaderProgram>("/shaders/physic_debug_drawer");
             RenderStateId = backend.CreateRenderState(false, true, true, BlendingFactorSrc.One, BlendingFactorDest.One, wireFrame: true);
-        }
 
-        public void DrawLine(Jitter.LinearMath.JVector start, Jitter.LinearMath.JVector end)
-        {
-            // TODO
-        }
-
-        public void DrawPoint(Jitter.LinearMath.JVector pos)
-        {
-            // TODO
-        }
-
-        public void DrawTriangle(Jitter.LinearMath.JVector pos1, Jitter.LinearMath.JVector pos2, Jitter.LinearMath.JVector pos3)
-        {
-            var n = Jitter.LinearMath.JVector.Cross(pos2 - pos1, pos3 - pos1);
-
-            Batch.AddVector3(pos1.X, pos1.Y, pos1.Z);
-            Batch.AddVector3(ref Color);
-            Batch.AddVector3(n.X, n.Y, n.Z);
-
-            Batch.AddVector3(pos2.X, pos2.Y, pos2.Z);
-            Batch.AddVector3(ref Color);
-            Batch.AddVector3(n.X, n.Y, n.Z);
-
-            Batch.AddVector3(pos3.X, pos3.Y, pos3.Z);
-            Batch.AddVector3(ref Color);
-            Batch.AddVector3(n.X, n.Y, n.Z);
-
-            if (!ClockWise)
-                Batch.AddTriangle(TriangleIndex + 0, TriangleIndex + 1, TriangleIndex + 2);
-            else
-                Batch.AddTriangle(TriangleIndex + 0, TriangleIndex + 2, TriangleIndex + 1);
-
-            TriangleIndex += 3;
+            DebugMode = DebugDrawModes.All;
         }
 
         public void Render(Camera camera)
@@ -97,6 +69,68 @@ namespace Triton.Physics
 
             TriangleIndex = 0;
             Batch.Begin();
+        }
+
+        public override void DrawTriangle(ref BulletSharp.Math.Vector3 v0, ref BulletSharp.Math.Vector3 v1, ref BulletSharp.Math.Vector3 v2, ref BulletSharp.Math.Vector3 color, float alpha)
+        {
+            base.DrawTriangle(ref v0, ref v1, ref v2, ref color, alpha);
+
+            var n = BulletSharp.Math.Vector3.Cross(v1 - v0, v2 - v0);
+
+            Batch.AddVector3(v0.X, v0.Y, v0.Z);
+            Batch.AddVector3(ref Color);
+            Batch.AddVector3(n.X, n.Y, n.Z);
+
+            Batch.AddVector3(v1.X, v1.Y, v1.Z);
+            Batch.AddVector3(ref Color);
+            Batch.AddVector3(n.X, n.Y, n.Z);
+
+            Batch.AddVector3(v2.X, v2.Y, v2.Z);
+            Batch.AddVector3(ref Color);
+            Batch.AddVector3(n.X, n.Y, n.Z);
+
+            if (!ClockWise)
+                Batch.AddTriangle(TriangleIndex + 0, TriangleIndex + 1, TriangleIndex + 2);
+            else
+                Batch.AddTriangle(TriangleIndex + 0, TriangleIndex + 2, TriangleIndex + 1);
+
+            TriangleIndex += 3;
+        }
+
+        public override void DrawLine(ref BulletSharp.Math.Vector3 from, ref BulletSharp.Math.Vector3 to, ref BulletSharp.Math.Vector3 color)
+        {
+            var pos1 = from;
+            var pos2 = to;
+            var pos3 = to;
+
+            var n = BulletSharp.Math.Vector3.Cross(pos2 - pos1, pos3 - pos1);
+
+            Batch.AddVector3(pos1.X, pos1.Y, pos1.Z);
+            Batch.AddVector3(ref Color);
+            Batch.AddVector3(n.X, n.Y, n.Z);
+
+            Batch.AddVector3(pos2.X, pos2.Y, pos2.Z);
+            Batch.AddVector3(ref Color);
+            Batch.AddVector3(n.X, n.Y, n.Z);
+
+            Batch.AddVector3(pos3.X, pos3.Y, pos3.Z);
+            Batch.AddVector3(ref Color);
+            Batch.AddVector3(n.X, n.Y, n.Z);
+
+            if (!ClockWise)
+                Batch.AddTriangle(TriangleIndex + 0, TriangleIndex + 1, TriangleIndex + 2);
+            else
+                Batch.AddTriangle(TriangleIndex + 0, TriangleIndex + 2, TriangleIndex + 1);
+
+            TriangleIndex += 3;
+        }
+
+        public override void Draw3DText(ref BulletSharp.Math.Vector3 location, string textString)
+        {
+        }
+
+        public override void ReportErrorWarning(string warningString)
+        {
         }
 
         class ShaderParams

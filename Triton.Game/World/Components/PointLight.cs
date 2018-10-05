@@ -30,9 +30,9 @@ namespace Triton.Game.World.Components
 			Stage.RemoveLight(Light);
 		}
 
-		public override void Update(float stepSize)
+		public override void Update(float dt)
 		{
-			base.Update(stepSize);
+			base.Update(dt);
 
 			Light.Position = Owner.Position;
 			Light.Range = Range;

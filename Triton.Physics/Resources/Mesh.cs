@@ -1,6 +1,4 @@
-﻿using Jitter.Collision;
-using Jitter.Collision.Shapes;
-using Jitter.LinearMath;
+﻿using BulletSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +9,9 @@ namespace Triton.Physics.Resources
 {
 	public class Mesh
 	{
-		internal Shape Shape;
+		internal CollisionShape Shape;
 
-		internal void Build(bool isConvexHull, List<JVector> vertices, List<TriangleVertexIndices> indices)
+		internal void Build(bool isConvexHull, List<BulletSharp.Math.Vector3> vertices, List<int> indices)
 		{
 			if (isConvexHull)
 			{
@@ -21,7 +19,18 @@ namespace Triton.Physics.Resources
 			}
 			else
 			{
-				Shape = new TriangleMeshShape(new Octree(vertices, indices));
+                var mesh = new TriangleMesh();
+                
+                for (var i = 0; i < indices.Count; i += 3)
+                {
+                    mesh.AddTriangle(
+                        vertices[indices[i + 0]],
+                        vertices[indices[i + 1]],
+                        vertices[indices[i + 2]]
+                        );
+                }
+
+                Shape = new BvhTriangleMeshShape(mesh, false);
 			}
 		}
 	}

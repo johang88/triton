@@ -13,6 +13,8 @@ namespace Triton.Game.World.Components
 
 		private Physics.CharacterController Controller;
 
+        public float WalkSpeed = 8.0f;
+
 		public override void OnActivate()
 		{
 			base.OnActivate();
@@ -23,8 +25,15 @@ namespace Triton.Game.World.Components
 
 		public void Move(Vector3 movement, bool jump)
 		{
-			Controller.TargetVelocity = movement;
+			Controller.TargetVelocity = movement * WalkSpeed;
 			Controller.TryJump = jump;
 		}
-	}
+
+        public override void OnDetached()
+        {
+            base.OnDetached();
+
+            World.PhysicsWorld.RemoveBody(Body);
+        }
+    }
 }

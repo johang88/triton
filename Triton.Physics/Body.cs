@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BulletSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,37 +7,49 @@ using System.Threading.Tasks;
 
 namespace Triton.Physics
 {
-	public class Body
+	public class Body : IDisposable
 	{
-		internal Jitter.Dynamics.RigidBody RigidBody;
+		internal RigidBody RigidBody;
 
 		public Vector3 Position = Vector3.Zero;
-		public Matrix4 Orientation = Matrix4.Identity;
+		public Quaternion Orientation = Quaternion.Identity;
 
 		public object Tag = null;
 		public int CollisionLayer = 1;
 
-		internal Body(Jitter.Dynamics.RigidBody rigidBody)
+		internal Body(RigidBody rigidBody)
 		{
 			RigidBody = rigidBody;
-			RigidBody.EnableSpeculativeContacts = true;
 		}
 
-		internal virtual void Update()
+		internal virtual void Update(float dt)
 		{
-			Position = Conversion.ToTritonVector(RigidBody.Position);
-			Orientation = Conversion.ToTritonMatrix(RigidBody.Orientation);
-		}
+            if (RigidBody == null) return;
 
-		public void SetPosition(Vector3 position)
+            var bulletWorldMatrix = RigidBody.WorldTransform;
+            var world = Conversion.ToTritonMatrix(ref bulletWorldMatrix);
+
+            Position = Conversion.ToTritonVector(bulletWorldMatrix.Origin);
+            Orientation = Conversion.ToTritonQuaternion(RigidBody.Orientation);
+        }
+
+		public virtual void SetPosition(Vector3 position)
 		{
+            if (RigidBody == null) return;
+
 			Position = position;
-			RigidBody.Position = Conversion.ToJitterVector(ref position);
+
+            var world = Matrix4.Rotate(Conversion.ToTritonQuaternion(RigidBody.Orientation)) * Matrix4.CreateTranslation(position);
+            RigidBody.WorldTransform = Conversion.ToBulletMatrix(ref world);
 		}
 
 		public void AddForce(Vector3 force)
 		{
-			RigidBody.AddForce(Conversion.ToJitterVector(ref force));
+			//RigidBody.AddForce(Conversion.ToBulletVector(ref force));
 		}
-	}
+
+        public virtual void Dispose()
+        {
+        }
+    }
 }

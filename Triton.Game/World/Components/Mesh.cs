@@ -28,11 +28,11 @@ namespace Triton.Game.World.Components
 			World.Stage.RemoveMesh(MeshInstance);
 		}
 
-		public override void Update(float stepSize)
+		public override void Update(float dt)
 		{
-			base.Update(stepSize);
+			base.Update(dt);
 
-			MeshInstance.World = Matrix4.Scale(Owner.Scale) * Owner.Orientation * Matrix4.CreateTranslation(Owner.Position);
+			MeshInstance.World = Matrix4.Scale(Owner.Scale) * Matrix4.Rotate(Owner.Orientation) * Matrix4.CreateTranslation(Owner.Position);
 			MeshInstance.CastShadows = CastShadows;
 		}
 	}

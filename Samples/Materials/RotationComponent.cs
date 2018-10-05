@@ -10,16 +10,17 @@ namespace Triton.Samples
 	{
 		public Vector3 Rotation = new Vector3();
 
-		public override void Update(float stepSize)
+		public override void Update(float dt)
 		{
-			base.Update(stepSize);
+			base.Update(dt);
 
-			var rot = Rotation * stepSize;
+			var rot = Rotation * dt;
 
-			Owner.Orientation *=
-				Matrix4.CreateRotationX(rot.X)
-				* Matrix4.CreateRotationY(rot.Y)
-				* Matrix4.CreateRotationZ(rot.Z);
+            var m = Matrix4.CreateRotationX(rot.X)
+                * Matrix4.CreateRotationY(rot.Y)
+                * Matrix4.CreateRotationZ(rot.Z);
+
+            Owner.Orientation *= new Quaternion(ref m);
 		}
 	}
 }

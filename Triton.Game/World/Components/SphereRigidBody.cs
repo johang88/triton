@@ -10,12 +10,13 @@ namespace Triton.Game.World.Components
 	{
 		public float Radius = 1;
 		public bool IsStatic = false;
+        public float Mass = 1.0f;
 
 		public override void OnAttached(GameObject owner)
 		{
 			base.OnAttached(owner);
 
-			Body = World.PhysicsWorld.CreateSphereBody(Radius, Owner.Position, IsStatic);
+			Body = World.PhysicsWorld.CreateSphereBody(Radius, Owner.Position, IsStatic, Mass);
 		}
 	}
 }

@@ -13,7 +13,8 @@ namespace Triton.Game.World
 
 		void OnActivate();
 
-		void Update(float stepSize);
+		void Update(float dt);
+        void FixedUpdate(float dt);
 
 		GameObject Owner { get; }
 	}

@@ -33,13 +33,13 @@ namespace Triton.Game.World.Components
 			World.ResourceManager.Unload(SkeletonInstance.Skeleton);
 		}
 
-		public override void Update(float stepSize)
+		public override void Update(float dt)
 		{
-			base.Update(stepSize);
+			base.Update(dt);
 
-			SkeletonInstance.Update(stepSize);
+			SkeletonInstance.Update(dt);
 
-			MeshInstance.World = Owner.Orientation * Matrix4.CreateTranslation(Owner.Position);
+			MeshInstance.World = Matrix4.Rotate(Owner.Orientation) * Matrix4.CreateTranslation(Owner.Position);
 		}
 	}
 }

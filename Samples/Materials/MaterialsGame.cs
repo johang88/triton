@@ -9,29 +9,29 @@ using Triton.Input;
 
 namespace Triton.Samples
 {
-	class MaterialsGame : Triton.Samples.BaseGame
-	{
-		private GameObject Player;
-		private CharacterController PlayerCharacter;
+    class MaterialsGame : Triton.Samples.BaseGame
+    {
+        private GameObject Player;
+        private CharacterController PlayerCharacter;
 
-		const float MovementSpeed = 3.5f;
-		const float MouseSensitivity = 0.0025f;
+        const float MovementSpeed = 3.5f;
+        const float MouseSensitivity = 0.0025f;
 
-		private float CameraYaw = 0;
-		private float CameraPitch = 0;
+        private float CameraYaw = 0;
+        private float CameraPitch = 0;
 
-		public MaterialsGame()
-			: base("Materials")
-		{
+        public MaterialsGame()
+            : base("Materials")
+        {
             CursorVisible = false;
-		}
+        }
 
-		protected override void LoadResources()
-		{
-			base.LoadResources();
+        protected override void LoadResources()
+        {
+            base.LoadResources();
 
-			Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0);
-			Stage.AmbientColor = Vector3.Zero;
+            Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0);
+            Stage.AmbientColor = Vector3.Zero;
 
             var room = GameWorld.CreateGameObject();
             room.AddComponent(new Mesh { Filename = "/models/room" });
@@ -39,10 +39,10 @@ namespace Triton.Samples
             GameWorld.Add(room);
 
             Player = GameWorld.CreateGameObject();
-			Player.Position = new Vector3(0, 2f, 0);
-			PlayerCharacter = new CharacterController();
-			Player.AddComponent(PlayerCharacter);
-			GameWorld.Add(Player);
+            Player.Position = new Vector3(0, 2f, 0);
+            PlayerCharacter = new CharacterController();
+            Player.AddComponent(PlayerCharacter);
+            GameWorld.Add(Player);
 
             var materials = new string[]
             {
@@ -59,9 +59,9 @@ namespace Triton.Samples
                 var materialName = materials[i % materials.Length];
 
                 var cube = GameWorld.CreateGameObject();
-                cube.Position = new Vector3(-3 + i * 1.5f, 0.5f, 2);
-                cube.AddComponent(new Mesh { Filename = "/models/crate", Material = materialName });
-                cube.AddComponent(new BoxRigidBody { Height = 1, Width = 1, Length = 1 });
+                cube.Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
+                cube.AddComponent(new Mesh { Filename = "/models/sphere", Material = materialName });
+                cube.AddComponent(new SphereRigidBody { Radius = 0.5f });
                 GameWorld.Add(cube);
             }
 
@@ -70,7 +70,7 @@ namespace Triton.Samples
                 var materialName = materials[i % materials.Length];
 
                 var cube = GameWorld.CreateGameObject();
-                cube.Position = new Vector3(-3 + i * 1.5f, 0.5f, -2);
+                cube.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
                 cube.AddComponent(new Mesh { Filename = "/models/sphere", Material = materialName });
                 cube.AddComponent(new SphereRigidBody { Radius = 0.5f });
                 GameWorld.Add(cube);
@@ -145,17 +145,17 @@ namespace Triton.Samples
 
             DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.High;
 
-			DebugFlags |= Game.DebugFlags.RenderStats;
-		}
+            DebugFlags |= Game.DebugFlags.RenderStats;
+        }
 
-		protected override void Update(float frameTime)
-		{
-			base.Update(frameTime);
+        protected override void Update(float frameTime)
+        {
+            base.Update(frameTime);
 
-			if (InputManager.WasKeyPressed(Triton.Input.Key.Escape))
-			{
-				CursorVisible = !CursorVisible;
-			}
+            if (InputManager.WasKeyPressed(Triton.Input.Key.Escape))
+            {
+                CursorVisible = !CursorVisible;
+            }
 
             if (!CursorVisible)
             {
@@ -189,6 +189,6 @@ namespace Triton.Samples
                 PlayerCharacter.Move(movement, InputManager.IsKeyDown(Key.Space));
                 Camera.Position = Player.Position + new Vector3(0, 0.7f, 0);
             }
-		}
-	}
+        }
+    }
 }
