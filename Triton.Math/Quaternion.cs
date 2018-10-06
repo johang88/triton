@@ -479,7 +479,6 @@ namespace Triton
 			return String.Format("V: {0}, W: {1}", Xyz, W);
 		}
 
-
 		/// <summary>
 		/// Compares this object instance to another object for equality. 
 		/// </summary>

@@ -1,23 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Triton.Common.Collections;
 
 namespace Triton.Game.World
 {
-	public class GameObject
+    [DataContract]
+    public class GameObject
 	{
-        public TrackingCollection<GameObject> Children { get; } = new TrackingCollection<GameObject>();
-        public TrackingCollection<IComponent> Components { get; } = new TrackingCollection<IComponent>();
+        [DataMember] public TrackingCollection<GameObject> Children { get; } = new TrackingCollection<GameObject>();
+        [DataMember] public TrackingCollection<IComponent> Components { get; } = new TrackingCollection<IComponent>();
 		public GameObject Parent { get; private set; }
 
         public bool Active => World != null;
 
-		public Vector3 Position = Vector3.Zero;
-		public Quaternion Orientation = Quaternion.Identity;
-		public Vector3 Scale = new Vector3(1, 1, 1);
+        [DataMember] public Vector3 Position = Vector3.Zero;
+        [DataMember] public Quaternion Orientation = Quaternion.Identity;
+        [DataMember] public Vector3 Scale = new Vector3(1, 1, 1);
 
         private GameObjectManager _world;
         public GameObjectManager World

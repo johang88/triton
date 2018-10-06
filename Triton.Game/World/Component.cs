@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Triton.Game.World
 {
+    [DataContract]
     public class Component : IComponent
 	{
-		public GameObject Owner { get; private set; }
+        public GameObject Owner { get; private set; }
         protected GameObjectManager World => Owner.World;
         protected Graphics.Stage Stage => Owner.World.Stage;
         protected GameObject Parent => Owner.Parent;

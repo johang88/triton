@@ -36,7 +36,7 @@ namespace Triton.Samples
             Stage.AmbientColor = Vector3.Zero;
 
             var room = new GameObject();
-            room.Components.Add(new Mesh { Filename = "/models/room" });
+            room.Components.Add(new MeshRenderer { Mesh = Resources.Load<Graphics.Resources.Mesh>("/models/room") });
             room.Components.Add(new MeshRigidBody { Filename = "/collision/room", IsStatic = true });
             GameWorld.Add(room);
 
@@ -46,34 +46,22 @@ namespace Triton.Samples
             Player.Components.Add(PlayerCharacter);
             GameWorld.Add(Player);
 
-            var materials = new string[]
-            {
-                "/materials/sphere",
-                //"/materials/gold",
-                //"/materials/iron",
-                //"/materials/wood",
-            };
-
             var rng = new System.Random();
 
             for (int i = 0; i < 5; i++)
             {
-                var materialName = materials[i % materials.Length];
-
                 var cube = new GameObject();
                 cube.Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
-                cube.Components.Add(new Mesh { Filename = "/models/sphere", Material = materialName });
+                cube.Components.Add(new MeshRenderer { Mesh = Resources.Load<Graphics.Resources.Mesh>("/models/sphere")});
                 cube.Components.Add(new SphereRigidBody { Radius = 0.5f });
                 GameWorld.Add(cube);
             }
 
             for (int i = 0; i < 5; i++)
             {
-                var materialName = materials[i % materials.Length];
-
                 var cube = new GameObject();
                 cube.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
-                cube.Components.Add(new Mesh { Filename = "/models/sphere", Material = materialName });
+                cube.Components.Add(new MeshRenderer { Mesh = Resources.Load<Graphics.Resources.Mesh>("/models/sphere") });
                 cube.Components.Add(new SphereRigidBody { Radius = 0.5f });
                 GameWorld.Add(cube);
             }

@@ -31,8 +31,18 @@ namespace Triton.Common
         {
             var converter = new ReferenceableConverter(_resourceManager);
 
-            var settings = new JsonSerializerSettings();
-            settings.Converters.Add(converter);
+            var settings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Objects,
+                Converters = new List<JsonConverter>
+                {
+                    new ReferenceableConverter(_resourceManager),
+                    new Vector2Converter(),
+                    new Vector3Converter(),
+                    new Vector4Converter(),
+                    new QuaternionConverter()
+                }
+            };
 
             JsonConvert.PopulateObject(Encoding.UTF8.GetString(data), resource, settings);
 
@@ -89,7 +99,24 @@ namespace Triton.Common
         }
 
         public byte[] Serialize(object resource)
-            => throw new NotImplementedException();
+        {
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                TypeNameHandling = TypeNameHandling.Objects,
+                Converters = new List<JsonConverter>
+                {
+                    new ReferenceableConverter(_resourceManager),
+                    new Vector2Converter(),
+                    new Vector3Converter(),
+                    new Vector4Converter(),
+                    new QuaternionConverter()
+                }
+            };
+
+            var data = JsonConvert.SerializeObject(resource, settings);
+            return Encoding.UTF8.GetBytes(data);
+        }
     }
 
     class ReferenceableConverter : JsonConverter
@@ -104,6 +131,12 @@ namespace Triton.Common
 
         public override bool CanConvert(Type objectType)
         {
+            if (objectType == typeof(string) || !objectType.IsClass)
+            {
+                _canConvert = true;
+                return false;
+            }
+
             if (!_canConvert)
             {
                 _canConvert = true;
@@ -134,9 +167,54 @@ namespace Triton.Common
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            throw new NotImplementedException();
+            var type = value.GetType();
+            if (type != typeof(string) && type.IsClass && _resourceManager.IsManaged(value))
+            {
+                // We got a resource reference to serialize!
+                var (name, _) = _resourceManager.GetResourceProperties(value);
+                writer.WriteValue(name);
+            }
+            else
+            {
+                _canConvert = false;
+                serializer.Serialize(writer, value);
+            }
         }
     }
 
+    class Vector2Converter : JsonConverter<Vector2>
+    {
+        public override Vector2 ReadJson(JsonReader reader, Type objectType, Vector2 existingValue, bool hasExistingValue, JsonSerializer serializer)
+           => StringConverter.ParseVector2(reader.Value.ToString());
 
+        public override void WriteJson(JsonWriter writer, Vector2 value, JsonSerializer serializer)
+            => writer.WriteValue(StringConverter.ToString(value));
+    }
+
+    class Vector3Converter : JsonConverter<Vector3>
+    {
+        public override Vector3 ReadJson(JsonReader reader, Type objectType, Vector3 existingValue, bool hasExistingValue, JsonSerializer serializer)
+           => StringConverter.ParseVector3(reader.Value.ToString());
+
+        public override void WriteJson(JsonWriter writer, Vector3 value, JsonSerializer serializer)
+            => writer.WriteValue(StringConverter.ToString(value));
+    }
+
+    class Vector4Converter : JsonConverter<Vector4>
+    {
+        public override Vector4 ReadJson(JsonReader reader, Type objectType, Vector4 existingValue, bool hasExistingValue, JsonSerializer serializer)
+           => StringConverter.ParseVector4(reader.Value.ToString());
+
+        public override void WriteJson(JsonWriter writer, Vector4 value, JsonSerializer serializer)
+            => writer.WriteValue(StringConverter.ToString(value));
+    }
+
+    class QuaternionConverter : JsonConverter<Quaternion>
+    {
+        public override Quaternion ReadJson(JsonReader reader, Type objectType, Quaternion existingValue, bool hasExistingValue, JsonSerializer serializer)
+            => StringConverter.ParseQuaternion(reader.Value.ToString());
+
+        public override void WriteJson(JsonWriter writer, Quaternion value, JsonSerializer serializer)
+            => writer.WriteValue(StringConverter.ToString(value));
+    }
 }

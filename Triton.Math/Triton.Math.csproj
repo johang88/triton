@@ -62,7 +62,6 @@
     <Compile Include="BoundingFrustum.cs" />
     <Compile Include="BoundingSphere.cs" />
     <Compile Include="ContainmentType.cs" />
-    <Compile Include="DataMember.cs" />
     <Compile Include="Intersections.cs" />
     <Compile Include="Matrix4.cs" />
     <Compile Include="Plane.cs" />

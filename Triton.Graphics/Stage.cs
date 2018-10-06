@@ -32,7 +32,8 @@ namespace Triton.Graphics
 		{
 			var instance = new MeshInstance
 			{
-				Mesh = mesh
+				Mesh = mesh,
+                OwnsMesh = false
 			};
 
 			_meshes.Add(instance);
@@ -43,7 +44,10 @@ namespace Triton.Graphics
 		public void RemoveMesh(MeshInstance mesh)
 		{
 			_meshes.Remove(mesh);
-			_resourceManager.Unload(mesh.Mesh);
+            if (mesh.OwnsMesh)
+            {
+                _resourceManager.Unload(mesh.Mesh);
+            }
 		}
 
 		public void Clear()

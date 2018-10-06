@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using System.IO;
 
 namespace Triton.Common
 {
@@ -95,6 +96,37 @@ namespace Triton.Common
             await resourceReference.LoadingTask;
 
             return resourceReference.Resource;
+        }
+
+        /// <summary>
+        /// Try to safe a resource to (Name + Extension)
+        /// </summary>
+        /// <param name="resource"></param>
+        public void Save(object resource)
+        {
+            var (name, _) = GetResourceProperties(resource);
+
+            Save(name, resource);
+        }
+
+        public void Save(string name, object resource)
+        {
+            var resourceType = resource.GetType();
+
+            // Fetch serializer
+            IResourceSerializer serializer = DefaultResourceSerializer;
+            if (_resourceSerializers.ContainsKey(resourceType))
+                serializer = _resourceSerializers[resourceType];
+
+            // Serialize to byte array
+            var data = serializer.Serialize(resource);
+
+            var path = name + serializer.Extension;
+
+            using (var stream = _fileSystem.OpenWrite(path))
+            {
+                stream.Write(data);
+            }
         }
 
         private async Task LoadResource(ResourceReference resource, IResourceSerializer serializer)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,11 +11,11 @@ namespace Triton.Game.World.Components
 	{
 		private Graphics.Light Light;
 
-		public float Range = 16;
-		public Vector3 Color = new Vector3(1, 1, 1);
-		public float ShadowBias = 0.005f;
-		public bool CastShadows = true;
-		public float Intensity = 10;
+        [DataMember] public float Range = 16;
+        [DataMember] public Vector3 Color = new Vector3(1, 1, 1);
+        [DataMember] public float ShadowBias = 0.005f;
+        [DataMember] public bool CastShadows = true;
+        [DataMember] public float Intensity = 10;
 
 		public override void OnActivate()
 		{
