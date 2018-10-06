@@ -40,11 +40,12 @@ namespace Triton.Common
         //private readonly object _loadingLock = new object();
         private SemaphoreSlim _loadingLock = new SemaphoreSlim(1);
 
-        public IResourceLoader DefaultResourceLoader { get; set; } = new GenericResourceLoader();
+        public IResourceLoader DefaultResourceLoader { get; set; }
 
         public ResourceManager(IO.FileSystem fileSystem)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
+            DefaultResourceLoader = new GenericResourceLoader(this);
         }
 
         public void Dispose()
@@ -72,10 +73,15 @@ namespace Triton.Common
         public TResource Load<TResource>(string name, string parameters = "") where TResource : class
              => LoadAsync<TResource>(name, parameters).Result;
 
+        public object Load(Type resourceType, string name, string parameters = "")
+             => LoadAsync(resourceType, name, parameters).Result;
+
         public async Task<TResource> LoadAsync<TResource>(string name, string parameters = "") where TResource : class
+             => (TResource)(await LoadAsync(typeof(TResource), name, parameters));
+
+        public async Task<object> LoadAsync(Type resourceType, string name, string parameters = "")
         {
             var identifier = name + "?" + parameters;
-            var resourceType = typeof(TResource);
 
             // Fetch loader
             IResourceLoader loader = DefaultResourceLoader;
@@ -89,7 +95,7 @@ namespace Triton.Common
             {
                 resourceReference = new ResourceReference(name, parameters)
                 {
-                    Resource = loader.Create(typeof(TResource))
+                    Resource = loader.Create(resourceType)
                 };
 
                 _resources.AddOrUpdate(identifier, resourceReference, (key, existingVal) => existingVal);
@@ -108,7 +114,7 @@ namespace Triton.Common
             _loadingLock.Release();
             await resourceReference.LoadingTask;
 
-            return (TResource)resourceReference.Resource;
+            return resourceReference.Resource;
         }
 
         private async Task LoadResource(ResourceReference resource, IResourceLoader loader)
@@ -211,6 +217,9 @@ namespace Triton.Common
                 resourceReference.RemoveReference();
             }
         }
+
+        public bool IsManaged(object resource)
+            => _instanceToReference.ContainsKey(resource);
 
         public void AddResourceLoader<TResource>(IResourceLoader<TResource> loader) where TResource : class
             => _resourceLoaders.Add(typeof(TResource), loader ?? throw new ArgumentNullException("loader"));
