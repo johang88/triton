@@ -150,7 +150,7 @@ namespace Triton.Game
 
             using (GraphicsBackend = new Triton.Graphics.Backend(Resources, _window.Width, _window.Height, ctx))
             {
-                Triton.Graphics.Resources.ResourceLoaders.Init(Resources, GraphicsBackend, FileSystem, new Graphics.Resources.ShaderHotReloadConfig
+                Triton.Graphics.Resources.ResourceSerializers.Init(Resources, GraphicsBackend, FileSystem, new Graphics.Resources.ShaderHotReloadConfig
                 {
                     Path = @"..\Data\core_data\shaders\",
                     BasePath  = @"/shaders/",

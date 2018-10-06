@@ -10,15 +10,14 @@ using Triton.Common;
 
 namespace Triton.Graphics.Resources
 {
-	class TextureLoader : Triton.Common.IResourceSerializer<Texture>
+	class TextureSerializer : Triton.Common.IResourceSerializer<Texture>
 	{
 		private readonly Backend _backend;
 		private readonly Triton.Common.IO.FileSystem _fileSystem;
-        private readonly ResourceManager _resourceManager;
 
         public bool SupportsStreaming => false;
 
-        public TextureLoader(Backend backend, Triton.Common.IO.FileSystem fileSystem)
+        public TextureSerializer(Backend backend, Triton.Common.IO.FileSystem fileSystem)
 		{
             _backend = backend ?? throw new ArgumentNullException("backend");
 			_fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
@@ -28,22 +27,18 @@ namespace Triton.Graphics.Resources
 		public string DefaultFilename { get { return "/textures/missing_n.dds"; } }
 
         public object Create(Type type)
-            => new Texture();
+            => new Texture(_backend);
 
 		public Task Deserialize(object resource, byte[] data)
 		{
             var texture = (Texture)resource;
-            texture.Handle = _backend.RenderSystem.CreateFromDDS(data, out texture.Width, out texture.Height);
+
+            texture.Handle = _backend.RenderSystem.CreateFromDDS(data, out var width, out var height);
+            texture.Width = width;
+            texture.Height = height;
 
             return Task.FromResult(0);
         }
-
-		public void Unload(object resource)
-		{
-			var texture = (Texture)resource;
-			_backend.RenderSystem.DestroyTexture(texture.Handle);
-			texture.Handle = -1;
-		}
 
         public byte[] Serialize(object resource)
             => throw new NotImplementedException();

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Triton.Common
 {
-    public class GenericResourceLoader : IResourceSerializer
+    public class GenericResourceSerializer : IResourceSerializer
     {
         private readonly ResourceManager _resourceManager;
 
@@ -21,7 +21,7 @@ namespace Triton.Common
 
         public object DataContractJsonSerializer { get; private set; }
 
-        public GenericResourceLoader(ResourceManager resourceManager)
+        public GenericResourceSerializer(ResourceManager resourceManager)
             => _resourceManager = resourceManager ?? throw new ArgumentNullException(nameof(resourceManager));
 
         public object Create(Type type)

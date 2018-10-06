@@ -8,7 +8,7 @@ using Triton.Common;
 
 namespace Triton.Graphics.Resources
 {
-	class SkeletonLoader : Triton.Common.IResourceSerializer<Skeleton>
+	class SkeletonSerializer : Triton.Common.IResourceSerializer<Skeleton>
 	{
 		static readonly char[] Magic = new char[] { 'S', 'K', 'E', 'L' };
 		const int Version_1 = 0x0100;
@@ -17,12 +17,9 @@ namespace Triton.Graphics.Resources
 
         public bool SupportsStreaming => false;
 
-        public SkeletonLoader(Triton.Common.IO.FileSystem fileSystem)
+        public SkeletonSerializer(Triton.Common.IO.FileSystem fileSystem)
 		{
-			if (fileSystem == null)
-				throw new ArgumentNullException("fileSystem");
-
-			FileSystem = fileSystem;
+            FileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
 		}
 
 		public string Extension { get { return ".skeleton"; } }
@@ -33,9 +30,6 @@ namespace Triton.Graphics.Resources
 
 		public Task Deserialize(object resource, byte[] data)
 		{
-			// Destroy any existing mesh handles
-			Unload(resource);
-
 			var skeleton = (Skeleton)resource;
 
 			using (var stream = new System.IO.MemoryStream(data))
@@ -103,11 +97,6 @@ namespace Triton.Graphics.Resources
 
             return Task.FromResult(0);
         }
-
-		public void Unload(object resource)
-		{
-			// Nothing to do here ..
-		}
 
         public byte[] Serialize(object resource)
             => throw new NotImplementedException();

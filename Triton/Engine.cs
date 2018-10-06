@@ -64,8 +64,8 @@ namespace Triton
 
 		public void RegisterResourceLoaders(Common.ResourceManager resourceManager)
 		{
-			Triton.Graphics.Resources.ResourceLoaders.Init(resourceManager, GraphicsBackend, FileSystem);
-			Physics.Resources.ResourceLoaders.Init(resourceManager, FileSystem);
+			//Triton.Graphics.Resources.ResourceLoaders.Init(resourceManager, GraphicsBackend, FileSystem);
+			//Physics.Resources.ResourceLoaders.Init(resourceManager, FileSystem);
 		}
 
 		// Start the update thread, TickMainThread will still have to be called from the main thread and a loop is required to keep everything alive
@@ -93,7 +93,7 @@ namespace Triton
 				return false;
 			}
 
-			ResourceGroupManager.TickResourceLoading();
+			//ResourceGroupManager.TickResourceLoading();
 
 			if (!GraphicsBackend.Process())
 			{

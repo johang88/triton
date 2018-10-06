@@ -28,8 +28,6 @@ namespace Triton.Physics.Resources
 
 		public Task Deserialize(object resource, byte[] data)
 		{
-			Unload(resource);
-
 			var mesh = (Mesh)resource;
 
 			using (var stream = new System.IO.MemoryStream(data))
@@ -80,10 +78,5 @@ namespace Triton.Physics.Resources
 
         public byte[] Serialize(object resource)
             => throw new NotImplementedException();
-
-        public void Unload(object resource)
-		{
-			var mesh = (Mesh)resource;
-		}
 	}
 }

@@ -7,12 +7,8 @@ using System.Threading.Tasks;
 namespace Triton.Common
 {
 	/// <summary>
-	/// Implementsa resource loader
-	/// Resource loaders provide metohds for creating, load and unloading resources.
-	/// The actual resource life management is done by the resource management system.
-	/// 
-	/// Load can be called several times for an already loaded resource, it is up to the resource loader
-	/// to decide if the resource has to be reloaded or not.
+    /// Manages resource serialization
+    /// Have the resource implement IDisposable for cleanup, will be called autoamtically when the resource is unloaded by the resource manager
 	/// </summary>
 	public interface IResourceSerializer
 	{
@@ -21,7 +17,6 @@ namespace Triton.Common
         bool SupportsStreaming { get; }
 
 		object Create(Type type);
-		void Unload(object resource);
 
         Task Deserialize(object resource, byte[] data);
         byte[] Serialize(object resource);

@@ -28,7 +28,7 @@ namespace Triton.Graphics.Resources
 	///		byte[VertexCount] VertexData
 	///		byte[IndexCount] IndexData
 	/// </summary>
-	class MeshLoader : Triton.Common.IResourceSerializer<Mesh>
+	class MeshSerializer : Triton.Common.IResourceSerializer<Mesh>
 	{
 		static readonly char[] Magic = new char[] { 'M', 'E', 'S', 'H' };
 		const int Version_1_4 = 0x0140;
@@ -39,7 +39,7 @@ namespace Triton.Graphics.Resources
 
         public bool SupportsStreaming => false;
 
-        public MeshLoader(Backend backend, Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
+        public MeshSerializer(Backend backend, Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
 		{
             _backend = backend ?? throw new ArgumentNullException("backend");
 			_fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
@@ -50,14 +50,12 @@ namespace Triton.Graphics.Resources
 		public string DefaultFilename { get { return ""; } }
 
         public object Create(Type type)
-             => new Mesh();
+             => new Mesh(_backend, _resourceManager);
 
 		public async Task Deserialize(object resource, byte[] data)
 		{
-			// Destroy any existing mesh handles
-			Unload(resource);
-
 			var mesh = (Mesh)resource;
+            mesh.Dispose();
 
             var (_, overrideMaterial) = _resourceManager.GetResourceProperties(mesh);
 
@@ -151,31 +149,6 @@ namespace Triton.Graphics.Resources
 
 				mesh.BoundingSphereRadius = mesh.SubMeshes.Max(s => s.BoundingSphereRadius);
 			}
-		}
-
-		public void Unload(object resource)
-		{
-			var mesh = (Mesh)resource;
-
-            if (mesh.Skeleton != null)
-            {
-                _resourceManager.Unload(mesh.Skeleton);
-            }
-
-			foreach (var subMesh in mesh.SubMeshes)
-			{
-                _backend.RenderSystem.DestroyBuffer(subMesh.VertexBufferHandle);
-                _backend.RenderSystem.DestroyBuffer(subMesh.IndexBufferHandle);
-                _backend.RenderSystem.DestroyMesh(subMesh.Handle);
-
-				if (subMesh.Material != null)
-				{
-					_resourceManager.Unload(subMesh.Material);
-					subMesh.Material = null;
-				}
-			}
-
-			mesh.SubMeshes = null;
 		}
 
         public byte[] Serialize(object resource)

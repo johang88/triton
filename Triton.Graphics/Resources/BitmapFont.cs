@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Common;
 
 namespace Triton.Graphics.Resources
 {
-	public class BitmapFont
+	public class BitmapFont : IDisposable
 	{
+        private readonly ResourceManager _resourceManager;
 		internal List<Texture> Textures = new List<Texture>();
 		internal Dictionary<char, Glyph> Glyphs = new Dictionary<char, Glyph>();
 		public float LineHeight;
@@ -23,6 +25,19 @@ namespace Triton.Graphics.Resources
 			Colors.Add("white", new Vector4(1, 1, 1, 1));
 			Colors.Add("black", new Vector4(0, 0, 0, 1));
 		}
+
+        public BitmapFont(ResourceManager resourceManager)
+        {
+            _resourceManager = resourceManager ?? throw new ArgumentNullException(nameof(resourceManager));
+        }
+
+        public void Dispose()
+        {
+            foreach (var texture in Textures)
+            {
+                _resourceManager.Unload(texture);
+            }
+        }
 
 		public void DrawText(SpriteBatch sprite, Vector2 position, Vector4 color, string text, params object[] parameters)
 		{

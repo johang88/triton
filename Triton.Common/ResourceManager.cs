@@ -8,26 +8,6 @@ using System.Threading;
 
 namespace Triton.Common
 {
-    /// <summary>
-    /// Manages all the various resources in the engine
-    /// 
-    /// All resources are reference counted, any resource with a reference count == 0 is eligable for unloading.
-    /// Unloaded resources are usually put on the loading queue the next time they are used. 
-    /// 
-    /// It is also possible to force unload of a single resource or of all resource with referenceCount &lt;= n.
-    /// 
-    /// The IResourceLoader interface is used to construct new resource loaders.
-    /// 
-    /// Actual loading of resources is done in async, the actual implementation is transparent to the resource manager.
-    /// A method to add items to a work queue is all that has to be provided to the resource manager. It is recommended
-    /// that all resource work items on the queue are processed synchroniously, preferably in a background thread.
-    /// 
-    /// Care has to be taken for threading issues in the resource loaders, for example, opengl resources has to be created
-    /// on a valid context, that is active on the processing thread.
-    /// 
-    /// Future features:
-    ///		Per resource type memory budgets
-    /// </summary>
     public class ResourceManager : IDisposable
     {
         private readonly ConcurrentDictionary<string, ResourceReference> _resources = new ConcurrentDictionary<string, ResourceReference>();
@@ -40,12 +20,12 @@ namespace Triton.Common
         //private readonly object _loadingLock = new object();
         private SemaphoreSlim _loadingLock = new SemaphoreSlim(1);
 
-        public IResourceSerializer DefaultResourceLoader { get; set; }
+        public IResourceSerializer DefaultResourceSerializer { get; set; }
 
         public ResourceManager(IO.FileSystem fileSystem)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
-            DefaultResourceLoader = new GenericResourceLoader(this);
+            DefaultResourceSerializer = new GenericResourceSerializer(this);
         }
 
         public void Dispose()
@@ -83,10 +63,10 @@ namespace Triton.Common
         {
             var identifier = name + "?" + parameters;
 
-            // Fetch loader
-            IResourceSerializer loader = DefaultResourceLoader;
+            // Fetch serializer
+            IResourceSerializer serializer = DefaultResourceSerializer;
             if (_resourceSerializers.ContainsKey(resourceType))
-                loader = _resourceSerializers[resourceType];
+                serializer = _resourceSerializers[resourceType];
 
             await _loadingLock.WaitAsync();
 
@@ -95,7 +75,7 @@ namespace Triton.Common
             {
                 resourceReference = new ResourceReference(name, parameters)
                 {
-                    Resource = loader.Create(resourceType)
+                    Resource = serializer.Create(resourceType)
                 };
 
                 _resources.AddOrUpdate(identifier, resourceReference, (key, existingVal) => existingVal);
@@ -108,7 +88,7 @@ namespace Triton.Common
             if (resourceReference.State == ResourceLoadingState.Unloaded)
             {
                 resourceReference.State = ResourceLoadingState.Loading;
-                resourceReference.LoadingTask = LoadResource(resourceReference, loader);
+                resourceReference.LoadingTask = LoadResource(resourceReference, serializer);
             }
 
             _loadingLock.Release();
@@ -117,10 +97,10 @@ namespace Triton.Common
             return resourceReference.Resource;
         }
 
-        private async Task LoadResource(ResourceReference resource, IResourceSerializer loader)
+        private async Task LoadResource(ResourceReference resource, IResourceSerializer serializer)
         {
-            var data = await await Concurrency.TaskHelpers.RunOnIOThread(() => LoadDataForResource(resource, loader));
-            await await Concurrency.TaskHelpers.RunOnMainThread(() => loader.Deserialize(resource.Resource, data));
+            var data = await await Concurrency.TaskHelpers.RunOnIOThread(() => LoadDataForResource(resource, serializer));
+            await await Concurrency.TaskHelpers.RunOnMainThread(() => serializer.Deserialize(resource.Resource, data));
 
             resource.State = ResourceLoadingState.Loaded;
 
@@ -130,18 +110,18 @@ namespace Triton.Common
                 Log.WriteLine("Loaded {0} of type {1}", resource.Name, resource.Resource.GetType());
         }
 
-        private async Task<byte[]> LoadDataForResource(ResourceReference resource, IResourceSerializer loader)
+        private async Task<byte[]> LoadDataForResource(ResourceReference resource, IResourceSerializer serializer)
         {
-            if (loader.SupportsStreaming)
+            if (serializer.SupportsStreaming)
             {
                 return null;
             }
 
-            var path = resource.Name + loader.Extension;
+            var path = resource.Name + serializer.Extension;
 
-            if (!_fileSystem.FileExists(path) && !string.IsNullOrWhiteSpace(loader.DefaultFilename))
+            if (!_fileSystem.FileExists(path) && !string.IsNullOrWhiteSpace(serializer.DefaultFilename))
             {
-                path = loader.DefaultFilename;
+                path = serializer.DefaultFilename;
             }
 
             using (var stream = _fileSystem.OpenRead(path))
@@ -164,9 +144,9 @@ namespace Triton.Common
 
             var resourceType = resourceReference.Resource.GetType();
 
-            IResourceSerializer loader = DefaultResourceLoader;
+            IResourceSerializer serializer = DefaultResourceSerializer;
             if (_resourceSerializers.ContainsKey(resourceType))
-                loader = _resourceSerializers[resourceType];
+                serializer = _resourceSerializers[resourceType];
 
             if (resourceReference.State == ResourceLoadingState.Loaded)
             {
@@ -174,14 +154,27 @@ namespace Triton.Common
 
                 void unloadAction()
                 {
-                    loader.Unload(resourceReference.Resource);
+                    if (resourceReference.Resource is IDisposable disposable)
+                    {
+                        disposable.Dispose();
+                    }
+                    else if (serializer is GenericResourceSerializer genericSerializer)
+                    {
+                        // Oh god no!
+                        // Maybe it was better to have unload instead of dispose pattern
+                        // Would at least make this part quite a bit cleaner
+                        // Could implement a callback / new interface pattern to manage it as well
+                        // Would allow a custom class for unloading which can be nice for some cases and IDisposable pattern for the rest
+                        genericSerializer.Unload(resourceReference.Resource);
+                    }
+
                     resourceReference.State = ResourceLoadingState.Unloaded;
-                    Log.WriteLine("Unloaded {0} of type {1}", resourceReference.Name, resourceReference.GetType());
+                    Log.WriteLine("Unloaded {0} of type {1}", resourceReference.Name, resourceType);
                 }
 
                 var task = new Task(unloadAction);
                 if (async)
-                    task.Start();
+                    Concurrency.TaskHelpers.RunOnMainThread(() => task.Wait()).Start();
                 else
                     task.RunSynchronously();
             }
@@ -221,8 +214,8 @@ namespace Triton.Common
         public bool IsManaged(object resource)
             => _instanceToReference.ContainsKey(resource);
 
-        public void AddResourceLoader<TResource>(IResourceSerializer<TResource> loader) where TResource : class
-            => _resourceSerializers.Add(typeof(TResource), loader ?? throw new ArgumentNullException("loader"));
+        public void AddResourceSerializer<TResource>(IResourceSerializer<TResource> serializer) where TResource : class
+            => _resourceSerializers.Add(typeof(TResource), serializer ?? throw new ArgumentNullException(nameof(serializer)));
 
         public void GargabgeCollect()
         {

@@ -21,7 +21,7 @@ namespace Triton
 		public void Clear()
 		{
 			GraphicsStage.Clear();
-			PhysicsWorld.Clear();
+			//PhysicsWorld.Clear();
 		}
 	}
 }

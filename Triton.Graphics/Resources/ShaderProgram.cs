@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Triton.Graphics.Resources
 {
-    public class ShaderProgram
+    public class ShaderProgram : IDisposable
     {
         public int Handle { get; internal set; }
         public Dictionary<Common.HashedString, int> Uniforms = new Dictionary<Common.HashedString, int>();
@@ -23,6 +23,15 @@ namespace Triton.Graphics.Resources
         {
             Handle = -1;
             _backend = backend;
+        }
+
+        public void Dispose()
+        {
+            if (Handle >= 0)
+            {
+                _backend.RenderSystem.DestroyShader(Handle);
+                Handle = -1;
+            }
         }
 
         internal void Reset()

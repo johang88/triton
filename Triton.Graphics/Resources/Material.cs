@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.Resources
 {
-	public class Material
+	public class Material : IDisposable
 	{
 		private bool Initialized = false;
 
@@ -30,6 +30,16 @@ namespace Triton.Graphics.Resources
 			_resourceManager = resourceManager;
         }
 
+        public void Dispose()
+        {
+            foreach (var samplerInfo in Textures)
+            {
+                _resourceManager.Unload(samplerInfo.Value);
+            }
+
+            Textures.Clear();
+        }
+
 		public void Initialize(Backend backend)
 		{
 			Initialized = true;
@@ -49,16 +59,6 @@ namespace Triton.Graphics.Resources
 				_samplerToTexture[i] = Shader.GetUniform(samplerInfo.Key);
 				i++;
 			}
-		}
-
-		public virtual void Unload()
-		{
-			foreach (var samplerInfo in Textures)
-			{
-				_resourceManager.Unload(samplerInfo.Value);
-			}
-
-			Textures.Clear();
 		}
 
 		public void BeginInstance(Backend backend, Camera camera, int renderStateId)

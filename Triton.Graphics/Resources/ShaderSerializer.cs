@@ -15,7 +15,7 @@ namespace Triton.Graphics.Resources
     /// Various pragmas and preprocessor defines are also setup.
     /// 
     /// </summary>
-    class ShaderLoader : Triton.Common.IResourceSerializer<ShaderProgram>
+    class ShaderSerializer : Triton.Common.IResourceSerializer<ShaderProgram>
     {
         private readonly Backend _backend;
         private readonly Triton.Common.IO.FileSystem _fileSystem;
@@ -25,7 +25,7 @@ namespace Triton.Graphics.Resources
 
         public bool SupportsStreaming => false;
 
-        public ShaderLoader(Backend backend, Triton.Common.IO.FileSystem fileSystem, ResourceManager resourceManager)
+        public ShaderSerializer(Backend backend, Triton.Common.IO.FileSystem fileSystem, ResourceManager resourceManager)
         {
             _backend = backend ?? throw new ArgumentNullException(nameof(backend));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
@@ -128,7 +128,7 @@ namespace Triton.Graphics.Resources
             if (success)
             {
                 // Destroy existing if it's a reload of the  shader
-                if (shader.Handle > 0)
+                if (shader.Handle >= 0)
                 {
                     shader.Reset();
                     _backend.RenderSystem.DestroyShader(shader.Handle);
@@ -203,13 +203,6 @@ namespace Triton.Graphics.Resources
             }
         }
 
-        public void Unload(object resource)
-        {
-            var shader = (ShaderProgram)resource;
-            _backend.RenderSystem.DestroyShader(shader.Handle);
-            shader.Handle = -1;
-        }
-
         public byte[] Serialize(object resource)
             => throw new NotImplementedException();
     }
@@ -219,11 +212,11 @@ namespace Triton.Graphics.Resources
         private readonly System.IO.FileSystemWatcher _watcher;
         private readonly HashSet<string> _changedFiles = new HashSet<string>();
 
-        private ShaderLoader _loader;
+        private ShaderSerializer _loader;
         private readonly string _path;
         private readonly string _basePath;
 
-        public ShaderHotReloader(ShaderLoader loader, string path, string basePath)
+        public ShaderHotReloader(ShaderSerializer loader, string path, string basePath)
         {
             _loader = loader;
             _path = path;

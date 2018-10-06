@@ -7,29 +7,24 @@ using Triton.Common;
 
 namespace Triton.Graphics.Resources
 {
-	class BitmapFontLoader : Triton.Common.IResourceSerializer<BitmapFont>
+	class BitmapFontSerializer : Triton.Common.IResourceSerializer<BitmapFont>
 	{
-		private readonly Triton.Common.IO.FileSystem FileSystem;
-		private readonly Triton.Common.ResourceManager ResourceManager;
+		private readonly Triton.Common.IO.FileSystem _fileSystem;
+		private readonly Triton.Common.ResourceManager _resourceManager;
 
         public bool SupportsStreaming => false;
 
-        public BitmapFontLoader(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
+        public BitmapFontSerializer(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
 		{
-			if (resourceManager == null)
-				throw new ArgumentNullException("resourceManager");
-			if (fileSystem == null)
-				throw new ArgumentNullException("fileSystem");
-
-			FileSystem = fileSystem;
-			ResourceManager = resourceManager;
+            _fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
+			_resourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");
 		}
 
 		public string Extension { get { return ".fnt"; } }
 		public string DefaultFilename { get { return ""; } }
 
         public object Create(Type type)
-             => new BitmapFont();
+             => new BitmapFont(_resourceManager);
 
 		public async Task Deserialize(object resource, byte[] data)
 		{
@@ -89,7 +84,7 @@ namespace Triton.Graphics.Resources
 		private async Task ParsePageInfo(BitmapFont bitmapFont, Dictionary<string, string> commands)
 		{
 			var filename = commands["file"].Replace("\"", "");
-			bitmapFont.Textures.Add(await ResourceManager.LoadAsync<Texture>(filename));
+			bitmapFont.Textures.Add(await _resourceManager.LoadAsync<Texture>(filename));
 		}
 
 		private void ParseCharInfo(BitmapFont bitmapFont, Dictionary<string, string> commands)
@@ -115,15 +110,6 @@ namespace Triton.Graphics.Resources
 				XAdvance = xadvance,
 				Page = page
 			});
-		}
-
-		public void Unload(object resource)
-		{
-			var bitmapFont = (BitmapFont)resource;
-			foreach (var texture in bitmapFont.Textures)
-			{
-				ResourceManager.Unload(texture);
-			}
 		}
 
         public byte[] Serialize(object resource)

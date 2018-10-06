@@ -103,17 +103,17 @@
     <Compile Include="RenderOperations.cs" />
     <Compile Include="RenderTarget.cs" />
     <Compile Include="Resources\BitmapFont.cs" />
-    <Compile Include="Resources\BitmapFontLoader.cs" />
+    <Compile Include="Resources\BitmapFontSerializer.cs" />
     <Compile Include="Resources\Material.cs" />
-    <Compile Include="Resources\MaterialLoader.cs" />
+    <Compile Include="Resources\MaterialSerializer.cs" />
     <Compile Include="Resources\Mesh.cs" />
-    <Compile Include="Resources\MeshLoader.cs" />
-    <Compile Include="Resources\ResourceLoaders.cs" />
-    <Compile Include="Resources\ShaderLoader.cs" />
+    <Compile Include="Resources\MeshSerializer.cs" />
+    <Compile Include="Resources\ResourceSerializers.cs" />
+    <Compile Include="Resources\ShaderSerializer.cs" />
     <Compile Include="Resources\ShaderProgram.cs" />
-    <Compile Include="Resources\SkeletonLoader.cs" />
+    <Compile Include="Resources\SkeletonSerializer.cs" />
     <Compile Include="Resources\Texture.cs" />
-    <Compile Include="Resources\TextureLoader.cs" />
+    <Compile Include="Resources\TextureSerializer.cs" />
     <Compile Include="Shaders\Preprocessor.cs" />
     <Compile Include="SkeletalAnimation\Animation.cs" />
     <Compile Include="SkeletalAnimation\KeyFrame.cs" />
@@ -123,9 +123,6 @@
     <Compile Include="SkeletalAnimation\Transform.cs" />
     <Compile Include="SpriteBatch.cs" />
     <Compile Include="Stage.cs" />
-    <Compile Include="Terrain\Chunk.cs" />
-    <Compile Include="Terrain\Terrain.cs" />
-    <Compile Include="Terrain\TerrainData.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Triton.Common\Triton.Common.csproj">

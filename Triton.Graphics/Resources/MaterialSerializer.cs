@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.Resources
 {
-	class MaterialLoader : Triton.Common.IResourceSerializer<Material>
+	class MaterialSerializer : Triton.Common.IResourceSerializer<Material>
 	{
         private static readonly char[] Magic = new char[] { 'M', 'A', 'T', 'E' };
 		private const int Version_1_0 = 0x01;
@@ -18,7 +18,7 @@ namespace Triton.Graphics.Resources
 
         public bool SupportsStreaming => false;
 
-        public MaterialLoader(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
+        public MaterialSerializer(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
 		{
             _fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
 			_resourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");
@@ -32,9 +32,9 @@ namespace Triton.Graphics.Resources
 
 		public async Task Deserialize(object resource, byte[] data)
 		{
-			Unload(resource);
-
             var material = (Material)resource;
+            material.Dispose();
+
             var (_, parameters) = _resourceManager.GetResourceProperties(material);
             material.IsSkinned = parameters.Contains("SKINNED");
 
@@ -67,12 +67,6 @@ namespace Triton.Graphics.Resources
 					material.Textures.Add(samplerName, await _resourceManager.LoadAsync<Texture>(texturePath));
 				}
 			}
-		}
-
-		public void Unload(object resource)
-		{
-			var material = (Material)resource;
-			material.Unload();
 		}
 
         public byte[] Serialize(object resource)

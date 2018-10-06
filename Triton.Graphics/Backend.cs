@@ -1011,7 +1011,7 @@ namespace Triton.Graphics
             var textures = new Resources.Texture[textureHandles.Length];
             for (var i = 0; i < textureHandles.Length; i++)
             {
-                var texture = new Resources.Texture
+                var texture = new Resources.Texture(this)
                 {
                     Handle = textureHandles[i],
                     Width = definition.Width,
@@ -1051,7 +1051,7 @@ namespace Triton.Graphics
         {
             var handle = RenderSystem.CreateTexture(width, height, data, pixelFormat, interalFormat, pixelType, mipmap, null);
 
-            var texture = new Resources.Texture
+            var texture = new Resources.Texture(this)
             {
                 Handle = handle,
                 Width = width,
@@ -1132,7 +1132,7 @@ namespace Triton.Graphics
             _endOfFrameActions.Add(action);
         }
 
-        internal void ConfigureShaderHotReloading(ShaderLoader loader, ShaderHotReloadConfig shaderHotReloadConfig)
+        internal void ConfigureShaderHotReloading(ShaderSerializer loader, ShaderHotReloadConfig shaderHotReloadConfig)
         {
             if (!shaderHotReloadConfig.Enable)
                 return;
