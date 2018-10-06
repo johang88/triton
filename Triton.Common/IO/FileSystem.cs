@@ -15,15 +15,12 @@ namespace Triton.Common.IO
 	/// </summary>
 	public class FileSystem
 	{
-		private readonly SharpFileSystem.IFileSystem FileSystemImpl;
+		private readonly SharpFileSystem.IFileSystem _fileSystemImpl;
 
 		public FileSystem(SharpFileSystem.IFileSystem fileSystem)
 		{
-			if (fileSystem == null)
-				throw new ArgumentNullException("fileSystem");
-
-			FileSystemImpl = fileSystem;
-		}
+            _fileSystemImpl = fileSystem ?? throw new ArgumentNullException("fileSystem");
+        }
 
 		private SharpFileSystem.FileSystemPath GetPath(string path)
 		{
@@ -32,26 +29,26 @@ namespace Triton.Common.IO
 
 		public bool FileExists(string filename)
 		{
-			return FileSystemImpl.Exists(GetPath(filename));
+			return _fileSystemImpl.Exists(GetPath(filename));
 		}
 
 		public bool DirectoryExists(string filename)
 		{
-			return FileSystemImpl.Exists(GetPath(filename));
+			return _fileSystemImpl.Exists(GetPath(filename));
 		}
 
 		public Stream OpenRead(string filename)
 		{
-			return FileSystemImpl.OpenFile(GetPath(filename), FileAccess.Read);
+			return _fileSystemImpl.OpenFile(GetPath(filename), FileAccess.Read);
 		}
 
 		public Stream OpenWrite(string filename)
 		{
 			var path = GetPath(filename);
-			if (!FileSystemImpl.Exists(path))
-				return FileSystemImpl.CreateFile(path);
+			if (!_fileSystemImpl.Exists(path))
+				return _fileSystemImpl.CreateFile(path);
 			else
-				return FileSystemImpl.OpenFile(path, FileAccess.Write);
+				return _fileSystemImpl.OpenFile(path, FileAccess.Write);
 		}
 	}
 }

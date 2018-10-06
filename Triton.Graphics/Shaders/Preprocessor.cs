@@ -14,6 +14,7 @@ namespace Triton.Graphics.Shaders
     {
         private readonly Triton.Common.IO.FileSystem _fileSystem;
         private static readonly Regex _preprocessorIncludeRegex = new Regex(@"^#include\s""([ \t\w /]+)""", RegexOptions.Multiline);
+        public List<string> Dependencies { get; } = new List<string>();
 
         public Preprocessor(Triton.Common.IO.FileSystem fileSystem)
         {
@@ -30,6 +31,9 @@ namespace Triton.Graphics.Shaders
         string PreprocessorImportReplacer(Match match)
         {
             var path = match.Groups[1].Value + ".glsl";
+
+            Dependencies.Add(path);
+
             using (var stream = _fileSystem.OpenRead(path))
             using (var reader = new System.IO.StreamReader(stream))
             {

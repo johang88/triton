@@ -12,6 +12,7 @@ using System.Collections.Concurrent;
 using Triton.Common;
 using Triton.Renderer;
 using System.Runtime.InteropServices;
+using Triton.Graphics.Resources;
 
 namespace Triton.Graphics
 {
@@ -75,6 +76,8 @@ namespace Triton.Graphics
         public int Height { get; private set; }
 
         public int DrawCalls = 0;
+
+        private ShaderHotReloader _shaderHotReloader;
 
         public Backend(ResourceManager resourceManager, int width, int height, ContextReference contextReference)
         {
@@ -163,9 +166,14 @@ namespace Triton.Graphics
             // We process any resources first so that they are always ready before rendering the next frame
             while (!_processQueue.IsEmpty)
             {
-                Action workItem;
-                if (_processQueue.TryDequeue(out workItem))
+                if (_processQueue.TryDequeue(out var workItem))
                     workItem();
+            }
+
+            // Shader hot reloading, it's a bit ad hoc and ugly atm ... but it might work
+            if (_shaderHotReloader!= null)
+            {
+                _shaderHotReloader.Tick();
             }
 
             // Process the rendering stream, do not swap buffers if no rendering commands have been sent, ie if the stream is still at position 0
@@ -1122,6 +1130,14 @@ namespace Triton.Graphics
         public void ScheduleForEndOfFrame(Action action)
         {
             _endOfFrameActions.Add(action);
+        }
+
+        internal void ConfigureShaderHotReloading(ShaderLoader loader, ShaderHotReloadConfig shaderHotReloadConfig)
+        {
+            if (!shaderHotReloadConfig.Enable)
+                return;
+
+            _shaderHotReloader = new ShaderHotReloader(loader, shaderHotReloadConfig.Path, shaderHotReloadConfig.BasePath);
         }
 
         /// <summary>

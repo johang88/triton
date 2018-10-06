@@ -68,7 +68,7 @@ namespace Triton.Game
         private readonly Common.Concurrency.SingleThreadScheduler _mainThreadScheduler;
         private readonly Common.Concurrency.SingleThreadScheduler _ioThreadScheduler;
         private readonly Thread _ioThread;
-
+        
         public Game(string name, string logPath = "logs/")
         {
             _name = name;
@@ -87,7 +87,7 @@ namespace Triton.Game
             _mainThreadScheduler = new Common.Concurrency.SingleThreadScheduler(System.Threading.Thread.CurrentThread);
             _ioThreadScheduler = new Common.Concurrency.SingleThreadScheduler(_ioThread);
             Common.Concurrency.TaskHelpers.Initialize(_mainThreadScheduler, _ioThreadScheduler);
-
+            
             Running = true;
         }
 
@@ -151,7 +151,12 @@ namespace Triton.Game
 
             using (GraphicsBackend = new Triton.Graphics.Backend(Resources, _window.Width, _window.Height, ctx))
             {
-                Triton.Graphics.Resources.ResourceLoaders.Init(Resources, GraphicsBackend, FileSystem);
+                Triton.Graphics.Resources.ResourceLoaders.Init(Resources, GraphicsBackend, FileSystem, new Graphics.Resources.ShaderHotReloadConfig
+                {
+                    Path = @"..\Data\core_data\shaders\",
+                    BasePath  = @"/shaders/",
+                    Enable = true
+                });
 
                 _rendererReady.Set();
 

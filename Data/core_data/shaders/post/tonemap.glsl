@@ -37,7 +37,6 @@ void main() {
 	}
 	
 	color = tonemap(color, averageLuminance, 0);
-	
 	oColor = vec4(color, 1);
 }
 #endif
