@@ -1,6 +1,7 @@
 uniform int tonemapOperator = 0;
 uniform float linearWhite = 11.2;
 uniform float keyValue = 0.115;
+uniform int autoKey = 1;
 
 // Average luminance
 float calc_luminance(vec3 color) {
@@ -11,17 +12,14 @@ float get_average_luminance(sampler2D samplerAverageLuminance) {
 	return texelFetch(samplerAverageLuminance, ivec2(0, 0), 0).x;
 }
 
-//#define AUTO_KEY
 vec3 calc_exposed_color(vec3 color, float averageLuminance, float threshold) {
 	averageLuminance = max(averageLuminance, 0.001);
 	
-	// todo: defuck
-#ifdef AUTO_KEY
-	float key = 1.03 - (2.0 / (2.0 + (log(averageLuminance + 1) / log(exp(1)))));
-#else
 	float key = keyValue;
-#endif
-	
+	if (autoKey == 1) {
+		key = 1.03 - (2.0 / (2.0 + (log(averageLuminance + 1) / log(exp(1)))));
+	}
+
 	float linearExposure = key / averageLuminance;
 	float exposure = log2(max(linearExposure, 0.0001));
 	

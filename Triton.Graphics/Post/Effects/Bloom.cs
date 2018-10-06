@@ -159,7 +159,8 @@ namespace Triton.Graphics.Post.Effects
 			_backend.BindShaderVariable(_highPassParams.SamplerLuminance, 1);
 			_backend.BindShaderVariable(_highPassParams.BloomThreshold, settings.BloomThreshold);
 			_backend.BindShaderVariable(_highPassParams.KeyValue, settings.KeyValue);
-			_backend.BindShaderVariable(_highPassParams.TonemapOperator, (int)settings.TonemapOperator);
+			_backend.BindShaderVariable(_highPassParams.AutoKey, settings.AutoKey ? 1 : 0);
+            _backend.BindShaderVariable(_highPassParams.TonemapOperator, (int)settings.TonemapOperator);
 
 			_backend.DrawMesh(_quadMesh.MeshHandle);
 			_backend.EndPass();
@@ -210,7 +211,8 @@ namespace Triton.Graphics.Post.Effects
 			public int SamplerLuminance = 0;
 			public int BloomThreshold = 0;
 			public int KeyValue = 0;
-			public int TonemapOperator = 0;
+			public int AutoKey = 0;
+            public int TonemapOperator = 0;
 		}
 
 		class QuadShaderParams

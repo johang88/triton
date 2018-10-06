@@ -58,7 +58,8 @@ namespace Triton.Graphics.Post.Effects
 			_backend.BindShaderVariable(_shaderParams.SamplerLensFlares, 3);
 			_backend.BindShaderVariable(_shaderParams.SamplerLuminance, 1);
 			_backend.BindShaderVariable(_shaderParams.KeyValue, settings.KeyValue);
-			_backend.BindShaderVariable(_shaderParams.EnableBloom, settings.EnableBloom ? 1 : 0);
+            _backend.BindShaderVariable(_shaderParams.AutoKey, settings.AutoKey ? 1 : 0);
+            _backend.BindShaderVariable(_shaderParams.EnableBloom, settings.EnableBloom ? 1 : 0);
 			_backend.BindShaderVariable(_shaderParams.BloomStrength, settings.BloomStrength);
             _backend.BindShaderVariable(_shaderParams.TonemapOperator, (int)settings.TonemapOperator);
 
@@ -73,6 +74,7 @@ namespace Triton.Graphics.Post.Effects
 			public int SamplerLensFlares = 0;
 			public int SamplerLuminance = 0;
 			public int KeyValue = 0;
+			public int AutoKey = 0;
 			public int EnableBloom = 0;
             public int BloomStrength = 0;
             public int EnableLensFlares = 0;

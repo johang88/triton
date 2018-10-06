@@ -9,6 +9,7 @@ namespace Triton.Graphics.Post
     public class HDRSettings
     {
         public float KeyValue;
+        public bool AutoKey;
         public float AdaptationRate;
         public float BlurSigma;
         public float BloomThreshold;

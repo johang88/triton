@@ -80,6 +80,9 @@ namespace Triton.Samples
                 PostEffectManager.HDRSettings.TonemapOperator = (TonemapOperator)selectedValue;
             }
 
+            ImGui.Checkbox("Auto Key", ref PostEffectManager.HDRSettings.AutoKey);
+            ImGui.SliderFloat("Key Value", ref PostEffectManager.HDRSettings.KeyValue, 0.001f, 1.0f, PostEffectManager.HDRSettings.KeyValue.ToString(), 1.0f);
+
             ImGui.EndWindow();
 
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(400, 100), Condition.Always);
