@@ -86,6 +86,7 @@ namespace Triton.Graphics.Post
 
             HDRSettings = new HDRSettings
             {
+                AutoKey = true,
                 KeyValue = 0.115f,
                 AdaptationRate = 0.5f,
                 BlurSigma = 3.0f,

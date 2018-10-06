@@ -138,7 +138,6 @@ namespace Triton.Game
             var context = new GraphicsContext(graphicsMode, _window.WindowInfo, 4, 5, GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug);
             context.MakeCurrent(_window.WindowInfo);
             context.LoadAll();
-            context.SwapInterval = 0;
 
             var ctx = new ContextReference
             {
@@ -250,7 +249,7 @@ namespace Triton.Game
 
                 RenderScene(_frameTime, watch);
 
-                Thread.Sleep(0);
+                Thread.Sleep(1);
             }
         }
 
