@@ -76,37 +76,11 @@ namespace Triton.Samples
                 GameWorld.Add(cube);
             }
 
-            var lightColor = new Vector3(1.1f, 1f, 1f);
-
             {
                 var sphere = new GameObject();
-                sphere.Position = new Vector3(2, 2.5f, 0);
+                sphere.Position = new Vector3(2, 2.5f, 3);
                 sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.Components.Add(new PointLight { Color = lightColor, Intensity = 2, Range = 16 });
-                GameWorld.Add(sphere);
-            }
-
-            {
-                var sphere = new GameObject();
-                sphere.Position = new Vector3(6, 2.5f, 0);
-                sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.Components.Add(new PointLight { Color = lightColor, Intensity = 1, Range = 16, CastShadows = false });
-                GameWorld.Add(sphere);
-            }
-
-            {
-                var sphere = new GameObject();
-                sphere.Position = new Vector3(2, 2.5f, -4);
-                sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.Components.Add(new PointLight { Color = lightColor, Intensity = 1, Range = 16, CastShadows = false });
-                GameWorld.Add(sphere);
-            }
-
-            {
-                var sphere = new GameObject();
-                sphere.Position = new Vector3(2, 2.5f, 4);
-                sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.Components.Add(new PointLight { Color = lightColor, Intensity = 1, Range = 16, CastShadows = false });
+                sphere.Components.Add(new PointLight { Color = new Vector3(0.9f, 0.5f, 0.3f), Intensity = 1, Range = 16 });
                 GameWorld.Add(sphere);
             }
 
@@ -114,7 +88,7 @@ namespace Triton.Samples
                 var sphere = new GameObject();
                 sphere.Position = new Vector3(-10, 2.5f, 1);
                 sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.Components.Add(new PointLight { Color = new Vector3(1f, 1f, 1f), Intensity = 2 });
+                sphere.Components.Add(new PointLight { Color = new Vector3(0.5f, 0.9f, 0.3f), Intensity = 1, Range = 32 });
                 GameWorld.Add(sphere);
             }
 
@@ -122,7 +96,7 @@ namespace Triton.Samples
                 var sphere = new GameObject();
                 sphere.Position = new Vector3(-18, 2.5f, -5);
                 sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.Components.Add(new PointLight { Color = new Vector3(1f, 1f, 1f), Intensity = 1.5f, Range = 8 });
+                sphere.Components.Add(new PointLight { Color = new Vector3(0.5f, 0.3f, 0.9f), Intensity = 1, Range = 32 });
                 GameWorld.Add(sphere);
             }
 
