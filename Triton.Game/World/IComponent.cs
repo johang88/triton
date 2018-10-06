@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Triton.Game.World
 {
-	public interface IComponent
+	public interface IComponent : ICloneable
 	{
         /// <summary>
         /// Called when activated on the world

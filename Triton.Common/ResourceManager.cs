@@ -251,7 +251,10 @@ namespace Triton.Common
             => _instanceToReference.ContainsKey(resource);
 
         public void AddResourceSerializer<TResource>(IResourceSerializer<TResource> serializer) where TResource : class
-            => _resourceSerializers.Add(typeof(TResource), serializer ?? throw new ArgumentNullException(nameof(serializer)));
+        {
+            _resourceSerializers.Add(typeof(TResource), serializer ?? throw new ArgumentNullException(nameof(serializer)));
+            KnownResourceTypes.Add(typeof(TResource));
+        }
 
         public void GargabgeCollect()
         {

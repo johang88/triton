@@ -19,9 +19,9 @@ namespace Triton.Game.World.Components
                 if (MeshInstance != null)
                 {
                     World.Stage.RemoveMesh(MeshInstance);
-                    World.ResourceManager.Unload(Mesh);
                 }
 
+                MeshInstance = null;
                 _mesh = value;
 
                 if (Owner != null && World != null)
@@ -48,7 +48,6 @@ namespace Triton.Game.World.Components
             if (MeshInstance != null)
             {
                 World.Stage.RemoveMesh(MeshInstance);
-                World.ResourceManager.Unload(Mesh);
             }
         }
 

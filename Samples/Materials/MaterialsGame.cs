@@ -35,80 +35,27 @@ namespace Triton.Samples
             Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0);
             Stage.AmbientColor = Vector3.Zero;
 
-            var room = new GameObject();
-            room.Components.Add(new MeshRenderer { Mesh = Resources.Load<Graphics.Resources.Mesh>("/models/room") });
-            room.Components.Add(new MeshRigidBody { Filename = "/collision/room", IsStatic = true });
-            GameWorld.Add(room);
-
             Player = new GameObject();
             Player.Position = new Vector3(0, 2f, 0);
             PlayerCharacter = new CharacterController();
             Player.Components.Add(PlayerCharacter);
             GameWorld.Add(Player);
 
-            var rng = new System.Random();
+            var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
+            roomPrefab.Instantiate(GameWorld);
+
+            var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
+            for (int i = 0; i < 5; i++)
+            {
+                ballPrefab.Instantiate(GameWorld).Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
+            }
 
             for (int i = 0; i < 5; i++)
             {
-                var cube = new GameObject();
-                cube.Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
-                cube.Components.Add(new MeshRenderer { Mesh = Resources.Load<Graphics.Resources.Mesh>("/models/sphere")});
-                cube.Components.Add(new SphereRigidBody { Radius = 0.5f });
-                GameWorld.Add(cube);
-            }
-
-            for (int i = 0; i < 5; i++)
-            {
-                var cube = new GameObject();
-                cube.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
-                cube.Components.Add(new MeshRenderer { Mesh = Resources.Load<Graphics.Resources.Mesh>("/models/sphere") });
-                cube.Components.Add(new SphereRigidBody { Radius = 0.5f });
-                GameWorld.Add(cube);
-            }
-
-            {
-                var sphere = new GameObject();
-                sphere.Position = new Vector3(2, 2.5f, 3);
-                sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.Components.Add(new PointLight { Color = new Vector3(0.9f, 0.5f, 0.3f), Intensity = 1, Range = 16 });
-                GameWorld.Add(sphere);
-            }
-
-            {
-                var sphere = new GameObject();
-                sphere.Position = new Vector3(-10, 2.5f, 1);
-                sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.Components.Add(new PointLight { Color = new Vector3(0.5f, 0.9f, 0.3f), Intensity = 1, Range = 32 });
-                GameWorld.Add(sphere);
-            }
-
-            {
-                var sphere = new GameObject();
-                sphere.Position = new Vector3(-18, 2.5f, -5);
-                sphere.Scale = new Vector3(1, 1, 1) * 0.15f;
-                sphere.Components.Add(new PointLight { Color = new Vector3(0.5f, 0.3f, 0.9f), Intensity = 1, Range = 32 });
-                GameWorld.Add(sphere);
-            }
-
-            for (var i = 0; i < 0; i++)
-            {
-                var x = (float)(-6.0 + RNG.NextDouble() * 15.0);
-                var z = (float)(-8.0 + RNG.NextDouble() * 20.0);
-
-                var sphere = new GameObject();
-                sphere.Position = new Vector3(x, 0.5f, z);
-                sphere.Components.Add(new PointLight
-                {
-                    Color = new Vector3(0.1f + (float)RNG.NextDouble() * 0.9f, 0.1f + (float)RNG.NextDouble() * 0.9f, 0.1f + (float)RNG.NextDouble() * 0.9f),
-                    Intensity = 0.3f + (float)RNG.NextDouble() * 0.6f,
-                    Range = 0.7f + (float)RNG.NextDouble() * 0.9f,
-                    CastShadows = false
-                });
-                GameWorld.Add(sphere);
+                ballPrefab.Instantiate(GameWorld).Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
             }
 
             DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.High;
-
             DebugFlags |= Game.DebugFlags.RenderStats;
         }
 

@@ -9,35 +9,43 @@ namespace Triton.Game.World
 {
     [DataContract]
     public class Component : IComponent
-	{
+    {
         public GameObject Owner { get; private set; }
         protected GameObjectManager World => Owner.World;
         protected Graphics.Stage Stage => Owner.World.Stage;
         protected GameObject Parent => Owner.Parent;
 
-		public virtual void OnAttached(GameObject owner)
-		{
+        public virtual void OnAttached(GameObject owner)
+        {
             Owner = owner ?? throw new ArgumentNullException("owner");
-		}
+        }
 
-		public virtual void OnActivate()
-		{
+        public virtual void OnActivate()
+        {
 
-		}
+        }
 
         public virtual void OnDeactivate()
         {
 
         }
 
-		public virtual void OnDetached()
-		{
+        public virtual void OnDetached()
+        {
 
-		}
+        }
 
-		public virtual void Update(float dt)
-		{
+        public virtual void Update(float dt)
+        {
 
-		}
-	}
+        }
+
+        public object Clone()
+        {
+            var component = (Component)MemberwiseClone();
+            component.Owner = null; // Detach
+
+            return component;
+        }
+    }
 }

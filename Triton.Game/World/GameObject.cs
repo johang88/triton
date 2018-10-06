@@ -9,7 +9,7 @@ using Triton.Common.Collections;
 namespace Triton.Game.World
 {
     [DataContract]
-    public class GameObject
+    public class GameObject : ICloneable
 	{
         [DataMember] public TrackingCollection<GameObject> Children { get; } = new TrackingCollection<GameObject>();
         [DataMember] public TrackingCollection<IComponent> Components { get; } = new TrackingCollection<IComponent>();
@@ -52,7 +52,7 @@ namespace Triton.Game.World
             Components.OnAdd += Components_OnAdd;
             Components.OnRemove += Components_OnRemove;
         }
-        
+
         private void OnAttached()
 		{
             foreach (var component in Components)
@@ -126,5 +126,27 @@ namespace Triton.Game.World
 
         public TComponentType GetComponent<TComponentType>() 
             => (TComponentType)Components.First(c => c is TComponentType);
+
+        public object Clone()
+        {
+            var gameObject = new GameObject
+            {
+                Position = Position,
+                Orientation = Orientation,
+                Scale = Scale
+            };
+
+            foreach (var component in Components)
+            {
+                gameObject.Components.Add((IComponent)component.Clone());
+            }
+
+            foreach (var child in Children)
+            {
+                gameObject.Children.Add((GameObject)child.Clone());
+            }
+
+            return gameObject;
+        }
     }
 }

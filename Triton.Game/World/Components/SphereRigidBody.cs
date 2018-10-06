@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,9 +9,9 @@ namespace Triton.Game.World.Components
 {
 	public class SphereRigidBody : RigidBody
 	{
-		public float Radius = 1;
-		public bool IsStatic = false;
-        public float Mass = 1.0f;
+        [DataMember] public float Radius { get; set; } = 1.0f;
+        [DataMember] public bool IsStatic { get; set; } = false;
+        [DataMember] public float Mass { get; set; } = 1.0f;
 
 		public override void OnActivate()
 		{

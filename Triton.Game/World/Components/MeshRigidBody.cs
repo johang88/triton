@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,15 +9,32 @@ namespace Triton.Game.World.Components
 {
 	public class MeshRigidBody : RigidBody
 	{
-		private Physics.Resources.Mesh Mesh;
-		public string Filename;
-		public bool IsStatic = true;
+        [DataMember] public bool IsStatic { get; set; } = true;
+
+        private Physics.Resources.Mesh _mesh = null;
+        [DataMember] public Physics.Resources.Mesh Mesh
+        {
+            get => _mesh;
+            set
+            {
+                if (Body != null)
+                {
+                    World.PhysicsWorld.RemoveBody(Body);
+                }
+
+                Body = null;
+                _mesh = value;
+
+                if (Owner != null && World != null)
+                {
+                    Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, IsStatic);
+                }
+            }
+        }
 
 		public override void OnActivate()
 		{
 			base.OnActivate();
-
-            Mesh = World.ResourceManager.Load<Physics.Resources.Mesh>(Filename);
             Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, IsStatic);
 		}
 	}

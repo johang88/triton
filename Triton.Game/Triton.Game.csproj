@@ -98,6 +98,7 @@
     <Compile Include="World\GameObject.cs" />
     <Compile Include="World\GameObjectManager.cs" />
     <Compile Include="World\IComponent.cs" />
+    <Compile Include="World\Prefab.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ThirdParty\sharpfilesystem\SharpFileSystem\SharpFileSystem.csproj">
