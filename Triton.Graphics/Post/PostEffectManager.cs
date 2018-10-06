@@ -90,6 +90,7 @@ namespace Triton.Graphics.Post
                 AdaptationRate = 0.5f,
                 BlurSigma = 3.0f,
                 BloomThreshold = 9.0f,
+                BloomStrength = 10.0f,
                 EnableBloom = true,
                 TonemapOperator = TonemapOperator.Uncharted
             };

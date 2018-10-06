@@ -24,19 +24,19 @@ uniform sampler2D samplerBloom;
 uniform sampler2D samplerLuminance;
 
 uniform bool enableBloom = true;
+uniform float bloomStrength = 10.0;
 
 void main() {
 	float averageLuminance = get_average_luminance(samplerLuminance);
 	vec3 color = texture(samplerScene, texCoord).xyz;
 
-	// color = tonemap(color, averageLuminance, 0);
+	color = tonemap(color, averageLuminance, 0);
 	
 	if (enableBloom) {
 		vec3 bloom = texture(samplerBloom, texCoord).xyz;
-		color += max(vec3(0), bloom) * 10;
+		color += max(vec3(0), bloom) * bloomStrength;
 	}
-	
-	color = tonemap(color, averageLuminance, 0);
+
 	oColor = vec4(color, 1);
 }
 #endif

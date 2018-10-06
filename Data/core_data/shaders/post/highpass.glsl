@@ -30,7 +30,8 @@ void main()
 	float averageLuminance = get_average_luminance(samplerLuminance);
 	color = tonemap(color, averageLuminance, bloomThreshold);
 	
-	// color = color * 0.01;
+	if (dot(color, vec3(0.33)) <= 0.001)
+		color = vec3(0.0);
 		
 	oColor = vec4(max(color, vec3(0)), 1.0);
 }

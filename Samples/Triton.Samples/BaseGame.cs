@@ -70,6 +70,9 @@ namespace Triton.Samples
             }
 
             ImGui.Checkbox("Bloom", ref PostEffectManager.HDRSettings.EnableBloom);
+            ImGui.SliderFloat("Bloom Threshold", ref PostEffectManager.HDRSettings.BloomThreshold, 0.5f, 20.0f, PostEffectManager.HDRSettings.BloomThreshold.ToString(), 1.0f);
+            ImGui.SliderFloat("Bloom Strength", ref PostEffectManager.HDRSettings.BloomStrength, 1f, 20.0f, PostEffectManager.HDRSettings.BloomStrength.ToString(), 1.0f);
+            ImGui.SliderFloat("Eye adaption rate", ref PostEffectManager.HDRSettings.AdaptationRate, 0.1f, 10.0f, PostEffectManager.HDRSettings.AdaptationRate.ToString(), 1.0f);
 
             selectedValue = (int)PostEffectManager.HDRSettings.TonemapOperator;
             if (ImGui.Combo("Tonemap operator", ref selectedValue, Enum.GetNames(typeof(TonemapOperator))))
