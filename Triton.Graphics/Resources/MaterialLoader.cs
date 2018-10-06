@@ -30,7 +30,7 @@ namespace Triton.Graphics.Resources
         public object Create(Type type)
             => new Material(_resourceManager);
 
-		public async Task Load(object resource, byte[] data)
+		public async Task Deserialize(object resource, byte[] data)
 		{
 			Unload(resource);
 
@@ -74,5 +74,8 @@ namespace Triton.Graphics.Resources
 			var material = (Material)resource;
 			material.Unload();
 		}
-	}
+
+        public byte[] Serialize(object resource)
+            => throw new NotImplementedException();
+    }
 }

@@ -31,7 +31,7 @@ namespace Triton.Graphics.Resources
 		public object Create(Type type)
 		=> new Skeleton();
 
-		public Task Load(object resource, byte[] data)
+		public Task Deserialize(object resource, byte[] data)
 		{
 			// Destroy any existing mesh handles
 			Unload(resource);
@@ -108,5 +108,8 @@ namespace Triton.Graphics.Resources
 		{
 			// Nothing to do here ..
 		}
-	}
+
+        public byte[] Serialize(object resource)
+            => throw new NotImplementedException();
+    }
 }

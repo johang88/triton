@@ -21,9 +21,11 @@ namespace Triton.Common
         bool SupportsStreaming { get; }
 
 		object Create(Type type);
-		Task Load(object resource, byte[] data);
 		void Unload(object resource);
-	}
+
+        Task Deserialize(object resource, byte[] data);
+        byte[] Serialize(object resource);
+    }
 
 	/// <summary>
 	/// Generic interface to implement resource loaders, this is the prefered interface to implement

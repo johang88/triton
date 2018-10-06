@@ -27,7 +27,7 @@ namespace Triton.Common
         public object Create(Type type)
             => Activator.CreateInstance(type);
 
-        public async Task Load(object resource, byte[] data)
+        public async Task Deserialize(object resource, byte[] data)
         {
             var converter = new ReferenceableConverter(_resourceManager);
 
@@ -87,6 +87,9 @@ namespace Triton.Common
                 }
             }
         }
+
+        public byte[] Serialize(object resource)
+            => throw new NotImplementedException();
     }
 
     class ReferenceableConverter : JsonConverter

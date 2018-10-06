@@ -30,7 +30,7 @@ namespace Triton.Graphics.Resources
         public object Create(Type type)
             => new Texture();
 
-		public Task Load(object resource, byte[] data)
+		public Task Deserialize(object resource, byte[] data)
 		{
             var texture = (Texture)resource;
             texture.Handle = _backend.RenderSystem.CreateFromDDS(data, out texture.Width, out texture.Height);
@@ -44,5 +44,8 @@ namespace Triton.Graphics.Resources
 			_backend.RenderSystem.DestroyTexture(texture.Handle);
 			texture.Handle = -1;
 		}
-	}
+
+        public byte[] Serialize(object resource)
+            => throw new NotImplementedException();
+    }
 }

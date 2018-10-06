@@ -142,7 +142,7 @@ namespace Triton.Graphics.Resources
                 Common.Log.WriteLine(name + ": " + errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
         }
 
-        public Task Load(object resource, byte[] data)
+        public Task Deserialize(object resource, byte[] data)
         {
             var shader = (ShaderProgram)resource;
             var (name, parameters) = _resourceManager.GetResourceProperties(shader);
@@ -209,6 +209,9 @@ namespace Triton.Graphics.Resources
             _backend.RenderSystem.DestroyShader(shader.Handle);
             shader.Handle = -1;
         }
+
+        public byte[] Serialize(object resource)
+            => throw new NotImplementedException();
     }
 
     class ShaderHotReloader

@@ -52,7 +52,7 @@ namespace Triton.Graphics.Resources
         public object Create(Type type)
              => new Mesh();
 
-		public async Task Load(object resource, byte[] data)
+		public async Task Deserialize(object resource, byte[] data)
 		{
 			// Destroy any existing mesh handles
 			Unload(resource);
@@ -177,5 +177,8 @@ namespace Triton.Graphics.Resources
 
 			mesh.SubMeshes = null;
 		}
-	}
+
+        public byte[] Serialize(object resource)
+            => throw new NotImplementedException();
+    }
 }

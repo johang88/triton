@@ -120,7 +120,7 @@ namespace Triton.Common
         private async Task LoadResource(ResourceReference resource, IResourceSerializer loader)
         {
             var data = await await Concurrency.TaskHelpers.RunOnIOThread(() => LoadDataForResource(resource, loader));
-            await await Concurrency.TaskHelpers.RunOnMainThread(() => loader.Load(resource.Resource, data));
+            await await Concurrency.TaskHelpers.RunOnMainThread(() => loader.Deserialize(resource.Resource, data));
 
             resource.State = ResourceLoadingState.Loaded;
 

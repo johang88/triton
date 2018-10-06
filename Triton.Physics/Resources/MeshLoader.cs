@@ -26,7 +26,7 @@ namespace Triton.Physics.Resources
         public object Create(Type type)
             => new Mesh();
 
-		public Task Load(object resource, byte[] data)
+		public Task Deserialize(object resource, byte[] data)
 		{
 			Unload(resource);
 
@@ -78,7 +78,10 @@ namespace Triton.Physics.Resources
             return Task.FromResult(0);
 		}
 
-		public void Unload(object resource)
+        public byte[] Serialize(object resource)
+            => throw new NotImplementedException();
+
+        public void Unload(object resource)
 		{
 			var mesh = (Mesh)resource;
 		}
