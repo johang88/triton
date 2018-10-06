@@ -82,8 +82,6 @@ void main()
 	vec3 lightVec = lightDir;
 #endif
 	
-	vec3 eyeDir = normalize(cameraPosition - position);
-	
 #if defined(SPOT_LIGHT) || defined(POINT_LIGHT)
 	float lightDistanceSquared = dot(lightVec, lightVec);
 	
@@ -106,7 +104,9 @@ void main()
 	float nDotL = saturate(dot(normal, lightDir));
 	vec3 lighting = vec3(0, 0, 0);
 
-	if (attenuation > 0 && nDotL > 0) {
+	float attenuationNdotL = attenuation * nDotL;
+
+	if (attenuationNdotL > 0) {
 #ifdef SHADOWS
 	#ifdef SHADOWS_CUBE
 		float shadow = get_shadows_cube(samplerShadowCube, nDotL, position, clipPlane, shadowBias, texelSize, lightPosition);
@@ -135,7 +135,7 @@ void main()
 			float shadow = get_shadows(samplerShadow, nDotL, position, shadowViewProj, texelSize);
 		#endif
 	#endif
-		attenuation *= shadow;
+		attenuationNdotL *= shadow;
 #endif
 		float metallic = gbuffer2.x;
 		float roughness = gbuffer2.y;
@@ -143,13 +143,13 @@ void main()
 		
 		vec3 diffuse = decodeDiffuse(gbuffer0.xyz);
 		
-		vec3 diffuseColor = mix(diffuse, vec3(0), metallic);
-		vec3 specularColor = mix(0.08 * vec3(specular), diffuse, metallic);
+		vec3 eyeDir = normalize(cameraPosition - position);
 
-		vec3 diffuseLighting = get_diffuse(diffuseColor, normal, eyeDir, lightDir, roughness);
-		vec3 specularLighting = get_specular(normal, eyeDir, lightDir, roughness, specularColor);
+		vec3 F0 = vec3(0.08);
+		F0 = mix(F0, diffuse, metallic);
 		
-		lighting = lightColor * nDotL * attenuation * (diffuseLighting + specularLighting);
+		//lighting = vec3 brdf(vec3 N, vec3 V, vec3 L, float roughness, float metallic, vec3 radiance, vec3 albedo)
+		lighting = brdf(normal, eyeDir, lightDir, roughness, metallic, lightColor * attenuationNdotL, diffuse, F0);
 	}
 
 	oColor.xyz = lighting.xyz;

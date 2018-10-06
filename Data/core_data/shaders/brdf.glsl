@@ -1,4 +1,4 @@
-#define OREN_NAYAR
+//#define OREN_NAYAR
 
 vec3 get_diffuse(vec3 diffuseColor, vec3 normal, vec3 viewer, vec3 light, float roughness) {
 #ifdef OREN_NAYAR
@@ -22,40 +22,59 @@ vec3 get_diffuse(vec3 diffuseColor, vec3 normal, vec3 viewer, vec3 light, float 
 #endif
 }
 
-float d_ggx(float roughness, float nDotH) {
-	float m = roughness * roughness;
-	float m2 = m * m;
-	float d = (nDotH * m2 - nDotH) * nDotH + 1;
-	return (m2 / (PI * d * d));
-}
+vec3 f_schlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+} 
 
-float g_schlick(float roughness, float nDotV, float nDotL) {
-	float k = square(roughness) * 0.5;
-	float schlickV = nDotV * (1 - k) + k;
-	float schlickL = nDotL * (1 - k) + k;
-	return 0.25 / (schlickV * schlickL);
-}
-
-vec3 f_schlick(vec3 specularColor, float vDotH) {
-	float fc = exp2(-5.55473 * vDotH - 6.98316) * vDotH;
-	return saturate(50.0 * specularColor.y) * fc + (1.0 - fc) * specularColor;
-}
-
-vec3 brdf_stuff2(vec3 normal, vec3 viewer, vec3 lightDir, float roughness, vec3 specularColor) {
-	vec3 H = normalize(lightDir + viewer);
-	float nDotL = saturate(dot(normal, lightDir));
-	float nDotH = saturate(dot(normal, H));
-	float nDotV = max(0.001, saturate(dot(normal, viewer)));
-	float vDotH = saturate(dot(viewer, H));
+float d_ggx(vec3 N, vec3 H, float roughness)
+{
+    float a      = roughness*roughness;
+    float a2     = a*a;
+    float NdotH  = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH*NdotH;
 	
-	float D = d_ggx(roughness, nDotH) / PI;
-	float G = g_schlick(roughness, nDotV, nDotL);
+    float num   = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
 	
-	vec3 F = f_schlick(specularColor, vDotH);
-	
-	return D * G * F;
+    return num / denom;
 }
 
-vec3 get_specular(vec3 normal, vec3 viewer, vec3 lightDir, float roughness, vec3 specularColor) {
-	return brdf_stuff2(normal, viewer, lightDir, roughness, specularColor);
+float g_schlickggx(float NdotV, float roughness)
+{
+    float r = (roughness + 1.0);
+    float k = (r*r) / 8.0;
+
+    float num   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+	
+    return num / denom;
+}
+float g_smith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2  = g_schlickggx(NdotV, roughness);
+    float ggx1  = g_schlickggx(NdotL, roughness);
+	
+    return ggx1 * ggx2;
+}
+
+vec3 brdf(vec3 N, vec3 V, vec3 L, float roughness, float metallic, vec3 radiance, vec3 albedo, vec3 F0) {
+	vec3 H = normalize(L + V);
+
+	float NDF = d_ggx(N, H, roughness);
+	float G = g_smith(N, V, L, roughness);
+	vec3 F = f_schlick(max(dot(H, V), 0.0), F0);
+
+	vec3 numerator = NDF * G * F;
+	float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+	vec3 specular = numerator / max(denominator, 0.001);
+
+	vec3 kS = F;
+	vec3 kD = vec3(1.0) - kS;
+
+	kD *= 1.0 - metallic;
+	return (kD * albedo / PI + specular) * radiance;
 }
