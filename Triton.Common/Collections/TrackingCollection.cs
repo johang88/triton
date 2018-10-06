@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Triton.Common.Collections
 {
-    public class TrackingCollection<T> : ICollection<T>
+    public class TrackingCollection<T> : IList<T>
     {
         private List<T> _items = new List<T>();
 
@@ -17,6 +17,19 @@ namespace Triton.Common.Collections
         public int Count => _items.Count;
 
         public bool IsReadOnly => false;
+
+        public T this[int index]
+        {
+            get => _items[index];
+            set
+            {
+                var old = _items[index];
+                _items[index] = value;
+
+                OnRemove?.Invoke(old);
+                OnAdd?.Invoke(value);
+            }
+        }
 
         public void Add(T item)
         {
@@ -57,5 +70,21 @@ namespace Triton.Common.Collections
 
         IEnumerator IEnumerable.GetEnumerator()
              => _items.GetEnumerator();
+
+        public int IndexOf(T item)
+            => _items.IndexOf(item);
+
+        public void Insert(int index, T item)
+        {
+            _items.Insert(index, item);
+            OnAdd?.Invoke(item);
+        }
+
+        public void RemoveAt(int index)
+        {
+            var item = _items[index];
+            _items.RemoveAt(index);
+            OnRemove?.Invoke(item);
+        }
     }
 }

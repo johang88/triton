@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections;
 
 namespace Triton.Common
 {
@@ -33,10 +34,10 @@ namespace Triton.Common
 
             var settings = new JsonSerializerSettings
             {
-                TypeNameHandling = TypeNameHandling.Objects,
+                TypeNameHandling = TypeNameHandling.Auto,
                 Converters = new List<JsonConverter>
                 {
-                    new ReferenceableConverter(_resourceManager),
+                    converter,
                     new Vector2Converter(),
                     new Vector3Converter(),
                     new Vector4Converter(),
@@ -55,12 +56,75 @@ namespace Triton.Common
                 var bits = path.Split('.');
                 for (var i = 0; i < bits.Length - 1; i++)
                 {
-                    var getter = target.GetType().GetProperty(bits[i]);
+                    var (propertyName, index) = ParsePropertyName(bits[i]);
+
+                    var getter = target.GetType().GetProperty(propertyName);
                     target = getter.GetValue(target, null);
+
+                    if (index != null)
+                    {
+                        getter = target.GetType().GetProperty("Item");
+                        target = getter.GetValue(target, index);
+                    }
                 }
 
-                var setter = target.GetType().GetProperty(bits[bits.Length - 1]);
-                setter.SetValue(target, referencedResource, null);
+                var (setterPropertyName, setterIndex) = ParsePropertyName(bits[bits.Length - 1]);
+                if (setterIndex != null)
+                {
+                    var setter = target.GetType().GetProperty(setterPropertyName);
+                    target = setter.GetValue(target, null);
+
+                    if (target is Array array)
+                    {
+                        array.SetValue(referencedResource, (int)setterIndex[0]);
+                    }
+                    else
+                    {
+                        setter = target.GetType().GetProperty("Item");
+                        setter.SetValue(target, referencedResource, setterIndex);
+                    }
+                }
+                else
+                {
+                    var setter = target.GetType().GetProperty(setterPropertyName);
+                    setter.SetValue(target, referencedResource, null);
+                }
+            }
+        }
+
+        public byte[] Serialize(object resource)
+        {
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                TypeNameHandling = TypeNameHandling.Auto,
+                Converters = new List<JsonConverter>
+                {
+                    new ReferenceableConverter(_resourceManager),
+                    new Vector2Converter(),
+                    new Vector3Converter(),
+                    new Vector4Converter(),
+                    new QuaternionConverter()
+                }
+            };
+
+            var data = JsonConvert.SerializeObject(resource, settings);
+            return Encoding.UTF8.GetBytes(data);
+        }
+
+        private (string propertyName, object[] arrayIndex) ParsePropertyName(string propertyName)
+        {
+            if (propertyName.Contains('['))
+            {
+                var index = propertyName.IndexOf('[');
+                var name = propertyName.Substring(0, index);
+                var arrayIndex = int.Parse(propertyName.Substring(index + 1, propertyName.Length - index - 2));
+
+                return (name, new object[] { arrayIndex });
+            }
+            else
+            {
+                return (propertyName, null);
             }
         }
 
@@ -86,8 +150,24 @@ namespace Triton.Common
                     continue;
 
                 var value = property.GetValue(resource, null);
+                if (value == null)
+                    continue;
 
-                if (_resourceManager.IsManaged(value))
+                if (value is IEnumerable enumerable)
+                {
+                    foreach (var item in enumerable)
+                    {
+                        if (_resourceManager.IsManaged(item))
+                        {
+                            _resourceManager.Unload(item);
+                        }
+                        else
+                        {
+                            Unload(item);
+                        }
+                    }
+                }
+                else if (_resourceManager.IsManaged(value))
                 {
                     _resourceManager.Unload(value);
                 }
@@ -96,26 +176,6 @@ namespace Triton.Common
                     Unload(value);
                 }
             }
-        }
-
-        public byte[] Serialize(object resource)
-        {
-            var settings = new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-                TypeNameHandling = TypeNameHandling.Objects,
-                Converters = new List<JsonConverter>
-                {
-                    new ReferenceableConverter(_resourceManager),
-                    new Vector2Converter(),
-                    new Vector3Converter(),
-                    new Vector4Converter(),
-                    new QuaternionConverter()
-                }
-            };
-
-            var data = JsonConvert.SerializeObject(resource, settings);
-            return Encoding.UTF8.GetBytes(data);
         }
     }
 
@@ -131,12 +191,6 @@ namespace Triton.Common
 
         public override bool CanConvert(Type objectType)
         {
-            if (objectType == typeof(string) || !objectType.IsClass)
-            {
-                _canConvert = true;
-                return false;
-            }
-
             if (!_canConvert)
             {
                 _canConvert = true;
@@ -144,13 +198,13 @@ namespace Triton.Common
             }
             else
             {
-                return true;
+                return _resourceManager.KnownResourceTypes.Contains(objectType);
             }
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            if (reader.TokenType == JsonToken.String && objectType.IsClass && objectType != typeof(string))
+            if (reader.TokenType == JsonToken.String)
             {
                 // We got a reference to a resource boyz!!
                 var name = reader.Value.ToString();
@@ -167,8 +221,7 @@ namespace Triton.Common
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var type = value.GetType();
-            if (type != typeof(string) && type.IsClass && _resourceManager.IsManaged(value))
+            if ( _resourceManager.IsManaged(value))
             {
                 // We got a resource reference to serialize!
                 var (name, _) = _resourceManager.GetResourceProperties(value);

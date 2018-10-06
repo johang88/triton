@@ -15,6 +15,8 @@ namespace Triton.Common
         private readonly ConcurrentDictionary<object, ResourceReference> _instanceToReference = new ConcurrentDictionary<object, ResourceReference>();
         private readonly Dictionary<Type, IResourceSerializer> _resourceSerializers = new Dictionary<Type, IResourceSerializer>();
 
+        public HashSet<Type> KnownResourceTypes = new HashSet<Type>();
+
         private readonly IO.FileSystem _fileSystem;
 
         private bool _isDispoed = false;
@@ -68,8 +70,10 @@ namespace Triton.Common
             IResourceSerializer serializer = DefaultResourceSerializer;
             if (_resourceSerializers.ContainsKey(resourceType))
                 serializer = _resourceSerializers[resourceType];
-
+            
             await _loadingLock.WaitAsync();
+
+            KnownResourceTypes.Add(resourceType);
 
             // Get or create the resource
             if (!_resources.TryGetValue(identifier, out var resourceReference))

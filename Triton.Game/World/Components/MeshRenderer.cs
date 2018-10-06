@@ -24,7 +24,7 @@ namespace Triton.Game.World.Components
 
                 _mesh = value;
 
-                if (Owner != null)
+                if (Owner != null && World != null)
                 {
                     MeshInstance = World.Stage.AddMesh(_mesh);
                 }
