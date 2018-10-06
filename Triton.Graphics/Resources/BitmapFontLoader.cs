@@ -7,7 +7,7 @@ using Triton.Common;
 
 namespace Triton.Graphics.Resources
 {
-	class BitmapFontLoader : Triton.Common.IResourceLoader<BitmapFont>
+	class BitmapFontLoader : Triton.Common.IResourceSerializer<BitmapFont>
 	{
 		private readonly Triton.Common.IO.FileSystem FileSystem;
 		private readonly Triton.Common.ResourceManager ResourceManager;

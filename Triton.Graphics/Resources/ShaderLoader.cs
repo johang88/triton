@@ -15,7 +15,7 @@ namespace Triton.Graphics.Resources
     /// Various pragmas and preprocessor defines are also setup.
     /// 
     /// </summary>
-    class ShaderLoader : Triton.Common.IResourceLoader<ShaderProgram>
+    class ShaderLoader : Triton.Common.IResourceSerializer<ShaderProgram>
     {
         private readonly Backend _backend;
         private readonly Triton.Common.IO.FileSystem _fileSystem;

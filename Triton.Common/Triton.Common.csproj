@@ -79,7 +79,7 @@
     <Compile Include="HashedString.cs" />
     <Compile Include="HashedStringTable.cs" />
     <Compile Include="IO\FileSystem.cs" />
-    <Compile Include="IResourceLoader.cs" />
+    <Compile Include="IResourceSerializer.cs" />
     <Compile Include="LogLevel.cs" />
     <Compile Include="LogOutputHandlers\Console.cs" />
     <Compile Include="LogOutputHandlers\File.cs" />

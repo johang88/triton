@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Triton.Physics.Resources
 {
-	class MeshLoader : Triton.Common.IResourceLoader<Mesh>
+	class MeshLoader : Triton.Common.IResourceSerializer<Mesh>
 	{
 		static readonly char[] Magic = new char[] { 'C', 'O', 'L', 'M' };
 		const int Version_1_0 = 0x0100;

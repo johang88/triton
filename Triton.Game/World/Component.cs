@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Triton.Game.World
 {
-	public class Component : IComponent
+    public class Component : IComponent
 	{
 		public GameObject Owner { get; private set; }
         protected GameObjectManager World => Owner.World;

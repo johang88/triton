@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.Resources
 {
-	class MaterialLoader : Triton.Common.IResourceLoader<Material>
+	class MaterialLoader : Triton.Common.IResourceSerializer<Material>
 	{
         private static readonly char[] Magic = new char[] { 'M', 'A', 'T', 'E' };
 		private const int Version_1_0 = 0x01;

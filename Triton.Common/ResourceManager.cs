@@ -32,7 +32,7 @@ namespace Triton.Common
     {
         private readonly ConcurrentDictionary<string, ResourceReference> _resources = new ConcurrentDictionary<string, ResourceReference>();
         private readonly ConcurrentDictionary<object, ResourceReference> _instanceToReference = new ConcurrentDictionary<object, ResourceReference>();
-        private readonly Dictionary<Type, IResourceLoader> _resourceLoaders = new Dictionary<Type, IResourceLoader>();
+        private readonly Dictionary<Type, IResourceSerializer> _resourceSerializers = new Dictionary<Type, IResourceSerializer>();
 
         private readonly IO.FileSystem _fileSystem;
 
@@ -40,7 +40,7 @@ namespace Triton.Common
         //private readonly object _loadingLock = new object();
         private SemaphoreSlim _loadingLock = new SemaphoreSlim(1);
 
-        public IResourceLoader DefaultResourceLoader { get; set; }
+        public IResourceSerializer DefaultResourceLoader { get; set; }
 
         public ResourceManager(IO.FileSystem fileSystem)
         {
@@ -84,9 +84,9 @@ namespace Triton.Common
             var identifier = name + "?" + parameters;
 
             // Fetch loader
-            IResourceLoader loader = DefaultResourceLoader;
-            if (_resourceLoaders.ContainsKey(resourceType))
-                loader = _resourceLoaders[resourceType];
+            IResourceSerializer loader = DefaultResourceLoader;
+            if (_resourceSerializers.ContainsKey(resourceType))
+                loader = _resourceSerializers[resourceType];
 
             await _loadingLock.WaitAsync();
 
@@ -117,7 +117,7 @@ namespace Triton.Common
             return resourceReference.Resource;
         }
 
-        private async Task LoadResource(ResourceReference resource, IResourceLoader loader)
+        private async Task LoadResource(ResourceReference resource, IResourceSerializer loader)
         {
             var data = await await Concurrency.TaskHelpers.RunOnIOThread(() => LoadDataForResource(resource, loader));
             await await Concurrency.TaskHelpers.RunOnMainThread(() => loader.Load(resource.Resource, data));
@@ -130,7 +130,7 @@ namespace Triton.Common
                 Log.WriteLine("Loaded {0} of type {1}", resource.Name, resource.Resource.GetType());
         }
 
-        private async Task<byte[]> LoadDataForResource(ResourceReference resource, IResourceLoader loader)
+        private async Task<byte[]> LoadDataForResource(ResourceReference resource, IResourceSerializer loader)
         {
             if (loader.SupportsStreaming)
             {
@@ -164,9 +164,9 @@ namespace Triton.Common
 
             var resourceType = resourceReference.Resource.GetType();
 
-            IResourceLoader loader = DefaultResourceLoader;
-            if (_resourceLoaders.ContainsKey(resourceType))
-                loader = _resourceLoaders[resourceType];
+            IResourceSerializer loader = DefaultResourceLoader;
+            if (_resourceSerializers.ContainsKey(resourceType))
+                loader = _resourceSerializers[resourceType];
 
             if (resourceReference.State == ResourceLoadingState.Loaded)
             {
@@ -221,8 +221,8 @@ namespace Triton.Common
         public bool IsManaged(object resource)
             => _instanceToReference.ContainsKey(resource);
 
-        public void AddResourceLoader<TResource>(IResourceLoader<TResource> loader) where TResource : class
-            => _resourceLoaders.Add(typeof(TResource), loader ?? throw new ArgumentNullException("loader"));
+        public void AddResourceLoader<TResource>(IResourceSerializer<TResource> loader) where TResource : class
+            => _resourceSerializers.Add(typeof(TResource), loader ?? throw new ArgumentNullException("loader"));
 
         public void GargabgeCollect()
         {

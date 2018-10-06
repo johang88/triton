@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Triton.Common
 {
-    public class GenericResourceLoader : IResourceLoader
+    public class GenericResourceLoader : IResourceSerializer
     {
         private readonly ResourceManager _resourceManager;
 

@@ -10,7 +10,7 @@ using Triton.Common;
 
 namespace Triton.Graphics.Resources
 {
-	class TextureLoader : Triton.Common.IResourceLoader<Texture>
+	class TextureLoader : Triton.Common.IResourceSerializer<Texture>
 	{
 		private readonly Backend _backend;
 		private readonly Triton.Common.IO.FileSystem _fileSystem;

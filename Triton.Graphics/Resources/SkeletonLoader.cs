@@ -8,7 +8,7 @@ using Triton.Common;
 
 namespace Triton.Graphics.Resources
 {
-	class SkeletonLoader : Triton.Common.IResourceLoader<Skeleton>
+	class SkeletonLoader : Triton.Common.IResourceSerializer<Skeleton>
 	{
 		static readonly char[] Magic = new char[] { 'S', 'K', 'E', 'L' };
 		const int Version_1 = 0x0100;

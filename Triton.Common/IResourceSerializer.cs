@@ -14,7 +14,7 @@ namespace Triton.Common
 	/// Load can be called several times for an already loaded resource, it is up to the resource loader
 	/// to decide if the resource has to be reloaded or not.
 	/// </summary>
-	public interface IResourceLoader
+	public interface IResourceSerializer
 	{
 		string Extension { get; }
 		string DefaultFilename { get; }
@@ -29,7 +29,7 @@ namespace Triton.Common
 	/// Generic interface to implement resource loaders, this is the prefered interface to implement
 	/// </summary>
 	/// <typeparam name="TResource"></typeparam>
-	public interface IResourceLoader<TResource> : IResourceLoader where TResource : class
+	public interface IResourceSerializer<TResource> : IResourceSerializer where TResource : class
 	{
 	}
 }

@@ -28,7 +28,7 @@ namespace Triton.Graphics.Resources
 	///		byte[VertexCount] VertexData
 	///		byte[IndexCount] IndexData
 	/// </summary>
-	class MeshLoader : Triton.Common.IResourceLoader<Mesh>
+	class MeshLoader : Triton.Common.IResourceSerializer<Mesh>
 	{
 		static readonly char[] Magic = new char[] { 'M', 'E', 'S', 'H' };
 		const int Version_1_4 = 0x0140;
