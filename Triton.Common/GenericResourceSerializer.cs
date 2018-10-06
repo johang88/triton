@@ -128,25 +128,13 @@ namespace Triton.Common
             }
         }
 
-        private Type GetFieldOrPropertyType(Type type, string name)
-        {
-            var property = type.GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
-            if (property != null)
-            {
-                return property.CanWrite && property.CanRead ? property.PropertyType : null;
-            }
-
-            var field = type.GetField(name, BindingFlags.Public | BindingFlags.Instance);
-            return !field.IsInitOnly ? field.FieldType : null;
-        }
-
         public void Unload(object resource)
         {
             var type = resource.GetType();
             foreach (var property in type.GetProperties())
             {
                 var propertyType = property.PropertyType;
-                if (!propertyType.IsClass || propertyType == typeof(string) || !property.CanRead || !property.CanWrite)
+                if (!propertyType.IsClass || propertyType == typeof(string) || !property.CanRead)
                     continue;
 
                 var value = property.GetValue(resource, null);
@@ -166,6 +154,10 @@ namespace Triton.Common
                             Unload(item);
                         }
                     }
+                }
+                else if (!property.CanWrite)
+                {
+                    continue; // Skip as it was never possible for us to set this
                 }
                 else if (_resourceManager.IsManaged(value))
                 {

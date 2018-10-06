@@ -45,8 +45,9 @@ namespace Triton.Physics
 
 		public void AddForce(Vector3 force)
 		{
-			//RigidBody.AddForce(Conversion.ToBulletVector(ref force));
-		}
+            RigidBody.Activate();
+            RigidBody.ApplyCentralImpulse(Conversion.ToBulletVector(ref force));
+        }
 
         public virtual void Dispose()
         {

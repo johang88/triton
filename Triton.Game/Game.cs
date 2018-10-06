@@ -446,6 +446,7 @@ namespace Triton.Game
         /// <param name="frameTime"></param>
         protected virtual void Update(float frameTime)
         {
+            Resources.GargabgeCollect();
         }
 
         private void SetImGuiKeyMaps()

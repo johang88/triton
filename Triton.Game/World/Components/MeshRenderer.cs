@@ -19,6 +19,7 @@ namespace Triton.Game.World.Components
                 if (MeshInstance != null)
                 {
                     World.Stage.RemoveMesh(MeshInstance);
+                    World.ResourceManager.Unload(_mesh);
                 }
 
                 MeshInstance = null;
@@ -26,6 +27,8 @@ namespace Triton.Game.World.Components
 
                 if (Owner != null && World != null)
                 {
+                    // Assume "ownership"
+                    World.ResourceManager.AddReference(_mesh);
                     MeshInstance = World.Stage.AddMesh(_mesh);
                 }
             }
@@ -38,8 +41,10 @@ namespace Triton.Game.World.Components
 		{
 			base.OnActivate();
 
+            // Assume "ownership"
+            World.ResourceManager.AddReference(_mesh);
             MeshInstance = World.Stage.AddMesh(Mesh);
-		}
+        }
 
 		public override void OnDeactivate()
 		{
@@ -48,6 +53,7 @@ namespace Triton.Game.World.Components
             if (MeshInstance != null)
             {
                 World.Stage.RemoveMesh(MeshInstance);
+                World.ResourceManager.Unload(_mesh);
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using ImGuiNET;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,8 @@ namespace Triton.Samples
         private float CameraYaw = 0;
         private float CameraPitch = 0;
 
+        private List<GameObject> _balls = new List<GameObject>();
+
         public MaterialsGame()
             : base("Materials")
         {
@@ -43,17 +46,23 @@ namespace Triton.Samples
 
             var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
             roomPrefab.Instantiate(GameWorld);
+            Resources.Unload(roomPrefab);
 
             var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
             for (int i = 0; i < 5; i++)
             {
-                ballPrefab.Instantiate(GameWorld).Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
+                var ball = ballPrefab.Instantiate(GameWorld);
+                _balls.Add(ball);
+                ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
             }
 
             for (int i = 0; i < 5; i++)
             {
-                ballPrefab.Instantiate(GameWorld).Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
+                var ball = ballPrefab.Instantiate(GameWorld);
+                _balls.Add(ball);
+                ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
             }
+            Resources.Unload(ballPrefab);
 
             DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.High;
             DebugFlags |= Game.DebugFlags.RenderStats;
@@ -100,6 +109,36 @@ namespace Triton.Samples
                 PlayerCharacter.Move(movement, InputManager.IsKeyDown(Key.Space));
                 Camera.Position = Player.Position + new Vector3(0, 0.7f, 0);
             }
+        }
+
+        private Random rng = new Random();
+        protected override void RenderUI(float deltaTime)
+        {
+            base.RenderUI(deltaTime);
+
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(400, 100), Condition.Always);
+            ImGui.SetNextWindowPos(new System.Numerics.Vector2(RequestedWidth - 500, RequestedHeight - 110), Condition.Always, System.Numerics.Vector2.Zero);
+            ImGui.BeginWindow("Material Game!!1", WindowFlags.NoResize | WindowFlags.NoMove | WindowFlags.NoCollapse);
+
+            if (ImGui.Button("Destroy all Ballz"))
+            {
+                foreach (var ball in _balls)
+                {
+                    GameWorld.Remove(ball);
+                }
+                _balls.Clear();
+            }
+
+            if (ImGui.Button("Add some Force!"))
+            {
+                foreach (var ball in _balls)
+                {
+                    var rigidBody = ball.GetComponent<RigidBody>();
+                    rigidBody.AddForce((new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble()) - new Vector3(0.5f, 0.5f, 0.5f)) * 10.0f);
+                }
+            }
+
+            ImGui.EndWindow();
         }
     }
 }

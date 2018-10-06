@@ -14,6 +14,7 @@ namespace Triton.Common
         private readonly ConcurrentDictionary<string, ResourceReference> _resources = new ConcurrentDictionary<string, ResourceReference>();
         private readonly ConcurrentDictionary<object, ResourceReference> _instanceToReference = new ConcurrentDictionary<object, ResourceReference>();
         private readonly Dictionary<Type, IResourceSerializer> _resourceSerializers = new Dictionary<Type, IResourceSerializer>();
+        private readonly List<ResourceReference> _resourcesToUnload = new List<ResourceReference>();
 
         public HashSet<Type> KnownResourceTypes = new HashSet<Type>();
 
@@ -51,6 +52,11 @@ namespace Triton.Common
             _resources.Clear();
 
             _isDispoed = true;
+        }
+
+        public void AddReference(object resource)
+        {
+            _instanceToReference[resource].AddReference();
         }
 
         public TResource Load<TResource>(string name, string parameters = "") where TResource : class
@@ -176,8 +182,6 @@ namespace Triton.Common
 
         private void UnloadResource(ResourceReference resourceReference, bool async = true)
         {
-            _loadingLock.Wait();
-
             var resourceType = resourceReference.Resource.GetType();
 
             IResourceSerializer serializer = DefaultResourceSerializer;
@@ -210,12 +214,10 @@ namespace Triton.Common
 
                 var task = new Task(unloadAction);
                 if (async)
-                    Concurrency.TaskHelpers.RunOnMainThread(() => task.Wait()).Start();
+                    Concurrency.TaskHelpers.RunOnMainThread(() => task.RunSynchronously());
                 else
                     task.RunSynchronously();
             }
-
-            _loadingLock.Release();
         }
 
         public void Manage<TResource>(string name, TResource resource) where TResource : class
@@ -258,13 +260,26 @@ namespace Triton.Common
 
         public void GargabgeCollect()
         {
+            _loadingLock.Wait();
+
             foreach (var resource in _resources.Values)
             {
                 if (resource.ReferenceCount <= 0)
                 {
-                    UnloadResource(resource);
+                    _resourcesToUnload.Add(resource);
                 }
             }
+
+            foreach (var resource in _resourcesToUnload)
+            {
+                UnloadResource(resource);
+                _resources.TryRemove(resource.Name, out var _);
+                _instanceToReference.TryRemove(resource.Resource, out var _);
+            }
+
+            _resourcesToUnload.Clear();
+
+            _loadingLock.Release();
         }
 
         public bool AllResourcesLoaded()

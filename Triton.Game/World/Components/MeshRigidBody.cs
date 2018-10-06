@@ -20,6 +20,7 @@ namespace Triton.Game.World.Components
                 if (Body != null)
                 {
                     World.PhysicsWorld.RemoveBody(Body);
+                    World.ResourceManager.Unload(Mesh);
                 }
 
                 Body = null;
@@ -27,6 +28,7 @@ namespace Triton.Game.World.Components
 
                 if (Owner != null && World != null)
                 {
+                    World.ResourceManager.AddReference(Mesh);
                     Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, IsStatic);
                 }
             }
@@ -36,6 +38,13 @@ namespace Triton.Game.World.Components
 		{
 			base.OnActivate();
             Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, IsStatic);
-		}
-	}
+            World.ResourceManager.AddReference(Mesh);
+        }
+
+        public override void OnDeactivate()
+        {
+            base.OnDeactivate();
+            World.ResourceManager.Unload(Mesh);
+        }
+    }
 }
