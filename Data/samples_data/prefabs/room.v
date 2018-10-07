@@ -10,8 +10,9 @@
 			{
 				"$type":"Triton.Game.World.Components.PointLight, Triton.Game",
 				"Color": "0.9 0.5 0.3",
-				"Intensity": 1.0,
-				"Range": 16
+				"Intensity": 5.0,
+				"Range": 16,
+				"CastShadows": false
 			}
 		]
 	  },
@@ -22,8 +23,9 @@
 			{
 				"$type":"Triton.Game.World.Components.PointLight, Triton.Game",
 				"Color": "0.5 0.9 0.3",
-				"Intensity": 1.0,
-				"Range": 32
+				"Intensity": 5.0,
+				"Range": 32,
+				"CastShadows": false
 			}
 		]
 	  },
@@ -34,8 +36,9 @@
 			{
 				"$type":"Triton.Game.World.Components.PointLight, Triton.Game",
 				"Color": "0.3 0.5 0.9",
-				"Intensity": 1.0,
-				"Range": 32
+				"Intensity": 5.0,
+				"Range": 32,
+				"CastShadows": false
 			}
 		]
 	  }

@@ -39,10 +39,9 @@ shared uint numTileLights;
 float linearDepth(float zw) {
 	float n = cameraClipPlanes.x;
 	float f = cameraClipPlanes.y;
-	
-	return (2 * n) / (f + n - zw * (f - n));
-	//return projection[3][2] / (zw - projection[2][2]);
-	//return Projection._43 / (zw - Projection._33);
+
+	zw = 2.0 * zw - 1.0;
+	return (2 * n * f) / (f + n - zw * (f - n));
 }
 
 const uint ThreadGroupSize = LightTileSize * LightTileSize;
@@ -56,7 +55,7 @@ void main() {
 	float maxZSample = cameraClipPlanes.y;
 	
 	vec2 depthTextureCoords = vec2(pixelCoord) / displaySize;
-	float zw = texture(samplerDepth, depthTextureCoords).x;
+	float zw = texelFetch(samplerDepth, pixelCoord, 0).x;
 	
 	float linearZ = linearDepth(zw);
 	vec3 positionWS = decodeWorldPosition(depthTextureCoords, zw);

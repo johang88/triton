@@ -88,13 +88,13 @@ namespace Triton.Graphics.Deferred
                 new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba8, Renderer.PixelType.UnsignedByte, 0),
                 new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 1),
                 new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba8, Renderer.PixelType.UnsignedByte, 2),
-                new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent24, Renderer.PixelType.Float, 0)
+                new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent32f, Renderer.PixelType.Float, 0)
             }));
 
             _lightAccumulationTarget = _backend.CreateRenderTarget("light_accumulation", new Definition(width, height, false, new List<Definition.Attachment>()
             {
                 new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0),
-                new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent24, Renderer.PixelType.Float, 0)
+                //new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent24, Renderer.PixelType.Float, 0)
             }));
 
             _spotShadowsRenderTarget = _backend.CreateRenderTarget("spot_shadows", new Definition(512, 512, true, new List<Definition.Attachment>()
@@ -214,9 +214,8 @@ namespace Triton.Graphics.Deferred
             RenderedLights = 0;
 
             // Init common matrices
-            Matrix4 view, projection;
-            camera.GetViewMatrix(out view);
-            camera.GetProjectionMatrix(out projection);
+            camera.GetViewMatrix(out var view);
+            camera.GetProjectionMatrix(out var projection);
 
             // Render scene to GBuffer
             var clearColor = stage.ClearColor;
@@ -229,10 +228,10 @@ namespace Triton.Graphics.Deferred
 
             // Render light accumulation
             _backend.ProfileBeginSection(Profiler.Lighting);
-            _backend.BeginPass(_lightAccumulationTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), ClearFlags.All);
 
-            RenderAmbientLight(stage);
+            _backend.BeginPass(_lightAccumulationTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), ClearFlags.All);
             RenderLights(camera, ref view, ref projection, stage.GetLights(), stage);
+            RenderAmbientLight(stage);
 
             _backend.EndPass();
             _backend.ProfileEndSection(Profiler.Lighting);
@@ -254,9 +253,7 @@ namespace Triton.Graphics.Deferred
             _renderOperations.Reset();
             stage.PrepareRenderOperations(viewProjection, _renderOperations);
 
-            RenderOperation[] operations;
-            int count;
-            _renderOperations.GetOperations(out operations, out count);
+            _renderOperations.GetOperations(out var operations, out var count);
 
             Resources.Material activeMaterial = null;
             Matrix4 worldView, world, itWorld, worldViewProjection;
@@ -285,7 +282,6 @@ namespace Triton.Graphics.Deferred
             Matrix4 modelViewProjection = Matrix4.Identity;
 
             var ambientColor = new Vector3((float)System.Math.Pow(stage.AmbientColor.X, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Y, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Z, 2.2f));
-
             _backend.BeginInstance(_ambientLightShader.Handle,
                 new int[] { GBuffer.Textures[0].Handle, GBuffer.Textures[1].Handle },
                 new int[] { _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering },
@@ -608,7 +604,7 @@ namespace Triton.Graphics.Deferred
                 _pointLightDataCS[index].LightColor = new Vector4(lightColor, light.Intensity);
 
                 index++;
-            }
+            } 
 
             if (index == 0)
                 return;
@@ -622,7 +618,7 @@ namespace Triton.Graphics.Deferred
             var lightCount = index;
             var lightTileSize = 16;
 
-            _backend.BeginInstance(_lightComputeShader.Handle, new int[] { GBuffer.Textures[3].Handle }, new int[] { _backend.DefaultSamplerNoFiltering }, _lightAccumulatinRenderState);
+            _backend.BeginInstance(_lightComputeShader.Handle, new int[] { GBuffer.Textures[3].Handle, _lightAccumulationTarget.Textures[0].Handle }, new int[] { _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering }, _lightAccumulatinRenderState);
 
             var numTilesX = (uint)DispatchSize(lightTileSize, GBuffer.Textures[0].Width);
             var numTilesY = (uint)DispatchSize(lightTileSize, GBuffer.Textures[0].Height);

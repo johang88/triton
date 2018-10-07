@@ -29,20 +29,10 @@ float square(float value) {
 }
 
 vec3 encodeNormals(vec3 n) {
-	vec2 res = vec2(n.x / (1.0 - n.z), n.y / (1.0 - n.z));
-	// return vec3(res, n.z >= 0 ? 1.0 : -1.0);
 	return n * 0.5 + 0.5;
 }
 
 vec3 decodeNormals(vec3 enc) {
-	vec3 n = vec3(
-		(2.0 * enc.x) / (1 + (enc.x * enc.x) + (enc.y * enc.y)),
-		(2.0 * enc.y) / (1 + (enc.x * enc.x) + (enc.y * enc.y)),
-		(-1 + (enc.x * enc.x) + (enc.y * enc.y)) / (1 + (enc.x * enc.x) + (enc.y * enc.y))
-	);
-	//n.z *= enc.z;
-	
-	//return n;
 	return enc * 2.0 - 1.0;
 }
 
