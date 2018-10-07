@@ -23,7 +23,8 @@ namespace Triton.Graphics.Deferred
 		public int ScreenSize = 0;
 		public int SpotParams = 0;
 		public int InvViewProjection = 0;
-		public int ShadowViewProj = 0;
+		public int InvProjection = 0;
+        public int ShadowViewProj = 0;
 		public int ShadowBias = 0;
 		public int ClipPlane = 0;
 		public int TexelSize = 0;

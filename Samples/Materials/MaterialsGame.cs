@@ -40,7 +40,7 @@ namespace Triton.Samples
             Player.Components.Add(new PlayerController());
             GameWorld.Add(Player);
 
-            var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
+            var roomPrefab = Resources.Load<Prefab>("/prefabs/city");
             var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
 
             roomPrefab.Instantiate(GameWorld);
@@ -59,7 +59,7 @@ namespace Triton.Samples
             }
 
             // Create a shit load of point lights
-            var lightSpacing = 0.6f;
+            var lightSpacing = 2f;
             var numLights = 40;
             for (var x = 0; x < numLights; x++)
             {
@@ -71,7 +71,7 @@ namespace Triton.Samples
                         (-lightSpacing * numLights * 0.5f) + lightSpacing * z
                         );
 
-                    Stage.CreatePointLight(position, 2.0f + (float)rng.NextDouble(), new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble()), intensity: 0.1f + (float)rng.NextDouble() * 0.5f);
+                    Stage.CreatePointLight(position, 5.0f + (float)rng.NextDouble(), new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble()), intensity: 0.5f + (float)rng.NextDouble());
                 }
             }
 

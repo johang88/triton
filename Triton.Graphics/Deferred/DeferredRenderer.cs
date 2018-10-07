@@ -635,7 +635,9 @@ namespace Triton.Graphics.Deferred
             _backend.BindShaderVariable(_computeLightParams.Projection, ref projection);
 
             var inverseViewProjectionMatrix = Matrix4.Invert(view * projection);
+            var inverseProjectionMatrix = Matrix4.Invert(projection);
             _backend.BindShaderVariable(_computeLightParams.InvViewProjection, ref inverseViewProjectionMatrix);
+            _backend.BindShaderVariable(_computeLightParams.InvProjection, ref inverseProjectionMatrix);
             _backend.BindImageTexture(0, GBuffer.Textures[0].Handle, OpenTK.Graphics.OpenGL.TextureAccess.ReadOnly, OpenTK.Graphics.OpenGL.SizedInternalFormat.Rgba8);
             _backend.BindImageTexture(1, GBuffer.Textures[1].Handle, OpenTK.Graphics.OpenGL.TextureAccess.ReadOnly, OpenTK.Graphics.OpenGL.SizedInternalFormat.Rgba16f);
             _backend.BindImageTexture(2, GBuffer.Textures[2].Handle, OpenTK.Graphics.OpenGL.TextureAccess.ReadOnly, OpenTK.Graphics.OpenGL.SizedInternalFormat.Rgba8);

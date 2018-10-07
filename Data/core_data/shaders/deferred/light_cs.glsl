@@ -46,122 +46,125 @@ float linearDepth(float zw) {
 
 const uint ThreadGroupSize = LightTileSize * LightTileSize;
 
+vec4 unproject(vec4 v) {
+	v = invProjection * v;
+	v /= v.w;
+	return v;
+}
+
+vec4 create_plane(vec4 b, vec4 c) { 
+    vec4 normal = vec4(normalize(cross(b.xyz, c.xyz)), 0);
+    return normal;
+}
+
+float get_signed_distance_from_plane(vec4 p, vec4 eqn) {
+	return dot(eqn.xyz, p.xyz);
+}
+
 void main() {
-	ivec2 pixelCoord = ivec2(gl_WorkGroupID.xy * uvec2(LightTileSize, LightTileSize) + gl_LocalInvocationID.xy);	
-	const uint groupThreadIdx = gl_LocalInvocationID.y * LightTileSize + gl_LocalInvocationID.x;
-	
-	// Work out z range
-	float minZSample = cameraClipPlanes.x;
-	float maxZSample = cameraClipPlanes.y;
-	
-	vec2 depthTextureCoords = vec2(pixelCoord) / displaySize;
-	float zw = texelFetch(samplerDepth, pixelCoord, 0).x;
-	
-	float linearZ = linearDepth(zw);
-	vec3 positionWS = decodeWorldPosition(depthTextureCoords, zw);
-	
-	minZSample = min(minZSample, linearZ);
-	maxZSample = max(maxZSample, linearZ);
-	
 	// Initialize shared memory
-	if (groupThreadIdx == 0) {
+	if (gl_LocalInvocationIndex == 0) {
 		numTileLights = 0;
-		
 		tileMinZ = 0xffffffff;
 		tileMaxZ = 0;
 	}
-	
+
+	ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy);	
+	vec2 texCoord = vec2(pixelCoord) / displaySize;
+
+	float depthFloat = texelFetch(samplerDepth, pixelCoord, 0).x;
+	uint depthInt = uint(depthFloat * 0xffffffffu);
+
+	// Calculate min / max depth
+	atomicMin(tileMinZ, depthInt);
+	atomicMax(tileMaxZ, depthInt);
+
+	// Synchronize
 	groupMemoryBarrier(); barrier();
-	
-	if (maxZSample >= minZSample) {
-		atomicMin(tileMinZ, uint(minZSample));
-		atomicMax(tileMaxZ, uint(maxZSample));
-	}
-	
-	groupMemoryBarrier();  barrier();
-	
-	float minTileZ = float(tileMinZ);
-    float maxTileZ = float(tileMaxZ);
-	
-	// Work out scale/bias from [0, 1]
-	vec2 tileScale = vec2(displaySize.xy) * (1.0 / (2.0 * float(LightTileSize)));
-	vec2 tileBias = tileScale - vec2(gl_WorkGroupID.xy);
-	
-	// Now work out composite projection matrix
-    // Relevant matrix columns for this tile frusta
-    vec4 c1 = vec4(-projection[0][0] * tileScale.x, projection[0][1], tileBias.x, projection[0][3]);
-	vec4 c2 = vec4(projection[1][0], -projection[1][1] * tileScale.y, tileBias.y, projection[1][3]);
-    vec4 c4 = vec4(projection[3][0], projection[3][1], -1.0, projection[3][3]);
-	
-	// Derive frustum planes
-	vec4 frustumPlanes[6];
-	
-	 // Sides
-    frustumPlanes[0] = c4 - c1;
-    frustumPlanes[1] = c4 + c1;
-    frustumPlanes[2] = c4 - c2;
-    frustumPlanes[3] = c4 + c2;
-	
-	// Near/far
-	frustumPlanes[4] = vec4(0.0, 0.0, -1.0, -minTileZ);
-	frustumPlanes[5] = vec4(0.0, 0.0, -1.0, maxTileZ);
-	
-	for (uint i = 0; i < 4; ++i) {
-		frustumPlanes[i] *= 1.0 / length(frustumPlanes[i].xyz);
-	}
-	
-	// Cull lights
-	for(uint lightIndex = groupThreadIdx; lightIndex < numLights; lightIndex += ThreadGroupSize) {
-		vec3 lightPosition = (view * vec4(lights[lightIndex].positionRange.xyz, 1.0)).xyz;
-		float cutoffRadius = lights[lightIndex].positionRange.w;
 
-        // Cull: point light sphere vs tile frustum
-        bool inFrustum = true;
-		for (uint i = 0; i < 4; ++i) {
-            float d = dot(frustumPlanes[i], vec4(lightPosition, 1.0));
-            inFrustum = inFrustum && (-cutoffRadius <= d);
-        }
-		
-		if (inFrustum) {
-            uint listIndex = atomicAdd(numTileLights, 1);
-            tileLightList[listIndex] = lightIndex;
-        }
-    }
+	float maxDepthZ = float(float(tileMaxZ) / float(0xffffffffu));
+	float minDepthZ = float(tileMinZ / float(0xffffffffu));
 
-    groupMemoryBarrier();  barrier();
+	// Create frustum tiles for the lights
+	uint minX = LightTileSize * gl_WorkGroupID.x;
+	uint minY = LightTileSize * gl_WorkGroupID.y;
+	uint maxX = LightTileSize * (gl_WorkGroupID.x + 1);
+	uint maxY = LightTileSize * (gl_WorkGroupID.y + 1);
+
+	// Convert to NDC and then viewspace
+	vec4 tileCorners[4];
+	tileCorners[0] = unproject(vec4( (float(minX)/displaySize.x) * 2.0f - 1.0f, (float(minY)/displaySize.y) * 2.0f - 1.0f, 1.0f, 1.0f));
+	tileCorners[1] = unproject(vec4( (float(maxX)/displaySize.x) * 2.0f - 1.0f, (float(minY)/displaySize.y) * 2.0f - 1.0f, 1.0f, 1.0f));
+	tileCorners[2] = unproject(vec4( (float(maxX)/displaySize.x) * 2.0f - 1.0f, (float(maxY)/displaySize.y) * 2.0f - 1.0f, 1.0f, 1.0f));
+	tileCorners[3] = unproject(vec4( (float(minX)/displaySize.x) * 2.0f - 1.0f, (float(maxY)/displaySize.y) * 2.0f - 1.0f, 1.0f, 1.0f));
+
+	vec4 frustum[4];
+	for(int i = 0; i < 4; i++) {
+		frustum[i] = create_plane(tileCorners[i], tileCorners[(i+1) & 3]);
+	}
+
+	// Synchronize
+	groupMemoryBarrier(); barrier();
+
+	// Check lights against the frustum
+	for (uint i = 0; i < numLights; i += ThreadGroupSize) {
+		uint lightIndex = gl_LocalInvocationIndex + i;
+		if (lightIndex < numLights) {
+			vec4 lightPositionVS = view * vec4(lights[lightIndex].positionRange.xyz, 1.0);
+			float radius = lights[lightIndex].positionRange.w;
+
+			if (   get_signed_distance_from_plane(lightPositionVS, frustum[0]) < radius
+				&& get_signed_distance_from_plane(lightPositionVS, frustum[1]) < radius
+				&& get_signed_distance_from_plane(lightPositionVS, frustum[2]) < radius
+				&& get_signed_distance_from_plane(lightPositionVS, frustum[3]) < radius) {
+					uint listIndex = atomicAdd(numTileLights, 1);
+            		tileLightList[listIndex] = lightIndex;
+				}
+		}
+	}
+
+	// Synchronize
+	groupMemoryBarrier(); barrier();
+
+	// Process lighting
+	vec3 positionWS = decodeWorldPosition(texCoord, depthFloat);
 	
+	vec4 gbuffer1 = imageLoad(samplerGBuffer1, pixelCoord);
 	vec3 diffuse = decodeDiffuse(imageLoad(samplerGBuffer0, pixelCoord).xyz);
-	vec3 normalWS = decodeNormals(imageLoad(samplerGBuffer1, pixelCoord).xyz);
+	vec3 normalWS = decodeNormals(gbuffer1.xyz);
 	vec4 gbuffer2 = imageLoad(samplerGBuffer2, pixelCoord);
 	
-	float metallic = gbuffer2.x;
-	float roughness = gbuffer2.y;
-	float specular = gbuffer2.z;
+	if (gbuffer1.w > 0) {
+		float metallic = gbuffer2.x;
+		float roughness = gbuffer2.y;
+		float specular = gbuffer2.z;
 
-    vec3 F0 = vec3(0.08);
-	F0 = mix(F0, diffuse, metallic);
+		vec3 F0 = vec3(0.08);
+		F0 = mix(F0, diffuse, metallic);
 
-	vec3 eyeDir = normalize(cameraPositionWS - positionWS);
-	
-	vec3 lighting = imageLoad(outputTexture, pixelCoord).xyz;
-	for(uint tLightIdx = 0; tLightIdx < numTileLights; ++tLightIdx) {
-		uint lIdx = tileLightList[tLightIdx];
-		Light light = lights[lIdx];
+		vec3 eyeDir = normalize(cameraPositionWS - positionWS);
 		
-		vec3 lightVec = light.positionRange.xyz - positionWS;
-		vec3 lightDir = normalize(lightVec);
+		vec3 lighting = imageLoad(outputTexture, pixelCoord).xyz;
+		for(uint tLightIdx = 0; tLightIdx < numTileLights; ++tLightIdx) {
+			uint lIdx = tileLightList[tLightIdx];
+			Light light = lights[lIdx];
+			
+			vec3 lightVec = light.positionRange.xyz - positionWS;
+			vec3 lightDir = normalize(lightVec);
+			
+			float nDotL = saturate(dot(normalWS, lightDir));
+			
+			float lightDistanceSquared = dot(lightVec, lightVec);
 		
-		float nDotL = saturate(dot(normalWS, lightDir));
-		
-		float lightDistanceSquared = dot(lightVec, lightVec);
-	
-		float attenuation = 1.0 / lightDistanceSquared;
-		attenuation = attenuation * square(saturate(1.0 - square(lightDistanceSquared * square(1.0 / light.positionRange.w))));
+			float attenuation = 1.0 / lightDistanceSquared;
+			attenuation = attenuation * square(saturate(1.0 - square(lightDistanceSquared * square(1.0 / light.positionRange.w))));
 
-        float attenuationNdotL = attenuation * nDotL;
+			float attenuationNdotL = attenuation * nDotL;
+			
+			lighting += brdf(normalWS, eyeDir, lightDir, roughness, metallic, light.colorIntensity.xyz * attenuationNdotL, diffuse, F0);
+			//lighting.r += 0.01;
+		}
 		
-		lighting += brdf(normalWS, eyeDir, lightDir, roughness, metallic, light.colorIntensity.xyz * attenuationNdotL, diffuse, F0);
+		imageStore(outputTexture, pixelCoord, vec4(lighting, 0));
 	}
-	
-	imageStore(outputTexture, pixelCoord, vec4(lighting, 0));
 }
