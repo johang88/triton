@@ -93,6 +93,20 @@ namespace Triton.Samples
                 _balls.Clear();
             }
 
+
+            if (ImGui.Button("Add some ball!"))
+            {
+                var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
+
+                var ball = ballPrefab.Instantiate(GameWorld);
+                _balls.Add(ball);
+
+                ball.Position = Player.Position + Vector3.Transform(new Vector3(0, 1, 1), Player.Orientation);
+                ball.Orientation = Player.Orientation;
+
+                Resources.Unload(ballPrefab);
+            }
+
             if (ImGui.Button("Add some Force!"))
             {
                 foreach (var ball in _balls)

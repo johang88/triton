@@ -277,7 +277,7 @@ namespace Triton.Common
             foreach (var resource in _resourcesToUnload)
             {
                 UnloadResource(resource);
-                _resources.TryRemove(resource.Name, out var _);
+                _resources.TryRemove(resource.Name + "?" + resource.Parameters, out var _);
                 _instanceToReference.TryRemove(resource.Resource, out var _);
             }
 
