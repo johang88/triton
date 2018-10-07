@@ -100,8 +100,7 @@ namespace Triton.Renderer.Textures
 
         public void Destroy(int handle)
         {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
+            ExtractHandle(handle, out int index, out int id);
 
             if (id == -1 || _handles[index].Id != id)
                 return;
@@ -120,8 +119,7 @@ namespace Triton.Renderer.Textures
 
         public void SetPixelData(int handle, TextureTarget target, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap = true)
         {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
+            ExtractHandle(handle, out int index, out int id);
 
             if (id == -1 || _handles[index].Id != id)
                 return;
@@ -148,6 +146,9 @@ namespace Triton.Renderer.Textures
                 GL.TexImage2D((OGL.TextureTarget)(int)_handles[index].Target, 0, (OGL.PixelInternalFormat)(int)internalFormat, width, height, 0, (OGL.PixelFormat)(int)format, (OGL.PixelType)(int)type, data);
                 if (mipmap)
                     GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+
+                GL.TexParameter((OGL.TextureTarget)(int)_handles[index].Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+                GL.TexParameter((OGL.TextureTarget)(int)_handles[index].Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             }
 
             // The texture can now be used
@@ -156,8 +157,7 @@ namespace Triton.Renderer.Textures
 
         public void LoadDDS(int handle, byte[] data, out int width, out int height)
         {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
+            ExtractHandle(handle, out int index, out int id);
 
             width = height = 0;
 
@@ -200,8 +200,7 @@ namespace Triton.Renderer.Textures
 
         public int GetOpenGLHande(int handle)
         {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
+            ExtractHandle(handle, out int index, out int id);
 
             if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
                 return _defaultOpenGlHandle;
@@ -211,8 +210,7 @@ namespace Triton.Renderer.Textures
 
         public int GetOpenGLHande(int handle, out OGL.TextureTarget target)
         {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
+            ExtractHandle(handle, out int index, out int id);
 
             target = OGL.TextureTarget.Texture2D;
 

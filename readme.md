@@ -66,3 +66,4 @@ Example: `ContentProcessor.exe in=..\Media out=..Data'
 * Triton.Renderer - Core renderer, manages all GL state and provides wrapper functions for all common functionality. This is the low level renderer implementation, use the rendering backend in `Triton.Graphics` to issue the actual commands as thread safety is not guaranteed by the core renderer.
 
 ![Cewl screenshot](screenshot.jpg?raw=true "Basic Scene Sample")
+![Cewl screenshot](screenshot2.jpg?raw=true "Tiled deferred lighting")

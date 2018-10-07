@@ -81,13 +81,10 @@ namespace Triton.Graphics
 
         public Backend(ResourceManager resourceManager, int width, int height, ContextReference contextReference)
         {
-            if (resourceManager == null)
-                throw new ArgumentNullException("resourceManager");
-
             Width = width;
             Height = height;
 
-            _resourceManager = resourceManager;
+            _resourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");
             _contextReference = contextReference;
 
             // Setup the render system
@@ -98,7 +95,7 @@ namespace Triton.Graphics
             {
                 { SamplerParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear },
                 { SamplerParameterName.TextureMagFilter, (int)TextureMagFilter.Linear },
-                { SamplerParameterName.TextureMaxAnisotropyExt, 8 },
+                { SamplerParameterName.TextureMaxAnisotropyExt, 16 },
                 { SamplerParameterName.TextureWrapS, (int)TextureWrapMode.Repeat },
                 { SamplerParameterName.TextureWrapT, (int)TextureWrapMode.Repeat },
                 { SamplerParameterName.TextureWrapR, (int)TextureWrapMode.Repeat }

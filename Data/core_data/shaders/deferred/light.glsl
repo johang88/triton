@@ -148,7 +148,6 @@ void main()
 		vec3 F0 = vec3(0.08);
 		F0 = mix(F0, diffuse, metallic);
 		
-		//lighting = vec3 brdf(vec3 N, vec3 V, vec3 L, float roughness, float metallic, vec3 radiance, vec3 albedo)
 		lighting = brdf(normal, eyeDir, lightDir, roughness, metallic, lightColor * attenuationNdotL, diffuse, F0);
 	}
 

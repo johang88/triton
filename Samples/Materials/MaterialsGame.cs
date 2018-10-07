@@ -58,6 +58,23 @@ namespace Triton.Samples
                 ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
             }
 
+            // Create a shit load of point lights
+            var lightSpacing = 0.6f;
+            var numLights = 40;
+            for (var x = 0; x < numLights; x++)
+            {
+                for (var z = 0; z < numLights; z++)
+                {
+                    var position = new Vector3(
+                        (-lightSpacing * numLights * 0.5f) + lightSpacing * x,
+                        (float)rng.NextDouble(),
+                        (-lightSpacing * numLights * 0.5f) + lightSpacing * z
+                        );
+
+                    Stage.CreatePointLight(position, 2.0f + (float)rng.NextDouble(), new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble()), intensity: 0.1f + (float)rng.NextDouble() * 0.5f);
+                }
+            }
+
             Resources.Unload(roomPrefab);
             Resources.Unload(ballPrefab);
 

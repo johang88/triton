@@ -21,6 +21,7 @@ namespace Triton.Graphics.Deferred
         private RenderShadowsParams RenderShadowsSkinnedParams = new RenderShadowsParams();
         private RenderShadowsParams RenderShadowsSkinnedCubeParams = new RenderShadowsParams();
         private FogParams FogParams = new FogParams();
+        private LightParams _computeLightParams = new LightParams();
 
         private Vector2 ScreenSize;
 
@@ -44,10 +45,13 @@ namespace Triton.Graphics.Deferred
         private Resources.ShaderProgram RenderShadowsSkinnedShader;
         private Resources.ShaderProgram RenderShadowsSkinnedCubeShader;
         private Resources.ShaderProgram FogShader;
+        private Resources.ShaderProgram _lightComputeShader;
+
+        private const int NumLightInstances = 2048;
+        private readonly PointLightDataCS[] _pointLightDataCS = new PointLightDataCS[NumLightInstances];
+        private int _pointLightDataCSBuffer;
 
         // Used for point light shadows
-        private Light ShadowSpotLight = new Light();
-
         private Resources.Texture RandomNoiseTexture;
 
         private bool HandlesInitialized = false;
@@ -79,25 +83,20 @@ namespace Triton.Graphics.Deferred
 
         public DeferredRenderer(Common.ResourceManager resourceManager, Backend backend, int width, int height)
         {
-            if (resourceManager == null)
-                throw new ArgumentNullException("resourceManager");
-            if (backend == null)
-                throw new ArgumentNullException("backend");
-
             Settings.ShadowQuality = ShadowQuality.High;
             Settings.EnableShadows = true;
             Settings.ShadowRenderDistance = 128.0f;
 
-            ResourceManager = resourceManager;
-            Backend = backend;
+            ResourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");
+            Backend = backend ?? throw new ArgumentNullException("backend");
 
             ScreenSize = new Vector2(width, height);
 
             GBuffer = Backend.CreateRenderTarget("gbuffer", new Definition(width, height, true, new List<Definition.Attachment>()
             {
-                new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0),
-                new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.UnsignedByte, 1),
-                new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 2),
+                new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba8, Renderer.PixelType.UnsignedByte, 0),
+                new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 1),
+                new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba8, Renderer.PixelType.UnsignedByte, 2),
                 new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent24, Renderer.PixelType.Float, 0)
             }));
 
@@ -179,7 +178,7 @@ namespace Triton.Graphics.Deferred
             RenderShadowsCubeShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows_cube");
             RenderShadowsSkinnedCubeShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows_cube", "SKINNED");
             FogShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/fog");
-
+            _lightComputeShader = ResourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/light_cs");
             RandomNoiseTexture = ResourceManager.Load<Triton.Graphics.Resources.Texture>("/textures/random_n");
 
             QuadMesh = Backend.CreateBatchBuffer();
@@ -206,6 +205,9 @@ namespace Triton.Graphics.Deferred
                 { SamplerParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge },
                 { SamplerParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge }
             });
+
+            _pointLightDataCSBuffer = Backend.RenderSystem.CreateBuffer(BufferTarget.ShaderStorageBuffer, true);
+            Backend.RenderSystem.SetBufferData(_pointLightDataCSBuffer, _pointLightDataCS, true, true);
         }
 
         public void InitializeHandles()
@@ -221,6 +223,7 @@ namespace Triton.Graphics.Deferred
             RenderShadowsCubeShader.BindUniformLocations(RenderShadowsCubeParams);
             RenderShadowsSkinnedCubeShader.BindUniformLocations(RenderShadowsSkinnedCubeParams);
             FogShader.BindUniformLocations(FogParams);
+            _lightComputeShader.BindUniformLocations(_computeLightParams);
         }
 
         public RenderTarget Render(Stage stage, Camera camera)
@@ -294,6 +297,13 @@ namespace Triton.Graphics.Deferred
             return Output;
         }
 
+        private int DispatchSize(int tgSize, int numElements)
+        {
+            var dispatchSize = numElements / tgSize;
+            dispatchSize += numElements % tgSize > 0 ? 1 : 0;
+            return dispatchSize;
+        }
+
         private void RenderScene(Stage stage, Camera camera, ref Matrix4 view, ref Matrix4 projection)
         {
             var viewProjection = view * projection;
@@ -352,6 +362,8 @@ namespace Triton.Graphics.Deferred
             Matrix4 modelViewProjection = Matrix4.Identity;
             var frustum = camera.GetFrustum();
 
+            RenderPointLights(camera, frustum, ref view, ref projection, stage, lights);
+
             foreach (var light in lights)
             {
                 if (!light.Enabled)
@@ -369,6 +381,9 @@ namespace Triton.Graphics.Deferred
             // Culling
             if (light.Type == LighType.PointLight)
             {
+                if (!light.CastShadows)
+                    return; // Handled by tiled renderer
+
                 BoundingSphere.Center = light.Position;
                 BoundingSphere.Radius = radius;
 
@@ -620,6 +635,75 @@ namespace Triton.Graphics.Deferred
             Backend.EndInstance();
         }
 
+        private unsafe void RenderPointLights(Camera camera, BoundingFrustum cameraFrustum, ref Matrix4 view, ref Matrix4 projection, Stage stage, IReadOnlyCollection<Light> lights)
+        {
+            var index = 0;
+
+            var boundingSphere = new BoundingSphere();
+            foreach (var light in lights)
+            {
+                if (!light.Enabled || light.CastShadows || light.Type != LighType.PointLight)
+                    continue;
+
+                var radius = light.Range * 1.1f;
+
+                boundingSphere.Center = light.Position;
+                boundingSphere.Radius = radius;
+
+                if (!cameraFrustum.Intersects(boundingSphere))
+                    continue;
+
+                RenderedLights++;
+
+                var lightColor = light.Color * light.Intensity;
+                lightColor = new Vector3((float)System.Math.Pow(lightColor.X, 2.2f), (float)System.Math.Pow(lightColor.Y, 2.2f), (float)System.Math.Pow(lightColor.Z, 2.2f));
+
+                _pointLightDataCS[index].LightPositionRange = new Vector4(light.Position, light.Range);
+                _pointLightDataCS[index].LightColor = new Vector4(lightColor, light.Intensity);
+
+                index++;
+            }
+
+            if (index == 0)
+                return;
+
+            fixed (PointLightDataCS* data = _pointLightDataCS)
+            {
+                Backend.UpdateBufferInline(_pointLightDataCSBuffer, index * sizeof(PointLightDataCS), (byte*)data);
+            }
+            Backend.BindBufferBase(0, _pointLightDataCSBuffer);
+
+            var lightCount = index;
+            var lightTileSize = 16;
+
+            Backend.BeginInstance(_lightComputeShader.Handle, new int[] { GBuffer.Textures[3].Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, LightAccumulatinRenderState);
+
+            var numTilesX = (uint)DispatchSize(lightTileSize, GBuffer.Textures[0].Width);
+            var numTilesY = (uint)DispatchSize(lightTileSize, GBuffer.Textures[0].Height);
+
+            Backend.BindShaderVariable(_computeLightParams.DisplaySize, (uint)ScreenSize.X, (uint)ScreenSize.Y);
+            Backend.BindShaderVariable(_computeLightParams.NumTiles, numTilesX, numTilesY);
+            Backend.BindShaderVariable(_computeLightParams.NumLights, lightCount);
+
+            var clipDistance = new Vector2(camera.NearClipDistance, camera.FarClipDistance);
+            Backend.BindShaderVariable(_computeLightParams.CameraClipPlanes, ref clipDistance);
+
+            Backend.BindShaderVariable(_computeLightParams.CameraPositionWS, ref camera.Position);
+            Backend.BindShaderVariable(_computeLightParams.View, ref view);
+            Backend.BindShaderVariable(_computeLightParams.Projection, ref projection);
+
+            var inverseViewProjectionMatrix = Matrix4.Invert(view * projection);
+            Backend.BindShaderVariable(_computeLightParams.InvViewProjection, ref inverseViewProjectionMatrix);
+            Backend.BindImageTexture(0, GBuffer.Textures[0].Handle, OpenTK.Graphics.OpenGL.TextureAccess.ReadOnly, OpenTK.Graphics.OpenGL.SizedInternalFormat.Rgba8);
+            Backend.BindImageTexture(1, GBuffer.Textures[1].Handle, OpenTK.Graphics.OpenGL.TextureAccess.ReadOnly, OpenTK.Graphics.OpenGL.SizedInternalFormat.Rgba16f);
+            Backend.BindImageTexture(2, GBuffer.Textures[2].Handle, OpenTK.Graphics.OpenGL.TextureAccess.ReadOnly, OpenTK.Graphics.OpenGL.SizedInternalFormat.Rgba8);
+            Backend.BindImageTexture(3, LightAccumulation.Textures[0].Handle, OpenTK.Graphics.OpenGL.TextureAccess.ReadWrite, OpenTK.Graphics.OpenGL.SizedInternalFormat.Rgba16f);
+
+            Backend.Barrier(OpenTK.Graphics.OpenGL.MemoryBarrierFlags.AllBarrierBits);
+            Backend.DispatchCompute((int)numTilesX, (int)numTilesY, 1);
+            Backend.Barrier(OpenTK.Graphics.OpenGL.MemoryBarrierFlags.AllBarrierBits);
+        }
+
         bool IsInsideSpotLight(Light light, Camera camera)
         {
             var lightPos = light.Position;
@@ -811,6 +895,12 @@ namespace Triton.Graphics.Deferred
             public ShadowQuality ShadowQuality;
             public bool EnableShadows;
             public float ShadowRenderDistance;
+        }
+
+        private struct PointLightDataCS
+        {
+            public Vector4 LightPositionRange;
+            public Vector4 LightColor;
         }
     }
 }

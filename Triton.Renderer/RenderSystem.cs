@@ -480,8 +480,7 @@ namespace Triton.Renderer
                 // Init render target
                 _renderTargetManager.Init(renderTargetHandle, definition);
 
-                if (loadedCallback != null)
-                    loadedCallback(renderTargetHandle, true, "");
+                loadedCallback?.Invoke(renderTargetHandle, true, "");
             });
 
             return renderTargetHandle;

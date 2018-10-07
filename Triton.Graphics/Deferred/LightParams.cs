@@ -37,5 +37,14 @@ namespace Triton.Graphics.Deferred
 		public int ShadowViewProj2 = 0;
 		public int ShadowViewProj3 = 0;
 		public int ClipDistances = 0;
-	}
+
+        // Compute
+        public int NumTiles = 0;
+        public int DisplaySize = 0;
+        public int NumLights = 0;
+        public int CameraPositionWS = 0;
+        public int CameraClipPlanes = 0;
+        public int View = 0;
+        public int Projection = 0;
+    }
 }

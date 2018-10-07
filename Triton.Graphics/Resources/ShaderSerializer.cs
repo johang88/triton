@@ -56,7 +56,7 @@ namespace Triton.Graphics.Resources
 
         private string InsertHeader(string type, string defines, string source)
         {
-            return string.Format("#version 410 core\n#define {0}\n{1}\n", type, defines) + source;
+            return string.Format("#version 450 core\n#define {0}\n{1}\n", type, defines) + source;
         }
 
         private Dictionary<Renderer.ShaderType, string> GetShaderSources(string name, string shaderSource, string parameters)
