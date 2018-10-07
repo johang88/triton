@@ -121,15 +121,8 @@ namespace Triton.Renderer.Meshes
             if (data == IntPtr.Zero)
                 return;
 
-            //GL.InvalidateBufferData(_handles[index].BufferID);
-            //if (_handles[index].Size >= (int)dataLength)
-            //{
-            //	GLWrapper.NamedBufferSubData(_handles[index].Target, _handles[index].BufferID, IntPtr.Zero, dataLength, data);
-            //}
-            //else
-            {
-                GLWrapper.NamedBufferData(_handles[index].Target, _handles[index].BufferID, dataLength, data, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
-            }
+            GL.InvalidateBufferData(_handles[index].BufferID);
+            GLWrapper.NamedBufferData(_handles[index].Target, _handles[index].BufferID, dataLength, data, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
 
             _handles[index].Size = (int)dataLength;
         }
@@ -160,7 +153,6 @@ namespace Triton.Renderer.Meshes
             }
             else
             {
-                GLWrapper.NamedBufferData(_handles[index].Target, _handles[index].BufferID, dataLength, data, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
                 GLWrapper.NamedBufferStorage(_handles[index].Target, _handles[index].BufferID, (IntPtr)dataLength, data, 0);
             }
 

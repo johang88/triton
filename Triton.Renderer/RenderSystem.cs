@@ -576,11 +576,6 @@ namespace Triton.Renderer
 
         public void Scissor(bool enable, int x, int y, int w, int h)
         {
-            if (enable)
-                GL.Enable(EnableCap.ScissorTest);
-            else
-                GL.Disable(EnableCap.ScissorTest);
-
             GL.Scissor(x, y, w, h);
         }
 

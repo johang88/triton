@@ -125,9 +125,7 @@ namespace Triton.Game
 
                     indexBufferOffset += pcmd->ElemCount * sizeof(ushort);
                 }
-
-                _backend.Scissor(false, 0, 0, width, height);
-
+                
                 /* 
                 Sample GL Implementation:
                 const ImDrawList* cmd_list = draw_data->CmdLists[n];
