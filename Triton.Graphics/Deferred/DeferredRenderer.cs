@@ -319,7 +319,8 @@ namespace Triton.Graphics.Deferred
         private void RenderLight(Camera camera, BoundingFrustum cameraFrustum, ref Matrix4 view, ref Matrix4 projection, Stage stage, ref Matrix4 modelViewProjection, Light light)
         {
             // Pad the radius of the rendered sphere a little, it's quite low poly so there will be minor artifacts otherwise
-            var radius = light.Range * 1.1f;
+            // TODO: Fix the actual geometry instead ... or maybe find a way to put the shadow maps into the tiled renderer
+            var radius = light.Range * 10f;
 
             // Culling
             if (light.Type == LighType.PointLight)
@@ -356,8 +357,7 @@ namespace Triton.Graphics.Deferred
             if (light.Type == LighType.PointLight)
             {
                 renderStateId = _lightOutsideRenderState;
-                // We pad it once again to avoid any artifacted when the camera is close to the edge of the bounding sphere
-                if (cameraDistanceToLight.Length <= radius * 1.1f)
+                if (cameraDistanceToLight.Length <= radius)
                 {
                     renderStateId = _lightInsideRenderState;
                 }
