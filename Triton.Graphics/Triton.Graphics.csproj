@@ -70,8 +70,10 @@
     <Compile Include="Camera.cs" />
     <Compile Include="Deferred\AmbientLightParams.cs" />
     <Compile Include="Deferred\CombineParams.cs" />
+    <Compile Include="Deferred\CSMRenderer.cs" />
     <Compile Include="Deferred\DeferredRenderer.cs" />
     <Compile Include="Deferred\LightParams.cs" />
+    <Compile Include="Deferred\ShadowBufferRenderer.cs" />
     <Compile Include="Deferred\ShadowQuality.cs" />
     <Compile Include="Deferred\RenderShadowsParams.cs" />
     <Compile Include="IRenderable.cs" />

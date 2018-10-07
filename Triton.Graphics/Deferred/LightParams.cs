@@ -12,7 +12,7 @@ namespace Triton.Graphics.Deferred
 		public int SamplerGBuffer0 = 0;
 		public int SamplerGBuffer1 = 0;
 		public int SamplerGBuffer2 = 0;
-		public int samplerDepth = 0;
+		public int SamplerDepth = 0;
 		public int SamplerShadow = 0;
 		public int SamplerShadowCube = 0;
 		public int LightDirection = 0;

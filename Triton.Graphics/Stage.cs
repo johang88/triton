@@ -18,6 +18,8 @@ namespace Triton.Graphics
 
         private BoundingFrustum Frustum = new BoundingFrustum(Matrix4.Identity);
 
+        public Light SunLight { get; private set; }
+
         public Stage(Common.ResourceManager resourceManager)
         {
             _resourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");
@@ -119,6 +121,10 @@ namespace Triton.Graphics
             };
 
             _lights.Add(light);
+            if (SunLight == null)
+            {
+                SunLight = light;
+            }
 
             return light;
         }
@@ -165,6 +171,11 @@ namespace Triton.Graphics
 
         public void RemoveLight(Light light)
         {
+            if (SunLight == light)
+            {
+                SunLight = null;
+            }
+
             _lights.Remove(light);
         }
 

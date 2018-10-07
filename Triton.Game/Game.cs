@@ -12,6 +12,7 @@ using ImGuiNET;
 using OpenTK.Input;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using Triton.Graphics;
 
 namespace Triton.Game
 {
@@ -39,6 +40,8 @@ namespace Triton.Game
         public Input.InputManager InputManager { get; private set; }
 
         public Graphics.Deferred.DeferredRenderer DeferredRenderer { get; private set; }
+        public Graphics.Deferred.CSMRenderer CSMRenderer { get; private set; }
+        public Graphics.Deferred.ShadowBufferRenderer ShadowBufferRenderer { get; private set; }
         public Graphics.Post.PostEffectManager PostEffectManager { get; private set; }
 
         public Triton.Physics.World PhysicsWorld { get; private set; }
@@ -186,6 +189,8 @@ namespace Triton.Game
             Physics.Resources.ResourceLoaders.Init(Resources, FileSystem);
 
             DeferredRenderer = new Graphics.Deferred.DeferredRenderer(Resources, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
+            CSMRenderer = new Graphics.Deferred.CSMRenderer(GraphicsBackend, Resources);
+            ShadowBufferRenderer = new Graphics.Deferred.ShadowBufferRenderer(GraphicsBackend, Resources, GraphicsBackend.Width, GraphicsBackend.Height);
             PostEffectManager = new Graphics.Post.PostEffectManager(FileSystem, Resources, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
 
             AudioSystem = new Audio.AudioSystem(FileSystem);
@@ -268,9 +273,20 @@ namespace Triton.Game
         {
             GraphicsBackend.BeginScene();
 
-            var lightOutput = DeferredRenderer.Render(Stage, Camera);
+            var gbuffer = DeferredRenderer.RenderGBuffer(Stage, Camera);
+            var sunLight = Stage.SunLight;
 
-            var postProcessedResult = PostEffectManager.Render(Camera, Stage, DeferredRenderer.GBuffer, lightOutput, deltaTime);
+            GraphicsBackend.ProfileBeginSection(Profiler.ShadowsGeneration);
+            var csm = CSMRenderer.Render(gbuffer, sunLight, Stage, Camera, out var viewProjections, out var clipDistances);
+            GraphicsBackend.ProfileEndSection(Profiler.ShadowsGeneration);
+
+            GraphicsBackend.ProfileBeginSection(Profiler.ShadowsRender);
+            var shadows = ShadowBufferRenderer.Render(Camera, gbuffer, csm, viewProjections, clipDistances);
+            GraphicsBackend.ProfileEndSection(Profiler.ShadowsRender);
+
+            var lightOutput = DeferredRenderer.RenderLighting(Stage, Camera, shadows);
+
+            var postProcessedResult = PostEffectManager.Render(Camera, Stage, gbuffer, lightOutput, deltaTime);
 
             GraphicsBackend.BeginPass(null, Vector4.Zero, ClearFlags.Color);
 
