@@ -71,8 +71,6 @@
     <Compile Include="Deferred\AmbientLightParams.cs" />
     <Compile Include="Deferred\CombineParams.cs" />
     <Compile Include="Deferred\DeferredRenderer.cs" />
-    <Compile Include="Deferred\FogParams.cs" />
-    <Compile Include="Deferred\FogSettings.cs" />
     <Compile Include="Deferred\LightParams.cs" />
     <Compile Include="Deferred\ShadowQuality.cs" />
     <Compile Include="Deferred\RenderShadowsParams.cs" />

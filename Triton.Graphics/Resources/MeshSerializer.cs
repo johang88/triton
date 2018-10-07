@@ -57,8 +57,6 @@ namespace Triton.Graphics.Resources
 			var mesh = (Mesh)resource;
             mesh.Dispose();
 
-            var (_, overrideMaterial) = _resourceManager.GetResourceProperties(mesh);
-
 			using (var stream = new System.IO.MemoryStream(data))
 			using (var reader = new System.IO.BinaryReader(stream))
 			{
@@ -92,9 +90,6 @@ namespace Triton.Graphics.Resources
 				for (var i = 0; i < meshCount; i++)
 				{
 					var materialName = reader.ReadString();
-
-                    if (!string.IsNullOrEmpty(overrideMaterial))
-                        materialName = overrideMaterial;
 
                     Material material = null;
 					if (materialName != "no_material")
