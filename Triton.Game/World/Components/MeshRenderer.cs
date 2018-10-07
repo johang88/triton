@@ -19,41 +19,34 @@ namespace Triton.Game.World.Components
                 if (MeshInstance != null)
                 {
                     World.Stage.RemoveMesh(MeshInstance);
-                    World.ResourceManager.Unload(_mesh);
                 }
 
                 MeshInstance = null;
                 _mesh = value;
-
-                if (Owner != null && World != null)
-                {
-                    // Assume "ownership"
-                    World.ResourceManager.AddReference(_mesh);
-                    MeshInstance = World.Stage.AddMesh(_mesh);
-                }
             }
         }
 
-		public Graphics.MeshInstance MeshInstance { get; private set; }
         [DataMember] public bool CastShadows = true;
 
-		public override void OnActivate()
-		{
-			base.OnActivate();
+        private Graphics.MeshInstance MeshInstance;
 
-            // Assume "ownership"
-            World.ResourceManager.AddReference(_mesh);
-            MeshInstance = World.Stage.AddMesh(Mesh);
+        public override void OnActivate()
+        {
+            base.OnActivate();
+
+            if (_mesh != null)
+            {
+                MeshInstance = World.Stage.AddMesh(_mesh);
+            }
         }
 
-		public override void OnDeactivate()
+        public override void OnDeactivate()
 		{
 			base.OnDeactivate();
 
             if (MeshInstance != null)
             {
                 World.Stage.RemoveMesh(MeshInstance);
-                World.ResourceManager.Unload(_mesh);
             }
         }
 
@@ -61,8 +54,15 @@ namespace Triton.Game.World.Components
 		{
 			base.Update(dt);
 
-			MeshInstance.World = Matrix4.Scale(Owner.Scale) * Matrix4.Rotate(Owner.Orientation) * Matrix4.CreateTranslation(Owner.Position);
-			MeshInstance.CastShadows = CastShadows;
+            if (MeshInstance == null && _mesh != null)
+            {
+                MeshInstance = World.Stage.AddMesh(_mesh);
+            }
+            else if (MeshInstance != null)
+            {
+                MeshInstance.World = Matrix4.Scale(Owner.Scale) * Matrix4.Rotate(Owner.Orientation) * Matrix4.CreateTranslation(Owner.Position);
+                MeshInstance.CastShadows = CastShadows;
+            }
 		}
 	}
 }

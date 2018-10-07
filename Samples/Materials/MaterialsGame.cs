@@ -9,6 +9,7 @@ using Triton.Common;
 using Triton.Game.World;
 using Triton.Game.World.Components;
 using Triton.Input;
+using Triton.Samples.Components;
 
 namespace Triton.Samples
 {
@@ -16,13 +17,7 @@ namespace Triton.Samples
     {
         private GameObject Player;
         private CharacterController PlayerCharacter;
-
-        const float MovementSpeed = 3.5f;
-        const float MouseSensitivity = 0.0025f;
-
-        private float CameraYaw = 0;
-        private float CameraPitch = 0;
-
+        
         private List<GameObject> _balls = new List<GameObject>();
 
         public MaterialsGame()
@@ -42,13 +37,13 @@ namespace Triton.Samples
             Player.Position = new Vector3(0, 2f, 0);
             PlayerCharacter = new CharacterController();
             Player.Components.Add(PlayerCharacter);
+            Player.Components.Add(new PlayerController());
             GameWorld.Add(Player);
 
             var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
-            roomPrefab.Instantiate(GameWorld);
-            Resources.Unload(roomPrefab);
-
             var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
+
+            roomPrefab.Instantiate(GameWorld);
             for (int i = 0; i < 5; i++)
             {
                 var ball = ballPrefab.Instantiate(GameWorld);
@@ -62,6 +57,8 @@ namespace Triton.Samples
                 _balls.Add(ball);
                 ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
             }
+
+            Resources.Unload(roomPrefab);
             Resources.Unload(ballPrefab);
 
             DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.High;
@@ -75,39 +72,6 @@ namespace Triton.Samples
             if (InputManager.WasKeyPressed(Triton.Input.Key.Escape))
             {
                 CursorVisible = !CursorVisible;
-            }
-
-            if (!CursorVisible)
-            {
-                // Player input
-                var movement = Vector3.Zero;
-                if (InputManager.IsKeyDown(Key.W))
-                    movement.Z = 1.0f;
-                else if (InputManager.IsKeyDown(Key.S))
-                    movement.Z = -1.0f;
-
-                if (InputManager.IsKeyDown(Key.A))
-                    movement.X = 1.0f;
-                else if (InputManager.IsKeyDown(Key.D))
-                    movement.X = -1.0f;
-
-                if (movement.LengthSquared > 0.0f)
-                {
-                    movement = movement.Normalize();
-                }
-
-                var movementDir = Quaternion.FromAxisAngle(Vector3.UnitY, CameraYaw);
-                movement = Vector3.Transform(movement * MovementSpeed, movementDir);
-
-                CameraYaw += -InputManager.MouseDelta.X * MouseSensitivity;
-                CameraPitch += InputManager.MouseDelta.Y * MouseSensitivity;
-
-                Camera.Orientation = Quaternion.Identity;
-                Camera.Yaw(CameraYaw);
-                Camera.Pitch(CameraPitch);
-
-                PlayerCharacter.Move(movement, InputManager.IsKeyDown(Key.Space));
-                Camera.Position = Player.Position + new Vector3(0, 0.7f, 0);
             }
         }
 

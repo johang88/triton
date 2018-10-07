@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Physics.Resources;
 
 namespace Triton.Physics
 {
@@ -17,7 +18,9 @@ namespace Triton.Physics
 		public object Tag = null;
 		public int CollisionLayer = 1;
 
-		internal Body(RigidBody rigidBody)
+        public Mesh Mesh;
+
+        internal Body(RigidBody rigidBody)
 		{
 			RigidBody = rigidBody;
 		}

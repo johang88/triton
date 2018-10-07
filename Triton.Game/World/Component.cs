@@ -4,6 +4,8 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Graphics;
+using Triton.Input;
 
 namespace Triton.Game.World
 {
@@ -14,6 +16,8 @@ namespace Triton.Game.World
         protected GameObjectManager World => Owner.World;
         protected Graphics.Stage Stage => Owner.World.Stage;
         protected GameObject Parent => Owner.Parent;
+        protected Camera Camera => Owner.World.Camera;
+        protected InputManager Input => Owner.World.InputManager;
 
         public virtual void OnAttached(GameObject owner)
         {

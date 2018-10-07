@@ -16,10 +16,11 @@ namespace Triton.Physics
         private DbvtBroadphase _broadphase;
         private CollisionConfiguration _collisionConfiguration;
 
-        private readonly List<Body> Bodies = new List<Body>();
-        private readonly DebugDrawer DebugDrawer;
+        private readonly ResourceManager _resourceManager;
+        private readonly List<Body> _bodies = new List<Body>();
+        private readonly DebugDrawer _debugDraw;
 
-        private Vector3[] DebugColors = new Vector3[]
+        private Vector3[] _debugColors = new Vector3[]
         {
             new Vector3(1, 0, 0),
             new Vector3(0, 1, 0),
@@ -37,6 +38,8 @@ namespace Triton.Physics
 
         public World(Backend backend, ResourceManager resourceManager)
         {
+            _resourceManager = resourceManager;
+
             _collisionConfiguration = new DefaultCollisionConfiguration();
             _dispatcher = new CollisionDispatcher(_collisionConfiguration);
 
@@ -44,9 +47,9 @@ namespace Triton.Physics
             _world = new DiscreteDynamicsWorld(_dispatcher, _broadphase, null, _collisionConfiguration);
             _world.Gravity = new BulletSharp.Math.Vector3(0, -10, 0);
 
-            DebugDrawer = new DebugDrawer(backend, resourceManager);
+            _debugDraw = new DebugDrawer(backend, resourceManager);
 
-            _world.DebugDrawer = DebugDrawer;
+            _world.DebugDrawer = _debugDraw;
         }
 
         public void Dispose()
@@ -59,7 +62,7 @@ namespace Triton.Physics
 
         public void Update(float stepSize)
         {
-            foreach (var body in Bodies)
+            foreach (var body in _bodies)
             {
                 body.Update(stepSize);
             }
@@ -86,12 +89,15 @@ namespace Triton.Physics
 
         public Body CreateMeshBody(Resources.Mesh mesh, Vector3 position, bool isStatic = false, float mass = 1.0f)
         {
+            _resourceManager.AddReference(mesh);
+
             var shape = mesh.Shape;
             var rigidBody = CreateRigidBody(shape, isStatic, Matrix4.CreateTranslation(position), mass);
 
             var body = new Body(rigidBody);
+            body.Mesh = mesh;
 
-            Bodies.Add(body);
+            _bodies.Add(body);
 
             _world.AddRigidBody(rigidBody);
 
@@ -105,7 +111,7 @@ namespace Triton.Physics
 
             var body = new Body(rigidBody);
 
-            Bodies.Add(body);
+            _bodies.Add(body);
 
             _world.AddRigidBody(rigidBody);
 
@@ -119,7 +125,7 @@ namespace Triton.Physics
 
             var body = new Body(rigidBody);
 
-            Bodies.Add(body);
+            _bodies.Add(body);
 
             _world.AddRigidBody(rigidBody);
 
@@ -130,7 +136,7 @@ namespace Triton.Physics
         {
             var controller = new CharacterController(_world, radius, length);
 
-            Bodies.Add(controller);
+            _bodies.Add(controller);
 
             return controller;
         }
@@ -163,7 +169,12 @@ namespace Triton.Physics
         public void RemoveBody(Body body)
         {
             _world.RemoveRigidBody(body.RigidBody);
-            Bodies.Remove(body);
+            _bodies.Remove(body);
+
+            if (body.Mesh != null)
+            {
+                _resourceManager.Unload(body.Mesh);
+            }
 
             body.Dispose();
 
@@ -177,7 +188,7 @@ namespace Triton.Physics
         public void DrawDebugInfo(Camera camera)
         {
             _world.DebugDrawWorld();
-            DebugDrawer.Render(camera);
+            _debugDraw.Render(camera);
         }
     }
 }

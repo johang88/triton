@@ -20,31 +20,31 @@ namespace Triton.Game.World.Components
                 if (Body != null)
                 {
                     World.PhysicsWorld.RemoveBody(Body);
-                    World.ResourceManager.Unload(Mesh);
                 }
 
                 Body = null;
                 _mesh = value;
-
-                if (Owner != null && World != null)
-                {
-                    World.ResourceManager.AddReference(Mesh);
-                    Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, IsStatic);
-                }
             }
         }
 
-		public override void OnActivate()
-		{
-			base.OnActivate();
-            Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, IsStatic);
-            World.ResourceManager.AddReference(Mesh);
+        public override void OnActivate()
+        {
+            base.OnActivate();
+
+            if (_mesh != null)
+            {
+                Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, IsStatic);
+            }
         }
 
-        public override void OnDeactivate()
+        public override void Update(float dt)
         {
-            base.OnDeactivate();
-            World.ResourceManager.Unload(Mesh);
+            if (Body == null && _mesh != null)
+            {
+                Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, IsStatic);
+            }
+
+            base.Update(dt);
         }
     }
 }

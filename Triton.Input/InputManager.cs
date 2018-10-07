@@ -17,6 +17,8 @@ namespace Triton.Input
 		private bool[] PreviousState = new bool[(int)Key.LastKey];
 		private bool[] WasPressedState = new bool[(int)Key.LastKey];
 
+        public bool UiHasFocus { get; set; }
+
 		public InputManager(Rectangle bounds)
 		{
 			Bounds = bounds;

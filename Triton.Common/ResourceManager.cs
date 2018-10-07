@@ -54,9 +54,15 @@ namespace Triton.Common
             _isDispoed = true;
         }
 
+        /// <summary>
+        /// Increase the reference count to a resource, this must be followed by a call to Unload,
+        /// can be used to keep resources alive and well
+        /// </summary>
+        /// <param name="resource"></param>
         public void AddReference(object resource)
         {
-            _instanceToReference[resource].AddReference();
+            if (_instanceToReference.TryGetValue(resource, out var resourceReference))
+                resourceReference.AddReference();
         }
 
         public TResource Load<TResource>(string name, string parameters = "") where TResource : class
@@ -244,9 +250,7 @@ namespace Triton.Common
         public void Unload<TResource>(TResource resource) where TResource : class
         {
             if (_instanceToReference.TryGetValue(resource, out var resourceReference))
-            {
                 resourceReference.RemoveReference();
-            }
         }
 
         public bool IsManaged(object resource)

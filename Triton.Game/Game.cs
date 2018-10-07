@@ -231,7 +231,12 @@ namespace Triton.Game
 
                 if (_window.Focused)
                 {
+                    InputManager.UiHasFocus = CursorVisible;
                     InputManager.Update();
+                }
+                else
+                {
+                    InputManager.UiHasFocus = true;
                 }
 
                 accumulator += _frameTime;
@@ -251,6 +256,8 @@ namespace Triton.Game
 
                 Thread.Sleep(1);
             }
+
+            UnloadResources();
         }
 
         /// <summary>
@@ -437,6 +444,10 @@ namespace Triton.Game
         /// Load resources
         /// </summary>
         protected virtual void LoadResources()
+        {
+        }
+
+        protected virtual void UnloadResources()
         {
         }
 

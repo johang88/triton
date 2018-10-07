@@ -14,15 +14,21 @@ namespace Triton.Game.World.Components
         {
             base.OnDeactivate();
 
-            World.PhysicsWorld.RemoveBody(Body);
+            if (Body != null)
+            {
+                World.PhysicsWorld.RemoveBody(Body);
+            }
         }
 
         public override void Update(float dt)
 		{
 			base.Update(dt);
 
-			Owner.Position = Body.Position;
-            Owner.Orientation = Body.Orientation;
+            if (Body != null)
+            {
+                Owner.Position = Body.Position;
+                Owner.Orientation = Body.Orientation;
+            }
 		}
 
         public void AddForce(Vector3 force)

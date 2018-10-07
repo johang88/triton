@@ -63,13 +63,26 @@ namespace Triton.Game.World
         /// <param name="gameObject"></param>
         public void Remove(GameObject gameObject)
             => GameObjectsToRemove.Add(gameObject ?? throw new ArgumentNullException(nameof(gameObject)));
-
+        
         /// <summary>
         /// Update all active game objects and their components
         /// Any game objects pending for removal / adding will be removed / added.
         /// </summary>
         /// <param name="stepSize"></param>
         public void Update(float dt)
+        {
+            HandlePendingGameObjects();
+
+            foreach (var gameObject in GameObjects)
+            {
+                gameObject.Update(dt);
+            }
+
+            // We do both a Pre and Post step to prevent any issues where the Resoruce GC would trigger before the objects are attached to the world
+            HandlePendingGameObjects();
+        }
+
+        private void HandlePendingGameObjects()
         {
             foreach (var gameObject in GameObjectsToAdd)
             {
@@ -86,11 +99,6 @@ namespace Triton.Game.World
                 }
             }
             GameObjectsToRemove.Clear();
-
-            foreach (var gameObject in GameObjects)
-            {
-                gameObject.Update(dt);
-            }
         }
     }
 }
