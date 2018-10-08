@@ -5,24 +5,24 @@ This might become a game engine sometime in the future, but right now a lot of c
 ## Features
 
 ### Renderer
-* Deferred rendering
+* Tiled deferred rendering
+* IBL
 * PBR
 * FXAA, SMAA
-* Screen space reflections (WIP)
 * Shadow Maps
-    * Point / Spot lights
     * CSM for directional lights
     * Poisson tap PCF
 * HDR
-* Filmic tonemapping
-* Bloom + Lens flares
+* Filmic tonemapping (Reinard / Unhcarted / Filmic / ASEC)
+* Bloom
 * Eye adaptation
 
 ## Dependencies
 * OpenTK
-* nVidia dds command lines tools
-* JitterPhysics
+* ImageMagick
+* Bullet physics
 * SharpFileSystem
+* Dear ImGui
 
 ## Building
 Open up `Triton.sln` and hit compile.
