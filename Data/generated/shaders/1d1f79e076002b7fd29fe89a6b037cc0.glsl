@@ -83,7 +83,7 @@ void main()
 
 #else
 
-#include "/shaders/deferred/brdf"
+#include "/shaders/brdf"
 
 in vec3 normal;
 in vec3 tangent;

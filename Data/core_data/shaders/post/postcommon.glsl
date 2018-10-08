@@ -5,7 +5,7 @@ uniform int autoKey = 1;
 
 // Average luminance
 float calc_luminance(vec3 color) {
-	return max(dot(color, vec3(0.299, 0.587, 0.114)), 0.00001);
+	return max(dot(color, vec3(0.299, 0.587, 0.114)), 0.0001);
 }
 
 float get_average_luminance(sampler2D samplerAverageLuminance) {

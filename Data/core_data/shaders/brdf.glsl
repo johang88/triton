@@ -61,6 +61,10 @@ float g_smith(vec3 N, vec3 V, vec3 L, float roughness)
     return ggx1 * ggx2;
 }
 
+vec3 f_schlick_roughness(float cosTheta, vec3 F0, float roughness) {
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+} 
+
 vec3 brdf(vec3 N, vec3 V, vec3 L, float roughness, float metallic, vec3 radiance, vec3 albedo, vec3 F0) {
 	vec3 H = normalize(L + V);
 
@@ -78,3 +82,4 @@ vec3 brdf(vec3 N, vec3 V, vec3 L, float roughness, float metallic, vec3 radiance
 	kD *= 1.0 - metallic;
 	return (kD * albedo / PI + specular) * radiance;
 }
+

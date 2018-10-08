@@ -30,6 +30,7 @@ void main()
 	float lastLuminance = texelFetch(samplerLastLuminacne, ivec2(0, 0), 0).x;
 	float currentLuminance = exp(textureLod(samplerCurrentLuminance, vec2(0.5, 0.5), 10).x);
 	
+	currentLuminance = max(min(currentLuminance, 1.0), 0.1);
 	float adaptedLuminance = lastLuminance + (currentLuminance - lastLuminance) * (1 - exp(-timeDelta * tau));
 	
 	oColor = vec4(adaptedLuminance, 1, 1, 1);

@@ -30,8 +30,17 @@ namespace Triton.Samples
         {
             base.LoadResources();
 
-            Stage.ClearColor = new Triton.Vector4(185 / 255.0f, 224 / 255.0f, 239 / 255.0f, 0);
+            Stage.ClearColor = new Triton.Vector4(255 / 255.0f, 255 / 255.0f, 255 / 255.0f, 0) * 3;
             Stage.AmbientColor = new Vector3(0.5f, 0.5f, 0.5f);
+
+            PostEffectManager.HDRSettings.AutoKey = false;
+            PostEffectManager.HDRSettings.TonemapOperator = Graphics.Post.TonemapOperator.ASEC;
+
+            Stage.AmbientLight = new Graphics.AmbientLight
+            {
+                Irradiance = Resources.Load<Graphics.Resources.Texture>("/textures/sky_irradiance"),
+                Specular = Resources.Load<Graphics.Resources.Texture>("/textures/sky_specular")
+            };
 
             Player = new GameObject();
             Player.Position = new Vector3(0, 2f, 0);
@@ -59,28 +68,28 @@ namespace Triton.Samples
             }
 
             // Create a shit load of point lights
-            //var lightSpacing = 2f;
-            //var numLights = 40;
-            //for (var x = 0; x < numLights; x++)
-            //{
-            //    for (var z = 0; z < numLights; z++)
-            //    {
-            //        var position = new Vector3(
-            //            (-lightSpacing * numLights * 0.5f) + lightSpacing * x,
-            //            (float)rng.NextDouble(),
-            //            (-lightSpacing * numLights * 0.5f) + lightSpacing * z
-            //            );
+            var lightSpacing = 2f;
+            var numLights = 40;
+            for (var x = 0; x < numLights; x++)
+            {
+                for (var z = 0; z < numLights; z++)
+                {
+                    var position = new Vector3(
+                        (-lightSpacing * numLights * 0.5f) + lightSpacing * x,
+                        (float)rng.NextDouble(),
+                        (-lightSpacing * numLights * 0.5f) + lightSpacing * z
+                        );
 
-            //        Stage.CreatePointLight(position, 5.0f + (float)rng.NextDouble(), new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble()), intensity: 0.5f + (float)rng.NextDouble());
-            //    }
-            //}
+                    Stage.CreatePointLight(position, 5.0f + (float)rng.NextDouble(), new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble()), intensity: 0.5f + (float)rng.NextDouble());
+                }
+            }
 
             Resources.Unload(roomPrefab);
             Resources.Unload(ballPrefab);
 
             Stage.ClearColor = new Vector4(1, 1, 1, 1) * 2;
 
-            var sunLight = Stage.CreateDirectionalLight(new Vector3(-0.3f, -0.7f, 0.66f), new Vector3(1.64f, 1.57f, 1.49f), true, shadowBias: 0.0025f, intensity: 1f);
+            var sunLight = Stage.CreateDirectionalLight(new Vector3(-0.3f, -0.7f, 0.66f), new Vector3(1.64f, 1.57f, 1.49f), true, shadowBias: 0.0025f, intensity: 2f);
             sunLight.Enabled = true;
 
             DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.High;

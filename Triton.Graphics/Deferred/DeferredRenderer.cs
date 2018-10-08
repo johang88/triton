@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Graphics.Resources;
 using Triton.Renderer;
 using Triton.Renderer.RenderTargets;
 
@@ -54,6 +55,7 @@ namespace Triton.Graphics.Deferred
         private int[] _lightSamplers = new int[5];
 
         private RenderTarget _shadowBuffer = null;
+        private Texture _specularIntegarion;
 
         public DeferredRenderer(Common.ResourceManager resourceManager, Backend backend, int width, int height)
         {
@@ -105,6 +107,8 @@ namespace Triton.Graphics.Deferred
             _directionalShaderOffset = 0;
 
             _lightComputeShader = _resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/light_cs");
+
+            _specularIntegarion = _resourceManager.Load<Resources.Texture>("/textures/specular_integration");
 
             _quadMesh = _backend.CreateBatchBuffer();
             _quadMesh.Begin();
@@ -177,7 +181,7 @@ namespace Triton.Graphics.Deferred
 
             _backend.BeginPass(_lightAccumulationTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), ClearFlags.All);
             RenderLights(camera, ref view, ref projection, stage.GetLights(), stage);
-            RenderAmbientLight(stage);
+            RenderAmbientLight(camera, stage);
 
             _backend.EndPass();
             _backend.ProfileEndSection(Profiler.Lighting);
@@ -223,21 +227,36 @@ namespace Triton.Graphics.Deferred
             }
         }
 
-        private void RenderAmbientLight(Stage stage)
+        private void RenderAmbientLight(Camera camera, Stage stage)
         {
             Matrix4 modelViewProjection = Matrix4.Identity;
 
+            var irradianceHandle = stage.AmbientLight?.Irradiance?.Handle ?? 0;
+            var specularHandle = stage.AmbientLight?.Specular?.Handle ?? 0;
+
+            camera.GetViewMatrix(out var view);
+            camera.GetProjectionMatrix(out var projection);
+            var inverseViewProjectionMatrix = Matrix4.Invert(view * projection);
+
             var ambientColor = new Vector3((float)System.Math.Pow(stage.AmbientColor.X, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Y, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Z, 2.2f));
             _backend.BeginInstance(_ambientLightShader.Handle,
-                new int[] { _gbuffer.Textures[0].Handle, _gbuffer.Textures[1].Handle },
-                new int[] { _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering },
+                new int[] { _gbuffer.Textures[0].Handle, _gbuffer.Textures[1].Handle, _gbuffer.Textures[2].Handle, _gbuffer.Textures[3].Handle, irradianceHandle, specularHandle, _specularIntegarion.Handle },
+                new int[] { _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSampler, _backend.DefaultSampler, _backend.DefaultSamplerNoFiltering },
                 _ambientRenderState);
             _backend.BindShaderVariable(_ambientLightParams.SamplerGBuffer0, 0);
             _backend.BindShaderVariable(_ambientLightParams.SamplerGBuffer1, 1);
-            _backend.BindShaderVariable(_ambientLightParams.SamplerGBuffer3, 2);
-            _backend.BindShaderVariable(_ambientLightParams.SamplerGBuffer4, 3);
+            _backend.BindShaderVariable(_ambientLightParams.SamplerGBuffer2, 2);
+            _backend.BindShaderVariable(_ambientLightParams.SamplerDepth, 3);
+            _backend.BindShaderVariable(_ambientLightParams.SamplerIrradiance, 4);
+            _backend.BindShaderVariable(_ambientLightParams.SamplerSpecular, 5);
+            _backend.BindShaderVariable(_ambientLightParams.SamplerSpecularIntegration, 6);
             _backend.BindShaderVariable(_ambientLightParams.ModelViewProjection, ref modelViewProjection);
             _backend.BindShaderVariable(_ambientLightParams.AmbientColor, ref ambientColor);
+            _backend.BindShaderVariable(_ambientLightParams.Mode, irradianceHandle == 0 ? 0 : 1);
+            _backend.BindShaderVariable(_ambientLightParams.IrradianceStrength, stage.AmbientLight?.IrradianceStrength ?? 1.0f);
+            _backend.BindShaderVariable(_ambientLightParams.SpecularStrength, stage.AmbientLight?.SpecularStrength ?? 1.0f);
+            _backend.BindShaderVariable(_ambientLightParams.CameraPosition, ref camera.Position);
+            _backend.BindShaderVariable(_ambientLightParams.InvViewProjection, ref inverseViewProjectionMatrix);
 
             _backend.DrawMesh(_quadMesh.MeshHandle);
         }

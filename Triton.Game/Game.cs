@@ -277,12 +277,17 @@ namespace Triton.Game
             var sunLight = Stage.SunLight;
 
             GraphicsBackend.ProfileBeginSection(Profiler.ShadowsGeneration);
-            var csm = CSMRenderer.Render(gbuffer, sunLight, Stage, Camera, out var viewProjections, out var clipDistances);
-            GraphicsBackend.ProfileEndSection(Profiler.ShadowsGeneration);
 
-            GraphicsBackend.ProfileBeginSection(Profiler.ShadowsRender);
-            var shadows = ShadowBufferRenderer.Render(Camera, gbuffer, csm, viewProjections, clipDistances);
-            GraphicsBackend.ProfileEndSection(Profiler.ShadowsRender);
+            List<RenderTarget> csm = null; RenderTarget shadows = null;
+            if (sunLight != null)
+            {
+                csm = CSMRenderer.Render(gbuffer, sunLight, Stage, Camera, out var viewProjections, out var clipDistances);
+                GraphicsBackend.ProfileEndSection(Profiler.ShadowsGeneration);
+
+                GraphicsBackend.ProfileBeginSection(Profiler.ShadowsRender);
+                shadows = ShadowBufferRenderer.Render(Camera, gbuffer, csm, viewProjections, clipDistances);
+                GraphicsBackend.ProfileEndSection(Profiler.ShadowsRender);
+            }
 
             var lightOutput = DeferredRenderer.RenderLighting(Stage, Camera, shadows);
 

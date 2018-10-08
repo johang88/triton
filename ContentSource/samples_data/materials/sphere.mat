@@ -4,7 +4,7 @@
           <NodeGraphNodeCollection>
                <Triton.Content.Materials.CustomNodes.RootNode Name="Material" X="100" Y="0" Width="140" Height="136" Comment="" CanBeSelected="False" />
                <Triton.Content.Materials.CustomNodes.FloatConstNode Name="Float: 0" X="-51" Y="266" Width="80" Height="45" Comment="" CanBeSelected="True" Value="0" />
-               <Triton.Content.Materials.CustomNodes.FloatConstNode Name="Float: 0.1" X="-232" Y="204" Width="80" Height="45" Comment="" CanBeSelected="True" Value="0.1" />
+               <Triton.Content.Materials.CustomNodes.FloatConstNode Name="Float: 0.2" X="-232" Y="204" Width="80" Height="45" Comment="" CanBeSelected="True" Value="0.2" />
                <Triton.Content.Materials.CustomNodes.ColorConstNode Name="Color: 255, 0, 0, 255" X="-261" Y="-8" Width="150" Height="116" Comment="" CanBeSelected="True" Value="255 0 0 255" />
           </NodeGraphNodeCollection>
           <NodeGraphLinkCollection>

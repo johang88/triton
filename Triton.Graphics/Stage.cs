@@ -13,12 +13,17 @@ namespace Triton.Graphics
         private readonly List<MeshInstance> _meshes = new List<MeshInstance>();
         private readonly List<Light> _lights = new List<Light>();
 
+        /// <summary>
+        /// Fallback ambient color if no ambient light is set
+        /// </summary>
         public Vector3 AmbientColor = new Vector3(0.2f, 0.2f, 0.2f);
         public Vector4 ClearColor = Vector4.Zero;
 
         private BoundingFrustum Frustum = new BoundingFrustum(Matrix4.Identity);
 
         public Light SunLight { get; private set; }
+
+        public AmbientLight AmbientLight { get; set; }
 
         public Stage(Common.ResourceManager resourceManager)
         {
