@@ -14,7 +14,8 @@
       {
          "$type":"Triton.Game.World.Components.SphereRigidBody, Triton.Game",
 		 "Radius": 0.5,
-		 "IsStatic":false
+		 "IsStatic":false,
+		 "CollisionLayer":2
       }
    ]
 }

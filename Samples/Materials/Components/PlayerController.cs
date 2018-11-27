@@ -17,6 +17,7 @@ namespace Triton.Samples.Components
         private float _cameraPitch = 0;
 
         private CharacterController _characterController;
+        private bool _wasMouseLeftPressed;
 
         public override void OnActivate()
         {
@@ -61,6 +62,23 @@ namespace Triton.Samples.Components
 
             _characterController.Move(movement, Input.IsKeyDown(Key.Space));
             Camera.Position = Owner.Position + new Vector3(0, 0.7f, 0);
+
+            if (Input.IsMouseButtonDown(MouseButton.Left))
+            {
+                _wasMouseLeftPressed = true;
+            }
+            else if (_wasMouseLeftPressed)
+            {
+                _wasMouseLeftPressed = false;
+
+                var from = Camera.Position;
+                var to = from + Vector3.Transform(new Vector3(0, 0, 100), Camera.Orientation);
+
+                if (World.PhysicsWorld.Raycast(from, to, (body, _, __) => body.CollisionLayer == 2, out var hitBody, out var hitNormal, out var hitFraction))
+                {
+                    hitBody.AddForce(hitNormal * 10);
+                }
+            }
         }
     }
 }

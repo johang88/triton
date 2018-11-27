@@ -23,6 +23,8 @@ namespace Triton.Physics
             _world = world;
 
             _ghostObject = new PairCachingGhostObject();
+            _ghostObject.UserObject = this;
+
             _shape = new CapsuleShape(radius, height);
 
             _world.Broadphase.OverlappingPairCache.SetInternalGhostPairCallback(new GhostPairCallback());

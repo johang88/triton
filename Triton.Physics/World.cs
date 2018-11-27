@@ -97,8 +97,8 @@ namespace Triton.Physics
             var body = new Body(rigidBody);
             body.Mesh = mesh;
 
+            rigidBody.UserObject = body;
             _bodies.Add(body);
-
             _world.AddRigidBody(rigidBody);
 
             return body;
@@ -111,8 +111,8 @@ namespace Triton.Physics
 
             var body = new Body(rigidBody);
 
+            rigidBody.UserObject = body;
             _bodies.Add(body);
-
             _world.AddRigidBody(rigidBody);
 
             return body;
@@ -125,8 +125,8 @@ namespace Triton.Physics
 
             var body = new Body(rigidBody);
 
+            rigidBody.UserObject = body;
             _bodies.Add(body);
-
             _world.AddRigidBody(rigidBody);
 
             return body;
@@ -140,6 +140,74 @@ namespace Triton.Physics
 
             return controller;
         }
+
+        public void RemoveBody(Body body)
+        {
+            _world.RemoveRigidBody(body.RigidBody);
+            _bodies.Remove(body);
+
+            if (body.Mesh != null)
+            {
+                _resourceManager.Unload(body.Mesh);
+            }
+
+            body.Dispose();
+
+            if (body.RigidBody != null)
+            {
+                body.Dispose();
+                body.RigidBody.Dispose();
+            }
+        }
+
+        public void DrawDebugInfo(Camera camera)
+        {
+            _world.DebugDrawWorld();
+            _debugDraw.Render(camera);
+        }
+
+        public bool Raycast(Vector3 from, Vector3 to, RaycastCallback callback, out Body body, out Vector3 normal, out float fraction)
+        {
+            var btTo = Conversion.ToBulletVector(ref from);
+            var btFrom = Conversion.ToBulletVector(ref to);
+
+            body = null;
+            normal = Vector3.Zero;
+            fraction = 0.0f;
+
+            using (var allResults = new AllHitsRayResultCallback(btFrom, btTo))
+            {
+                _world.RayTest(btFrom, btTo, allResults);
+
+                if (!allResults.HasHit)
+                {
+                    return false;
+                }
+
+                float closesHitFraction = float.MaxValue;
+                for (var i = 0; i < allResults.HitFractions.Count; i++)
+                {
+                    if (allResults.CollisionObjects[i].UserObject is Body hitBody)
+                    {
+                        var hitNormal = Conversion.ToTritonVector(allResults.HitNormalWorld[i]);
+                        if (callback?.Invoke(hitBody, hitNormal, allResults.HitFractions[i]) == true && allResults.HitFractions[i] < closesHitFraction)
+                        {
+                            closesHitFraction = allResults.HitFractions[i];
+                            normal = hitNormal;
+                            body = hitBody;
+                        }
+                    }
+                }
+
+                if (body != null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
 
         //public bool Raycast(Vector3 origin, Vector3 direction, RaycastCallback callback, out Body body, out Vector3 normal, out float fraction)
         //{
@@ -166,29 +234,6 @@ namespace Triton.Physics
         //    return res;
         //}
 
-        public void RemoveBody(Body body)
-        {
-            _world.RemoveRigidBody(body.RigidBody);
-            _bodies.Remove(body);
 
-            if (body.Mesh != null)
-            {
-                _resourceManager.Unload(body.Mesh);
-            }
-
-            body.Dispose();
-
-            if (body.RigidBody != null)
-            {
-                body.Dispose();
-                body.RigidBody.Dispose();
-            }
-        }
-
-        public void DrawDebugInfo(Camera camera)
-        {
-            _world.DebugDrawWorld();
-            _debugDraw.Render(camera);
-        }
     }
 }
