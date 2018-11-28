@@ -78,8 +78,8 @@ void main()
 
 	gl_Position = modelViewProjection * blendPos;
 #else
-	normal = normalize(iNormal);
-	tangent = normalize(iTangent);
+	normal = mat3(itWorld) * normalize(iNormal);
+	tangent = mat3(itWorld) * normalize(iTangent);
 	bitangent = normalize(cross(normal, tangent));
 	
 	position = world * vec4(iPosition, 1);

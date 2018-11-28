@@ -17,7 +17,7 @@ namespace Triton.Game.World.Components
 		{
 			base.OnActivate();
 
-			Body = World.PhysicsWorld.CreateSphereBody(Radius, Owner.Position, IsStatic, Mass);
+			Body = World.PhysicsWorld.CreateSphereBody(Radius, Owner.Position, Mass, IsStatic ? Physics.BodyFlags.Static : Physics.BodyFlags.None);
 		}
 	}
 }

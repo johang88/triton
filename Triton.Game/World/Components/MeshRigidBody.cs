@@ -10,6 +10,7 @@ namespace Triton.Game.World.Components
 	public class MeshRigidBody : RigidBody
 	{
         [DataMember] public bool IsStatic { get; set; } = true;
+        [DataMember] public float Mass { get; set; } = 1.0f;
 
         private Physics.Resources.Mesh _mesh = null;
         [DataMember] public Physics.Resources.Mesh Mesh
@@ -33,7 +34,7 @@ namespace Triton.Game.World.Components
 
             if (_mesh != null)
             {
-                Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, IsStatic);
+                Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, Mass, IsStatic ? Physics.BodyFlags.Static : Physics.BodyFlags.None);
             }
         }
 
@@ -41,7 +42,7 @@ namespace Triton.Game.World.Components
         {
             if (Body == null && _mesh != null)
             {
-                Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, IsStatic);
+                Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, Mass, IsStatic ? Physics.BodyFlags.Static : Physics.BodyFlags.None);
             }
 
             base.Update(dt);

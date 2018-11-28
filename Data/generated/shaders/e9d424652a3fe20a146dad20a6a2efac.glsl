@@ -107,28 +107,28 @@ layout(location = 2) out vec4 oSpecular;
 
 uniform vec3 cameraPosition;
 
-uniform sampler2D sampler_3;
-uniform sampler2D sampler_4;
-uniform sampler2D sampler_5;
+uniform sampler2D sampler_37;
+uniform sampler2D sampler_38;
+uniform sampler2D sampler_39;
 vec4 get_diffuse() {
-vec4 v_0 = texture(sampler_3, texCoord);
+vec4 v_0 = texture(sampler_37, texCoord);
 return pow(v_0, vec4(2.2));
 
 }
 vec3 get_normals() {
-vec4 v_1 = texture(sampler_4, texCoord);
+vec4 v_1 = texture(sampler_38, texCoord);
 mat3x3 tbn_3 = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
 vec3 normals_2 = normalize(tbn_3 * normalize(v_1.xyz * 2.0 - 1.0));
 return normals_2;
 
 }
 float get_metallic() {
-float f_4 = 0;
+float f_4 = 1;
 return f_4;
 
 }
 float get_roughness() {
-float f_5 = texture(sampler_5, texCoord).x;
+float f_5 = texture(sampler_39, texCoord).x;
 return f_5;
 
 }

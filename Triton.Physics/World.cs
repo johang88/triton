@@ -70,66 +70,55 @@ namespace Triton.Physics
             _world.StepSimulation(stepSize, 2);
         }
 
-        RigidBody CreateRigidBody(CollisionShape shape, bool isStatic, Matrix4 startTransform, float mass)
+        Body CreateRigidBody(CollisionShape shape, Matrix4 startTransform, BodyFlags flags, float mass)
         {
-            BulletSharp.Math.Vector3 localInertia = BulletSharp.Math.Vector3.Zero;
-            if (isStatic)
+            if (flags.HasFlag(BodyFlags.Static))
             {
                 mass = 0.0f;
-                shape.CalculateLocalInertia(mass, out localInertia);
             }
+
+            BulletSharp.Math.Vector3 localInertia = BulletSharp.Math.Vector3.Zero;
+            shape.CalculateLocalInertia(mass, out localInertia);
 
             DefaultMotionState myMotionState = new DefaultMotionState(Conversion.ToBulletMatrix(ref startTransform));
 
             RigidBodyConstructionInfo rbInfo = new RigidBodyConstructionInfo(mass, myMotionState, shape, localInertia);
-            RigidBody body = new RigidBody(rbInfo);
+            RigidBody rigidBody = new RigidBody(rbInfo);
+
+            var body = new Body(rigidBody)
+            {
+                Flags = flags
+            };
+
+            rigidBody.UserObject = body;
+            _bodies.Add(body);
+            _world.AddRigidBody(rigidBody);
 
             return body;
         }
 
-        public Body CreateMeshBody(Resources.Mesh mesh, Vector3 position, bool isStatic = false, float mass = 1.0f)
+        public Body CreateMeshBody(Resources.Mesh mesh, Vector3 position, float mass, BodyFlags flags = BodyFlags.None)
         {
             _resourceManager.AddReference(mesh);
 
             var shape = mesh.Shape;
-            var rigidBody = CreateRigidBody(shape, isStatic, Matrix4.CreateTranslation(position), mass);
 
-            var body = new Body(rigidBody);
+            var body = CreateRigidBody(shape, Matrix4.CreateTranslation(position), flags, mass);
             body.Mesh = mesh;
 
-            rigidBody.UserObject = body;
-            _bodies.Add(body);
-            _world.AddRigidBody(rigidBody);
-
             return body;
         }
 
-        public Body CreateSphereBody(float radius, Vector3 position, bool isStatic = false, float mass = 1.0f)
+        public Body CreateSphereBody(float radius, Vector3 position, float mass, BodyFlags flags = BodyFlags.None)
         {
             var shape = new SphereShape(radius);
-            var rigidBody = CreateRigidBody(shape, isStatic, Matrix4.CreateTranslation(position), mass);
-
-            var body = new Body(rigidBody);
-
-            rigidBody.UserObject = body;
-            _bodies.Add(body);
-            _world.AddRigidBody(rigidBody);
-
-            return body;
+            return CreateRigidBody(shape, Matrix4.CreateTranslation(position), flags, mass);
         }
 
-        public Body CreateBoxBody(float length, float height, float width, Vector3 position, bool isStatic = false, float mass = 1.0f)
+        public Body CreateBoxBody(float length, float height, float width, Vector3 position, float mass, BodyFlags flags = BodyFlags.None)
         {
             var shape = new BoxShape(length, height, width);
-            var rigidBody = CreateRigidBody(shape, isStatic, Matrix4.CreateTranslation(position), mass);
-
-            var body = new Body(rigidBody);
-
-            rigidBody.UserObject = body;
-            _bodies.Add(body);
-            _world.AddRigidBody(rigidBody);
-
-            return body;
+            return CreateRigidBody(shape, Matrix4.CreateTranslation(position), flags, mass);
         }
 
         public CharacterController CreateCharacterController(float length, float radius)
