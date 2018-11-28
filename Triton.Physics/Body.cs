@@ -17,6 +17,8 @@ namespace Triton.Physics
         NoContactResponse = 1 << 2
     }
 
+    public delegate void CollisionCallback(Body other);
+
     public class Body : IDisposable
     {
         internal RigidBody RigidBody;
@@ -64,6 +66,13 @@ namespace Triton.Physics
                     RigidBody.CollisionFlags &= ~CollisionFlags.NoContactResponse;
                 }
             }
+        }
+
+        public event CollisionCallback Collision;
+
+        internal void OnCollision(Body other)
+        {
+            Collision?.Invoke(other);
         }
 
         internal Body(RigidBody rigidBody)

@@ -4,21 +4,67 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Physics;
 
 namespace Triton.Game.World.Components
 {
-	public class RigidBody : Component
+    public delegate void BodyCollisionCallback(GameObject other);
+
+	public abstract class RigidBody : Component
 	{
-		public Physics.Body Body;
+		protected Physics.Body _body;
+
         [DataMember] public int CollisionLayer = 1;
+        [DataMember] public bool IsStatic { get; set; } = false;
+        [DataMember] public bool IsTrigger { get; set; } = false;
+        [DataMember] public bool IsKinematic { get; set; } = false;
+        [DataMember] public float Mass { get; set; } = 1.0f;
+
+        public event BodyCollisionCallback Collision;
+
+        protected abstract Body CreateBody(Physics.BodyFlags flags);
+
+        public override void OnActivate()
+        {
+            base.OnActivate();
+
+            var flags = Physics.BodyFlags.None;
+            if (IsStatic)
+            {
+                flags |= Physics.BodyFlags.Static;
+            }
+
+            if (IsTrigger)
+            {
+                flags |= Physics.BodyFlags.NoContactResponse;
+            }
+
+            if (IsKinematic)
+            {
+                flags |= Physics.BodyFlags.Kinematic;
+            }
+
+            _body = CreateBody(flags);
+            _body.Collision += OnCollision;
+            _body.Tag = Owner;
+        }
 
         public override void OnDeactivate()
         {
             base.OnDeactivate();
 
-            if (Body != null)
+            if (_body != null)
             {
-                World.PhysicsWorld.RemoveBody(Body);
+                _body.Collision -= OnCollision;
+                World.PhysicsWorld.RemoveBody(_body);
+            }
+        }
+
+        protected void OnCollision(Body other)
+        {
+            if (other.Tag is GameObject otherGameObject)
+            {
+                Collision?.Invoke(otherGameObject);
             }
         }
 
@@ -26,17 +72,17 @@ namespace Triton.Game.World.Components
 		{
 			base.Update(dt);
 
-            if (Body != null)
+            if (_body != null)
             {
-                Owner.Position = Body.Position;
-                Owner.Orientation = Body.Orientation;
-                Body.CollisionLayer = CollisionLayer;
+                Owner.Position = _body.Position;
+                Owner.Orientation = _body.Orientation;
+                _body.CollisionLayer = CollisionLayer;
             }
 		}
 
         public void AddForce(Vector3 force)
 		{
-			Body.AddForce(force);
+			_body.AddForce(force);
 		}
 	}
 }

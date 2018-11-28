@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Triton.Common;
 using Triton.Game.World;
 using Triton.Game.World.Components;
+using Triton.Graphics.Resources;
 using Triton.Input;
 using Triton.Samples.Components;
 
@@ -36,11 +37,11 @@ namespace Triton.Samples
             PostEffectManager.HDRSettings.AutoKey = false;
             PostEffectManager.HDRSettings.TonemapOperator = Graphics.Post.TonemapOperator.ASEC;
 
-            Stage.AmbientLight = new Graphics.AmbientLight
-            {
-                Irradiance = Resources.Load<Graphics.Resources.Texture>("/textures/sky_irradiance"),
-                Specular = Resources.Load<Graphics.Resources.Texture>("/textures/sky_specular")
-            };
+            //Stage.AmbientLight = new Graphics.AmbientLight
+            //{
+            //    Irradiance = Resources.Load<Graphics.Resources.Texture>("/textures/sky_irradiance"),
+            //    Specular = Resources.Load<Graphics.Resources.Texture>("/textures/sky_specular")
+            //};
 
             Player = new GameObject();
             Player.Position = new Vector3(0, 2f, 0);
@@ -49,7 +50,7 @@ namespace Triton.Samples
             Player.Components.Add(new PlayerController());
             GameWorld.Add(Player);
 
-            var roomPrefab = Resources.Load<Prefab>("/prefabs/city");
+            var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
             var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
 
             roomPrefab.Instantiate(GameWorld);
@@ -67,30 +68,36 @@ namespace Triton.Samples
                 ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
             }
 
-            // Create a shit load of point lights
-            var lightSpacing = 2f;
-            var numLights = 40;
-            for (var x = 0; x < numLights; x++)
+            // Setup a test trigger
+            var bigBall = new GameObject();
+            bigBall.Components.Add(new BoxRigidBody
             {
-                for (var z = 0; z < numLights; z++)
-                {
-                    var position = new Vector3(
-                        (-lightSpacing * numLights * 0.5f) + lightSpacing * x,
-                        (float)rng.NextDouble(),
-                        (-lightSpacing * numLights * 0.5f) + lightSpacing * z
-                        );
+                IsStatic = true,
+                IsTrigger = true,
+                Length = 2.5f,
+                Width = 2.5f,
+                Height = 2.5f
+            });
+            bigBall.Components.Add(new PointLight
+            {
+                Color = new Vector3(1, 1, 1),
+                Intensity = 100,
+                Enabled = false,
+                Range = 5f
+            });
+            bigBall.Components.Add(new TriggerTest());
+            bigBall.Scale = new Vector3(5, 5, 5);
+            bigBall.Position = new Vector3(5, 2.5f, 5);
 
-                    Stage.CreatePointLight(position, 5.0f + (float)rng.NextDouble(), new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble()), intensity: 0.5f + (float)rng.NextDouble());
-                }
-            }
+            GameWorld.Add(bigBall);
 
             Resources.Unload(roomPrefab);
             Resources.Unload(ballPrefab);
 
             Stage.ClearColor = new Vector4(1, 1, 1, 1) * 2;
 
-            var sunLight = Stage.CreateDirectionalLight(new Vector3(-0.3f, -0.7f, 0.66f), new Vector3(1.64f, 1.57f, 1.49f), true, shadowBias: 0.0025f, intensity: 2f);
-            sunLight.Enabled = true;
+            //var sunLight = Stage.CreateDirectionalLight(new Vector3(-0.3f, -0.7f, 0.66f), new Vector3(1.64f, 1.57f, 1.49f), true, shadowBias: 0.0025f, intensity: 2f);
+            //sunLight.Enabled = true;
 
             DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.High;
             DebugFlags |= Game.DebugFlags.RenderStats;

@@ -4,20 +4,15 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Physics;
 
 namespace Triton.Game.World.Components
 {
 	public class SphereRigidBody : RigidBody
 	{
         [DataMember] public float Radius { get; set; } = 1.0f;
-        [DataMember] public bool IsStatic { get; set; } = false;
-        [DataMember] public float Mass { get; set; } = 1.0f;
 
-		public override void OnActivate()
-		{
-			base.OnActivate();
-
-			Body = World.PhysicsWorld.CreateSphereBody(Radius, Owner.Position, Mass, IsStatic ? Physics.BodyFlags.Static : Physics.BodyFlags.None);
-		}
+        protected override Body CreateBody(BodyFlags flags)
+            => World.PhysicsWorld.CreateSphereBody(Radius, Owner.Position, Mass, flags);
 	}
 }

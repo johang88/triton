@@ -68,6 +68,21 @@ namespace Triton.Physics
             }
 
             _world.StepSimulation(stepSize, 2);
+
+            var numManifolds = _world.Dispatcher.NumManifolds;
+            for (var i = 0; i < numManifolds; i++)
+            {
+                var contactManifold = _world.Dispatcher.GetManifoldByIndexInternal(i);
+
+                if (contactManifold.NumContacts == 0)
+                    continue;
+
+                if (contactManifold.Body0.UserObject is Body bodyA && contactManifold.Body1.UserObject is Body bodyB)
+                {
+                    bodyA.OnCollision(bodyB);
+                    bodyB.OnCollision(bodyA);
+                }
+            }
         }
 
         Body CreateRigidBody(CollisionShape shape, Matrix4 startTransform, BodyFlags flags, float mass)

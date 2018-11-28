@@ -127,6 +127,9 @@ namespace Triton.Game.World
         public TComponentType GetComponent<TComponentType>() 
             => (TComponentType)Components.First(c => c is TComponentType);
 
+        public bool HasComponent<TComponentType>()
+            => Components.Any(c => c is TComponentType);
+
         public object Clone()
         {
             var gameObject = new GameObject

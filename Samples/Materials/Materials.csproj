@@ -79,6 +79,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\TriggerTest.cs" />
     <Compile Include="Components\PlayerController.cs" />
     <Compile Include="MaterialsGame.cs" />
     <Compile Include="Program.cs" />

@@ -4,45 +4,36 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Physics;
 
 namespace Triton.Game.World.Components
 {
 	public class MeshRigidBody : RigidBody
 	{
-        [DataMember] public bool IsStatic { get; set; } = true;
-        [DataMember] public float Mass { get; set; } = 1.0f;
-
         private Physics.Resources.Mesh _mesh = null;
         [DataMember] public Physics.Resources.Mesh Mesh
         {
             get => _mesh;
             set
             {
-                if (Body != null)
+                if (_body != null)
                 {
-                    World.PhysicsWorld.RemoveBody(Body);
+                    World.PhysicsWorld.RemoveBody(_body);
                 }
 
-                Body = null;
+                _body = null;
                 _mesh = value;
             }
         }
 
-        public override void OnActivate()
-        {
-            base.OnActivate();
-
-            if (_mesh != null)
-            {
-                Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, Mass, IsStatic ? Physics.BodyFlags.Static : Physics.BodyFlags.None);
-            }
-        }
+        protected override Body CreateBody(BodyFlags flags)
+            => World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, Mass, IsStatic ? Physics.BodyFlags.Static : Physics.BodyFlags.None);
 
         public override void Update(float dt)
         {
-            if (Body == null && _mesh != null)
+            if (_body == null && _mesh != null)
             {
-                Body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, Mass, IsStatic ? Physics.BodyFlags.Static : Physics.BodyFlags.None);
+                _body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, Mass, IsStatic ? Physics.BodyFlags.Static : Physics.BodyFlags.None);
             }
 
             base.Update(dt);
