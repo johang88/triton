@@ -207,33 +207,5 @@ namespace Triton.Physics
 
             return false;
         }
-
-
-        //public bool Raycast(Vector3 origin, Vector3 direction, RaycastCallback callback, out Body body, out Vector3 normal, out float fraction)
-        //{
-        //    RigidBody rigidBody;
-        //    JVector jitterNormal;
-
-        //    Jitter.Collision.RaycastCallback jitterCallback = (RigidBody body1, JVector normal1, float fraction1) =>
-        //    {
-        //        return callback((Body)body1.Tag, Conversion.ToTritonVector(ref normal1), fraction1);
-        //    };
-
-        //    var res = PhysicsWorld.CollisionSystem.Raycast(Conversion.ToBulletVector(ref origin), Conversion.ToBulletVector(ref direction), jitterCallback, out rigidBody, out jitterNormal, out fraction);
-
-        //    normal = Conversion.ToTritonVector(ref jitterNormal);
-        //    if (rigidBody != null)
-        //    {
-        //        body = (Body)rigidBody.Tag;
-        //    }
-        //    else
-        //    {
-        //        body = null;
-        //    }
-
-        //    return res;
-        //}
-
-
     }
 }
