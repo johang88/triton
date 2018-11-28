@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Triton.Common;
+using Triton.Resources;
+using Triton.Utility;
 
 namespace Triton.Graphics.Resources
 {
@@ -79,7 +80,7 @@ namespace Triton.Graphics.Resources
 						}
 						else
 						{
-							var bytes = Common.Utility.Hex.StringToByteArray(colorCode);
+							var bytes = Hex.StringToByteArray(colorCode);
 
 							color = new Vector4(
 								(float)bytes[0] / 255.0f,

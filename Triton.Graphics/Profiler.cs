@@ -5,23 +5,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK.Graphics.OpenGL;
+using Triton.Utility;
 
 namespace Triton.Graphics
 {
     public class Profiler : IDisposable
     {
-        public static readonly Common.HashedString Total = "total";
-        public static readonly Common.HashedString GBuffer = "gbuffer";
-        public static readonly Common.HashedString Lighting = "lighting";
-        public static readonly Common.HashedString ShadowsGeneration = "shadows_generation";
-        public static readonly Common.HashedString ShadowsRender = "shadows_render";
+        public static readonly HashedString Total = "total";
+        public static readonly HashedString GBuffer = "gbuffer";
+        public static readonly HashedString Lighting = "lighting";
+        public static readonly HashedString ShadowsGeneration = "shadows_generation";
+        public static readonly HashedString ShadowsRender = "shadows_render";
 
-        public static readonly Common.HashedString Post = "post";
-        public static readonly Common.HashedString AntiAliasing = "anti aliasing";
-        public static readonly Common.HashedString LuminanceAdaptation = "luminance adaptation";
-        public static readonly Common.HashedString LensFlares = "lensflares";
-        public static readonly Common.HashedString Bloom = "bloom";
-        public static readonly Common.HashedString Tonemap = "tonemap";
+        public static readonly HashedString Post = "post";
+        public static readonly HashedString AntiAliasing = "anti aliasing";
+        public static readonly HashedString LuminanceAdaptation = "luminance adaptation";
+        public static readonly HashedString LensFlares = "lensflares";
+        public static readonly HashedString Bloom = "bloom";
+        public static readonly HashedString Tonemap = "tonemap";
 
         private const int MaxSections = 32;
         private readonly ProfilerSection[] Sections = new ProfilerSection[MaxSections];

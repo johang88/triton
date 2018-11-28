@@ -16,8 +16,8 @@ namespace Triton.Game.World.Components
 		Noise
 	}
 
-	public class LightAnimator : Component
-	{
+	public class LightAnimator : BaseComponent
+    {
 		private static Random RNG = new Random();
 
 		private PointLight Light;

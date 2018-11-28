@@ -7,8 +7,8 @@ using Triton.Physics;
 
 namespace Triton.Game.World.Components
 {
-	public class CharacterController : Component
-	{
+	public class CharacterController : BaseComponent
+    {
         public event BodyCollisionCallback Collision;
 
         public float Length = 1.5f;
@@ -21,7 +21,7 @@ namespace Triton.Game.World.Components
         {
             base.OnActivate();
 
-            Controller = World.PhysicsWorld.CreateCharacterController(Length, Radius);
+            Controller = PhysicsWorld.CreateCharacterController(Length, Radius);
             Controller.Tag = Owner;
 
             Controller.SetPosition(Owner.Position);
@@ -34,7 +34,7 @@ namespace Triton.Game.World.Components
             if (Controller != null)
             {
                 Controller.Collision -= OnCollision;
-                World.PhysicsWorld.RemoveBody(Controller);
+                PhysicsWorld.RemoveBody(Controller);
             }
         }
 

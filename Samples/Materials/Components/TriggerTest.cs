@@ -8,7 +8,7 @@ using Triton.Game.World.Components;
 
 namespace Triton.Samples.Components
 {
-    class TriggerTest : Component
+    class TriggerTest : BaseComponent
     {
         private RigidBody _body;
         private PointLight _light;

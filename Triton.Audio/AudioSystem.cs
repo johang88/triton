@@ -16,7 +16,7 @@ namespace Triton.Audio
 		private readonly AudioBufferManager AudioBufferManager;
 		private float[] Orientation = new float[6];
 
-		public AudioSystem(Common.IO.FileSystem fileSystem)
+		public AudioSystem(IO.FileSystem fileSystem)
 		{
 			if (fileSystem == null)
 				throw new ArgumentNullException("fileSystem");

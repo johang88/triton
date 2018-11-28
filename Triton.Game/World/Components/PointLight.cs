@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Triton.Game.World.Components
 {
-    public class PointLight : Component
+    public class PointLight : BaseComponent
     {
         private Graphics.Light Light;
 

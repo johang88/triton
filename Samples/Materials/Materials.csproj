@@ -57,8 +57,8 @@
     <Reference Include="ImGui.NET, Version=0.4.7.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\ImGui.NET.0.4.7\lib\netstandard1.1\ImGui.NET.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -95,10 +95,6 @@
       <Project>{ae39d529-64e2-476d-b99a-91d79dadda63}</Project>
       <Name>Triton.Audio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Triton.Common\Triton.Common.csproj">
-      <Project>{354b215a-cc57-408b-900d-e7e1f95c04c2}</Project>
-      <Name>Triton.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Triton.Game\Triton.Game.csproj">
       <Project>{3cd6878f-354e-4897-ac21-04330b65ebbb}</Project>
       <Name>Triton.Game</Name>
@@ -122,6 +118,10 @@
     <ProjectReference Include="..\..\Triton.Renderer\Triton.Renderer.csproj">
       <Project>{d8da8b59-a4b9-4de1-920e-5d056375c71e}</Project>
       <Name>Triton.Renderer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Triton\Triton.csproj">
+      <Project>{a8e78b39-52c9-40d8-908a-886567990595}</Project>
+      <Name>Triton</Name>
     </ProjectReference>
     <ProjectReference Include="..\Triton.Samples\Triton.Samples.csproj">
       <Project>{1535b7c5-4557-46fb-ab18-668dc8b0686b}</Project>

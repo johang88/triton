@@ -22,7 +22,7 @@ namespace Triton.Graphics
 		/// <summary>
 		/// Should always be created through Backend.CreateSpriteBatch
 		/// </summary>
-		internal SpriteBatch(Backend backend, Renderer.RenderSystem renderSystem, Common.ResourceManager resourceManager)
+		internal SpriteBatch(Backend backend, Renderer.RenderSystem renderSystem, Triton.Resources.ResourceManager resourceManager)
 		{
 			if (backend == null)
 				throw new ArgumentNullException("backend");

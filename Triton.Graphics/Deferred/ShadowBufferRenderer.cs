@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Triton.Renderer.RenderTargets;
 using Triton.Renderer;
-using Triton.Common;
 
 namespace Triton.Graphics.Deferred
 {
@@ -23,7 +22,7 @@ namespace Triton.Graphics.Deferred
 
         private bool _handlesInitialized = false;
 
-        public ShadowBufferRenderer(Backend backend, ResourceManager resourceManager, int width, int height)
+        public ShadowBufferRenderer(Backend backend, Triton.Resources.ResourceManager resourceManager, int width, int height)
         {
             _backend = backend ?? throw new ArgumentNullException("backend");
 

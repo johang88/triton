@@ -17,7 +17,7 @@ namespace Triton.Graphics.Post.Effects
 			_quadMesh = quadMesh ?? throw new ArgumentNullException("quadMesh");
 		}
 
-		internal virtual void LoadResources(Common.ResourceManager resourceManager)
+		internal virtual void LoadResources(Triton.Resources.ResourceManager resourceManager)
 		{
 		}
 

@@ -10,8 +10,8 @@ namespace Triton.Game.World.Components
 {
     public delegate void BodyCollisionCallback(GameObject other);
 
-	public abstract class RigidBody : Component
-	{
+	public abstract class RigidBody : BaseComponent
+    {
 		protected Physics.Body _body;
 
         [DataMember] public int CollisionLayer = 1;
@@ -28,20 +28,20 @@ namespace Triton.Game.World.Components
         {
             base.OnActivate();
 
-            var flags = Physics.BodyFlags.None;
+            var flags = BodyFlags.None;
             if (IsStatic)
             {
-                flags |= Physics.BodyFlags.Static;
+                flags |= BodyFlags.Static;
             }
 
             if (IsTrigger)
             {
-                flags |= Physics.BodyFlags.NoContactResponse;
+                flags |= BodyFlags.NoContactResponse;
             }
 
             if (IsKinematic)
             {
-                flags |= Physics.BodyFlags.Kinematic;
+                flags |= BodyFlags.Kinematic;
             }
 
             _body = CreateBody(flags);
@@ -56,7 +56,7 @@ namespace Triton.Game.World.Components
             if (_body != null)
             {
                 _body.Collision -= OnCollision;
-                World.PhysicsWorld.RemoveBody(_body);
+                PhysicsWorld.RemoveBody(_body);
             }
         }
 

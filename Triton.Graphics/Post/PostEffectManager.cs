@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Triton.Graphics.Post.Effects;
 using Triton.Renderer.RenderTargets;
+using Triton.Resources;
 
 namespace Triton.Graphics.Post
 {
@@ -40,7 +41,7 @@ namespace Triton.Graphics.Post
 
         private List<BaseEffect> _effects = new List<BaseEffect>();
 
-        public PostEffectManager(Common.IO.FileSystem fileSystem, Common.ResourceManager resourceManager, Backend backend, int width, int height)
+        public PostEffectManager(IO.FileSystem fileSystem, ResourceManager resourceManager, Backend backend, int width, int height)
         {
             if (fileSystem == null) throw new ArgumentNullException("fileSystem");
             _backend = backend ?? throw new ArgumentNullException("backend");
@@ -101,7 +102,7 @@ namespace Triton.Graphics.Post
             LoadResources(resourceManager);
         }
 
-        void LoadResources(Common.ResourceManager resourceManager)
+        void LoadResources(ResourceManager resourceManager)
         {
             _sprite = _backend.CreateSpriteBatch();
 

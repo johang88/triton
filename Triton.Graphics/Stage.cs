@@ -8,7 +8,7 @@ namespace Triton.Graphics
 {
     public class Stage
     {
-        private readonly Common.ResourceManager _resourceManager;
+        private readonly Triton.Resources.ResourceManager _resourceManager;
 
         private readonly List<MeshInstance> _meshes = new List<MeshInstance>();
         private readonly List<Light> _lights = new List<Light>();
@@ -25,7 +25,9 @@ namespace Triton.Graphics
 
         public AmbientLight AmbientLight { get; set; }
 
-        public Stage(Common.ResourceManager resourceManager)
+        public Camera Camera { get; set; }
+
+        public Stage(Triton.Resources.ResourceManager resourceManager)
         {
             _resourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");
         }

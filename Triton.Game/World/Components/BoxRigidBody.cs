@@ -15,6 +15,6 @@ namespace Triton.Game.World.Components
         [DataMember] public float Width = 1;
 
         protected override Body CreateBody(BodyFlags flags)
-            => World.PhysicsWorld.CreateBoxBody(Length, Height, Width, Owner.Position, Mass, flags);
+            => PhysicsWorld.CreateBoxBody(Length, Height, Width, Owner.Position, Mass, flags);
 	}
 }

@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace Triton.Physics.Resources
 {
-	class MeshLoader : Triton.Common.IResourceSerializer<Mesh>
+	class MeshLoader : Triton.Resources.IResourceSerializer<Mesh>
 	{
 		static readonly char[] Magic = new char[] { 'C', 'O', 'L', 'M' };
 		const int Version_1_0 = 0x0100;
 
-		private readonly Triton.Common.IO.FileSystem _fileSystem;
+		private readonly Triton.IO.FileSystem _fileSystem;
 
         public bool SupportsStreaming => false;
 
-		public MeshLoader(Triton.Common.IO.FileSystem fileSystem)
+		public MeshLoader(Triton.IO.FileSystem fileSystem)
 		{
             _fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
 		}

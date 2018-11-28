@@ -9,11 +9,11 @@ namespace Triton.Audio
 {
 	class AudioBufferManager : IDisposable
 	{
-		private readonly Common.IO.FileSystem FileSystem;
+		private readonly IO.FileSystem FileSystem;
 		private readonly DecoderFactory DecoderFactory;
 		private readonly Dictionary<string, IAudioBuffer> Buffers;
 
-		public AudioBufferManager(DecoderFactory decoderFactory, Common.IO.FileSystem fileSystem)
+		public AudioBufferManager(DecoderFactory decoderFactory, IO.FileSystem fileSystem)
 		{
 			if (decoderFactory == null)
 				throw new ArgumentNullException("decoderFactory");

@@ -8,8 +8,8 @@ using Triton.Graphics.Resources;
 
 namespace Triton.Game.World.Components
 {
-	public class MeshRenderer : Component
-	{
+	public class MeshRenderer : BaseComponent
+    {
         private Mesh _mesh = null;
         [DataMember] public Mesh Mesh
         {
@@ -18,7 +18,7 @@ namespace Triton.Game.World.Components
             {
                 if (MeshInstance != null)
                 {
-                    World.Stage.RemoveMesh(MeshInstance);
+                    Stage.RemoveMesh(MeshInstance);
                 }
 
                 MeshInstance = null;
@@ -36,7 +36,7 @@ namespace Triton.Game.World.Components
 
             if (_mesh != null)
             {
-                MeshInstance = World.Stage.AddMesh(_mesh);
+                MeshInstance = Stage.AddMesh(_mesh);
             }
         }
 
@@ -46,7 +46,7 @@ namespace Triton.Game.World.Components
 
             if (MeshInstance != null)
             {
-                World.Stage.RemoveMesh(MeshInstance);
+                Stage.RemoveMesh(MeshInstance);
             }
         }
 
@@ -56,7 +56,7 @@ namespace Triton.Game.World.Components
 
             if (MeshInstance == null && _mesh != null)
             {
-                MeshInstance = World.Stage.AddMesh(_mesh);
+                MeshInstance = Stage.AddMesh(_mesh);
             }
             else if (MeshInstance != null)
             {

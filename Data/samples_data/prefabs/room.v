@@ -4,7 +4,7 @@
    "Scale":"1 1 1",
    "Children":[
 	  {
-	    "$type":"Triton.Game.World.GameObject, Triton.Game",
+	    "$type":"Triton.GameObject, Triton",
 		"Position": "2 2.5 3",
 		"Components": [
 			{
@@ -17,7 +17,7 @@
 		]
 	  },
 	  {
-	    "$type":"Triton.Game.World.GameObject, Triton.Game",
+	    "$type":"Triton.GameObject, Triton",
 		"Position": "-10 2.5 1",
 		"Components": [
 			{
@@ -30,7 +30,7 @@
 		]
 	  },
 	  {
-	    "$type":"Triton.Game.World.GameObject, Triton.Game",
+	    "$type":"Triton.GameObject, Triton",
 		"Position": "-18 2.5 -5",
 		"Components": [
 			{

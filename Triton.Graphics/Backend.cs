@@ -9,10 +9,12 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.IO;
 using System.Collections.Concurrent;
-using Triton.Common;
 using Triton.Renderer;
 using System.Runtime.InteropServices;
 using Triton.Graphics.Resources;
+using Triton.Resources;
+using Triton.Utility;
+using Triton.IO;
 
 namespace Triton.Graphics
 {
@@ -931,13 +933,13 @@ namespace Triton.Graphics
             _primaryBuffer.Writer.Write(textureHandle);
         }
 
-        public void ProfileBeginSection(Common.HashedString name)
+        public void ProfileBeginSection(HashedString name)
         {
             _primaryBuffer.Writer.Write((byte)OpCode.ProfileBegin);
             _primaryBuffer.Writer.Write((int)name);
         }
 
-        public void ProfileEndSection(Common.HashedString name)
+        public void ProfileEndSection(HashedString name)
         {
             _primaryBuffer.Writer.Write((byte)OpCode.ProfileEnd);
             _primaryBuffer.Writer.Write((int)name);

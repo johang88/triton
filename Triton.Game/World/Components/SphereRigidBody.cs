@@ -13,6 +13,6 @@ namespace Triton.Game.World.Components
         [DataMember] public float Radius { get; set; } = 1.0f;
 
         protected override Body CreateBody(BodyFlags flags)
-            => World.PhysicsWorld.CreateSphereBody(Radius, Owner.Position, Mass, flags);
+            => PhysicsWorld.CreateSphereBody(Radius, Owner.Position, Mass, flags);
 	}
 }

@@ -28,18 +28,18 @@ namespace Triton.Graphics.Resources
 	///		byte[VertexCount] VertexData
 	///		byte[IndexCount] IndexData
 	/// </summary>
-	class MeshSerializer : Triton.Common.IResourceSerializer<Mesh>
+	class MeshSerializer : Triton.Resources.IResourceSerializer<Mesh>
 	{
 		static readonly char[] Magic = new char[] { 'M', 'E', 'S', 'H' };
 		const int Version_1_4 = 0x0140;
 
 		private readonly Backend _backend;
-		private readonly Triton.Common.IO.FileSystem _fileSystem;
-		private readonly Triton.Common.ResourceManager _resourceManager;
+		private readonly Triton.IO.FileSystem _fileSystem;
+		private readonly Triton.Resources.ResourceManager _resourceManager;
 
         public bool SupportsStreaming => false;
 
-        public MeshSerializer(Backend backend, Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
+        public MeshSerializer(Backend backend, Triton.Resources.ResourceManager resourceManager, Triton.IO.FileSystem fileSystem)
 		{
             _backend = backend ?? throw new ArgumentNullException("backend");
 			_fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");

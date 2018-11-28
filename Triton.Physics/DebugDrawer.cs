@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Triton.Graphics;
 using Triton.Renderer;
-using Triton.Common;
 using BulletSharp;
 using BulletSharp.Math;
+using Triton.Resources;
 
 namespace Triton.Physics
 {

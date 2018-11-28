@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.Resources
 {
-	class MaterialSerializer : Triton.Common.IResourceSerializer<Material>
+	class MaterialSerializer : Triton.Resources.IResourceSerializer<Material>
 	{
         private static readonly char[] Magic = new char[] { 'M', 'A', 'T', 'E' };
 		private const int Version_1_0 = 0x01;
 
-		private readonly Triton.Common.IO.FileSystem _fileSystem;
-		private readonly Triton.Common.ResourceManager _resourceManager;
+		private readonly Triton.IO.FileSystem _fileSystem;
+		private readonly Triton.Resources.ResourceManager _resourceManager;
 
 		private const string DefaultShader = "/shaders/deferred/gbuffer";
 
         public bool SupportsStreaming => false;
 
-        public MaterialSerializer(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
+        public MaterialSerializer(Triton.Resources.ResourceManager resourceManager, Triton.IO.FileSystem fileSystem)
 		{
             _fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
 			_resourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");

@@ -83,13 +83,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Triton.Common\Triton.Common.csproj">
-      <Project>{354b215a-cc57-408b-900d-e7e1f95c04c2}</Project>
-      <Name>Triton.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">
       <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>
       <Name>Triton.Math</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Triton\Triton.csproj">
+      <Project>{a8e78b39-52c9-40d8-908a-886567990595}</Project>
+      <Name>Triton</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

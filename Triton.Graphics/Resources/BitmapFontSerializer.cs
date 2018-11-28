@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Triton.Common;
+using Triton.Utility;
 
 namespace Triton.Graphics.Resources
 {
-	class BitmapFontSerializer : Triton.Common.IResourceSerializer<BitmapFont>
+	class BitmapFontSerializer : Triton.Resources.IResourceSerializer<BitmapFont>
 	{
-		private readonly Triton.Common.IO.FileSystem _fileSystem;
-		private readonly Triton.Common.ResourceManager _resourceManager;
+		private readonly Triton.IO.FileSystem _fileSystem;
+		private readonly Triton.Resources.ResourceManager _resourceManager;
 
         public bool SupportsStreaming => false;
 
-        public BitmapFontSerializer(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
+        public BitmapFontSerializer(Triton.Resources.ResourceManager resourceManager, Triton.IO.FileSystem fileSystem)
 		{
             _fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");
 			_resourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");

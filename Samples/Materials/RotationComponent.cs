@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Game.World.Components;
 
 namespace Triton.Samples
 {
-	class RotationComponent : Game.World.Component
+	class RotationComponent : BaseComponent
 	{
 		public Vector3 Rotation = new Vector3();
 

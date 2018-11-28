@@ -14,7 +14,7 @@ namespace Triton.Graphics.Resources
 
 		public ShaderProgram Shader;
 		private ShaderHandles _handles;
-		private Common.ResourceManager _resourceManager;
+		private Triton.Resources.ResourceManager _resourceManager;
 		public bool IsSkinned;
 
 		private int[] _textureHandles;
@@ -25,7 +25,7 @@ namespace Triton.Graphics.Resources
 		private static int LastId = 0;
 		public readonly int Id = LastId++;
 
-		public Material(Common.ResourceManager resourceManager)
+		public Material(Triton.Resources.ResourceManager resourceManager)
 		{
 			_resourceManager = resourceManager;
         }

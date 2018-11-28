@@ -18,7 +18,7 @@ namespace Triton.Game.World.Components
             {
                 if (_body != null)
                 {
-                    World.PhysicsWorld.RemoveBody(_body);
+                    PhysicsWorld.RemoveBody(_body);
                 }
 
                 _body = null;
@@ -27,13 +27,13 @@ namespace Triton.Game.World.Components
         }
 
         protected override Body CreateBody(BodyFlags flags)
-            => World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, Mass, IsStatic ? Physics.BodyFlags.Static : Physics.BodyFlags.None);
+            => PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, Mass, IsStatic ? BodyFlags.Static : BodyFlags.None);
 
         public override void Update(float dt)
         {
             if (_body == null && _mesh != null)
             {
-                _body = World.PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, Mass, IsStatic ? Physics.BodyFlags.Static : Physics.BodyFlags.None);
+                _body = PhysicsWorld.CreateMeshBody(Mesh, Owner.Position, Mass, IsStatic ? BodyFlags.Static : BodyFlags.None);
             }
 
             base.Update(dt);

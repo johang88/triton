@@ -4,20 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Triton.Graphics.SkeletalAnimation;
-using Triton.Common;
+using Triton.IO;
 
 namespace Triton.Graphics.Resources
 {
-	class SkeletonSerializer : Triton.Common.IResourceSerializer<Skeleton>
+	class SkeletonSerializer : Triton.Resources.IResourceSerializer<Skeleton>
 	{
 		static readonly char[] Magic = new char[] { 'S', 'K', 'E', 'L' };
 		const int Version_1 = 0x0100;
 
-		private readonly Triton.Common.IO.FileSystem FileSystem;
+		private readonly Triton.IO.FileSystem FileSystem;
 
         public bool SupportsStreaming => false;
 
-        public SkeletonSerializer(Triton.Common.IO.FileSystem fileSystem)
+        public SkeletonSerializer(Triton.IO.FileSystem fileSystem)
 		{
             FileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
 		}

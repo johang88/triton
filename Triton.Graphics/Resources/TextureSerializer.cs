@@ -6,18 +6,17 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-using Triton.Common;
 
 namespace Triton.Graphics.Resources
 {
-	class TextureSerializer : Triton.Common.IResourceSerializer<Texture>
+	class TextureSerializer : Triton.Resources.IResourceSerializer<Texture>
 	{
 		private readonly Backend _backend;
-		private readonly Triton.Common.IO.FileSystem _fileSystem;
+		private readonly Triton.IO.FileSystem _fileSystem;
 
         public bool SupportsStreaming => false;
 
-        public TextureSerializer(Backend backend, Triton.Common.IO.FileSystem fileSystem)
+        public TextureSerializer(Backend backend, Triton.IO.FileSystem fileSystem)
 		{
             _backend = backend ?? throw new ArgumentNullException("backend");
 			_fileSystem = fileSystem ?? throw new ArgumentNullException("fileSystem");

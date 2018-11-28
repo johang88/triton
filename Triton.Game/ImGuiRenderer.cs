@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using ImGuiNET;
-using Triton.Common;
 using Triton.Graphics.Resources;
 using Triton.Renderer;
+using Triton.Resources;
 
 namespace Triton.Game
 {
@@ -55,7 +55,7 @@ namespace Triton.Game
 
         unsafe void CreateTextures()
         {
-            IO io = ImGui.GetIO();
+            ImGuiNET.IO io = ImGui.GetIO();
 
             // Build texture atlas
             FontTextureData texData = io.FontAtlas.GetTexDataAsRGBA32();

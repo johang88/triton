@@ -4,14 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
+using Triton.Utility;
 
 namespace Triton.Graphics.Resources
 {
     public class ShaderProgram : IDisposable
     {
         public int Handle { get; internal set; }
-        public Dictionary<Common.HashedString, int> Uniforms = new Dictionary<Common.HashedString, int>();
-        private Dictionary<Common.HashedString, Common.HashedString> _bindNamesToVarNames = new Dictionary<Common.HashedString, Common.HashedString>();
+        public Dictionary<Utility.HashedString, int> Uniforms = new Dictionary<Utility.HashedString, int>();
+        private Dictionary<Utility.HashedString, Utility.HashedString> _bindNamesToVarNames = new Dictionary<Utility.HashedString, Utility.HashedString>();
         private readonly Backend _backend;
 
         public bool HasTeselation = false;
@@ -36,11 +37,11 @@ namespace Triton.Graphics.Resources
 
         internal void Reset()
         {
-            Uniforms = new Dictionary<Common.HashedString, int>();
-            _bindNamesToVarNames = new Dictionary<Common.HashedString, Common.HashedString>();
+            Uniforms = new Dictionary<Utility.HashedString, int>();
+            _bindNamesToVarNames = new Dictionary<Utility.HashedString, HashedString>();
         }
 
-        public int GetUniform(Common.HashedString name)
+        public int GetUniform(Utility.HashedString name)
         {
             int uniformLocation;
             if (!Uniforms.TryGetValue(name, out uniformLocation))

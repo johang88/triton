@@ -8,7 +8,7 @@ namespace Triton.Physics.Resources
 {
 	public static class ResourceLoaders
 	{
-		public static void Init(Triton.Common.ResourceManager resourceManager, Triton.Common.IO.FileSystem fileSystem)
+		public static void Init(Triton.Resources.ResourceManager resourceManager, Triton.IO.FileSystem fileSystem)
 		{
 			resourceManager.AddResourceSerializer<Mesh>(new MeshLoader(fileSystem));
 		}

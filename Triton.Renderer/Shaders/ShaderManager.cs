@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Utility;
 
 namespace Triton.Renderer.Shaders
 {
@@ -202,10 +203,10 @@ namespace Triton.Renderer.Shaders
 			return true;
 		}
 
-		public Dictionary<Common.HashedString, int> GetUniforms(int handle)
+		public Dictionary<HashedString, int> GetUniforms(int handle)
 		{
 			var program = GetOpenGLHande(handle);
-			var uniforms = new Dictionary<Common.HashedString, int>();
+			var uniforms = new Dictionary<HashedString, int>();
 
 			int uniformCount;
 			GL.GetProgram(program, GetProgramParameterName.ActiveUniforms, out uniformCount);

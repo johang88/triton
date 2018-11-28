@@ -7,6 +7,8 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Graphics;
 using OGL = OpenTK.Graphics.OpenGL;
 using System.Runtime.InteropServices;
+using Triton.Utility;
+using Triton.Logging;
 
 namespace Triton.Renderer
 {
@@ -76,10 +78,10 @@ namespace Triton.Renderer
             var major = GL.GetInteger(GetPName.MajorVersion);
             var minor = GL.GetInteger(GetPName.MinorVersion);
 
-            Common.Log.WriteLine("OpenGL Context ({0}.{1}) initialized", major, minor);
-            Common.Log.WriteLine(" - Color format: {0}", _context.GraphicsMode.ColorFormat);
-            Common.Log.WriteLine(" - Depth: {0}", _context.GraphicsMode.Depth);
-            Common.Log.WriteLine(" - FSAA Samples: {0}", _context.GraphicsMode.Samples);
+            Log.WriteLine("OpenGL Context ({0}.{1}) initialized", major, minor);
+            Log.WriteLine(" - Color format: {0}", _context.GraphicsMode.ColorFormat);
+            Log.WriteLine(" - Depth: {0}", _context.GraphicsMode.Depth);
+            Log.WriteLine(" - FSAA Samples: {0}", _context.GraphicsMode.Samples);
 
             GLWrapper.Initialize();
 
@@ -133,7 +135,7 @@ namespace Triton.Renderer
             if (severity >= DebugSeverity.DebugSeverityLow)
             {
                 var msg = Marshal.PtrToStringAnsi(message, length);
-                Common.Log.WriteLine(string.Format("{0} {1} {2}", severity, type, msg));
+                Log.WriteLine(string.Format("{0} {1} {2}", severity, type, msg));
             }
         }
 
@@ -344,7 +346,7 @@ namespace Triton.Renderer
             return GL.GetUniformLocation(programHandle, name);
         }
 
-        public Dictionary<Common.HashedString, int> GetUniforms(int handle)
+        public Dictionary<HashedString, int> GetUniforms(int handle)
         {
             return _shaderManager.GetUniforms(handle);
         }

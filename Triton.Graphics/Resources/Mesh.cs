@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Triton.Common;
 using Triton.Renderer;
+using Triton.Resources;
 
 namespace Triton.Graphics.Resources
 {

@@ -11,7 +11,7 @@ namespace Triton.Graphics.Deferred
 {
     public class DeferredRenderer
     {
-        private readonly Common.ResourceManager _resourceManager;
+        private readonly Triton.Resources.ResourceManager _resourceManager;
         private readonly Backend _backend;
 
         private AmbientLightParams _ambientLightParams = new AmbientLightParams();
@@ -57,7 +57,7 @@ namespace Triton.Graphics.Deferred
         private RenderTarget _shadowBuffer = null;
         private Texture _specularIntegarion;
 
-        public DeferredRenderer(Common.ResourceManager resourceManager, Backend backend, int width, int height)
+        public DeferredRenderer(Triton.Resources.ResourceManager resourceManager, Backend backend, int width, int height)
         {
             Settings.ShadowQuality = ShadowQuality.High;
             Settings.EnableShadows = true;

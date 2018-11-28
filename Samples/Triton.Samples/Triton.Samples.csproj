@@ -83,10 +83,6 @@
       <Project>{ae39d529-64e2-476d-b99a-91d79dadda63}</Project>
       <Name>Triton.Audio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Triton.Common\Triton.Common.csproj">
-      <Project>{354b215a-cc57-408b-900d-e7e1f95c04c2}</Project>
-      <Name>Triton.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Triton.Game\Triton.Game.csproj">
       <Project>{3cd6878f-354e-4897-ac21-04330b65ebbb}</Project>
       <Name>Triton.Game</Name>
@@ -110,6 +106,10 @@
     <ProjectReference Include="..\..\Triton.Renderer\Triton.Renderer.csproj">
       <Project>{d8da8b59-a4b9-4de1-920e-5d056375c71e}</Project>
       <Name>Triton.Renderer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Triton\Triton.csproj">
+      <Project>{a8e78b39-52c9-40d8-908a-886567990595}</Project>
+      <Name>Triton</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

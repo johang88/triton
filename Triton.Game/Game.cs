@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Triton.Common;
 using System.Threading;
 using OpenTK.Graphics;
 using OpenTK;
@@ -13,16 +12,18 @@ using OpenTK.Input;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using Triton.Graphics;
+using Triton.Logging;
+using Triton.Utility;
 
 namespace Triton.Game
 {
     public abstract class Game : IDisposable
     {
         public Triton.Graphics.Backend GraphicsBackend { get; private set; }
-        public Triton.Common.IO.FileSystem FileSystem { get; private set; }
+        public Triton.IO.FileSystem FileSystem { get; private set; }
 
-        public Triton.Common.ResourceGroupManager ResourceGroupManager { get; private set; }
-        public Triton.Common.ResourceManager Resources { get; private set; }
+        public Triton.Resources.ResourceGroupManager ResourceGroupManager { get; private set; }
+        public Triton.Resources.ResourceManager Resources { get; private set; }
 
         private Thread _updateThread { get; set; }
 
@@ -48,7 +49,7 @@ namespace Triton.Game
 
         public Audio.AudioSystem AudioSystem { get; private set; }
 
-        public World.GameObjectManager GameWorld;
+        public GameObjectManager GameWorld;
 
         public Graphics.SpriteBatch SpriteRenderer;
         public Graphics.Resources.BitmapFont DebugFont;
@@ -68,18 +69,20 @@ namespace Triton.Game
 
         public bool CursorVisible { get; set; } = true;
 
-        private readonly Common.Concurrency.SingleThreadScheduler _mainThreadScheduler;
-        private readonly Common.Concurrency.SingleThreadScheduler _ioThreadScheduler;
+        private readonly Concurrency.SingleThreadScheduler _mainThreadScheduler;
+        private readonly Concurrency.SingleThreadScheduler _ioThreadScheduler;
         private readonly Thread _ioThread;
+
+        private Services _services = new Services();
         
         public Game(string name, string logPath = "logs/")
         {
             _name = name;
-            Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
-            Triton.Common.Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File(string.Format("{0}/{1}.txt", logPath, name)));
+            Log.AddOutputHandler(new Logging.Console());
+            Log.AddOutputHandler(new Logging.File(string.Format("{0}/{1}.txt", logPath, name)));
 
-            FileSystem = new Common.IO.FileSystem(MountFileSystem());
-            ResourceGroupManager = new Common.ResourceGroupManager(FileSystem);
+            FileSystem = new IO.FileSystem(MountFileSystem());
+            ResourceGroupManager = new Resources.ResourceGroupManager(FileSystem);
 
             Resources = ResourceGroupManager.Add("resources");
 
@@ -87,9 +90,9 @@ namespace Triton.Game
 
             _ioThread = new Thread(IOThread) { Name = "IO Thread" };
 
-            _mainThreadScheduler = new Common.Concurrency.SingleThreadScheduler(System.Threading.Thread.CurrentThread);
-            _ioThreadScheduler = new Common.Concurrency.SingleThreadScheduler(_ioThread);
-            Common.Concurrency.TaskHelpers.Initialize(_mainThreadScheduler, _ioThreadScheduler);
+            _mainThreadScheduler = new Concurrency.SingleThreadScheduler(System.Threading.Thread.CurrentThread);
+            _ioThreadScheduler = new Concurrency.SingleThreadScheduler(_ioThread);
+            Concurrency.TaskHelpers.Initialize(_mainThreadScheduler, _ioThreadScheduler);
             
             Running = true;
         }
@@ -198,10 +201,17 @@ namespace Triton.Game
 
             Stage = new Graphics.Stage(Resources);
             Camera = new Graphics.Camera(new Vector2(GraphicsBackend.Width, GraphicsBackend.Height));
+            Stage.Camera = Camera;
 
             InputManager = new Input.InputManager(_window.Bounds);
 
-            GameWorld = new World.GameObjectManager(Stage, InputManager, Resources, PhysicsWorld, Camera);
+            _services.Add(Stage);
+            _services.Add(InputManager);
+            _services.Add(Resources);
+            _services.Add(PhysicsWorld);
+            _services.Add(Camera);
+
+            GameWorld = new GameObjectManager(_services);
 
             LoadCoreResources();
 
@@ -313,7 +323,7 @@ namespace Triton.Game
 
         void DoRenderUI(float deltaTime)
         {
-            IO io = ImGui.GetIO();
+            var io = ImGui.GetIO();
             io.DisplaySize = new System.Numerics.Vector2(_window.Width, _window.Height);
             io.DisplayFramebufferScale = new System.Numerics.Vector2(1); /// TODO !!!!
             io.DeltaTime = deltaTime;
@@ -327,7 +337,7 @@ namespace Triton.Game
             _imGuiRenderer.SubmitDrawCommands();
         }
 
-        void UpdateImGuiInput(IO io)
+        void UpdateImGuiInput(ImGuiNET.IO io)
         {
             try
             {
@@ -404,7 +414,7 @@ namespace Triton.Game
             for (var i = 0; i < sectionCount; i++)
             {
                 var section = sections[i];
-                var name = Common.HashedStringTable.GetString(new Common.HashedString(section.Name));
+                var name = HashedStringTable.GetString(new HashedString(section.Name));
 
                 ImGui.Text($"\t{name} {section.ElapsedMs:0.00}ms");
             }
@@ -483,7 +493,7 @@ namespace Triton.Game
 
         private void SetImGuiKeyMaps()
         {
-            IO io = ImGui.GetIO();
+            ImGuiNET.IO io = ImGui.GetIO();
             io.KeyMap[GuiKey.Tab] = (int)Input.Key.Tab;
             io.KeyMap[GuiKey.LeftArrow] = (int)Input.Key.Left;
             io.KeyMap[GuiKey.RightArrow] = (int)Input.Key.Right;

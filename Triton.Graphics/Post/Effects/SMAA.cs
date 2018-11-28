@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Triton.Renderer;
 using Triton.Renderer.RenderTargets;
+using Triton.Utility;
 
 namespace Triton.Graphics.Post.Effects
 {
@@ -27,7 +28,7 @@ namespace Triton.Graphics.Post.Effects
 		private readonly int _linearClampSampler = 0;
 		private readonly int _nearClampSampler = 0;
 
-		public SMAA(Backend backend, Common.IO.FileSystem fileSystem, BatchBuffer quadMesh)
+		public SMAA(Backend backend, IO.FileSystem fileSystem, BatchBuffer quadMesh)
 			: base(backend, quadMesh)
 		{
 			var width = _backend.Width;
@@ -63,14 +64,14 @@ namespace Triton.Graphics.Post.Effects
 			}));
 		}
 
-		internal override void LoadResources(Common.ResourceManager resourceManager)
+		internal override void LoadResources(Triton.Resources.ResourceManager resourceManager)
 		{
 			base.LoadResources(resourceManager);
 
 			var width = _backend.Width;
 			var height = _backend.Height;
 
-			var pixelSizeDefine = string.Format("SMAA_PIXEL_SIZE float2(1.0 / {0}, 1.0 / {1})", Common.StringConverter.ToString(width), Common.StringConverter.ToString(height));
+			var pixelSizeDefine = string.Format("SMAA_PIXEL_SIZE float2(1.0 / {0}, 1.0 / {1})", StringConverter.ToString(width), StringConverter.ToString(height));
 			var qualities = new string[] { "SMAA_PRESET_LOW", "SMAA_PRESET_MEDIUM", "SMAA_PRESET_HIGH", "SMAA_PRESET_ULTRA" };
 
 			for (var i = 0; i < 4; i++)
@@ -83,7 +84,7 @@ namespace Triton.Graphics.Post.Effects
 			}
 		}
 
-		private byte[] GetRawTexture(Common.IO.FileSystem fileSystem, string path)
+		private byte[] GetRawTexture(IO.FileSystem fileSystem, string path)
 		{
 			using (var stream = fileSystem.OpenRead(path))
 			{

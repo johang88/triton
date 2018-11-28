@@ -12,11 +12,11 @@ namespace Triton.Graphics.Shaders
     /// </summary>
     class Preprocessor
     {
-        private readonly Triton.Common.IO.FileSystem _fileSystem;
+        private readonly Triton.IO.FileSystem _fileSystem;
         private static readonly Regex _preprocessorIncludeRegex = new Regex(@"^#include\s""([ \t\w /]+)""", RegexOptions.Multiline);
         public List<string> Dependencies { get; } = new List<string>();
 
-        public Preprocessor(Triton.Common.IO.FileSystem fileSystem)
+        public Preprocessor(Triton.IO.FileSystem fileSystem)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         }

@@ -8,7 +8,7 @@ namespace Triton.Graphics.Resources
 {
 	public static class ResourceSerializers
 	{
-		public static void Init(Triton.Common.ResourceManager resourceManager, Backend backend, Triton.Common.IO.FileSystem fileSystem, ShaderHotReloadConfig shaderHotReloadConfig)
+		public static void Init(Triton.Resources.ResourceManager resourceManager, Backend backend, Triton.IO.FileSystem fileSystem, ShaderHotReloadConfig shaderHotReloadConfig)
 		{
             var shaderLoader = new ShaderSerializer(backend, fileSystem, resourceManager);
 

@@ -9,7 +9,7 @@ using Triton.Input;
 
 namespace Triton.Samples.Components
 {
-    public class PlayerController : Component
+    public class PlayerController : BaseComponent
     {
         private const float MouseSensitivity = 0.0025f;
 
@@ -74,7 +74,7 @@ namespace Triton.Samples.Components
                 var from = Camera.Position;
                 var to = from + Vector3.Transform(new Vector3(0, 0, 100), Camera.Orientation);
 
-                if (World.PhysicsWorld.Raycast(from, to, (body, _, __) => body.CollisionLayer == 2, out var hitBody, out var hitNormal, out var hitFraction))
+                if (PhysicsWorld.Raycast(from, to, (body, _, __) => body.CollisionLayer == 2, out var hitBody, out var hitNormal, out var hitFraction))
                 {
                     hitBody.AddForce(hitNormal * 10);
                 }

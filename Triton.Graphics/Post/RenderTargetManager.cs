@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Triton.Renderer.RenderTargets;
+using Triton.Utility;
 
 namespace Triton.Graphics.Post
 {
@@ -38,7 +39,7 @@ namespace Triton.Graphics.Post
 			return new RenderTargetWrapper(
 				width, height, pixelInternalFormat,
 				this,
-				Backend.CreateRenderTarget("tmp_" + Common.StringConverter.ToString(Counter++), new Definition(width, height, false, new List<Definition.Attachment>()
+				Backend.CreateRenderTarget("tmp_" + StringConverter.ToString(Counter++), new Definition(width, height, false, new List<Definition.Attachment>()
 				{
 					new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0)
 				}))

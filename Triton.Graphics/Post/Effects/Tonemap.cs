@@ -29,7 +29,7 @@ namespace Triton.Graphics.Post.Effects
 			_samplers = new int[] { _backend.DefaultSamplerNoFiltering, _backend.DefaultSampler, blurSampler, blurSampler };
 		}
 
-		internal override void LoadResources(Common.ResourceManager resourceManager)
+		internal override void LoadResources(Triton.Resources.ResourceManager resourceManager)
 		{
 			base.LoadResources(resourceManager);
 			_shader = resourceManager.Load<Resources.ShaderProgram>("/shaders/post/tonemap");

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Triton.Common;
+using Triton.Logging;
+using Triton.Resources;
+using Triton.Utility;
 
 namespace Triton.Graphics.Resources
 {
@@ -15,17 +17,17 @@ namespace Triton.Graphics.Resources
     /// Various pragmas and preprocessor defines are also setup.
     /// 
     /// </summary>
-    class ShaderSerializer : Triton.Common.IResourceSerializer<ShaderProgram>
+    class ShaderSerializer : Triton.Resources.IResourceSerializer<ShaderProgram>
     {
         private readonly Backend _backend;
-        private readonly Triton.Common.IO.FileSystem _fileSystem;
+        private readonly Triton.IO.FileSystem _fileSystem;
         private readonly Dictionary<string, List<ShaderProgram>> _shaders = new Dictionary<string, List<ShaderProgram>>();
         private readonly Dictionary<string, HashSet<string>> _dependencies = new Dictionary<string, HashSet<string>>();
         private readonly ResourceManager _resourceManager;
 
         public bool SupportsStreaming => false;
 
-        public ShaderSerializer(Backend backend, Triton.Common.IO.FileSystem fileSystem, ResourceManager resourceManager)
+        public ShaderSerializer(Backend backend, Triton.IO.FileSystem fileSystem, ResourceManager resourceManager)
         {
             _backend = backend ?? throw new ArgumentNullException(nameof(backend));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
@@ -139,7 +141,7 @@ namespace Triton.Graphics.Resources
             }
 
             if (!string.IsNullOrWhiteSpace(errors))
-                Common.Log.WriteLine(name + ": " + errors, success ? Common.LogLevel.Default : Common.LogLevel.Error);
+                Log.WriteLine(name + ": " + errors, success ? LogLevel.Default : LogLevel.Error);
         }
 
         public Task Deserialize(object resource, byte[] data)
@@ -165,7 +167,7 @@ namespace Triton.Graphics.Resources
         {
             if (!_shaders.ContainsKey(name))
             {
-                Common.Log.WriteLine($"Untracked shader '{name}'", LogLevel.Warning);
+                Log.WriteLine($"Untracked shader '{name}'", LogLevel.Warning);
                 return;
             }
 

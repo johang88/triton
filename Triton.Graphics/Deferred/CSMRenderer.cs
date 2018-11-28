@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Triton.Common;
 using Triton.Renderer;
 using Triton.Renderer.RenderTargets;
 
@@ -44,7 +43,7 @@ namespace Triton.Graphics.Deferred
 
         private Backend _backend;
 
-        public CSMRenderer(Backend backend, ResourceManager resourceManager, int cascadeCount = MaxCascadeCount, int resolution = DefaultResolution)
+        public CSMRenderer(Backend backend, Triton.Resources.ResourceManager resourceManager, int cascadeCount = MaxCascadeCount, int resolution = DefaultResolution)
         {
             _backend = backend ?? throw new ArgumentNullException(nameof(backend));
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK.Graphics.OpenGL;
+using Triton.Logging;
 using OGL = OpenTK.Graphics.OpenGL;
 
 namespace Triton.Renderer.RenderTargets
@@ -96,10 +97,10 @@ namespace Triton.Renderer.RenderTargets
 
             var drawBuffers = new List<DrawBuffersEnum>();
 
-            Common.Log.WriteLine("Creating frame buffer object, {0}x{1}", definition.Width, definition.Height);
+            Log.WriteLine("Creating frame buffer object, {0}x{1}", definition.Width, definition.Height);
             foreach (var attachment in definition.Attachments)
             {
-                Common.Log.WriteLine(" - ap = {0}, pf = {1}, pif = {2}, pt = {3}", attachment.AttachmentPoint, attachment.PixelFormat, attachment.PixelInternalFormat, attachment.PixelType);
+                Log.WriteLine(" - ap = {0}, pf = {1}, pif = {2}, pt = {3}", attachment.AttachmentPoint, attachment.PixelFormat, attachment.PixelInternalFormat, attachment.PixelType);
 
                 if (attachment.AttachmentPoint == Definition.AttachmentPoint.Color)
                 {
@@ -144,7 +145,7 @@ namespace Triton.Renderer.RenderTargets
             var status = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
             if (status != FramebufferErrorCode.FramebufferComplete)
             {
-                Common.Log.WriteLine("Could not create framebuffer, status = " + status.ToString(), Common.LogLevel.Error);
+                Log.WriteLine("Could not create framebuffer, status = " + status.ToString(), LogLevel.Error);
                 throw new Exception("Framebuffer not complete, " + status.ToString());
             }
 
