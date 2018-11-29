@@ -25,7 +25,7 @@ namespace Triton.Tools.TypeConverters
 			{
 				var v = (Vector3)value;
 
-				return Triton.Common.StringConverter.ToString(v);
+				return Triton.Utility.StringConverter.ToString(v);
 			}
 
 			return base.ConvertTo(context, culture, value, destinationType);
@@ -42,7 +42,7 @@ namespace Triton.Tools.TypeConverters
 		{
 			if (value is string)
 			{
-				return Triton.Common.StringConverter.ParseVector3(value as string);
+				return Triton.Utility.StringConverter.ParseVector3(value as string);
 			}
 
 			return base.ConvertFrom(context, culture, value);

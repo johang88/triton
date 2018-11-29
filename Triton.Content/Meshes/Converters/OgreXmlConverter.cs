@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Xml;
 using System.Globalization;
-using Triton.Common;
+using Triton.Utility;
+using Triton.IO;
 
 namespace Triton.Content.Meshes.Converters
 {

@@ -73,6 +73,14 @@
       <Project>{05e298cb-db9f-4389-bc94-a27793673caf}</Project>
       <Name>Triton.Content</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Triton.Tools\Triton.Tools.csproj">
+      <Project>{33EF76C5-1894-460C-9CB3-A7DBF260321E}</Project>
+      <Name>Triton.Tools</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Triton\Triton.csproj">
+      <Project>{a8e78b39-52c9-40d8-908a-886567990595}</Project>
+      <Name>Triton</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

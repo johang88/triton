@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Utility;
 
 namespace Triton.Content.Materials.CustomNodes
 {
@@ -50,7 +51,7 @@ namespace Triton.Content.Materials.CustomNodes
 		public override NodeGraphData Process(int connectorIndex)
 		{
 			SamplerNumber = Counter++; // TODO ......
-			var samplerName = "sampler_" + Common.StringConverter.ToString(SamplerNumber);
+			var samplerName = "sampler_" + StringConverter.ToString(SamplerNumber);
 			var sample = "texture(" + samplerName + ", texCoord)";
 			string outputVar = "";
 

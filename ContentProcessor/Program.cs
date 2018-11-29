@@ -5,9 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
-using Triton.Common;
 using Triton.Content;
 using Triton.Content.Database;
+using Triton.Tools;
+using Triton.Logging;
+
 namespace ContentProcessor
 {
 	class Program
@@ -15,15 +17,15 @@ namespace ContentProcessor
 		private const string ContentDBFilename = "content.db";
 		private const string MeshConverterPath = "MeshConverter.exe";
 
-		private readonly Triton.Common.CommandLineApplication Application;
+		private readonly CommandLineApplication Application;
 
 		private readonly Factory<string, Triton.Content.ICompiler> Compilers = new Factory<string, Triton.Content.ICompiler>();
 		private Triton.Content.Database.DB Database;
 
 		public Program(string[] parameters)
 		{
-			Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.Console());
-			Log.AddOutputHandler(new Triton.Common.LogOutputHandlers.File("Logs/ContentProcessor.txt"));
+			Log.AddOutputHandler(new Triton.Logging.Console());
+			Log.AddOutputHandler(new Triton.Logging.File("Logs/ContentProcessor.txt"));
 
 			var extensionToType = new Dictionary<string, string>();
 			extensionToType.Add(".mesh", "mesh");
@@ -46,7 +48,7 @@ namespace ContentProcessor
 			Compilers.Add("material", () => new Triton.Content.Compilers.MaterialCompiler());
 			Compilers.Add("collision", () => new Triton.Content.Compilers.CollisionMeshCompiler());
 
-			Application = new Triton.Common.CommandLineApplication(parameters, "ContentProcessor in=<input_dir> out=<output_dir>");
+			Application = new CommandLineApplication(parameters, "ContentProcessor in=<input_dir> out=<output_dir>");
 
 			string inputDir = "", outputDir = "";
 			bool noCache = false;
@@ -113,10 +115,10 @@ namespace ContentProcessor
 					var sourcePath = Path.Combine(inputDir, entry.Source);
 					var outputPath = Path.Combine(outputDir, entry.Id);
 
-					if (!File.Exists(sourcePath))
+					if (!System.IO.File.Exists(sourcePath))
 						continue;
 
-					if (!noCache && File.GetLastWriteTime(sourcePath) <= entry.LastCompilation)
+					if (!noCache && System.IO.File.GetLastWriteTime(sourcePath) <= entry.LastCompilation)
 						continue;
 
 					if (Compilers.Exists(entry.Type))

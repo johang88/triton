@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using Assimp;
 using Assimp.Configs;
 using System.IO;
-using Triton.Common;
+using Triton.IO;
+using Triton.Logging;
 
 namespace Triton.Content.Meshes.Converters
 {
@@ -34,25 +35,25 @@ namespace Triton.Content.Meshes.Converters
 					// Validate sub mesh data
 					if (meshToImport.PrimitiveType != PrimitiveType.Triangle)
 					{
-						Common.Log.WriteLine("{0}:{1} invalid primitive type {2} should be Triangle", filename, meshToImport.Name, meshToImport.PrimitiveType);
+						Log.WriteLine("{0}:{1} invalid primitive type {2} should be Triangle", filename, meshToImport.Name, meshToImport.PrimitiveType);
 						continue;
 					}
 
 					if (!meshToImport.HasNormals)
 					{
-						Common.Log.WriteLine("{0}:{1} does not have any normals", filename, meshToImport.Name);
+						Log.WriteLine("{0}:{1} does not have any normals", filename, meshToImport.Name);
 						continue;
 					}
 
 					if (!meshToImport.HasTangentBasis)
 					{
-						Common.Log.WriteLine("{0}:{1} does not have any tangents", filename, meshToImport.Name);
+						Log.WriteLine("{0}:{1} does not have any tangents", filename, meshToImport.Name);
 						continue;
 					}
 
 					if (meshToImport.TextureCoordinateChannelCount == 0)
 					{
-						Common.Log.WriteLine("{0}:{1} does not have any texture channels", filename, meshToImport.Name);
+						Log.WriteLine("{0}:{1} does not have any texture channels", filename, meshToImport.Name);
 						continue;
 					}
 

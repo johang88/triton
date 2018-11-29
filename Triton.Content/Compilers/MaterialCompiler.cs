@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
-using Triton.Common;
 using Triton.Content.Materials;
 using NodeGraphControl;
 using Triton.Content.Materials.CustomNodes;

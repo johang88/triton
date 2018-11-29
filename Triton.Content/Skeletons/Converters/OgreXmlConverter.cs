@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Xml;
 using System.Globalization;
-using Triton.Common;
+using Triton.Utility;
 
 namespace Triton.Content.Skeletons.Converters
 {

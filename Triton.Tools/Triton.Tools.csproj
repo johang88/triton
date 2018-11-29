@@ -59,9 +59,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandLineApplication.cs" />
+    <Compile Include="CommandLineParser.cs" />
     <Compile Include="CustomPropertyDescriptor.cs" />
     <Compile Include="CustomTypeDescriptor.cs" />
     <Compile Include="CustomTypeDescriptorProvider.cs" />
+    <Compile Include="Factory.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeConverters\QuaternionTypeConverter.cs" />
@@ -72,6 +75,10 @@
     <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">
       <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>
       <Name>Triton.Math</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Triton\Triton.csproj">
+      <Project>{a8e78b39-52c9-40d8-908a-886567990595}</Project>
+      <Name>Triton</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

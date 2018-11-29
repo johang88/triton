@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Utility;
 
 namespace Triton.Content.Materials.CustomNodes
 {
@@ -19,7 +20,7 @@ namespace Triton.Content.Materials.CustomNodes
 
 		public static string NextVariable(string prefix)
 		{
-			return prefix + "_" + Common.StringConverter.ToString(Counter++);
+			return prefix + "_" + StringConverter.ToString(Counter++);
 		}
 	}
 }

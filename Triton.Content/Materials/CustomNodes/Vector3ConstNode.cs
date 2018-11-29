@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Utility;
 
 namespace Triton.Content.Materials.CustomNodes
 {
@@ -16,7 +17,7 @@ namespace Triton.Content.Materials.CustomNodes
 			: base(p_TreeNode, p_View)
 		{
 			Setup();
-			Value = Common.StringConverter.Parse<Vector3>(p_TreeNode.m_attributes["Value"]);
+			Value = StringConverter.Parse<Vector3>(p_TreeNode.m_attributes["Value"]);
 		}
 
 		public Vector3ConstNode(int p_X, int p_Y, NodeGraphView p_View, bool p_CanBeSelected)
@@ -56,7 +57,7 @@ namespace Triton.Content.Materials.CustomNodes
 
 				var statements = new List<string>()
 				{
-					string.Format("float {0} = {1}", outputVar, Common.StringConverter.ToString(value)),
+					string.Format("float {0} = {1}", outputVar, StringConverter.ToString(value)),
 				};
 
 				return new DataTypes.ShaderData(statements, outputVar);
@@ -67,7 +68,7 @@ namespace Triton.Content.Materials.CustomNodes
 
 				var statements = new List<string>()
 				{
-					string.Format("vec3 {0} = vec3({1}, {2}, {3})", outputVar, Common.StringConverter.ToString(Value.X), Common.StringConverter.ToString(Value.Y), Common.StringConverter.ToString(Value.Z)),
+					string.Format("vec3 {0} = vec3({1}, {2}, {3})", outputVar, StringConverter.ToString(Value.X), StringConverter.ToString(Value.Y), StringConverter.ToString(Value.Z)),
 				};
 
 				return new DataTypes.ShaderData(statements, outputVar);
@@ -82,7 +83,7 @@ namespace Triton.Content.Materials.CustomNodes
 		public override XmlTreeNode SerializeToXML(XmlTreeNode p_Parent)
 		{
 			var element = base.SerializeToXML(p_Parent);
-			element.AddParameter("Value", Common.StringConverter.ToString(Value));
+			element.AddParameter("Value", StringConverter.ToString(Value));
 
 			return element;
 		}

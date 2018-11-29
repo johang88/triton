@@ -25,7 +25,7 @@ namespace Triton.Tools.TypeConverters
 			{
 				var v = (Quaternion)value;
 
-				return Triton.Common.StringConverter.ToString(v);
+				return Triton.Utility.StringConverter.ToString(v);
 			}
 
 			return base.ConvertTo(context, culture, value, destinationType);
@@ -42,7 +42,7 @@ namespace Triton.Tools.TypeConverters
 		{
 			if (value is string)
 			{
-				return Triton.Common.StringConverter.ParseQuaternion(value as string);
+				return Triton.Utility.StringConverter.ParseQuaternion(value as string);
 			}
 
 			return base.ConvertFrom(context, culture, value);

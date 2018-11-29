@@ -126,6 +126,14 @@
       <Project>{d8da8b59-a4b9-4de1-920e-5d056375c71e}</Project>
       <Name>Triton.Renderer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Triton.Tools\Triton.Tools.csproj">
+      <Project>{33EF76C5-1894-460C-9CB3-A7DBF260321E}</Project>
+      <Name>Triton.Tools</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Triton\Triton.csproj">
+      <Project>{A8E78B39-52C9-40D8-908A-886567990595}</Project>
+      <Name>Triton</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -2,11 +2,11 @@
 using NodeGraphControl.Xml;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Utility;
 
 namespace Triton.Content.Materials.CustomNodes
 {
@@ -44,7 +44,7 @@ namespace Triton.Content.Materials.CustomNodes
 
 			var statements = new List<string>()
 			{
-				string.Format("float {0} = {1}", outputVar, Common.StringConverter.ToString(Value)),
+				string.Format("float {0} = {1}", outputVar, StringConverter.ToString(Value)),
 			};
 
 			return new DataTypes.ShaderData(statements, outputVar);

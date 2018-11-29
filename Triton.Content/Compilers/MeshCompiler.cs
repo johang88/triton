@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
-using Triton.Common;
 using Triton.Content.Meshes;
+using Triton.Tools;
 
 namespace Triton.Content.Compilers
 {
