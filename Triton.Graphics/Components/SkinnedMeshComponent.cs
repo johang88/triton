@@ -9,15 +9,7 @@ namespace Triton.Graphics.Components
 {
     public class SkinnedMeshComponent : MeshComponent
     {
-        private SkeletonInstance _skeletonInstance;
-
-        public override void OnActivate()
-        {
-            base.OnActivate();
-
-            // TODO: Manage dynamic mesh swapping
-            _skeletonInstance = new SkeletonInstance(Mesh);
-        }
+        private SkeletonInstance _skeletonInstance = null;
 
         public override void OnDeactivate()
         {
@@ -26,11 +18,24 @@ namespace Triton.Graphics.Components
             _skeletonInstance = null;
         }
 
+        protected override void UpdateDerviedMeshSettings()
+        {
+            base.UpdateDerviedMeshSettings();
+
+            if (_mesh != null)
+            {
+                _skeletonInstance = new SkeletonInstance(_mesh);
+            }
+        }
+
         public override void Update(float dt)
         {
             base.Update(dt);
 
-            _skeletonInstance.Update(dt);
+            if (_skeletonInstance != null)
+            {
+                _skeletonInstance.Update(dt);
+            }
         }
 
         public override void PrepareRenderOperations(RenderOperations operations)

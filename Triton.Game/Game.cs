@@ -397,6 +397,7 @@ namespace Triton.Game
             ImGui.Text($"Average FPS: {averageFPS:0}");
             ImGui.Text($"FPS: {fps:0}");
             ImGui.Text($"Light count: {DeferredRenderer.RenderedLights}");
+            ImGui.Text($"Draw calls: {GraphicsBackend.DrawCalls}");
 
             ImGui.Separator();
             ImGui.Text($"GC Stats:");

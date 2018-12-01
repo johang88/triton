@@ -14,7 +14,7 @@ namespace Triton.Graphics
         public Vector3 AmbientColor = new Vector3(0.2f, 0.2f, 0.2f);
         public Vector4 ClearColor = Vector4.Zero;
 
-        private BoundingFrustum Frustum = new BoundingFrustum(Matrix4.Identity);
+        private BoundingFrustum _frustum = new BoundingFrustum(Matrix4.Identity);
 
         public AmbientLight AmbientLight { get; set; }
 
@@ -37,39 +37,20 @@ namespace Triton.Graphics
 
         public void PrepareRenderOperations(Matrix4 viewMatrix, RenderOperations operations, bool shadowCastersOnly = false, bool frustumCull = true)
         {
-            // TODO: Frustum cull!
+            _frustum.Matrix = viewMatrix;
+            var sphere = new BoundingSphere();
+            var zero = Vector3.Zero;
+
             for (var i = 0; i < _renderableComponents.Count; i++)
             {
-                if (!shadowCastersOnly || _renderableComponents[i].CastShadows)
+                sphere.Center = _renderableComponents[i].Owner.Position;
+                sphere.Radius = _renderableComponents[i].BoundingSphere;
+
+                if ((!shadowCastersOnly || _renderableComponents[i].CastShadows) && frustumCull && _frustum.Intersects(sphere))
                 {
                     _renderableComponents[i].PrepareRenderOperations(operations);
                 }
             }
-            //Frustum.Matrix = viewMatrix;
-            //var sphere = new BoundingSphere();
-            //var zero = Vector3.Zero;
-
-            //for (var i = 0; i < _meshes.Count; i++)
-            //{
-            //    var meshInstance = _meshes[i];
-            //    var subMeshes = meshInstance.Mesh.SubMeshes;
-
-            //    if (!meshInstance.CastShadows && shadowCastersOnly)
-            //        continue;
-
-            //    Vector3.Transform(ref zero, ref meshInstance.World, out sphere.Center);
-
-            //    for (var j = 0; j < subMeshes.Length; j++)
-            //    {
-            //        var subMesh = subMeshes[j];
-
-            //        sphere.Radius = subMesh.BoundingSphereRadius;
-            //        if (!frustumCull || Frustum.Intersects(sphere))
-            //        {
-            //            operations.Add(subMesh.Handle, meshInstance.World, subMesh.Material, meshInstance.Skeleton, false, meshInstance.CastShadows);
-            //        }
-            //    }
-            //}
         }
 
         public Components.LightComponent GetSunLight()

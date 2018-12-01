@@ -10,7 +10,19 @@ namespace Triton.Graphics.Components
 {
     public class MeshComponent : RenderableComponent
     {
-        [DataMember] public Mesh Mesh { get; set; }
+        protected bool _meshDirty = false;
+
+        protected Mesh _mesh;
+        [DataMember]
+        public Mesh Mesh
+        {
+            get => _mesh;
+            set
+            {
+                _mesh = value;
+                _meshDirty = true;
+            }
+        }
 
         internal void GetWorldMatrix(out Matrix4 world)
         {
@@ -22,8 +34,36 @@ namespace Triton.Graphics.Components
             Matrix4.Mult(ref rotationScale, ref translation, out world);
         }
 
+        protected virtual void UpdateDerviedMeshSettings()
+        {
+            if (_mesh == null)
+                return;
+
+            for (var i = 0; i < _mesh.SubMeshes.Length; i++)
+            {
+                if (_mesh.SubMeshes[i].BoundingSphereRadius > _boundingSphere)
+                {
+                    _boundingSphere = _mesh.SubMeshes[i].BoundingSphereRadius;
+                }
+            }
+        }
+
+        public override void Update(float dt)
+        {
+            base.Update(dt);
+
+            if (_meshDirty)
+            {
+                UpdateDerviedMeshSettings();
+                _meshDirty = false;
+            }
+        }
+
         public override void PrepareRenderOperations(RenderOperations operations)
         {
+            if (_mesh == null)
+                return;
+
             GetWorldMatrix(out var world);
 
             for (var i = 0; i < Mesh.SubMeshes.Length; i++)

@@ -11,6 +11,9 @@ namespace Triton.Graphics.Components
     {
         [DataMember] public bool CastShadows { get; set; }
 
+        protected float _boundingSphere;
+        public float BoundingSphere => _boundingSphere;
+
         internal Stage Stage => Owner.World.Services.Get<Stage>();
 
         public abstract void PrepareRenderOperations(RenderOperations operations);
