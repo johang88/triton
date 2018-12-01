@@ -71,5 +71,10 @@ namespace Triton.Physics
         {
             return new Quaternion(q.X, q.Y, q.Z, q.W);
         }
+
+        public static Quaternion ToTritonQuaternion(ref BulletSharp.Math.Quaternion q)
+        {
+            return new Quaternion(q.X, q.Y, q.Z, q.W);
+        }
     }
 }

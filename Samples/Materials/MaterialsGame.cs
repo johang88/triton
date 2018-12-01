@@ -9,6 +9,7 @@ using Triton.Game.World;
 using Triton.Game.World.Components;
 using Triton.Graphics.Resources;
 using Triton.Input;
+using Triton.Physics.Components;
 using Triton.Samples.Components;
 
 namespace Triton.Samples
@@ -16,7 +17,6 @@ namespace Triton.Samples
     class MaterialsGame : Triton.Samples.BaseGame
     {
         private GameObject Player;
-        private CharacterController PlayerCharacter;
         
         private List<GameObject> _balls = new List<GameObject>();
 
@@ -44,54 +44,73 @@ namespace Triton.Samples
 
             Player = new GameObject();
             Player.Position = new Vector3(0, 2f, 0);
-            PlayerCharacter = new CharacterController();
-            Player.Components.Add(PlayerCharacter);
+            Player.Components.Add(new CharacterControllerComponent
+            {
+                ColliderShape = new Triton.Physics.Shapes.CapsuleColliderShape
+                {
+                    Height = 1.5f,
+                    Radius = 0.15f
+                }
+            });
             Player.Components.Add(new PlayerController());
             GameWorld.Add(Player);
 
-            var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
-            var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
-
-            roomPrefab.Instantiate(GameWorld);
-            for (int i = 0; i < 5; i++)
+            var room = new GameObject();
+            room.Components.Add(new MeshRenderer
             {
-                var ball = ballPrefab.Instantiate(GameWorld);
-                _balls.Add(ball);
-                ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
-            }
-
-            for (int i = 0; i < 5; i++)
-            {
-                var ball = ballPrefab.Instantiate(GameWorld);
-                _balls.Add(ball);
-                ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
-            }
-
-            // Setup a test trigger
-            var bigBall = new GameObject();
-            bigBall.Components.Add(new BoxRigidBody
-            {
-                IsStatic = true,
-                IsTrigger = true,
-                Length = 2.5f,
-                Width = 2.5f,
-                Height = 2.5f
+                Mesh = Resources.Load<Mesh>("/models/room")
             });
-            bigBall.Components.Add(new PointLight
+            room.Components.Add(new Triton.Physics.Components.RigidBodyComponent
             {
-                Color = new Vector3(1, 1, 1),
-                Intensity = 100,
-                Enabled = false,
-                Range = 5f
+                ColliderShape = new Triton.Physics.Shapes.MeshColliderShape
+                {
+                    Mesh = Resources.Load<Physics.Resources.Mesh>("/collision/room")
+                },
+                RigidBodyType = Physics.RigidBodyType.Static
             });
-            bigBall.Components.Add(new TriggerTest());
-            bigBall.Scale = new Vector3(5, 5, 5);
-            bigBall.Position = new Vector3(5, 2.5f, 5);
 
-            GameWorld.Add(bigBall);
+            GameWorld.Add(room);
 
-            Resources.Unload(roomPrefab);
-            Resources.Unload(ballPrefab);
+            //var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
+            //var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
+
+            //roomPrefab.Instantiate(GameWorld);
+            //for (int i = 0; i < 5; i++)
+            //{
+            //    var ball = ballPrefab.Instantiate(GameWorld);
+            //    _balls.Add(ball);
+            //    ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
+            //}
+
+            //for (int i = 0; i < 5; i++)
+            //{
+            //    var ball = ballPrefab.Instantiate(GameWorld);
+            //    _balls.Add(ball);
+            //    ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
+            //}
+
+            //// Setup a test trigger
+            //var bigBall = new GameObject();
+            //bigBall.Components.Add(new BoxRigidBody
+            //{
+            //    IsStatic = true,
+            //    IsTrigger = true,
+            //    Length = 2.5f,
+            //    Width = 2.5f,
+            //    Height = 2.5f
+            //});
+            //bigBall.Components.Add(new PointLight
+            //{
+            //    Color = new Vector3(1, 1, 1),
+            //    Intensity = 100,
+            //    Enabled = false,
+            //    Range = 5f
+            //});
+            //bigBall.Components.Add(new TriggerTest());
+            //bigBall.Scale = new Vector3(5, 5, 5);
+            //bigBall.Position = new Vector3(5, 2.5f, 5);
+
+            //GameWorld.Add(bigBall);
 
             Stage.ClearColor = new Vector4(1, 1, 1, 1) * 2;
 

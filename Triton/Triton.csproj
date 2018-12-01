@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GameObjectComponent.cs" />
     <Compile Include="IO\BinaryReaderExtensions.cs" />
     <Compile Include="IO\BinaryWriterExtensions.cs" />
     <Compile Include="Collections\TrackingCollection.cs" />
