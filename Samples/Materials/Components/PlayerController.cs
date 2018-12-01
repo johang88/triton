@@ -79,9 +79,10 @@ namespace Triton.Samples.Components
                 var from = Camera.Position;
                 var to = from + Vector3.Transform(new Vector3(0, 0, 100), Camera.Orientation);
 
-                if (PhysicsWorld.Raycast(from, to, (body, _, __) => body.CollisionLayer == 2, out var hitBody, out var hitNormal, out var hitFraction))
+                if (PhysicsWorld.Raycast(from, to, (component, _, __) => component.ColliderShape is Physics.Shapes.SphereColliderShape && component is RigidBodyComponent, out var hitComponent, out var hitNormal, out var hitFraction))
                 {
-                    hitBody.AddForce(hitNormal * 10);
+                    var rigidyBodyComponent = hitComponent as RigidBodyComponent;
+                    rigidyBodyComponent.AddForce(hitNormal * 10);
                 }
             }
         }

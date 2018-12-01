@@ -172,12 +172,12 @@ namespace Triton.Physics
             _debugDraw.Render(camera);
         }
 
-        public bool Raycast(Vector3 from, Vector3 to, RaycastCallback callback, out Body body, out Vector3 normal, out float fraction)
+        public bool Raycast(Vector3 from, Vector3 to, RaycastCallback callback, out Components.BasePhysicsComponent component, out Vector3 normal, out float fraction)
         {
             var btTo = Conversion.ToBulletVector(ref from);
             var btFrom = Conversion.ToBulletVector(ref to);
 
-            body = null;
+            component = null;
             normal = Vector3.Zero;
             fraction = 0.0f;
 
@@ -193,19 +193,18 @@ namespace Triton.Physics
                 float closesHitFraction = float.MaxValue;
                 for (var i = 0; i < allResults.HitFractions.Count; i++)
                 {
-                    if (allResults.CollisionObjects[i].UserObject is Body hitBody)
+                    var hitComponent = allResults.CollisionObjects[i].UserObject as Components.BasePhysicsComponent;
+
+                    var hitNormal = Conversion.ToTritonVector(allResults.HitNormalWorld[i]);
+                    if (callback?.Invoke(hitComponent, hitNormal, allResults.HitFractions[i]) == true && allResults.HitFractions[i] < closesHitFraction)
                     {
-                        var hitNormal = Conversion.ToTritonVector(allResults.HitNormalWorld[i]);
-                        if (callback?.Invoke(hitBody, hitNormal, allResults.HitFractions[i]) == true && allResults.HitFractions[i] < closesHitFraction)
-                        {
-                            closesHitFraction = allResults.HitFractions[i];
-                            normal = hitNormal;
-                            body = hitBody;
-                        }
+                        closesHitFraction = allResults.HitFractions[i];
+                        normal = hitNormal;
+                        component = hitComponent;
                     }
                 }
 
-                if (body != null)
+                if (component != null)
                 {
                     return true;
                 }

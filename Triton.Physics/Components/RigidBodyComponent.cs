@@ -87,5 +87,11 @@ namespace Triton.Physics.Components
 
             base.OnDeactivate();
         }
+
+        public void AddForce(Vector3 force)
+        {
+            _nativeRigidBody.Activate();
+            _nativeRigidBody.ApplyCentralImpulse(Conversion.ToBulletVector(ref force));
+        }
     }
 }

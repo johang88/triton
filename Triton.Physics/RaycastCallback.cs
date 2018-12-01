@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace Triton.Physics
 {
-	public delegate bool RaycastCallback(Body body, Vector3 normal, float fraction);
+	public delegate bool RaycastCallback(Components.BasePhysicsComponent component, Vector3 normal, float fraction);
 }
