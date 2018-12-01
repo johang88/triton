@@ -40,7 +40,7 @@ namespace Triton.Graphics.Components
 
         public override void PrepareRenderOperations(RenderOperations operations)
         {
-            GetWorldMatrix(out var world);
+            Owner.GetWorldMatrix(out var world);
 
             for (var i = 0; i < Mesh.SubMeshes.Length; i++)
             {

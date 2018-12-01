@@ -24,16 +24,6 @@ namespace Triton.Graphics.Components
             }
         }
 
-        internal void GetWorldMatrix(out Matrix4 world)
-        {
-            var scale = Matrix4.Scale(Owner.Scale);
-            Matrix4.Rotate(ref Owner.Orientation, out var rotation);
-            Matrix4.CreateTranslation(ref Owner.Position, out var translation);
-
-            Matrix4.Mult(ref scale, ref rotation, out var rotationScale);
-            Matrix4.Mult(ref rotationScale, ref translation, out world);
-        }
-
         protected virtual void UpdateDerviedMeshSettings()
         {
             if (_mesh == null)
@@ -64,7 +54,7 @@ namespace Triton.Graphics.Components
             if (_mesh == null)
                 return;
 
-            GetWorldMatrix(out var world);
+            Owner.GetWorldMatrix(out var world);
 
             for (var i = 0; i < Mesh.SubMeshes.Length; i++)
             {

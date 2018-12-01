@@ -43,7 +43,9 @@ namespace Triton.Graphics
 
             for (var i = 0; i < _renderableComponents.Count; i++)
             {
-                sphere.Center = _renderableComponents[i].Owner.Position;
+                _renderableComponents[i].Owner.GetWorldMatrix(out var world);
+
+                Vector3.Transform(ref zero, ref world, out sphere.Center);
                 sphere.Radius = _renderableComponents[i].BoundingSphere;
 
                 if ((!shadowCastersOnly || _renderableComponents[i].CastShadows) && frustumCull && _frustum.Intersects(sphere))

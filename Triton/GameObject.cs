@@ -20,7 +20,7 @@ namespace Triton
         [DataMember] public Vector3 Position = Vector3.Zero;
         [DataMember] public Quaternion Orientation = Quaternion.Identity;
         [DataMember] public Vector3 Scale = new Vector3(1, 1, 1);
-
+        
         private GameObjectManager _world;
         public GameObjectManager World
         {
@@ -151,6 +151,16 @@ namespace Triton
             }
 
             return gameObject;
+        }
+
+        public void GetWorldMatrix(out Matrix4 world)
+        {
+            var scale = Matrix4.Scale(Scale);
+            Matrix4.Rotate(ref Orientation, out var rotation);
+            Matrix4.CreateTranslation(ref Position, out var translation);
+
+            Matrix4.Mult(ref scale, ref rotation, out var rotationScale);
+            Matrix4.Mult(ref rotationScale, ref translation, out world);
         }
     }
 }
