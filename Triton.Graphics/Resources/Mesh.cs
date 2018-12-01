@@ -53,6 +53,7 @@ namespace Triton.Graphics.Resources
     {
         public Material Material;
         public float BoundingSphereRadius;
+        public BoundingBox BoundingBox;
         public VertexFormat VertexFormat;
         public int TriangleCount;
         public byte[] VertexData;

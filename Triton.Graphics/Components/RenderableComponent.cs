@@ -11,8 +11,8 @@ namespace Triton.Graphics.Components
     {
         [DataMember] public bool CastShadows { get; set; }
 
-        protected float _boundingSphere;
-        public float BoundingSphere => _boundingSphere;
+        public float BoundingSphereRadius;
+        public BoundingBox BoundingBox;
 
         internal Stage Stage => Owner.World.Services.Get<Stage>();
 

@@ -126,6 +126,8 @@ namespace Triton.Content.Meshes.Converters
 								subMesh.BoundingSphereRadius = length;
 						}
 					}
+
+                    subMesh.BoundingBox = BoundingBox.CreateFromPoints(vertices.Select(x => x.Position));
 				}
 				// Read bone assignments
 				else if (subReader.Name == "boneassignments")

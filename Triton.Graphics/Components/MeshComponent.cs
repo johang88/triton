@@ -29,12 +29,16 @@ namespace Triton.Graphics.Components
             if (_mesh == null)
                 return;
 
+            BoundingBox = BoundingBox.Empty;
+
             for (var i = 0; i < _mesh.SubMeshes.Length; i++)
             {
-                if (_mesh.SubMeshes[i].BoundingSphereRadius > _boundingSphere)
+                if (_mesh.SubMeshes[i].BoundingSphereRadius > BoundingSphereRadius)
                 {
-                    _boundingSphere = _mesh.SubMeshes[i].BoundingSphereRadius;
+                    BoundingSphereRadius = _mesh.SubMeshes[i].BoundingSphereRadius;
                 }
+
+                BoundingBox = BoundingBox.CreateMerged(BoundingBox, _mesh.SubMeshes[i].BoundingBox);
             }
         }
 

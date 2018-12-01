@@ -8,8 +8,9 @@ namespace Triton
 {
 	public struct BoundingBox : IEquatable<BoundingBox>
 	{
+        public static readonly BoundingBox Empty = new BoundingBox(new Vector3(float.MaxValue, float.MaxValue, float.MaxValue), new Vector3(float.MinValue, float.MinValue, float.MinValue));
 
-		public Vector3 Min;
+        public Vector3 Min;
 		public Vector3 Max;
 
 		public const int CornerCount = 8;

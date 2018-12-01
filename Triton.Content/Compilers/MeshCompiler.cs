@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading;
 using Triton.Content.Meshes;
 using Triton.Tools;
+using Triton.IO;
 
 namespace Triton.Content.Compilers
 {
@@ -14,7 +15,7 @@ namespace Triton.Content.Compilers
 	{
 		private Factory<string, IMeshImporter> ImporterFactory;
 
-		const int Version = 0x0140;
+		const int Version = 0x0150;
 
 		public MeshCompiler()
 		{
@@ -84,11 +85,13 @@ namespace Triton.Content.Compilers
 						writer.Write(element.Offset);
 					}
 
-					// Bounding sphere
+					// Bounds
 					writer.Write(subMesh.BoundingSphereRadius);
+                    writer.Write(subMesh.BoundingBox.Min);
+                    writer.Write(subMesh.BoundingBox.Max);
 
-					// Vertices
-					writer.Write(subMesh.Vertices);
+                    // Vertices
+                    writer.Write(subMesh.Vertices);
 
 					// Indices
 					writer.Write(subMesh.Indices);
