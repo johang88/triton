@@ -43,7 +43,7 @@ namespace Triton.Physics.Components
             }
         }
 
-        private float _jumpSpeed = 5.0f;
+        private float _jumpSpeed = 10.0f;
         public float JumpSpeed
         {
             get => _jumpSpeed;
