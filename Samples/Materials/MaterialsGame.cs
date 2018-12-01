@@ -55,62 +55,23 @@ namespace Triton.Samples
             Player.Components.Add(new PlayerController());
             GameWorld.Add(Player);
 
-            var room = new GameObject();
-            room.Components.Add(new MeshRenderer
+            var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
+            var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
+
+            roomPrefab.Instantiate(GameWorld);
+            for (int i = 0; i < 5; i++)
             {
-                Mesh = Resources.Load<Mesh>("/models/room")
-            });
-            room.Components.Add(new Triton.Physics.Components.RigidBodyComponent
+                var ball = ballPrefab.Instantiate(GameWorld);
+                _balls.Add(ball);
+                ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
+            }
+
+            for (int i = 0; i < 5; i++)
             {
-                ColliderShape = new Triton.Physics.Shapes.MeshColliderShape
-                {
-                    Mesh = Resources.Load<Physics.Resources.Mesh>("/collision/room")
-                },
-                RigidBodyType = Physics.RigidBodyType.Static
-            });
-
-            GameWorld.Add(room);
-
-            //var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
-            //var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
-
-            //roomPrefab.Instantiate(GameWorld);
-            //for (int i = 0; i < 5; i++)
-            //{
-            //    var ball = ballPrefab.Instantiate(GameWorld);
-            //    _balls.Add(ball);
-            //    ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
-            //}
-
-            //for (int i = 0; i < 5; i++)
-            //{
-            //    var ball = ballPrefab.Instantiate(GameWorld);
-            //    _balls.Add(ball);
-            //    ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
-            //}
-
-            //// Setup a test trigger
-            //var bigBall = new GameObject();
-            //bigBall.Components.Add(new BoxRigidBody
-            //{
-            //    IsStatic = true,
-            //    IsTrigger = true,
-            //    Length = 2.5f,
-            //    Width = 2.5f,
-            //    Height = 2.5f
-            //});
-            //bigBall.Components.Add(new PointLight
-            //{
-            //    Color = new Vector3(1, 1, 1),
-            //    Intensity = 100,
-            //    Enabled = false,
-            //    Range = 5f
-            //});
-            //bigBall.Components.Add(new TriggerTest());
-            //bigBall.Scale = new Vector3(5, 5, 5);
-            //bigBall.Position = new Vector3(5, 2.5f, 5);
-
-            //GameWorld.Add(bigBall);
+                var ball = ballPrefab.Instantiate(GameWorld);
+                _balls.Add(ball);
+                ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
+            }
 
             Stage.ClearColor = new Vector4(1, 1, 1, 1) * 2;
 
@@ -131,48 +92,9 @@ namespace Triton.Samples
             }
         }
 
-        private Random rng = new Random();
         protected override void RenderUI(float deltaTime)
         {
             base.RenderUI(deltaTime);
-
-            ImGui.SetNextWindowSize(new System.Numerics.Vector2(400, 100), Condition.Always);
-            ImGui.SetNextWindowPos(new System.Numerics.Vector2(RequestedWidth - 500, RequestedHeight - 110), Condition.Always, System.Numerics.Vector2.Zero);
-            ImGui.BeginWindow("Material Game!!1", WindowFlags.NoResize | WindowFlags.NoMove | WindowFlags.NoCollapse);
-
-            if (ImGui.Button("Destroy all Ballz"))
-            {
-                foreach (var ball in _balls)
-                {
-                    GameWorld.Remove(ball);
-                }
-                _balls.Clear();
-            }
-
-
-            if (ImGui.Button("Add some ball!"))
-            {
-                var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
-
-                var ball = ballPrefab.Instantiate(GameWorld);
-                _balls.Add(ball);
-
-                ball.Position = Player.Position + Vector3.Transform(new Vector3(0, 1, 1), Player.Orientation);
-                ball.Orientation = Player.Orientation;
-
-                Resources.Unload(ballPrefab);
-            }
-
-            if (ImGui.Button("Add some Force!"))
-            {
-                foreach (var ball in _balls)
-                {
-                    var rigidBody = ball.GetComponent<RigidBody>();
-                    rigidBody.AddForce((new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble()) - new Vector3(0.5f, 0.5f, 0.5f)) * 10.0f);
-                }
-            }
-
-            ImGui.EndWindow();
         }
     }
 }

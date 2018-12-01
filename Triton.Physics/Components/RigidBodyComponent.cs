@@ -60,13 +60,16 @@ namespace Triton.Physics.Components
         {
             var motionState = new DefaultMotionState(BulletSharp.Math.Matrix.Identity);
 
-            _nativeRigidBody = new RigidBody(new RigidBodyConstructionInfo(0.0f, motionState, NativeCollisionShape, BulletSharp.Math.Vector3.Zero));
+            NativeCollisionShape.CalculateLocalInertia(_mass, out var localInertia);
+
+            _nativeRigidBody = new RigidBody(new RigidBodyConstructionInfo(_mass, motionState, NativeCollisionShape, localInertia));
             _nativeRigidBody.UserObject = this;
             
             _nativeCollisionObject = _nativeRigidBody;
 
             PhysicsWorld.DiscreteDynamicsWorld.AddRigidBody(_nativeRigidBody);
 
+            Mass = _mass;
             RigidBodyType = _rigidBodyType;
 
             base.OnActivate();
@@ -84,6 +87,5 @@ namespace Triton.Physics.Components
 
             base.OnDeactivate();
         }
-
     }
 }

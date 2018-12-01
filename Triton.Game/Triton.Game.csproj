@@ -86,15 +86,10 @@
     <Compile Include="ImGuiRenderer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="World\Components\BaseComponent.cs" />
-    <Compile Include="World\Components\BoxRigidBody.cs" />
     <Compile Include="World\Components\LightAnimator.cs" />
-    <Compile Include="World\Components\MeshRigidBody.cs" />
     <Compile Include="World\Components\PointLight.cs" />
-    <Compile Include="World\Components\RigidBody.cs" />
-    <Compile Include="World\Components\CharacterController.cs" />
     <Compile Include="World\Components\MeshRenderer.cs" />
     <Compile Include="World\Components\SkeletalMesh.cs" />
-    <Compile Include="World\Components\SphereRigidBody.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ThirdParty\sharpfilesystem\SharpFileSystem\SharpFileSystem.csproj">

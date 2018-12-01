@@ -50,9 +50,12 @@
          "Mesh":"/models/room"
       },
       {
-         "$type":"Triton.Game.World.Components.MeshRigidBody, Triton.Game",
-		 "Mesh":"/collision/room",
-		 "IsStatic":true
+         "$type": "Triton.Physics.Components.RigidBodyComponent, Triton.Physics",
+		 "ColliderShape": {
+           "$type": "Triton.Physics.Shapes.MeshColliderShape, Triton.Physics",
+           "Mesh": "/collision/room"
+         },
+		 "RigidBodyType": 2
       }
    ]
 }

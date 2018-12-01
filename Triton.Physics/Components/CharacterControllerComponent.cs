@@ -96,6 +96,14 @@ namespace Triton.Physics.Components
 
         public override void OnDeactivate()
         {
+            if (_kinematicCharacterController != null)
+            {
+                PhysicsWorld.DiscreteDynamicsWorld.RemoveCollisionObject(_nativeCollisionObject);
+                PhysicsWorld.DiscreteDynamicsWorld.RemoveAction(_kinematicCharacterController);
+
+                _kinematicCharacterController = null;
+            }
+
             base.OnDeactivate();
         }
 

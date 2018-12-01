@@ -10,15 +10,14 @@ namespace Triton.Samples.Components
 {
     class TriggerTest : BaseComponent
     {
-        private RigidBody _body;
         private PointLight _light;
 
         public override void OnActivate()
         {
             base.OnActivate();
 
-            _body = Owner.GetComponent<RigidBody>();
-            _body.Collision += OnCollision;
+            //_body = Owner.GetComponent<RigidBody>();
+            //_body.Collision += OnCollision;
 
             _light = Owner.GetComponent<PointLight>();
         }
@@ -26,7 +25,7 @@ namespace Triton.Samples.Components
         public override void OnDeactivate()
         {
             base.OnDeactivate();
-            _body.Collision -= OnCollision;
+            //_body.Collision -= OnCollision;
         }
 
         public override void Update(float dt)
@@ -38,10 +37,10 @@ namespace Triton.Samples.Components
 
         private void OnCollision(GameObject other)
         {
-            if (other.HasComponent<CharacterController>())
-            {
-                _light.Enabled = true;
-            }
+            //if (other.HasComponent<CharacterController>())
+            //{
+            //    _light.Enabled = true;
+            //}
         }
     }
 }

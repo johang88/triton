@@ -12,10 +12,12 @@
          "Mesh":"/models/sphere"
       },
       {
-         "$type":"Triton.Game.World.Components.SphereRigidBody, Triton.Game",
-		 "Radius": 0.5,
-		 "IsStatic":false,
-		 "CollisionLayer":2
+         "$type": "Triton.Physics.Components.RigidBodyComponent, Triton.Physics",
+		 "ColliderShape": {
+           "$type": "Triton.Physics.Shapes.SphereColliderShape, Triton.Physics",
+           "Radius": 0.5
+         },
+		 "Mass": 1.0
       }
    ]
 }
