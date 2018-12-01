@@ -199,7 +199,7 @@ namespace Triton.Game
             AudioSystem = new Audio.AudioSystem(FileSystem);
             PhysicsWorld = new Triton.Physics.World(GraphicsBackend, Resources);
 
-            Stage = new Graphics.Stage(Resources);
+            Stage = new Graphics.Stage();
             Camera = new Graphics.Camera(new Vector2(GraphicsBackend.Width, GraphicsBackend.Height));
             Stage.Camera = Camera;
 
@@ -284,7 +284,7 @@ namespace Triton.Game
             GraphicsBackend.BeginScene();
 
             var gbuffer = DeferredRenderer.RenderGBuffer(Stage, Camera);
-            var sunLight = Stage.SunLight;
+            var sunLight = Stage.GetSunLight();
 
             GraphicsBackend.ProfileBeginSection(Profiler.ShadowsGeneration);
 

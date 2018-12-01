@@ -8,11 +8,6 @@ namespace Triton.Graphics
 {
     public class Stage
     {
-        private readonly Triton.Resources.ResourceManager _resourceManager;
-
-        private readonly List<MeshInstance> _meshes = new List<MeshInstance>();
-        private readonly List<Light> _lights = new List<Light>();
-
         /// <summary>
         /// Fallback ambient color if no ambient light is set
         /// </summary>
@@ -21,174 +16,65 @@ namespace Triton.Graphics
 
         private BoundingFrustum Frustum = new BoundingFrustum(Matrix4.Identity);
 
-        public Light SunLight { get; private set; }
-
         public AmbientLight AmbientLight { get; set; }
 
         public Camera Camera { get; set; }
 
-        public Stage(Triton.Resources.ResourceManager resourceManager)
-        {
-            _resourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");
-        }
+        private List<Components.RenderableComponent> _renderableComponents = new List<Components.RenderableComponent>();
+        private List<Components.LightComponent> _lightComponents = new List<Components.LightComponent>();
 
-        public MeshInstance AddMesh(string mesh)
-        {
-            return AddMesh(_resourceManager.Load<Resources.Mesh>(mesh));
-        }
+        internal void AddRenderableComponent(Components.RenderableComponent component)
+            => _renderableComponents.Add(component);
 
-        public MeshInstance AddMesh(Resources.Mesh mesh)
-        {
-            var instance = new MeshInstance
-            {
-                Mesh = mesh
-            };
+        internal void RemoveRenderableComponent(Components.RenderableComponent component)
+            => _renderableComponents.Remove(component);
 
-            _resourceManager.AddReference(mesh);
-            _meshes.Add(instance);
+        internal void AddLightComponent(Components.LightComponent component)
+            => _lightComponents.Add(component);
 
-            return instance;
-        }
-
-        public void RemoveMesh(MeshInstance mesh)
-        {
-            _meshes.Remove(mesh);
-            _resourceManager.Unload(mesh.Mesh);
-        }
-
-        public void Clear()
-        {
-            _meshes.Clear();
-            _lights.Clear();
-        }
+        internal void RemoveLightComponent(Components.LightComponent component)
+            => _lightComponents.Remove(component);
 
         public void PrepareRenderOperations(Matrix4 viewMatrix, RenderOperations operations, bool shadowCastersOnly = false, bool frustumCull = true)
         {
-            Frustum.Matrix = viewMatrix;
-            var sphere = new BoundingSphere();
-            var zero = Vector3.Zero;
-
-            for (var i = 0; i < _meshes.Count; i++)
+            // TODO: Frustum cull!
+            for (var i = 0; i < _renderableComponents.Count; i++)
             {
-                var meshInstance = _meshes[i];
-                var subMeshes = meshInstance.Mesh.SubMeshes;
-
-                if (!meshInstance.CastShadows && shadowCastersOnly)
-                    continue;
-
-                Vector3.Transform(ref zero, ref meshInstance.World, out sphere.Center);
-
-                for (var j = 0; j < subMeshes.Length; j++)
+                if (!shadowCastersOnly || _renderableComponents[i].CastShadows)
                 {
-                    var subMesh = subMeshes[j];
-
-                    sphere.Radius = subMesh.BoundingSphereRadius;
-                    if (!frustumCull || Frustum.Intersects(sphere))
-                    {
-                        operations.Add(subMesh.Handle, meshInstance.World, subMesh.Material, meshInstance.Skeleton, false, meshInstance.CastShadows);
-                    }
+                    _renderableComponents[i].PrepareRenderOperations(operations);
                 }
             }
+            //Frustum.Matrix = viewMatrix;
+            //var sphere = new BoundingSphere();
+            //var zero = Vector3.Zero;
+
+            //for (var i = 0; i < _meshes.Count; i++)
+            //{
+            //    var meshInstance = _meshes[i];
+            //    var subMeshes = meshInstance.Mesh.SubMeshes;
+
+            //    if (!meshInstance.CastShadows && shadowCastersOnly)
+            //        continue;
+
+            //    Vector3.Transform(ref zero, ref meshInstance.World, out sphere.Center);
+
+            //    for (var j = 0; j < subMeshes.Length; j++)
+            //    {
+            //        var subMesh = subMeshes[j];
+
+            //        sphere.Radius = subMesh.BoundingSphereRadius;
+            //        if (!frustumCull || Frustum.Intersects(sphere))
+            //        {
+            //            operations.Add(subMesh.Handle, meshInstance.World, subMesh.Material, meshInstance.Skeleton, false, meshInstance.CastShadows);
+            //        }
+            //    }
+            //}
         }
 
-        public void PrepareRenderOperations(Vector3 position, float radius, RenderOperations operations, bool shadowCastersOnly = false)
+        public Components.LightComponent GetSunLight()
         {
-            var zero = Vector3.Zero;
-            Vector3 meshPosition;
-
-            for (var i = 0; i < _meshes.Count; i++)
-            {
-                var meshInstance = _meshes[i];
-                var subMeshes = meshInstance.Mesh.SubMeshes;
-
-                Vector3.Transform(ref zero, ref meshInstance.World, out meshPosition);
-
-                if ((!shadowCastersOnly || meshInstance.CastShadows) && Math.Intersections.SphereToSphere(ref position, radius, ref meshPosition, meshInstance.Mesh.BoundingSphereRadius))
-                {
-                    for (var j = 0; j < subMeshes.Length; j++)
-                    {
-                        var subMesh = subMeshes[j];
-                        operations.Add(subMesh.Handle, meshInstance.World, subMesh.Material, meshInstance.Skeleton, false, meshInstance.CastShadows);
-                    }
-                }
-            }
-        }
-
-        public Light CreateDirectionalLight(Vector3 direction, Vector3 color, bool castShadows = false, float shadowRange = 64.0f, float shadowBias = 0.001f, float intensity = 1.0f)
-        {
-            var light = new Light
-            {
-                Type = LighType.Directional,
-                Direction = direction,
-                Color = color,
-                CastShadows = castShadows,
-                ShadowBias = shadowBias,
-                Range = shadowRange,
-                Intensity = intensity
-            };
-
-            _lights.Add(light);
-            if (SunLight == null)
-            {
-                SunLight = light;
-            }
-
-            return light;
-        }
-
-        public Light CreatePointLight(Vector3 position, float range, Vector3 color, bool castShadows = false, float shadowBias = 0.001f, float intensity = 1.0f)
-        {
-            var light = new Light
-            {
-                Type = LighType.PointLight,
-                Position = position,
-                Range = range,
-                Color = color,
-                CastShadows = castShadows,
-                ShadowBias = shadowBias,
-                Intensity = intensity
-            };
-
-            _lights.Add(light);
-
-            return light;
-        }
-
-        public Light CreateSpotLight(Vector3 position, Vector3 direction, float innerAngle, float outerAngle, float range, Vector3 color, bool castShadows = false, float shadowBias = 0.001f, float intensity = 1.0f)
-        {
-            direction.Normalize();
-            var light = new Light
-            {
-                Type = LighType.SpotLight,
-                Position = position,
-                Range = range,
-                Color = color,
-                Direction = direction,
-                InnerAngle = innerAngle,
-                OuterAngle = outerAngle,
-                CastShadows = castShadows,
-                ShadowBias = shadowBias,
-                Intensity = intensity
-            };
-
-            _lights.Add(light);
-
-            return light;
-        }
-
-        public void RemoveLight(Light light)
-        {
-            if (SunLight == light)
-            {
-                SunLight = null;
-            }
-
-            _lights.Remove(light);
-        }
-
-        public Light GetSunLight()
-        {
-            foreach (var light in _lights)
+            foreach (var light in _lightComponents)
             {
                 if (light.Type == LighType.Directional)
                     return light;
@@ -197,9 +83,9 @@ namespace Triton.Graphics
             return null;
         }
 
-        public IReadOnlyCollection<Light> GetLights()
+        public IReadOnlyCollection<Components.LightComponent> GetLights()
         {
-            return _lights;
+            return _lightComponents;
         }
     }
 }

@@ -52,7 +52,11 @@ namespace Triton.Graphics.Post.Effects
 			var sunLight = stage.GetSunLight();
             if (sunLight != null)
             {
-                _backend.BindShaderVariable(_shaderParams.SunDir, ref sunLight.Direction);
+                Vector3 unitZ = Vector3.UnitZ;
+                Vector3.Transform(ref unitZ, ref sunLight.Owner.Orientation, out var lightDirWS);
+                lightDirWS = lightDirWS.Normalize();
+
+                _backend.BindShaderVariable(_shaderParams.SunDir, ref lightDirWS);
             }
 
 			_backend.DrawMesh(_quadMesh.MeshHandle);

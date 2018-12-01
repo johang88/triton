@@ -8,7 +8,7 @@
 		"Position": "2 2.5 3",
 		"Components": [
 			{
-				"$type":"Triton.Game.World.Components.PointLight, Triton.Game",
+				"$type":"Triton.Graphics.Components.LightComponent, Triton.Graphics",
 				"Color": "0.9 0.5 0.3",
 				"Intensity": 5.0,
 				"Range": 16,
@@ -21,7 +21,7 @@
 		"Position": "-10 2.5 1",
 		"Components": [
 			{
-				"$type":"Triton.Game.World.Components.PointLight, Triton.Game",
+				"$type":"Triton.Graphics.Components.LightComponent, Triton.Graphics",
 				"Color": "0.5 0.9 0.3",
 				"Intensity": 5.0,
 				"Range": 32,
@@ -34,7 +34,7 @@
 		"Position": "-18 2.5 -5",
 		"Components": [
 			{
-				"$type":"Triton.Game.World.Components.PointLight, Triton.Game",
+				"$type":"Triton.Graphics.Components.LightComponent, Triton.Graphics",
 				"Color": "0.3 0.5 0.9",
 				"Intensity": 5.0,
 				"Range": 32,
@@ -45,7 +45,7 @@
    ],
    "Components":[
       {
-         "$type":"Triton.Game.World.Components.MeshRenderer, Triton.Game",
+         "$type":"Triton.Graphics.Components.MeshComponent, Triton.Graphics",
          "CastShadows":true,
          "Mesh":"/models/room"
       },

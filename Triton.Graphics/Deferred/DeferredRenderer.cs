@@ -261,7 +261,7 @@ namespace Triton.Graphics.Deferred
             _backend.DrawMesh(_quadMesh.MeshHandle);
         }
 
-        private void RenderLights(Camera camera, ref Matrix4 view, ref Matrix4 projection, IReadOnlyCollection<Light> lights, Stage stage)
+        private void RenderLights(Camera camera, ref Matrix4 view, ref Matrix4 projection, IReadOnlyCollection<Components.LightComponent> lights, Stage stage)
         {
             var frustum = camera.GetFrustum();
 
@@ -277,7 +277,7 @@ namespace Triton.Graphics.Deferred
             }
         }
 
-        private void RenderDirectionalLight(Camera camera, BoundingFrustum cameraFrustum, ref Matrix4 view, ref Matrix4 projection, Stage stage, Light light)
+        private void RenderDirectionalLight(Camera camera, BoundingFrustum cameraFrustum, ref Matrix4 view, ref Matrix4 projection, Stage stage, Components.LightComponent light)
         {
             if (light.Type != LighType.Directional)
                 return;
@@ -285,7 +285,6 @@ namespace Triton.Graphics.Deferred
             RenderedLights++;
 
             var renderStateId = _directionalRenderState;
-            var cameraDistanceToLight = light.Position - camera.Position;
 
             var viewProjection = view * projection;
             var modelViewProjection = viewProjection; // It's a directional light ...
@@ -334,7 +333,10 @@ namespace Triton.Graphics.Deferred
             _backend.BindShaderVariable(shaderParams.LightColor, ref lightColor);
             _backend.BindShaderVariable(shaderParams.CameraPosition, ref camera.Position);
 
-            var lightDirWS = light.Direction.Normalize();
+            Vector3 unitZ = Vector3.UnitZ;
+            Vector3.Transform(ref unitZ, ref light.Owner.Orientation, out var lightDirWS);
+            lightDirWS = lightDirWS.Normalize();
+
             _backend.BindShaderVariable(shaderParams.LightDirection, ref lightDirWS);
 
             var inverseViewProjectionMatrix = Matrix4.Invert(view * projection);
@@ -345,7 +347,7 @@ namespace Triton.Graphics.Deferred
             _backend.EndInstance();
         }
 
-        private unsafe void RenderPointLights(Camera camera, BoundingFrustum cameraFrustum, ref Matrix4 view, ref Matrix4 projection, Stage stage, IReadOnlyCollection<Light> lights)
+        private unsafe void RenderPointLights(Camera camera, BoundingFrustum cameraFrustum, ref Matrix4 view, ref Matrix4 projection, Stage stage, IReadOnlyCollection<Components.LightComponent> lights)
         {
             var index = 0;
 
@@ -357,7 +359,9 @@ namespace Triton.Graphics.Deferred
 
                 var radius = light.Range * 1.1f;
 
-                boundingSphere.Center = light.Position;
+                var lightPositionWS = light.Owner.Position;
+
+                boundingSphere.Center = lightPositionWS;
                 boundingSphere.Radius = radius;
 
                 if (!cameraFrustum.Intersects(boundingSphere))
@@ -368,7 +372,7 @@ namespace Triton.Graphics.Deferred
                 var lightColor = light.Color * light.Intensity;
                 lightColor = new Vector3((float)System.Math.Pow(lightColor.X, 2.2f), (float)System.Math.Pow(lightColor.Y, 2.2f), (float)System.Math.Pow(lightColor.Z, 2.2f));
 
-                _pointLightDataCS[index].LightPositionRange = new Vector4(light.Position, light.Range);
+                _pointLightDataCS[index].LightPositionRange = new Vector4(lightPositionWS, light.Range);
                 _pointLightDataCS[index].LightColor = new Vector4(lightColor, light.Intensity);
 
                 index++;
@@ -416,7 +420,7 @@ namespace Triton.Graphics.Deferred
             _backend.Barrier(OpenTK.Graphics.OpenGL.MemoryBarrierFlags.AllBarrierBits);
         }
 
-        private unsafe void RenderSpotLights(Camera camera, BoundingFrustum cameraFrustum, ref Matrix4 view, ref Matrix4 projection, Stage stage, IReadOnlyCollection<Light> lights)
+        private unsafe void RenderSpotLights(Camera camera, BoundingFrustum cameraFrustum, ref Matrix4 view, ref Matrix4 projection, Stage stage, IReadOnlyCollection<Components.LightComponent> lights)
         {
             foreach (var light in lights)
             {

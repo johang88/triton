@@ -7,7 +7,7 @@
    ],
    "Components":[
       {
-         "$type":"Triton.Game.World.Components.MeshRenderer, Triton.Game",
+         "$type":"Triton.Graphics.Components.MeshComponent, Triton.Graphics",
          "CastShadows":true,
          "Mesh":"/models/sphere"
       },

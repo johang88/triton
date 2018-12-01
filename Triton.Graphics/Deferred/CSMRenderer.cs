@@ -121,7 +121,7 @@ namespace Triton.Graphics.Deferred
             _shadowViewProjections = new Matrix4[count];
         }
 
-        public List<RenderTarget> Render(RenderTarget gbuffer, Light light, Stage stage, Camera camera, out Matrix4[] viewProjections, out float[] clipDistances)
+        public List<RenderTarget> Render(RenderTarget gbuffer, Components.LightComponent light, Stage stage, Camera camera, out Matrix4[] viewProjections, out float[] clipDistances)
         {
             if (!_handlesInitialized)
             {
@@ -206,12 +206,13 @@ namespace Triton.Graphics.Deferred
             projection = Matrix4.CreateOrthographic(boxSize.X, boxSize.Y, -boxSize.Z * 2.0f, boxSize.Z);
         }
 
-        private void RenderCascade(RenderTarget renderTarget, Light light, Stage stage, Camera camera, out Matrix4 viewProjection)
+        private void RenderCascade(RenderTarget renderTarget, Components.LightComponent light, Stage stage, Camera camera, out Matrix4 viewProjection)
         {
             _backend.BeginPass(renderTarget, new Vector4(0, 0, 0, 0), ClearFlags.All);
 
-            var lightDir = -light.Direction;
-            lightDir.Normalize();
+            Vector3 unitZ = Vector3.UnitZ;
+            Vector3.Transform(ref unitZ, ref light.Owner.Orientation, out var lightDir);
+            lightDir = -lightDir.Normalize();
 
             CalculateViewProjection(camera.GetFrustum(), lightDir, out var view, out var projection);
             viewProjection = view * projection;
@@ -263,7 +264,7 @@ namespace Triton.Graphics.Deferred
 
                 _backend.BeginInstance(program.Handle, textures, samplers, _shadowsRenderState);
 
-                var lightDirWSAndBias = new Vector4(light.Direction.Normalize(), light.ShadowBias);
+                var lightDirWSAndBias = new Vector4(-lightDir, light.ShadowBias);
                 _backend.BindShaderVariable(0, ref lightDirWSAndBias);
 
                 if (operations[i].Skeleton != null)

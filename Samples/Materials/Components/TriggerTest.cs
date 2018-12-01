@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Triton.Game.World;
 using Triton.Game.World.Components;
+using Triton.Graphics.Components;
 
 namespace Triton.Samples.Components
 {
     class TriggerTest : BaseComponent
     {
-        private PointLight _light;
+        private LightComponent _light;
 
         public override void OnActivate()
         {
@@ -19,7 +20,7 @@ namespace Triton.Samples.Components
             //_body = Owner.GetComponent<RigidBody>();
             //_body.Collision += OnCollision;
 
-            _light = Owner.GetComponent<PointLight>();
+            _light = Owner.GetComponent<LightComponent>();
         }
 
         public override void OnDeactivate()
