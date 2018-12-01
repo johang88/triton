@@ -84,8 +84,6 @@ namespace Triton.Graphics
         }
 
         public IReadOnlyCollection<Components.LightComponent> GetLights()
-        {
-            return _lightComponents;
-        }
+            => _lightComponents;
     }
 }
