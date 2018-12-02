@@ -18,10 +18,8 @@ namespace Triton.Graphics.Components
             _skeletonInstance = null;
         }
 
-        public void Play(string animation)
-        {
-            _skeletonInstance.Play(animation);
-        }
+        public AnimationState GetAnimationState(string animation)
+            => _skeletonInstance.GetAnimationState(animation);
 
         protected override void UpdateDerviedMeshSettings()
         {
@@ -37,10 +35,7 @@ namespace Triton.Graphics.Components
         {
             base.Update(dt);
 
-            if (_skeletonInstance != null)
-            {
-                _skeletonInstance.Update(dt);
-            }
+            _skeletonInstance?.Update();
         }
 
         public override void PrepareRenderOperations(RenderOperations operations)

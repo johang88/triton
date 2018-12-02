@@ -122,6 +122,8 @@
     <Compile Include="Resources\TextureSerializer.cs" />
     <Compile Include="Shaders\Preprocessor.cs" />
     <Compile Include="SkeletalAnimation\Animation.cs" />
+    <Compile Include="SkeletalAnimation\AnimationBlender.cs" />
+    <Compile Include="SkeletalAnimation\AnimationState.cs" />
     <Compile Include="SkeletalAnimation\KeyFrame.cs" />
     <Compile Include="SkeletalAnimation\Skeleton.cs" />
     <Compile Include="SkeletalAnimation\SkeletonInstance.cs" />

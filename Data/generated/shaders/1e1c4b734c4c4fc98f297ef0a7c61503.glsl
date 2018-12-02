@@ -34,7 +34,7 @@ uniform mat4x4 worldView;
 uniform mat4x4 modelViewProjection;
 
 #ifdef SKINNED
-uniform mat4x4[64] bones;
+uniform mat4x4[96] bones;
 #endif
 
 void main()

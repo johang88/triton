@@ -76,6 +76,7 @@ namespace Triton.Samples
 
             var knight = new GameObject();
             knight.Position = new Vector3(2, 0, 2);
+            knight.Scale = new Vector3(1.6f, 1.6f, 1.6f);
             knight.Components.Add(new SkinnedMeshComponent
             {
                 Mesh = Resources.Load<Mesh>("/models/knight")
