@@ -18,6 +18,11 @@ namespace Triton.Graphics.Components
             _skeletonInstance = null;
         }
 
+        public void Play(string animation)
+        {
+            _skeletonInstance.Play(animation);
+        }
+
         protected override void UpdateDerviedMeshSettings()
         {
             base.UpdateDerviedMeshSettings();
@@ -40,6 +45,9 @@ namespace Triton.Graphics.Components
 
         public override void PrepareRenderOperations(RenderOperations operations)
         {
+            if (_mesh == null)
+                return;
+
             Owner.GetWorldMatrix(out var world);
 
             for (var i = 0; i < Mesh.SubMeshes.Length; i++)

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Triton.Game.World;
 using Triton.Game.World.Components;
+using Triton.Graphics.Components;
 using Triton.Graphics.Resources;
 using Triton.Input;
 using Triton.Physics.Components;
@@ -17,7 +18,7 @@ namespace Triton.Samples
     class MaterialsGame : Triton.Samples.BaseGame
     {
         private GameObject Player;
-        
+
         private List<GameObject> _balls = new List<GameObject>();
 
         public MaterialsGame()
@@ -72,6 +73,15 @@ namespace Triton.Samples
                 _balls.Add(ball);
                 ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
             }
+
+            var knight = new GameObject();
+            knight.Position = new Vector3(2, 0, 2);
+            knight.Components.Add(new SkinnedMeshComponent
+            {
+                Mesh = Resources.Load<Mesh>("/models/knight")
+            });
+            knight.Components.Add(new KnightAnimator());
+            GameWorld.Add(knight);
 
             Stage.ClearColor = new Vector4(1, 1, 1, 1) * 2;
 

@@ -24,6 +24,13 @@ namespace Triton.Graphics.Components
             }
         }
 
+        public override void OnActivate()
+        {
+            base.OnActivate();
+
+            UpdateDerviedMeshSettings();
+        }
+
         protected virtual void UpdateDerviedMeshSettings()
         {
             if (_mesh == null)
@@ -40,6 +47,8 @@ namespace Triton.Graphics.Components
 
                 BoundingBox = BoundingBox.CreateMerged(BoundingBox, _mesh.SubMeshes[i].BoundingBox);
             }
+
+            _meshDirty = false;
         }
 
         public override void Update(float dt)
@@ -49,7 +58,6 @@ namespace Triton.Graphics.Components
             if (_meshDirty)
             {
                 UpdateDerviedMeshSettings();
-                _meshDirty = false;
             }
         }
 
