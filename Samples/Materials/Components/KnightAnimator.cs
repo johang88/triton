@@ -16,7 +16,7 @@ namespace Triton.Samples.Components
         {
             base.OnActivate();
 
-            _idleState = Owner.GetComponent<SkinnedMeshComponent>().GetAnimationState("idle");
+            _idleState = Owner.GetComponent<SkinnedMeshComponent>().GetAnimationState("walk");
             _idleState.Enabled = true;
         }
 

@@ -4,11 +4,11 @@
    "Scale":"1 1 1",
    "Children":[
 	  {
-	    "$type":"Triton.Game.World.GameObject, Triton.Game",
+	    "$type":"Triton.GameObject, Triton",
 		"Position": "2 2.5 3",
 		"Components": [
 			{
-				"$type":"Triton.Game.World.Components.PointLight, Triton.Game",
+				"$type":"Triton.Graphics.Components.LightComponent, Triton.Graphics",
 				"Color": "0.9 0.5 0.3",
 				"Intensity": 5.0,
 				"Range": 16,
@@ -17,11 +17,11 @@
 		]
 	  },
 	  {
-	    "$type":"Triton.Game.World.GameObject, Triton.Game",
+	    "$type":"Triton.GameObject, Triton",
 		"Position": "-10 2.5 1",
 		"Components": [
 			{
-				"$type":"Triton.Game.World.Components.PointLight, Triton.Game",
+				"$type":"Triton.Graphics.Components.LightComponent, Triton.Graphics",
 				"Color": "0.5 0.9 0.3",
 				"Intensity": 5.0,
 				"Range": 32,
@@ -30,11 +30,11 @@
 		]
 	  },
 	  {
-	    "$type":"Triton.Game.World.GameObject, Triton.Game",
+	    "$type":"Triton.GameObject, Triton",
 		"Position": "-18 2.5 -5",
 		"Components": [
 			{
-				"$type":"Triton.Game.World.Components.PointLight, Triton.Game",
+				"$type":"Triton.Graphics.Components.LightComponent, Triton.Graphics",
 				"Color": "0.3 0.5 0.9",
 				"Intensity": 5.0,
 				"Range": 32,
@@ -45,14 +45,17 @@
    ],
    "Components":[
       {
-         "$type":"Triton.Game.World.Components.MeshRenderer, Triton.Game",
+         "$type":"Triton.Graphics.Components.MeshComponent, Triton.Graphics",
          "CastShadows":true,
          "Mesh":"/models/city"
       },
       {
-         "$type":"Triton.Game.World.Components.MeshRigidBody, Triton.Game",
-		 "Mesh":"/collision/city",
-		 "IsStatic":true
+         "$type": "Triton.Physics.Components.RigidBodyComponent, Triton.Physics",
+		 "ColliderShape": {
+           "$type": "Triton.Physics.Shapes.MeshColliderShape, Triton.Physics",
+           "Mesh": "/collision/city"
+         },
+		 "RigidBodyType": 2
       }
    ]
 }
