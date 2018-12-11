@@ -32,7 +32,7 @@ namespace Triton.Samples
             base.LoadResources();
 
             Stage.ClearColor = new Triton.Vector4(255 / 255.0f, 255 / 255.0f, 255 / 255.0f, 0) * 3;
-            Stage.AmbientColor = new Vector3(0.5f, 0.5f, 0.5f);
+            Stage.AmbientColor = new Vector3(0.5f, 0.5f, 0.5f) * 0;
 
             PostEffectManager.HDRSettings.AutoKey = false;
             PostEffectManager.HDRSettings.TonemapOperator = Graphics.Post.TonemapOperator.ASEC;

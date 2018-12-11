@@ -4,17 +4,27 @@
 #define COMPUTE
 
 #define LightTileSize 16
-#define MaxLights 2048
+#define MaxLights 1024
 
 layout(local_size_x = LightTileSize, local_size_y = LightTileSize) in;
 
-struct Light {
+struct PointLight {
 	vec4 positionRange;
 	vec4 colorIntensity;
 };
 
-layout(std430, binding = 0) buffer Lights {
-	Light lights[];
+struct SpotLight {
+	vec4 positionRange;
+	vec4 colorInnerAngle;
+	vec4 directionOuterAngle;
+};
+
+layout(std430, binding = 0) buffer PointLights {
+	PointLight pointLights[];
+};
+
+layout(std430, binding = 1) buffer SpotLights {
+	SpotLight spotLights[];
 };
 
 uniform mat4x4 view;
@@ -23,7 +33,8 @@ uniform vec3 cameraPositionWS;
 uniform vec2 cameraClipPlanes;
 uniform uvec2 numTiles;
 uniform uvec2 displaySize;
-uniform int numLights;
+uniform int numPointLights;
+uniform int numSpotLights;
 
 layout(binding = 0) uniform sampler2D samplerDepth;
 layout(binding = 0, rgba8) uniform image2D samplerGBuffer0;
@@ -33,8 +44,10 @@ layout(binding = 3, rgba16f) uniform image2D outputTexture;
 
 shared uint tileMinZ;
 shared uint tileMaxZ;
-shared uint tileLightList[MaxLights];
-shared uint numTileLights;
+shared uint tilePointLightList[MaxLights];
+shared uint numTilePointLights;
+shared uint tileSpotLightList[MaxLights];
+shared uint numTileSpotLights;
 
 float linearDepth(float zw) {
 	float n = cameraClipPlanes.x;
@@ -64,7 +77,8 @@ float get_signed_distance_from_plane(vec4 p, vec4 eqn) {
 void main() {
 	// Initialize shared memory
 	if (gl_LocalInvocationIndex == 0) {
-		numTileLights = 0;
+		numTilePointLights = 0;
+		numTileSpotLights = 0;
 		tileMinZ = 0xffffffff;
 		tileMaxZ = 0;
 	}
@@ -106,24 +120,43 @@ void main() {
 	// Synchronize
 	groupMemoryBarrier(); barrier();
 
-	// Check lights against the frustum
-	for (uint i = 0; i < numLights; i += ThreadGroupSize) {
+	// Check lights against the frustum (point)
+	for (uint i = 0; i < numPointLights; i += ThreadGroupSize) {
 		uint lightIndex = gl_LocalInvocationIndex + i;
-		if (lightIndex < numLights) {
-			vec4 lightPositionVS = view * vec4(lights[lightIndex].positionRange.xyz, 1.0);
-			float radius = lights[lightIndex].positionRange.w;
+		if (lightIndex < numPointLights) {
+			vec4 lightPositionVS = view * vec4(pointLights[lightIndex].positionRange.xyz, 1.0);
+			float radius = pointLights[lightIndex].positionRange.w;
 
 			if (   get_signed_distance_from_plane(lightPositionVS, frustum[0]) < radius
 				&& get_signed_distance_from_plane(lightPositionVS, frustum[1]) < radius
 				&& get_signed_distance_from_plane(lightPositionVS, frustum[2]) < radius
 				&& get_signed_distance_from_plane(lightPositionVS, frustum[3]) < radius) {
-					uint listIndex = atomicAdd(numTileLights, 1);
-            		tileLightList[listIndex] = lightIndex;
+					uint listIndex = atomicAdd(numTilePointLights, 1);
+            		tilePointLightList[listIndex] = lightIndex;
 				}
 		}
 	}
 
 	// Synchronize
+	groupMemoryBarrier(); barrier();
+
+	// Check lights against the frustum (spot)
+	for (uint i = 0; i < numSpotLights; i += ThreadGroupSize) {
+		uint lightIndex = gl_LocalInvocationIndex + i;
+		if (lightIndex < numSpotLights) {
+			vec4 lightPositionVS = view * vec4(spotLights[lightIndex].positionRange.xyz, 1.0);
+			float radius = spotLights[lightIndex].positionRange.w;
+
+			if (   get_signed_distance_from_plane(lightPositionVS, frustum[0]) < radius
+				&& get_signed_distance_from_plane(lightPositionVS, frustum[1]) < radius
+				&& get_signed_distance_from_plane(lightPositionVS, frustum[2]) < radius
+				&& get_signed_distance_from_plane(lightPositionVS, frustum[3]) < radius) {
+					uint listIndex = atomicAdd(numTileSpotLights, 1);
+            		tileSpotLightList[listIndex] = lightIndex;
+				}
+		}
+	}
+
 	groupMemoryBarrier(); barrier();
 
 	// Process lighting
@@ -145,9 +178,11 @@ void main() {
 		vec3 eyeDir = normalize(cameraPositionWS - positionWS);
 		
 		vec3 lighting = imageLoad(outputTexture, pixelCoord).xyz;
-		for(uint tLightIdx = 0; tLightIdx < numTileLights; ++tLightIdx) {
-			uint lIdx = tileLightList[tLightIdx];
-			Light light = lights[lIdx];
+
+		// Point lights
+		for(uint tLightIdx = 0; tLightIdx < numTilePointLights; ++tLightIdx) {
+			uint lIdx = tilePointLightList[tLightIdx];
+			PointLight light = pointLights[lIdx];
 			
 			vec3 lightVec = light.positionRange.xyz - positionWS;
 			vec3 lightDir = normalize(lightVec);
@@ -162,9 +197,37 @@ void main() {
 			float attenuationNdotL = attenuation * nDotL;
 			
 			lighting += brdf(normalWS, eyeDir, lightDir, roughness, metallic, light.colorIntensity.xyz * attenuationNdotL, diffuse, F0);
-			//lighting.r += 0.01;
 		}
 		
+		// Spot lights
+		for(uint tLightIdx = 0; tLightIdx < numTileSpotLights; ++tLightIdx) {
+			uint lIdx = tileSpotLightList[tLightIdx];
+			SpotLight light = spotLights[lIdx];
+			
+			vec3 lightVec = light.positionRange.xyz - positionWS;
+			vec3 lightDir = normalize(lightVec);
+			
+			float nDotL = saturate(dot(normalWS, lightDir));
+			
+			float lightDistanceSquared = dot(lightVec, lightVec);
+		
+			float attenuation = 1.0 / lightDistanceSquared;
+			attenuation = attenuation * square(saturate(1.0 - square(lightDistanceSquared * square(1.0 / light.positionRange.w))));
+
+			float innerAngle = light.colorInnerAngle.w;
+			float outerAngle = light.directionOuterAngle.w;
+
+			float spotLightAngle = saturate(dot(-light.directionOuterAngle.xyz, lightDir));
+			float cosInnerMinusOuterAngle = innerAngle - outerAngle;
+			float spotFallof = 1.0 - saturate((spotLightAngle - outerAngle) / cosInnerMinusOuterAngle);
+			
+			attenuation *= spotFallof;
+
+			float attenuationNdotL = attenuation * nDotL;
+			
+			lighting += brdf(normalWS, eyeDir, lightDir, roughness, metallic, light.colorInnerAngle.xyz * attenuationNdotL, diffuse, F0);
+		}
+
 		imageStore(outputTexture, pixelCoord, vec4(lighting, 0));
 	}
 }

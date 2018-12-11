@@ -30,9 +30,12 @@ namespace Triton.Graphics.Deferred
         private Resources.ShaderProgram[] _lightShaders;
         private Resources.ShaderProgram _lightComputeShader;
 
-        private const int NumLightInstances = 2048;
+        private const int NumLightInstances = 1024;
         private readonly PointLightDataCS[] _pointLightDataCS = new PointLightDataCS[NumLightInstances];
         private int _pointLightDataCSBuffer;
+
+        private readonly SpotLightDataCS[] _spotLightDataCS = new SpotLightDataCS[NumLightInstances];
+        private int _spotLightDataCSBuffer;
 
         private bool _initialized = false;
 
@@ -123,6 +126,9 @@ namespace Triton.Graphics.Deferred
 
             _pointLightDataCSBuffer = _backend.RenderSystem.CreateBuffer(BufferTarget.ShaderStorageBuffer, true);
             _backend.RenderSystem.SetBufferData(_pointLightDataCSBuffer, _pointLightDataCS, true, true);
+
+            _spotLightDataCSBuffer = _backend.RenderSystem.CreateBuffer(BufferTarget.ShaderStorageBuffer, true);
+            _backend.RenderSystem.SetBufferData(_spotLightDataCSBuffer, _spotLightDataCS, true, true);
         }
 
         public void InitializeHandles()
@@ -265,7 +271,7 @@ namespace Triton.Graphics.Deferred
         {
             var frustum = camera.GetFrustum();
 
-            RenderPointLights(camera, frustum, ref view, ref projection, stage, lights);
+            RenderTiledLights(camera, frustum, ref view, ref projection, stage, lights);
             RenderSpotLights(camera, frustum, ref view, ref projection, stage, lights);
 
             foreach (var light in lights)
@@ -290,8 +296,8 @@ namespace Triton.Graphics.Deferred
             var modelViewProjection = viewProjection; // It's a directional light ...
 
             // Convert light color to linear space
-            var lightColor = light.Color * light.Intensity;
-            lightColor = new Vector3((float)System.Math.Pow(lightColor.X, 2.2f), (float)System.Math.Pow(lightColor.Y, 2.2f), (float)System.Math.Pow(lightColor.Z, 2.2f));
+            var lightColor = light.Color;
+            lightColor = new Vector3((float)System.Math.Pow(lightColor.X, 2.2f), (float)System.Math.Pow(lightColor.Y, 2.2f), (float)System.Math.Pow(lightColor.Z, 2.2f)) * light.Intensity;
 
             // Select the correct shader
             var lightTypeOffset = _shadowBuffer != null ? 1 : 0;
@@ -347,14 +353,15 @@ namespace Triton.Graphics.Deferred
             _backend.EndInstance();
         }
 
-        private unsafe void RenderPointLights(Camera camera, BoundingFrustum cameraFrustum, ref Matrix4 view, ref Matrix4 projection, Stage stage, IReadOnlyCollection<Components.LightComponent> lights)
+        private unsafe void RenderTiledLights(Camera camera, BoundingFrustum cameraFrustum, ref Matrix4 view, ref Matrix4 projection, Stage stage, IReadOnlyCollection<Components.LightComponent> lights)
         {
-            var index = 0;
-
             var boundingSphere = new BoundingSphere();
+
+            int pointLightCount = 0, spotLightCount = 0;
+
             foreach (var light in lights)
             {
-                if (!light.Enabled || light.Type != LighType.PointLight)
+                if (!light.Enabled || (light.Type != LighType.PointLight && light.Type != LighType.SpotLight))
                     continue;
 
                 var radius = light.Range * 1.1f;
@@ -369,25 +376,46 @@ namespace Triton.Graphics.Deferred
 
                 RenderedLights++;
 
-                var lightColor = light.Color * light.Intensity;
-                lightColor = new Vector3((float)System.Math.Pow(lightColor.X, 2.2f), (float)System.Math.Pow(lightColor.Y, 2.2f), (float)System.Math.Pow(lightColor.Z, 2.2f));
+                var lightColor = light.Color;
+                lightColor = new Vector3((float)System.Math.Pow(lightColor.X, 2.2f), (float)System.Math.Pow(lightColor.Y, 2.2f), (float)System.Math.Pow(lightColor.Z, 2.2f)) * light.Intensity;
 
-                _pointLightDataCS[index].LightPositionRange = new Vector4(lightPositionWS, light.Range);
-                _pointLightDataCS[index].LightColor = new Vector4(lightColor, light.Intensity);
+                if (light.Type == LighType.PointLight)
+                {
+                    _pointLightDataCS[pointLightCount].PositionRange = new Vector4(lightPositionWS, light.Range);
+                    _pointLightDataCS[pointLightCount].Color = new Vector4(lightColor, light.Intensity);
 
-                index++;
+                    pointLightCount++;
+                }
+                else
+                {
+                    Vector3 unitZ = Vector3.UnitZ;
+                    Vector3.Transform(ref unitZ, ref light.Owner.Orientation, out var lightDirWS);
+                    lightDirWS = lightDirWS.Normalize();
+
+                    _spotLightDataCS[spotLightCount].PositionRange = new Vector4(lightPositionWS, light.Range);
+                    _spotLightDataCS[spotLightCount].ColorInnerAngle = new Vector4(lightColor, light.InnerAngle);
+                    _spotLightDataCS[spotLightCount].DirectionOuterAngle = new Vector4(lightDirWS, light.OuterAngle);
+
+                    spotLightCount++;
+                }
             }
 
-            if (index == 0)
+            if (pointLightCount == 0 && spotLightCount == 0)
                 return;
 
             fixed (PointLightDataCS* data = _pointLightDataCS)
             {
-                _backend.UpdateBufferInline(_pointLightDataCSBuffer, index * sizeof(PointLightDataCS), (byte*)data);
+                _backend.UpdateBufferInline(_pointLightDataCSBuffer, pointLightCount * sizeof(PointLightDataCS), (byte*)data);
             }
-            _backend.BindBufferBase(0, _pointLightDataCSBuffer);
 
-            var lightCount = index;
+            fixed (SpotLightDataCS* data = _spotLightDataCS)
+            {
+                _backend.UpdateBufferInline(_spotLightDataCSBuffer, spotLightCount * sizeof(SpotLightDataCS), (byte*)data);
+            }
+
+            _backend.BindBufferBase(0, _pointLightDataCSBuffer);
+            _backend.BindBufferBase(1, _spotLightDataCSBuffer);
+
             var lightTileSize = 16;
 
             _backend.BeginInstance(_lightComputeShader.Handle, new int[] { _gbuffer.Textures[3].Handle, _lightAccumulationTarget.Textures[0].Handle }, new int[] { _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering }, _lightAccumulatinRenderState);
@@ -397,7 +425,8 @@ namespace Triton.Graphics.Deferred
 
             _backend.BindShaderVariable(_computeLightParams.DisplaySize, (uint)_screenSize.X, (uint)_screenSize.Y);
             _backend.BindShaderVariable(_computeLightParams.NumTiles, numTilesX, numTilesY);
-            _backend.BindShaderVariable(_computeLightParams.NumLights, lightCount);
+            _backend.BindShaderVariable(_computeLightParams.NumPointLights, pointLightCount);
+            _backend.BindShaderVariable(_computeLightParams.NumSpotLights, spotLightCount);
 
             var clipDistance = new Vector2(camera.NearClipDistance, camera.FarClipDistance);
             _backend.BindShaderVariable(_computeLightParams.CameraClipPlanes, ref clipDistance);
@@ -440,8 +469,15 @@ namespace Triton.Graphics.Deferred
 
         private struct PointLightDataCS
         {
-            public Vector4 LightPositionRange;
-            public Vector4 LightColor;
+            public Vector4 PositionRange;
+            public Vector4 Color;
+        }
+
+        private struct SpotLightDataCS
+        {
+            public Vector4 PositionRange;
+            public Vector4 ColorInnerAngle;
+            public Vector4 DirectionOuterAngle;
         }
     }
 }

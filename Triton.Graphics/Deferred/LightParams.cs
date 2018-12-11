@@ -42,7 +42,8 @@ namespace Triton.Graphics.Deferred
         // Compute
         public int NumTiles = 0;
         public int DisplaySize = 0;
-        public int NumLights = 0;
+        public int NumPointLights = 0;
+        public int NumSpotLights = 0;
         public int CameraPositionWS = 0;
         public int CameraClipPlanes = 0;
         public int View = 0;

@@ -10,6 +10,7 @@ layout(location = ATTRIB_INSTANCE_TRANSFORM) in mat4x4 iInstanceTransform;
 
 out vec4 position;
 out vec2 texCoord;
+out float depth;
 
 layout(location = 0) uniform vec4 lightDirectionAndBias;
 uniform mat4x4[96] bones;
@@ -41,7 +42,8 @@ void main()
 	position = iInstanceTransform * vec4(iPosition, 1);
 #endif
 
-	position.z += bias;
+	depth = position.z + bias;
+
 	gl_Position = position;
 	texCoord = iTexCoord;
 }
@@ -49,18 +51,12 @@ void main()
 #else
 
 in vec2 texCoord;
+in float depth;
 
-layout(location = 0) out float dummyoutput;
-layout(binding = 0) uniform sampler2D samplerDiffuseMap;
+layout(location = 0) out vec3 oColor;
 
 void main()
 {
-#ifdef ALPHA_CLIP
-	float a = texture(samplerDiffuseMap, texCoord).a;
-	if (a < 0.5)
-		discard;
-#endif
-	
-	dummyoutput = 1;
+	oColor = depth.xxx;
 }
 #endif
