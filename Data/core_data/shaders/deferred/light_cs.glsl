@@ -1,5 +1,6 @@
 #include "/shaders/core"
 #include "/shaders/brdf"
+#include "/shaders/deferred/shadows"
 
 #define COMPUTE
 
@@ -7,6 +8,9 @@
 #define MaxLights 1024
 
 layout(local_size_x = LightTileSize, local_size_y = LightTileSize) in;
+
+#define SpotLightShadowIndexOffset 1024
+#define MaxShadowCastingSpotLights 8
 
 struct PointLight {
 	vec4 positionRange;
@@ -27,6 +31,10 @@ layout(std430, binding = 1) buffer SpotLights {
 	SpotLight spotLights[];
 };
 
+layout(std430, binding = 2) buffer ShadowMapIndexes {
+	int lightToShadowIndex[];
+};
+
 uniform mat4x4 view;
 uniform mat4x4 projection;
 uniform vec3 cameraPositionWS;
@@ -35,8 +43,11 @@ uniform uvec2 numTiles;
 uniform uvec2 displaySize;
 uniform int numPointLights;
 uniform int numSpotLights;
+uniform mat4x4[MaxShadowCastingSpotLights] spotShadowMatrices;
 
 layout(binding = 0) uniform sampler2D samplerDepth;
+layout(binding = 1) uniform sampler2D samplerSpotLightShadowAtlas;
+
 layout(binding = 0, rgba8) uniform image2D samplerGBuffer0;
 layout(binding = 1, rgba16f) uniform image2D samplerGBuffer1;
 layout(binding = 2, rgba8) uniform image2D samplerGBuffer2;
@@ -224,6 +235,35 @@ void main() {
 			attenuation *= spotFallof;
 
 			float attenuationNdotL = attenuation * nDotL;
+
+			// Shadows!
+			int shadowMapIndex = lightToShadowIndex[SpotLightShadowIndexOffset + lIdx];
+			if (shadowMapIndex > -1) {
+				// Sample shadows!
+				vec4 shadowUv = spotShadowMatrices[shadowMapIndex] * vec4(positionWS, 1.0);
+				shadowUv.xyz = 0.5 * shadowUv.xyz / shadowUv.w + vec3(0.5);
+
+				shadowUv.x += shadowMapIndex;
+				shadowUv.x *= 1.0 / float(MaxShadowCastingSpotLights);
+
+				float distance = shadowUv.z;
+				vec2 uv = shadowUv.xy;
+
+				float texelSize = 1.0 / float(textureSize(samplerSpotLightShadowAtlas, 0).y);
+
+				#if SHADOW_QUALITY == 3
+					float shadow = sample_shadow_29(samplerSpotLightShadowAtlas, uv, texelSize, distance);
+				#elif SHADOW_QUALITY == 2
+					float shadow = sample_shadow_12(samplerSpotLightShadowAtlas, uv, texelSize, distance);
+				#elif SHADOW_QUALITY == 1
+					float shadow = sample_shadow_5(samplerSpotLightShadowAtlas, uv, texelSize, distance);
+				#else 
+					float shadow = check_shadow_map(samplerSpotLightShadowAtlas, uv, distance);
+				#endif
+
+				//attenuationNdotL *= check_shadow_map(samplerSpotLightShadowAtlas, uv, distance);
+				attenuationNdotL *= shadow;
+			}
 			
 			lighting += brdf(normalWS, eyeDir, lightDir, roughness, metallic, light.colorInnerAngle.xyz * attenuationNdotL, diffuse, F0);
 		}

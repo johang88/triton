@@ -170,7 +170,7 @@ namespace Triton.Graphics
             }
 
             // Shader hot reloading, it's a bit ad hoc and ugly atm ... but it might work
-            if (_shaderHotReloader!= null)
+            if (_shaderHotReloader != null)
             {
                 _shaderHotReloader.Tick();
             }
@@ -249,6 +249,30 @@ namespace Triton.Graphics
                                     var flags = (ClearFlags)reader.ReadByte();
 
                                     RenderSystem.Clear(color, flags);
+                                }
+                            }
+                            break;
+                        case OpCode.BeginPass2:
+                            {
+                                var renderTargetHandle = reader.ReadInt32();
+
+                                var x = reader.ReadInt32();
+                                var y = reader.ReadInt32();
+                                var w = reader.ReadInt32();
+                                var h = reader.ReadInt32();
+
+                                RenderSystem.BeginScene(renderTargetHandle, x, y, w, h);
+
+                                var clear = reader.ReadBoolean();
+
+                                if (clear)
+                                {
+                                    var color = reader.ReadVector4();
+                                    var flags = (ClearFlags)reader.ReadByte();
+
+                                    RenderSystem.Scissor(true, x, y, w, h);
+                                    RenderSystem.Clear(color, flags);
+                                    RenderSystem.Scissor(false, x, y, w, h);
                                 }
                             }
                             break;
@@ -642,6 +666,21 @@ namespace Triton.Graphics
                 _primaryBuffer.Writer.Write(renderTarget.Width);
                 _primaryBuffer.Writer.Write(renderTarget.Height);
             }
+
+            _primaryBuffer.Writer.Write(true);
+            _primaryBuffer.Writer.Write(clearColor);
+            _primaryBuffer.Writer.Write((byte)clearFlags);
+        }
+
+        public void BeginPass(RenderTarget renderTarget, Vector4 clearColor, int x, int y, int w, int h, ClearFlags clearFlags = ClearFlags.Depth | ClearFlags.Color)
+        {
+            _primaryBuffer.Writer.Write((byte)OpCode.BeginPass2);
+            _primaryBuffer.Writer.Write(renderTarget?.Handle ?? 0);
+
+            _primaryBuffer.Writer.Write(x);
+            _primaryBuffer.Writer.Write(y);
+            _primaryBuffer.Writer.Write(w);
+            _primaryBuffer.Writer.Write(h);
 
             _primaryBuffer.Writer.Write(true);
             _primaryBuffer.Writer.Write(clearColor);
@@ -1123,7 +1162,8 @@ namespace Triton.Graphics
             BindImageTexture,
             BindBufferBase,
             BindBufferRange,
-            Barrier
+            Barrier,
+            BeginPass2
         }
 
         public void ScheduleForEndOfFrame(Action action)

@@ -17,7 +17,7 @@ namespace Triton.Graphics.Components
         [DataMember] public float OuterAngle { get; set; }
         [DataMember] public bool CastShadows { get; set; } = false;
         [DataMember] public bool Enabled { get; set; } = true;
-        [DataMember] public float ShadowBias { get; set; } = 0.001f;
+        [DataMember] public float ShadowBias { get; set; } = 0.01f;
         [DataMember] public float ShadowNearClipDistance { get; set; } = 0.01f;
 
         internal Stage Stage => Owner.World.Services.Get<Stage>();

@@ -310,6 +310,13 @@ namespace Triton.Renderer
             GL.Viewport(0, 0, width, height);
         }
 
+        public void BeginScene(int renderTargetHandle, int x, int y, int width, int height)
+        {
+            _renderStateManager.ApplyRenderState(0);
+            BindRenderTarget(renderTargetHandle);
+            GL.Viewport(x, y, width, height);
+        }
+
         public void SwapBuffers()
         {
             _context.SwapBuffers();
@@ -578,7 +585,15 @@ namespace Triton.Renderer
 
         public void Scissor(bool enable, int x, int y, int w, int h)
         {
-            GL.Scissor(x, y, w, h);
+            if (enable)
+            {
+                GL.Enable(EnableCap.ScissorTest);
+                GL.Scissor(x, y, w, h);
+            }
+            else
+            {
+                GL.Disable(EnableCap.ScissorTest);
+            }
         }
 
         public void ReadTexture<T>(int handle, PixelFormat format, PixelType type, ref T pixels) where T : struct

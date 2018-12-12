@@ -18,6 +18,7 @@ namespace Triton.Samples
     class MaterialsGame : Triton.Samples.BaseGame
     {
         private GameObject Player;
+        private GameObject Light;
 
         private List<GameObject> _balls = new List<GameObject>();
 
@@ -75,7 +76,7 @@ namespace Triton.Samples
             }
 
             var knight = new GameObject();
-            knight.Position = new Vector3(2, 0, 2);
+            knight.Position = new Vector3(1, 0, 4);
             knight.Scale = new Vector3(1.6f, 1.6f, 1.6f);
             knight.Components.Add(new SkinnedMeshComponent
             {
@@ -84,6 +85,22 @@ namespace Triton.Samples
             knight.Components.Add(new KnightAnimator());
             GameWorld.Add(knight);
 
+            Light = new GameObject
+            {
+                Position = new Vector3(0, 0.4f, 0)
+            };
+            Light.Components.Add(new LightComponent
+            {
+                Type = Graphics.LighType.SpotLight,
+                Intensity = 600,
+                Color = new Vector3(0.45f, 0.4f, 0.9f),
+                Range = 100,
+                InnerAngle = 0.94f,
+                OuterAngle = 0.98f,
+                CastShadows = true
+            });
+            //GameWorld.Add(Light);
+
             Stage.ClearColor = new Vector4(1, 1, 1, 1) * 2;
 
             //var sunLight = Stage.CreateDirectionalLight(new Vector3(-0.3f, -0.7f, 0.66f), new Vector3(1.64f, 1.57f, 1.49f), true, shadowBias: 0.0025f, intensity: 2f);
@@ -91,6 +108,7 @@ namespace Triton.Samples
 
             DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.High;
             DebugFlags |= Game.DebugFlags.RenderStats;
+            DebugFlags |= Game.DebugFlags.ShadowMaps;
         }
 
         protected override void Update(float frameTime)
@@ -101,6 +119,8 @@ namespace Triton.Samples
             {
                 CursorVisible = !CursorVisible;
             }
+
+            Light.Orientation *= Quaternion.FromAxisAngle(Vector3.UnitY, frameTime);
         }
 
         protected override void RenderUI(float deltaTime)

@@ -14,6 +14,9 @@ namespace Triton.Graphics.Deferred
 		public int Model = 0;
 		public int ViewProjectionMatrices = 0;
 		public int LightPosition = 0;
+        public int LightDirectionAndBias = 0;
+        public int View = 0;
+        public int Projection = 0;
 		public int ShadowBias = 0;
 	}
 }

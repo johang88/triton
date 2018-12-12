@@ -48,5 +48,6 @@ namespace Triton.Graphics.Deferred
         public int CameraClipPlanes = 0;
         public int View = 0;
         public int Projection = 0;
+        public int SpotShadowMatrices = 0;
     }
 }

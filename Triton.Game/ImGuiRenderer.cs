@@ -154,6 +154,8 @@ namespace Triton.Game
                 }
                 */
             }
+
+            _backend.Scissor(false, 0, 0, 0, 0);
         }
 
         class ShaderParams

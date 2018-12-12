@@ -61,7 +61,7 @@ void main()
 		blendPos += (worldMatrix * vec4(iPosition, 1)) * weight;
 		
 		mat3 worldRot = mat3(worldMatrix[0].xyz, worldMatrix[1].xyz, worldMatrix[2].xyz);
-		blendNormal+= (worldRot * iNormal) * weight;
+		blendNormal += (worldRot * iNormal) * weight;
 	}
 	
 	blendPos = vec4(blendPos.xyz, 1);

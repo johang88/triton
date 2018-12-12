@@ -49,9 +49,26 @@
 			{
 				"$type":"Triton.Graphics.Components.LightComponent, Triton.Graphics",
 				"Color": "0.3 0.5 0.9",
-				"Intensity": 50.0,
+				"Intensity": 60.0,
 				"Range": 64,
-				"CastShadows": false,
+				"CastShadows": true,
+				"Type": "SpotLight",
+				"InnerAngle": 0.8,
+				"OuterAngle": 0.9
+			}
+		]
+	  },
+	  {
+	    "$type":"Triton.GameObject, Triton",
+		"Position": "0 1 0",
+		"Orientation": "0 1 0 -4.3711",
+		"Components": [
+			{
+				"$type":"Triton.Graphics.Components.LightComponent, Triton.Graphics",
+				"Color": "0.8 0.5 0.9",
+				"Intensity": 30.0,
+				"Range": 64,
+				"CastShadows": true,
 				"Type": "SpotLight",
 				"InnerAngle": 0.8,
 				"OuterAngle": 0.9

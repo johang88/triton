@@ -9,7 +9,7 @@ namespace Triton.Graphics.Components
 {
     public abstract class RenderableComponent : GameObjectComponent
     {
-        [DataMember] public bool CastShadows { get; set; }
+        [DataMember] public bool CastShadows { get; set; } = true;
 
         public float BoundingSphereRadius;
         public BoundingBox BoundingBox;

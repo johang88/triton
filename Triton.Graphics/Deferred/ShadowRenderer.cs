@@ -8,7 +8,7 @@ using Triton.Renderer.RenderTargets;
 
 namespace Triton.Graphics.Deferred
 {
-    public class CSMRenderer
+    public class ShadowRenderer
     {
         // Settings
         private const int MaxCascadeCount = 5;
@@ -43,7 +43,7 @@ namespace Triton.Graphics.Deferred
 
         private Backend _backend;
 
-        public CSMRenderer(Backend backend, Triton.Resources.ResourceManager resourceManager, int cascadeCount = MaxCascadeCount, int resolution = DefaultResolution)
+        public ShadowRenderer(Backend backend, Triton.Resources.ResourceManager resourceManager, int cascadeCount = MaxCascadeCount, int resolution = DefaultResolution)
         {
             _backend = backend ?? throw new ArgumentNullException(nameof(backend));
 
@@ -121,16 +121,8 @@ namespace Triton.Graphics.Deferred
             _shadowViewProjections = new Matrix4[count];
         }
 
-        public List<RenderTarget> Render(RenderTarget gbuffer, Components.LightComponent light, Stage stage, Camera camera, out Matrix4[] viewProjections, out float[] clipDistances)
+        public List<RenderTarget> RenderCSM(RenderTarget gbuffer, Components.LightComponent light, Stage stage, Camera camera, out Matrix4[] viewProjections, out float[] clipDistances)
         {
-            if (!_handlesInitialized)
-            {
-                _renderShadowsShader.BindUniformLocations(_renderShadowsParams);
-                _renderShadowsSkinnedShader.BindUniformLocations(_renderShadowsSkinnedParams);
-
-                _handlesInitialized = true;
-            }
-
             // Basic camera setup
             clipDistances = new float[6];
 
@@ -217,6 +209,21 @@ namespace Triton.Graphics.Deferred
             CalculateViewProjection(camera.GetFrustum(), lightDir, out var view, out var projection);
             viewProjection = view * projection;
 
+            RenderShadowMap(light, stage, lightDir, view, projection);
+
+            _backend.EndPass();
+        }
+
+        public void RenderShadowMap(Components.LightComponent light, Stage stage, Vector3 lightDir, Matrix4 view, Matrix4 projection)
+        {
+            if (!_handlesInitialized)
+            {
+                _renderShadowsShader.BindUniformLocations(_renderShadowsParams);
+                _renderShadowsSkinnedShader.BindUniformLocations(_renderShadowsSkinnedParams);
+
+                _handlesInitialized = true;
+            }
+
             _shadowRenderOperations.Reset();
             stage.PrepareRenderOperations(view, _shadowRenderOperations, true, false);
 
@@ -239,7 +246,7 @@ namespace Triton.Graphics.Deferred
                     }
                     else
                     {
-                        Matrix4.Mult(ref operations[index].WorldMatrix, ref viewProjection, out _worldMatrices[instanceCount]);
+                        _worldMatrices[instanceCount] = operations[index].WorldMatrix;
                         instanceCount++;
                         i = index;
                     }
@@ -264,8 +271,10 @@ namespace Triton.Graphics.Deferred
 
                 _backend.BeginInstance(program.Handle, textures, samplers, _shadowsRenderState);
 
-                var lightDirWSAndBias = new Vector4(-lightDir, light.ShadowBias);
-                _backend.BindShaderVariable(0, ref lightDirWSAndBias);
+                var lightDirWSAndBias = new Vector4(light.Owner.Position, light.ShadowBias);
+                _backend.BindShaderVariable(shadowParams.LightDirectionAndBias, ref lightDirWSAndBias);
+                _backend.BindShaderVariable(shadowParams.View, ref view);
+                _backend.BindShaderVariable(shadowParams.Projection, ref projection);
 
                 if (operations[i].Skeleton != null)
                 {
@@ -278,8 +287,6 @@ namespace Triton.Graphics.Deferred
 
                 _backend.EndInstance();
             }
-
-            _backend.EndPass();
         }
     }
 }

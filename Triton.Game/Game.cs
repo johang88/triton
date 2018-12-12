@@ -41,7 +41,7 @@ namespace Triton.Game
         public Input.InputManager InputManager { get; private set; }
 
         public Graphics.Deferred.DeferredRenderer DeferredRenderer { get; private set; }
-        public Graphics.Deferred.CSMRenderer CSMRenderer { get; private set; }
+        public Graphics.Deferred.ShadowRenderer ShadowRenderer { get; private set; }
         public Graphics.Deferred.ShadowBufferRenderer ShadowBufferRenderer { get; private set; }
         public Graphics.Post.PostEffectManager PostEffectManager { get; private set; }
 
@@ -191,8 +191,8 @@ namespace Triton.Game
 
             Physics.Resources.ResourceLoaders.Init(Resources, FileSystem);
 
-            DeferredRenderer = new Graphics.Deferred.DeferredRenderer(Resources, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
-            CSMRenderer = new Graphics.Deferred.CSMRenderer(GraphicsBackend, Resources);
+            ShadowRenderer = new Graphics.Deferred.ShadowRenderer(GraphicsBackend, Resources);
+            DeferredRenderer = new Graphics.Deferred.DeferredRenderer(Resources, GraphicsBackend, ShadowRenderer, GraphicsBackend.Width, GraphicsBackend.Height);
             ShadowBufferRenderer = new Graphics.Deferred.ShadowBufferRenderer(GraphicsBackend, Resources, GraphicsBackend.Width, GraphicsBackend.Height);
             PostEffectManager = new Graphics.Post.PostEffectManager(FileSystem, Resources, GraphicsBackend, GraphicsBackend.Width, GraphicsBackend.Height);
 
@@ -291,7 +291,7 @@ namespace Triton.Game
             List<RenderTarget> csm = null; RenderTarget shadows = null;
             if (sunLight != null)
             {
-                csm = CSMRenderer.Render(gbuffer, sunLight, Stage, Camera, out var viewProjections, out var clipDistances);
+                csm = ShadowRenderer.RenderCSM(gbuffer, sunLight, Stage, Camera, out var viewProjections, out var clipDistances);
                 GraphicsBackend.ProfileEndSection(Profiler.ShadowsGeneration);
 
                 GraphicsBackend.ProfileBeginSection(Profiler.ShadowsRender);
@@ -307,6 +307,15 @@ namespace Triton.Game
 
             SpriteRenderer.RenderQuad(postProcessedResult.Textures[0], Vector2.Zero, new Vector2(_window.Width, _window.Height));
             SpriteRenderer.Render(_window.Width, _window.Height);
+
+            if ((DebugFlags & DebugFlags.ShadowMaps) == DebugFlags.ShadowMaps)
+            {
+                var x = _window.Width - 10 - 256;
+                var y = 10;
+
+                SpriteRenderer.RenderQuad(DeferredRenderer.SpotShadowAtlas.Textures[0], new Vector2(x, y), new Vector2(256, 256));
+                SpriteRenderer.Render(_window.Width, _window.Height);
+            }
 
             if ((DebugFlags & DebugFlags.Physics) == DebugFlags.Physics)
             {

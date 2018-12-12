@@ -76,7 +76,7 @@
     <Compile Include="Components\SkinnedMeshComponent.cs" />
     <Compile Include="Deferred\AmbientLightParams.cs" />
     <Compile Include="Deferred\CombineParams.cs" />
-    <Compile Include="Deferred\CSMRenderer.cs" />
+    <Compile Include="Deferred\ShadowRenderer.cs" />
     <Compile Include="Deferred\DeferredRenderer.cs" />
     <Compile Include="Deferred\LightParams.cs" />
     <Compile Include="Deferred\ShadowBufferRenderer.cs" />

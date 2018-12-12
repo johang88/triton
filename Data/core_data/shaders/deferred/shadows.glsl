@@ -75,7 +75,7 @@ float check_shadow_map(sampler2D shadowMap, vec2 uv, float distance) {
 	return (dot(res, vec4(1)) / 4);
 }
 
-float sample_shadow_5(sampler2D shadowMap, vec2 uv, vec3 worldPos, float texelSize, float distance) {
+float sample_shadow_5(sampler2D shadowMap, vec2 uv, float texelSize, float distance) {
 	float result = 0.0;
 	for (int i = 0; i < 5; i++) {
 		result += check_shadow_map(shadowMap, uv - poisson_disc_samples_5[i] * texelSize, distance);
@@ -84,7 +84,7 @@ float sample_shadow_5(sampler2D shadowMap, vec2 uv, vec3 worldPos, float texelSi
 	return result / 5;
 }
 
-float sample_shadow_12(sampler2D shadowMap, vec2 uv, vec3 worldPos, float texelSize, float distance) {
+float sample_shadow_12(sampler2D shadowMap, vec2 uv, float texelSize, float distance) {
 	float result = 0.0;
 	for (int i = 0; i < 12; i++) {
 		result += check_shadow_map(shadowMap, uv - poisson_disc_samples_12[i] * texelSize, distance);
@@ -93,7 +93,7 @@ float sample_shadow_12(sampler2D shadowMap, vec2 uv, vec3 worldPos, float texelS
 	return result / 12;
 }
 
-float sample_shadow_29(sampler2D shadowMap, vec2 uv, vec3 worldPos, float texelSize, float distance) {
+float sample_shadow_29(sampler2D shadowMap, vec2 uv, float texelSize, float distance) {
 	float result = 0.0;
 	for (int i = 0; i < 29; i++) {
 		result += check_shadow_map(shadowMap, uv - poisson_disc_samples_29[i] * texelSize, distance);
@@ -165,11 +165,11 @@ float get_shadows(sampler2D shadowMap, vec3 worldPos, mat4x4 shadowViewProj, flo
 	vec2 uv = shadowUv.xy;
 
 #if SHADOW_QUALITY == 3
-	return sample_shadow_29(shadowMap, uv, worldPos, texelSize, distance);
+	return sample_shadow_29(shadowMap, uv, texelSize, distance);
 #elif SHADOW_QUALITY == 2
-	return sample_shadow_12(shadowMap, uv, worldPos, texelSize, distance);
+	return sample_shadow_12(shadowMap, uv, texelSize, distance);
 #elif SHADOW_QUALITY == 1
-	return sample_shadow_5(shadowMap, uv, worldPos, texelSize, distance);
+	return sample_shadow_5(shadowMap, uv, texelSize, distance);
 #else 
 	//float res = texture(shadowMap, uv).x;
 	//return step(distance, res.x);
