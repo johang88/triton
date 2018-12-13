@@ -525,6 +525,11 @@ namespace Triton.Graphics.Deferred
         /// </summary>
         private int RenderSpotLightShadows(Stage stage, Components.LightComponent light)
         {
+            if (_spotShadowCount >= MaxShadowCastingSpotLights)
+            {
+                return -1;
+            }
+
             // Light direction
             Vector3 unitZ = Vector3.UnitZ;
             Vector3.Transform(ref unitZ, ref light.Owner.Orientation, out var lightDirWS);
@@ -553,6 +558,11 @@ namespace Triton.Graphics.Deferred
 
         private int RenderPointLightShadows(Stage stage, Components.LightComponent light)
         {
+            if (_pointShadowCount >= MaxShadowCastingPointLights)
+            {
+                return -1;
+            }
+
             // Calculate index and viewport
             var index = (_pointShadowCount++) * 6;
 
