@@ -1,5 +1,3 @@
-#define SHADOW_QUALITY_HIGH
-
 #ifdef SHADOW_QUALITY_HIGH
 #define SHADOW_QUALITY 3
 #elif defined(SHADOW_QUALITY_MEDIUM)
@@ -101,7 +99,7 @@ float sample_shadow_12(sampler2D shadowMap, vec2 uv, float distance) {
 
 float sample_shadow_29(sampler2D shadowMap, vec2 uv, float distance) {
 	vec2 texelSize = vec2(1.0) / textureSize(shadowMap, 0);
-	
+
 	float result = 0.0;
 	for (int i = 0; i < 29; i++) {
 		result += check_shadow_map(shadowMap, uv - poisson_disc_samples_29[i] * texelSize, distance);

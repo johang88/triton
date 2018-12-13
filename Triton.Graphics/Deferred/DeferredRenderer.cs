@@ -37,7 +37,7 @@ namespace Triton.Graphics.Deferred
 
         private Resources.ShaderProgram _ambientLightShader;
         private Resources.ShaderProgram[] _lightShaders;
-        private Resources.ShaderProgram _lightComputeShader;
+        private Resources.ShaderProgram[] _lightComputeShader = new ShaderProgram[(int)ShadowQuality.High + 1];
 
         private const int NumLightInstances = 1024;
         private readonly PointLightDataCS[] _pointLightDataCS = new PointLightDataCS[NumLightInstances];
@@ -139,7 +139,12 @@ namespace Triton.Graphics.Deferred
 
             _directionalShaderOffset = 0;
 
-            _lightComputeShader = _resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/light_cs");
+            var shadowQualities = new string[] { "SHADOW_QUALITY_LOWEST", "SHADOW_QUALITY_LOW", "SHADOW_QUALITY_MEDIUM", "SHADOW_QUALITY_HIGH" };
+            for (var i = 0; i < _lightComputeShader.Length; i++)
+            {
+                _lightComputeShader[i] = _resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/light_cs", shadowQualities[i]);
+            }
+            
             _specularIntegarion = _resourceManager.Load<Resources.Texture>("/textures/specular_integration");
 
             _quadMesh = _backend.CreateBatchBuffer();
@@ -170,7 +175,8 @@ namespace Triton.Graphics.Deferred
             {
                 _lightShaders[i].BindUniformLocations(_lightParams[i]);
             }
-            _lightComputeShader.BindUniformLocations(_computeLightParams);
+            // Expect all of them to have the same uniform locations (probably not a good idea)
+            _lightComputeShader[0].BindUniformLocations(_computeLightParams);
         }
 
         private void Initialize()
@@ -481,7 +487,7 @@ namespace Triton.Graphics.Deferred
 
             var lightTileSize = 16;
 
-            _backend.BeginInstance(_lightComputeShader.Handle, new int[] { _gbuffer.Textures[3].Handle, SpotShadowAtlas.Textures[0].Handle, PointShadowAtlas.Textures[0].Handle }, new int[] { _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering }, _lightAccumulatinRenderState);
+            _backend.BeginInstance(_lightComputeShader[(int)Settings.ShadowQuality].Handle, new int[] { _gbuffer.Textures[3].Handle, SpotShadowAtlas.Textures[0].Handle, PointShadowAtlas.Textures[0].Handle }, new int[] { _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering }, _lightAccumulatinRenderState);
 
             var numTilesX = (uint)DispatchSize(lightTileSize, _gbuffer.Textures[0].Width);
             var numTilesY = (uint)DispatchSize(lightTileSize, _gbuffer.Textures[0].Height);
