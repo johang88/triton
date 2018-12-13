@@ -8,7 +8,7 @@ namespace Triton.Logging
 {
 	public enum LogLevel
 	{
-		Default = 0,
+		Info = 0,
 		Warning,
 		Error,
 		Debug

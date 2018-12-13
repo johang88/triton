@@ -13,12 +13,12 @@ namespace Triton.Logging
 
 		public static void WriteLine(string message)
 		{
-			WriteLine(message, LogLevel.Default);
+			WriteLine(message, LogLevel.Info);
 		}
 
 		public static void WriteLine(string message, params object[] p)
 		{
-			WriteLine(string.Format(message, p), LogLevel.Default);
+			WriteLine(string.Format(message, p), LogLevel.Info);
 		}
 
 		public static void WriteLine(string message, LogLevel level)

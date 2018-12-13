@@ -33,7 +33,7 @@ namespace Triton.Logging
 			StringBuilder sb = new StringBuilder();
 			switch (level)
 			{
-				case LogLevel.Default:
+				case LogLevel.Info:
 					sb.Append("<-> ").Append(message);
 					break;
 				case LogLevel.Warning:

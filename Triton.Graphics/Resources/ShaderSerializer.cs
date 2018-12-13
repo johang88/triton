@@ -141,7 +141,7 @@ namespace Triton.Graphics.Resources
             }
 
             if (!string.IsNullOrWhiteSpace(errors))
-                Log.WriteLine(name + ": " + errors, success ? LogLevel.Default : LogLevel.Error);
+                Log.WriteLine(name + ": " + errors, success ? LogLevel.Info : LogLevel.Error);
         }
 
         public Task Deserialize(object resource, byte[] data)
