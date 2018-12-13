@@ -49,5 +49,6 @@ namespace Triton.Graphics.Deferred
         public int View = 0;
         public int Projection = 0;
         public int SpotShadowMatrices = 0;
+        public int PointShadowMatrices = 0;
     }
 }

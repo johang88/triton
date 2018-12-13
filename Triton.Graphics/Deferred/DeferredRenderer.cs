@@ -13,7 +13,11 @@ namespace Triton.Graphics.Deferred
     {
         private const int SpotShadowAtlasResolution = 2048;
         private const int SpotShadowResolution = 256;
-        private const int MaxShadowCastingSpotLights = 8;
+        private const int MaxShadowCastingSpotLights = SpotShadowAtlasResolution / SpotShadowResolution;
+
+        private const int MaxShadowCastingPointLights = 5;
+        private const int PointShadowResolution = 256;
+        private const int PointShadowAtlasResolution = PointShadowResolution * MaxShadowCastingPointLights * 6;
 
         private readonly Triton.Resources.ResourceManager _resourceManager;
         private readonly Backend _backend;
@@ -72,6 +76,10 @@ namespace Triton.Graphics.Deferred
         private int _spotShadowCount = 0;
         private Matrix4[] _spotShadowMatrices = new Matrix4[MaxShadowCastingSpotLights];
 
+        public RenderTarget PointShadowAtlas;
+        private int _pointShadowCount = 0;
+        private Matrix4[] _pointShadowMatrices = new Matrix4[MaxShadowCastingPointLights * 6];
+
         public DeferredRenderer(Triton.Resources.ResourceManager resourceManager, Backend backend, ShadowRenderer shadowRenderer, int width, int height)
         {
             Settings.ShadowQuality = ShadowQuality.High;
@@ -94,13 +102,16 @@ namespace Triton.Graphics.Deferred
 
             _lightAccumulationTarget = _backend.CreateRenderTarget("light_accumulation", new Definition(width, height, false, new List<Definition.Attachment>()
             {
-                new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0),
-                //new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent24, Renderer.PixelType.Float, 0)
+                new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba16f, Renderer.PixelType.Float, 0)
             }));
 
-            SpotShadowAtlas = _backend.CreateRenderTarget("directional_shadows", new Definition(SpotShadowAtlasResolution, SpotShadowResolution, true, new List<Definition.Attachment>()
+            SpotShadowAtlas = _backend.CreateRenderTarget("spot_shadow_atlas", new Definition(SpotShadowAtlasResolution, SpotShadowResolution, true, new List<Definition.Attachment>()
                     {
-						//new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.R16f, Renderer.PixelType.Float, 0),
+						new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent16, Renderer.PixelType.Float, 0)
+                    }));
+
+            PointShadowAtlas = _backend.CreateRenderTarget("point_shadow_atlas", new Definition(PointShadowAtlasResolution, PointShadowResolution, true, new List<Definition.Attachment>()
+                    {
 						new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent16, Renderer.PixelType.Float, 0)
                     }));
 
@@ -379,7 +390,9 @@ namespace Triton.Graphics.Deferred
             // Do light stuff!
             var boundingSphere = new BoundingSphere();
             int pointLightCount = 0, spotLightCount = 0;
+
             _spotShadowCount = 0;
+            _pointShadowCount = 0;
 
             foreach (var light in lights)
             {
@@ -405,13 +418,18 @@ namespace Triton.Graphics.Deferred
                 {
                     _pointLightDataCS[pointLightCount].PositionRange = new Vector4(lightPositionWS, light.Range);
                     _pointLightDataCS[pointLightCount].Color = new Vector4(lightColor, light.Intensity);
-
-                    pointLightCount++;
-
+                    
                     if (light.CastShadows)
                     {
                         // TODO: Render Point Light Shadows!
+                        _lightToShadowIndex[pointLightCount] = RenderPointLightShadows(stage, light);
                     }
+                    else
+                    {
+                        _lightToShadowIndex[pointLightCount] = -1;
+                    }
+
+                    pointLightCount++;
                 }
                 else
                 {
@@ -425,9 +443,7 @@ namespace Triton.Graphics.Deferred
                     
                     if (light.CastShadows == true)
                     {
-                        var index = RenderSpotLightShadows(stage, light, out var viewProjection);
-                        _lightToShadowIndex[NumLightInstances + spotLightCount] = index;
-                        _spotShadowMatrices[index] = viewProjection;
+                        _lightToShadowIndex[NumLightInstances + spotLightCount] = RenderSpotLightShadows(stage, light);
                     }
                     else
                     {
@@ -465,7 +481,7 @@ namespace Triton.Graphics.Deferred
 
             var lightTileSize = 16;
 
-            _backend.BeginInstance(_lightComputeShader.Handle, new int[] { _gbuffer.Textures[3].Handle, SpotShadowAtlas.Textures[0].Handle }, new int[] { _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering }, _lightAccumulatinRenderState);
+            _backend.BeginInstance(_lightComputeShader.Handle, new int[] { _gbuffer.Textures[3].Handle, SpotShadowAtlas.Textures[0].Handle, PointShadowAtlas.Textures[0].Handle }, new int[] { _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering }, _lightAccumulatinRenderState);
 
             var numTilesX = (uint)DispatchSize(lightTileSize, _gbuffer.Textures[0].Width);
             var numTilesY = (uint)DispatchSize(lightTileSize, _gbuffer.Textures[0].Height);
@@ -482,6 +498,7 @@ namespace Triton.Graphics.Deferred
             _backend.BindShaderVariable(_computeLightParams.View, ref view);
             _backend.BindShaderVariable(_computeLightParams.Projection, ref projection);
             _backend.BindShaderVariable(_computeLightParams.SpotShadowMatrices, ref _spotShadowMatrices);
+            _backend.BindShaderVariable(_computeLightParams.PointShadowMatrices, ref _pointShadowMatrices);
 
             var inverseViewProjectionMatrix = Matrix4.Invert(view * projection);
             var inverseProjectionMatrix = Matrix4.Invert(projection);
@@ -500,7 +517,7 @@ namespace Triton.Graphics.Deferred
         /// <summary>
         /// Render spot light shadows, returns the index of the shadow map on the atlas
         /// </summary>
-        private int RenderSpotLightShadows(Stage stage, Components.LightComponent light, out Matrix4 viewProjection)
+        private int RenderSpotLightShadows(Stage stage, Components.LightComponent light)
         {
             // Light direction
             Vector3 unitZ = Vector3.UnitZ;
@@ -517,12 +534,60 @@ namespace Triton.Graphics.Deferred
             var view = Matrix4.LookAt(light.Owner.Position, light.Owner.Position + lightDirWS, Vector3.UnitY);
             var projection = Matrix4.CreatePerspectiveFieldOfView(light.OuterAngle, 1.0f, 0.1f, light.Range * 1.2f);
 
-            viewProjection = view * projection;
+            var viewProjection = view * projection;
+            _spotShadowMatrices[index] = viewProjection;
 
             // Render the shadow map!
             _backend.BeginPass(SpotShadowAtlas, new Vector4(0, 0, 0, 1), x, y, SpotShadowResolution, SpotShadowResolution, ClearFlags.All);
             _shadowRenderer.RenderShadowMap(light, stage, lightDirWS, view, projection);
             _backend.EndPass();
+
+            return index;
+        }
+
+        private int RenderPointLightShadows(Stage stage, Components.LightComponent light)
+        {
+            // Calculate index and viewport
+            var index = (_pointShadowCount++) * 6;
+
+            var dir = new Vector3[]
+            {
+                new Vector3(1, 0, 0), 
+                new Vector3(-1, 0, 0), 
+                new Vector3(0, 1, 0),
+                new Vector3(0, -1, 0),
+                new Vector3(0, 0, -1),
+                new Vector3(0, 0, 1)
+            };
+
+            var up = new Vector3[]
+            {
+                new Vector3(0, 1, 0),
+                new Vector3(0, 1, 0),
+                new Vector3(0, 0, 1),
+                new Vector3(0, 0, -1),
+                new Vector3(0, 1, 0),
+                new Vector3(0, 1, 0)
+            };
+
+            var projection = Matrix4.CreatePerspectiveFieldOfView(Math.Util.DegreesToRadians(92.0f), 1.0f, 0.1f, light.Range);
+
+            for (var i = 0; i < 6; i++)
+            {
+                var x = (index + i) * PointShadowResolution;
+                var y = 0;
+
+                // Camera matrix
+                var view = Matrix4.LookAt(light.Owner.Position, light.Owner.Position + dir[i], up[i]);
+
+                var viewProjection = view * projection;
+                _pointShadowMatrices[index + i] = viewProjection;
+
+                // Render the shadow map!
+                _backend.BeginPass(PointShadowAtlas, new Vector4(0, 0, 0, 1), x, y, PointShadowResolution, PointShadowResolution, ClearFlags.All);
+                _shadowRenderer.RenderShadowMap(light, stage, dir[i], view, projection);
+                _backend.EndPass();
+            }
 
             return index;
         }

@@ -49,7 +49,7 @@ void main()
 	float nDotL = dot(N, L);
 	float cosTheta = clamp(nDotL, 0.0, 1.0);
 	float bias = lightDirectionAndBias.w * tan(acos(cosTheta));
-	bias = clamp(bias, lightDirectionAndBias.w * 0.1, lightDirectionAndBias.w * 2.0);
+	bias = clamp(bias, lightDirectionAndBias.w * 0.1, lightDirectionAndBias.w);
 
 	vec4 position = (projection * view) * vec4(positionWS, 1);
 	position.z += bias;

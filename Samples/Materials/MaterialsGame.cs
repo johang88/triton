@@ -99,7 +99,7 @@ namespace Triton.Samples
                 OuterAngle = 0.98f,
                 CastShadows = true
             });
-            //GameWorld.Add(Light);
+            GameWorld.Add(Light);
 
             Stage.ClearColor = new Vector4(1, 1, 1, 1) * 2;
 

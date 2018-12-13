@@ -1,3 +1,5 @@
+#define SHADOW_QUALITY_HIGH
+
 #ifdef SHADOW_QUALITY_HIGH
 #define SHADOW_QUALITY 3
 #elif defined(SHADOW_QUALITY_MEDIUM)
@@ -5,7 +7,7 @@
 #elif defined(SHADOW_QUALITY_LOW)
 #define SHADOW_QUALITY 1
 #else
-#define SHADOW_QUALITY 3
+#define SHADOW_QUALITY 0
 #endif
 
 vec2 poisson_disc_samples_5[5] = vec2[](
@@ -75,7 +77,9 @@ float check_shadow_map(sampler2D shadowMap, vec2 uv, float distance) {
 	return (dot(res, vec4(1)) / 4);
 }
 
-float sample_shadow_5(sampler2D shadowMap, vec2 uv, float texelSize, float distance) {
+float sample_shadow_5(sampler2D shadowMap, vec2 uv, float distance) {
+	vec2 texelSize = vec2(1.0) / textureSize(shadowMap, 0);
+
 	float result = 0.0;
 	for (int i = 0; i < 5; i++) {
 		result += check_shadow_map(shadowMap, uv - poisson_disc_samples_5[i] * texelSize, distance);
@@ -84,7 +88,9 @@ float sample_shadow_5(sampler2D shadowMap, vec2 uv, float texelSize, float dista
 	return result / 5;
 }
 
-float sample_shadow_12(sampler2D shadowMap, vec2 uv, float texelSize, float distance) {
+float sample_shadow_12(sampler2D shadowMap, vec2 uv, float distance) {
+	vec2 texelSize = vec2(1.0) / textureSize(shadowMap, 0);
+
 	float result = 0.0;
 	for (int i = 0; i < 12; i++) {
 		result += check_shadow_map(shadowMap, uv - poisson_disc_samples_12[i] * texelSize, distance);
@@ -93,67 +99,15 @@ float sample_shadow_12(sampler2D shadowMap, vec2 uv, float texelSize, float dist
 	return result / 12;
 }
 
-float sample_shadow_29(sampler2D shadowMap, vec2 uv, float texelSize, float distance) {
+float sample_shadow_29(sampler2D shadowMap, vec2 uv, float distance) {
+	vec2 texelSize = vec2(1.0) / textureSize(shadowMap, 0);
+	
 	float result = 0.0;
 	for (int i = 0; i < 29; i++) {
 		result += check_shadow_map(shadowMap, uv - poisson_disc_samples_29[i] * texelSize, distance);
 	}
 	
 	return result / 29;
-}
-
-float check_shadow_cube(samplerCubeShadow shadowMap, vec3 worldPos, vec2 clipPlane, float shadowBias, float texelSize, vec3 lightPosition) {
-	vec3 lookup = worldPos - lightPosition;
-	float distance = length(lookup) / (clipPlane.y - clipPlane.x);
-	
-	lookup = normalize(lookup.xyz);
-	
-	vec3 sideVector = normalize(cross(lookup, vec3(0, 0, 1)));
-	vec3 upVector = cross(sideVector, lookup);
-
-	sideVector *= texelSize;
-	upVector *= texelSize;
-
-#if SHADOW_QUALITY == 3
-	float result = 0;
-	for (int i = 0; i < 29; i++) {
-		result += texture(shadowMap, 
-			vec4(
-				lookup.xyz + sideVector * poisson_disc_samples_29[i].x + upVector * poisson_disc_samples_29[i].y,
-				distance - shadowBias * length(poisson_disc_samples_29[i])
-		));
-	}
-	
-	return result / 29;
-#elif SHADOW_QUALITY == 2
-	float result = 0;
-	for (int i = 0; i < 12; i++) {
-		result += texture(shadowMap, 
-			vec4(
-				lookup.xyz + sideVector * poisson_disc_samples_12[i].x + upVector * poisson_disc_samples_12[i].y,
-				distance - shadowBias * length(poisson_disc_samples_12[i])
-		));
-	}
-	
-	return result / 12;
-#elif SHADOW_QUALITY == 1
-	float result = 0;
-	for (int i = 0; i < 5; i++) {
-		result += texture(shadowMap, 
-			vec4(
-				lookup.xyz + sideVector * poisson_disc_samples_5[i].x + upVector * poisson_disc_samples_5[i].y,
-				distance - shadowBias * length(poisson_disc_samples_5[i])
-		));
-	}
-	
-	return result / 5;
-#elif SHADOW_QUALITY == 0
-	return  texture(shadowMap, 
-			vec4(
-				lookup.xyz + sideVector,
-				distance - shadowBias)
-		);
-#endif
 }
 
 float get_shadows(sampler2D shadowMap, vec3 worldPos, mat4x4 shadowViewProj, float texelSize) {
@@ -165,26 +119,12 @@ float get_shadows(sampler2D shadowMap, vec3 worldPos, mat4x4 shadowViewProj, flo
 	vec2 uv = shadowUv.xy;
 
 #if SHADOW_QUALITY == 3
-	return sample_shadow_29(shadowMap, uv, texelSize, distance);
+	return sample_shadow_29(shadowMap, uv, distance);
 #elif SHADOW_QUALITY == 2
-	return sample_shadow_12(shadowMap, uv, texelSize, distance);
+	return sample_shadow_12(shadowMap, uv, distance);
 #elif SHADOW_QUALITY == 1
-	return sample_shadow_5(shadowMap, uv, texelSize, distance);
+	return sample_shadow_5(shadowMap, uv, distance);
 #else 
-	//float res = texture(shadowMap, uv).x;
-	//return step(distance, res.x);
-
 	return check_shadow_map(shadowMap, uv, distance);
 #endif
-}
-
-float get_shadows_cube(samplerCubeShadow shadowMap, float nDotL, vec3 worldPos, vec2 clipPlane, float shadowBias, float texelSize, vec3 lightPosition) {
-	if (nDotL <= 0)
-		return 0;
-		
-	float cosTheta = clamp(nDotL, 0.0, 1.0);
-	float bias = shadowBias * tan(acos(cosTheta));
-	bias = clamp(bias, 0.0, shadowBias * 2.0);
-		
-	return check_shadow_cube(shadowMap, worldPos, clipPlane, bias, texelSize, lightPosition);
 }

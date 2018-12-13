@@ -10,9 +10,9 @@
 			{
 				"$type":"Triton.Graphics.Components.LightComponent, Triton.Graphics",
 				"Color": "0.9 0.5 0.3",
-				"Intensity": 5.0,
+				"Intensity": 50.0,
 				"Range": 16,
-				"CastShadows": false
+				"CastShadows": true
 			}
 		]
 	  },
@@ -23,9 +23,10 @@
 			{
 				"$type":"Triton.Graphics.Components.LightComponent, Triton.Graphics",
 				"Color": "0.5 0.9 0.3",
-				"Intensity": 5.0,
+				"Intensity": 50.0,
 				"Range": 32,
-				"CastShadows": false
+				"CastShadows": true,
+				"Enabled": true
 			}
 		]
 	  },
@@ -36,9 +37,10 @@
 			{
 				"$type":"Triton.Graphics.Components.LightComponent, Triton.Graphics",
 				"Color": "0.3 0.5 0.9",
-				"Intensity": 5.0,
+				"Intensity": 40.0,
 				"Range": 32,
-				"CastShadows": false
+				"CastShadows": true,
+				"Enabled": true
 			}
 		]
 	  },
@@ -54,7 +56,8 @@
 				"CastShadows": true,
 				"Type": "SpotLight",
 				"InnerAngle": 0.8,
-				"OuterAngle": 0.9
+				"OuterAngle": 0.9,
+				"Enabled": true
 			}
 		]
 	  },
@@ -71,7 +74,8 @@
 				"CastShadows": true,
 				"Type": "SpotLight",
 				"InnerAngle": 0.8,
-				"OuterAngle": 0.9
+				"OuterAngle": 0.9,
+				"Enabled": true
 			}
 		]
 	  }

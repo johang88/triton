@@ -313,6 +313,7 @@ namespace Triton.Game
                 var x = _window.Width - 10 - 256;
                 var y = 10;
 
+                SpriteRenderer.RenderQuad(DeferredRenderer.PointShadowAtlas.Textures[0], new Vector2(x - 256 - 10, y), new Vector2(256, 256));
                 SpriteRenderer.RenderQuad(DeferredRenderer.SpotShadowAtlas.Textures[0], new Vector2(x, y), new Vector2(256, 256));
                 SpriteRenderer.Render(_window.Width, _window.Height);
             }

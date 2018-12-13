@@ -239,7 +239,7 @@ namespace Triton.Graphics.Deferred
                 for (var index = i; index < count; index++)
                 {
                     if (instanceCount == NumInstances || index != i &&
-                        (operations[index].Skeleton != null || operations[index].Material.Id != operations[i].Material.Id ||
+                        (operations[i].Skeleton != null || operations[index].Material.Id != operations[i].Material.Id ||
                          operations[index].MeshHandle != operations[i].MeshHandle))
                     {
                         break;
