@@ -170,6 +170,7 @@ namespace Triton.Resources
 
             if (!_fileSystem.FileExists(path) && !string.IsNullOrWhiteSpace(serializer.DefaultFilename))
             {
+                Log.WriteLine($"{path} can not be found", LogLevel.Error);
                 path = serializer.DefaultFilename;
             }
 

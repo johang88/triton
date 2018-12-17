@@ -26,16 +26,19 @@ namespace Triton.Samples
             : base("Materials")
         {
             CursorVisible = false;
+
+            RequestedWidth = 1920;
+            RequestedHeight = 1080;
         }
 
         protected override void LoadResources()
         {
             base.LoadResources();
-
+            
             Stage.ClearColor = new Triton.Vector4(255 / 255.0f, 255 / 255.0f, 255 / 255.0f, 0) * 0;
             Stage.AmbientColor = new Vector3(0.5f, 0.5f, 0.5f) * 0;
 
-            PostEffectManager.HDRSettings.AutoKey = false;
+            PostEffectManager.HDRSettings.AutoKey = true;
             PostEffectManager.HDRSettings.TonemapOperator = Graphics.Post.TonemapOperator.ASEC;
 
             Stage.AmbientLight = new Graphics.AmbientLight
@@ -99,7 +102,7 @@ namespace Triton.Samples
                 OuterAngle = 0.98f,
                 CastShadows = true
             });
-            //GameWorld.Add(Light);
+            GameWorld.Add(Light);
 
             Stage.ClearColor = new Vector4(1, 1, 1, 1) * 2;
 
@@ -108,7 +111,7 @@ namespace Triton.Samples
 
             DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.High;
             DebugFlags |= Game.DebugFlags.RenderStats;
-            DebugFlags |= Game.DebugFlags.ShadowMaps;
+            //DebugFlags |= Game.DebugFlags.ShadowMaps;
         }
 
         protected override void Update(float frameTime)
