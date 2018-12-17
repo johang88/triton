@@ -58,32 +58,32 @@ namespace Triton.Samples
             GameWorld.Add(Player);
 
             var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
-            var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
-
             roomPrefab.Instantiate(GameWorld);
-            for (int i = 0; i < 5; i++)
-            {
-                var ball = ballPrefab.Instantiate(GameWorld);
-                _balls.Add(ball);
-                ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
-            }
 
-            for (int i = 0; i < 5; i++)
-            {
-                var ball = ballPrefab.Instantiate(GameWorld);
-                _balls.Add(ball);
-                ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
-            }
+            //var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
+            //for (int i = 0; i < 5; i++)
+            //{
+            //    var ball = ballPrefab.Instantiate(GameWorld);
+            //    _balls.Add(ball);
+            //    ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
+            //}
 
-            var knight = new GameObject();
-            knight.Position = new Vector3(1, 0, 4);
-            knight.Scale = new Vector3(1.6f, 1.6f, 1.6f);
-            knight.Components.Add(new SkinnedMeshComponent
-            {
-                Mesh = Resources.Load<Mesh>("/models/knight")
-            });
-            knight.Components.Add(new KnightAnimator());
-            GameWorld.Add(knight);
+            //for (int i = 0; i < 5; i++)
+            //{
+            //    var ball = ballPrefab.Instantiate(GameWorld);
+            //    _balls.Add(ball);
+            //    ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
+            //}
+
+            //var knight = new GameObject();
+            //knight.Position = new Vector3(1, 0, 4);
+            //knight.Scale = new Vector3(1.6f, 1.6f, 1.6f);
+            //knight.Components.Add(new SkinnedMeshComponent
+            //{
+            //    Mesh = Resources.Load<Mesh>("/models/knight")
+            //});
+            //knight.Components.Add(new KnightAnimator());
+            //GameWorld.Add(knight);
 
             Light = new GameObject
             {

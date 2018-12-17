@@ -10,7 +10,7 @@ namespace Triton.Logging
     {
         private static ConsoleColor[] LogLevelToColor = new ConsoleColor[]
         {
-            ConsoleColor.DarkGray,
+            ConsoleColor.White,
             ConsoleColor.Yellow,
             ConsoleColor.Red,
             ConsoleColor.Blue

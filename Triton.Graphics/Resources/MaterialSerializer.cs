@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,13 +9,8 @@ namespace Triton.Graphics.Resources
 {
 	class MaterialSerializer : Triton.Resources.IResourceSerializer<Material>
 	{
-        private static readonly char[] Magic = new char[] { 'M', 'A', 'T', 'E' };
-		private const int Version_1_0 = 0x01;
-
 		private readonly Triton.IO.FileSystem _fileSystem;
 		private readonly Triton.Resources.ResourceManager _resourceManager;
-
-		private const string DefaultShader = "/shaders/deferred/gbuffer";
 
         public bool SupportsStreaming => false;
 
@@ -24,8 +20,8 @@ namespace Triton.Graphics.Resources
 			_resourceManager = resourceManager ?? throw new ArgumentNullException("resourceManager");
 		}
 
-		public string Extension { get { return ".mat"; } }
-		public string DefaultFilename { get { return "/materials/default.mat"; } }
+		public string Extension { get { return ".mat.v"; } }
+		public string DefaultFilename { get { return "/materials/default.mat.v"; } }
 
         public object Create(Type type)
             => new Material(_resourceManager);
@@ -39,37 +35,37 @@ namespace Triton.Graphics.Resources
             material.IsSkinned = parameters.Contains("SKINNED");
 
             using (var stream = new System.IO.MemoryStream(data))
-			using (var reader = new System.IO.BinaryReader(stream))
+			using (var reader = new System.IO.StreamReader(stream))
 			{
-				var magic = reader.ReadChars(4);
-				for (var i = 0; i < Magic.Length; i++)
-				{
-					if (magic[i] != Magic[i])
-						throw new ArgumentException("invalid material");
-				}
+                var materialJsonData = await reader.ReadToEndAsync();
+                var materialDesc = JsonConvert.DeserializeObject<MaterialDesc>(materialJsonData);
 
-				var version = reader.ReadInt32();
+                var shaderDefines = new List<string>();
+                if (material.IsSkinned)
+                {
+                    shaderDefines.Add("SKINNED");
+                }
 
-				var validVersions = new int[] { Version_1_0 };
+                foreach (var texture in materialDesc.Textures)
+                {
+                    var samplerName = $"sampler{texture.Key}";
+                    var define = $"HAS_SAMPLER_{texture.Key.ToUpperInvariant()}";
 
-				if (!validVersions.Contains(version))
-					throw new ArgumentException("invalid material, unknown version");
+                    shaderDefines.Add(define);
+                    material.Textures.Add(samplerName, await _resourceManager.LoadAsync<Texture>(texture.Value));
+                }
 
-				var shaderPath = reader.ReadString();
-				material.Shader = await _resourceManager.LoadAsync<ShaderProgram>(shaderPath, material.IsSkinned ? "SKINNED" : "");
-
-				var samplerCount = reader.ReadInt32();
-				for (var i = 0; i < samplerCount; i++)
-				{
-					var samplerName = reader.ReadString();
-					var texturePath = reader.ReadString();
-
-					material.Textures.Add(samplerName, await _resourceManager.LoadAsync<Texture>(texturePath));
-				}
-			}
+                material.Shader = await _resourceManager.LoadAsync<ShaderProgram>(materialDesc.Shader, string.Join(";", shaderDefines));
+            }
 		}
 
         public byte[] Serialize(object resource)
             => throw new NotImplementedException();
+
+        class MaterialDesc
+        {
+            public string Shader { get; set; }
+            public Dictionary<string, string> Textures { get; set; }
+        }
     }
 }

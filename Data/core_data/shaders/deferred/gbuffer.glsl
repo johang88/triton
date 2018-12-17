@@ -107,34 +107,37 @@ layout(location = 2) out vec4 oSpecular;
 
 uniform vec3 cameraPosition;
 
-//__MATERIAL__PLACEHOLDER__
-/*vec3 get_normals() {
-}*/
+uniform sampler2D samplerDiffuseMap;
+uniform sampler2D samplerNormalMap;
+uniform sampler2D samplerRoughnessMetallicMap;
 
-/*vec4 get_diffuse() {
-}*/
-
-/*float get_metallic() {
-}*/
-
-/*float get_specular() {
-}*/
-
-/*float get_roughness() {
-}*/
+void get_material(out vec3 diffuse, out vec3 normals, out float metallic, out float specular, out float roughness) {
+#ifdef HAS_SAMPLER_DIFFUSEMAP
+	diffuse = pow(texture(samplerDiffuseMap, texCoord).xyz, vec3(2.2));
+#endif
+	
+#ifdef HAS_SAMPLER_NORMALMAP
+	mat3x3 TBN = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
+	normals = normalize(TBN * normalize(texture(samplerNormalMap, texCoord).xyz * 2.0 - 1.0));
+#endif
+	
+#ifdef HAS_SAMPLER_ROUGHNESSMETALMAP
+	vec4 materialParameters = texture(samplerRoughnessMetallicMap, texCoord);
+	
+	roughness = materialParameters.x;
+	metallic = materialParameters.y;
+	specular = 0.5;
+#endif
+}
 
 void main() {
-	vec3 normals = get_normals();
-	
-	//normals = normalize(mat3x3(itWorld) * normals);
-	
-	vec3 diffuse = get_diffuse().xyz;
-	
-	float metallic = get_metallic();
-	float specular = get_specular();
+	vec3 diffuse;
+	vec3 normals;
+	float metallic, specular, roughness;
 
-	float roughness = get_roughness();
-	
+	get_material(diffuse, normals, metallic, specular, roughness);
+	roughness = max(0.01, roughness);
+
 	oColor = vec4(encodeDiffuse(diffuse), 0);
 	oNormal = vec4(encodeNormals(normals), 1);
 	oSpecular = vec4(metallic, roughness, specular, 0);
