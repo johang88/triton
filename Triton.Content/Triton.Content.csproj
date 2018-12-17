@@ -72,7 +72,6 @@
   <ItemGroup>
     <Compile Include="CompilationContext.cs" />
     <Compile Include="Compilers\CollisionMeshCompiler.cs" />
-    <Compile Include="Compilers\MaterialCompiler.cs" />
     <Compile Include="Compilers\MeshCompiler.cs" />
     <Compile Include="Compilers\SkeletonCompiler.cs" />
     <Compile Include="Compilers\TextureCompiler.cs" />
@@ -80,23 +79,6 @@
     <Compile Include="Database\ContentEntry.cs" />
     <Compile Include="Database\DB.cs" />
     <Compile Include="ICompiler.cs" />
-    <Compile Include="Materials\CustomNodes\ColorConstNode.cs" />
-    <Compile Include="Materials\CustomNodes\Context.cs" />
-    <Compile Include="Materials\CustomNodes\FloatConstNode.cs" />
-    <Compile Include="Materials\CustomNodes\FloatLerpNode.cs" />
-    <Compile Include="Materials\CustomNodes\NormalMapNode.cs" />
-    <Compile Include="Materials\CustomNodes\RootNode.cs" />
-    <Compile Include="Materials\CustomNodes\TextureNode.cs" />
-    <Compile Include="Materials\CustomNodes\Vector3ConstNode.cs" />
-    <Compile Include="Materials\CustomNodes\Vector4AddNode.cs" />
-    <Compile Include="Materials\CustomNodes\Vector4ConstNode.cs" />
-    <Compile Include="Materials\CustomNodes\Vector4MulScalarNode.cs" />
-    <Compile Include="Materials\DataTypes\BuildShaderData.cs" />
-    <Compile Include="Materials\DataTypes\ShaderData.cs" />
-    <Compile Include="Materials\Material.cs" />
-    <Compile Include="Materials\NodeGraphDataTypes\NodeGraphDataTypeFloat.cs" />
-    <Compile Include="Materials\NodeGraphDataTypes\NodeGraphDataTypeVector3.cs" />
-    <Compile Include="Materials\NodeGraphDataTypes\NodeGraphDataTypeVector4.cs" />
     <Compile Include="Meshes\Converters\AssimpConverter.cs" />
     <Compile Include="Meshes\Converters\OgreXmlConverter.cs" />
     <Compile Include="Meshes\IMeshConverter.cs" />
@@ -114,10 +96,6 @@
     <Compile Include="SQLite\SQLiteAsync.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ThirdParty\NodeGraphControl\NodeGraphControl.csproj">
-      <Project>{ad33efc3-c5cd-4f6f-a958-22e23f1f0b8b}</Project>
-      <Name>NodeGraphControl</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">
       <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>
       <Name>Triton.Math</Name>

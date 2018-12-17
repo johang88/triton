@@ -99,10 +99,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ThirdParty\NodeGraphControl\NodeGraphControl.csproj">
-      <Project>{ad33efc3-c5cd-4f6f-a958-22e23f1f0b8b}</Project>
-      <Name>NodeGraphControl</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ThirdParty\sharpfilesystem\SharpFileSystem\SharpFileSystem.csproj">
       <Project>{3c4d07ba-23b5-4a63-92cf-f3bf892b7329}</Project>
       <Name>SharpFileSystem</Name>
