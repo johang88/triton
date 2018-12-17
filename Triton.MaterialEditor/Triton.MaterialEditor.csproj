@@ -103,6 +103,10 @@
       <Project>{ad33efc3-c5cd-4f6f-a958-22e23f1f0b8b}</Project>
       <Name>NodeGraphControl</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThirdParty\sharpfilesystem\SharpFileSystem\SharpFileSystem.csproj">
+      <Project>{3c4d07ba-23b5-4a63-92cf-f3bf892b7329}</Project>
+      <Name>SharpFileSystem</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Triton.Content\Triton.Content.csproj">
       <Project>{05e298cb-db9f-4389-bc94-a27793673caf}</Project>
       <Name>Triton.Content</Name>

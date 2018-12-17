@@ -1,7 +1,9 @@
 ﻿using NodeGraphControl;
+using SharpFileSystem;
+using SharpFileSystem.FileSystems;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.ComponentMo§;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -16,14 +18,17 @@ namespace Triton.MaterialEditor
 {
 	public partial class MainForm : Form
 	{
-		private RootNode RootNode;
-		private Point MouseLocation = Point.Empty;
+		private RootNode _rootNode;
+		private Point _mouseLocation = Point.Empty;
+        private Triton.IO.FileSystem _fileSystem;
 
 		public MainForm()
 		{
 			InitializeComponent();
 
-			Tools.CustomTypeDescriptorProvider.Register(typeof(Vector3ConstNode));
+            _fileSystem = new IO.FileSystem(MountFileSystem());
+
+            Tools.CustomTypeDescriptorProvider.Register(typeof(Vector3ConstNode));
 			Tools.CustomTypeDescriptorProvider.Register(typeof(Vector4ConstNode));
 			Tools.CustomTypeDescriptorProvider.Register(typeof(ColorConstNode));
 
@@ -31,18 +36,37 @@ namespace Triton.MaterialEditor
 			nodeGraphPanel1.View.RegisterDataType(new NodeGraphDataTypeVector3());
 			nodeGraphPanel1.View.RegisterDataType(new NodeGraphDataTypeVector4());
 
-			RootNode = new RootNode(100, 0, nodeGraphPanel1.View);
-			nodeGraphPanel1.AddNode(RootNode);
-		}
+            _rootNode = new RootNode(100, 0, nodeGraphPanel1.View);
+			nodeGraphPanel1.AddNode(_rootNode);
+        }
 
-		private void nodeGraphPanel1_MouseMove(object sender, MouseEventArgs e)
+        private IFileSystem MountFileSystem()
+        {
+            // TODO: Load from config?
+            return new FileSystemMounter(
+                Mount("/tmp/", new PhysicalFileSystem("./tmp")),
+                Mount("/", new MergedFileSystem(
+                    new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/core_data/")),
+                    new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/samples_data/")),
+                    new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/no_dist/")),
+                    new ReadOnlyFileSystem(new PhysicalFileSystem("../Data/generated/"))
+                    ))
+                );
+        }
+
+        private KeyValuePair<FileSystemPath, IFileSystem> Mount(string mountPoint, IFileSystem fileSystem)
+        {
+            return new KeyValuePair<FileSystemPath, IFileSystem>(FileSystemPath.Parse(mountPoint), fileSystem);
+        }
+
+        private void nodeGraphPanel1_MouseMove(object sender, MouseEventArgs e)
 		{
-			MouseLocation = e.Location;
+			_mouseLocation = e.Location;
 		}
 
 		private void processToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			var result = RootNode.Process(0) as BuildShaderData;
+			var result = _rootNode.Process(0) as BuildShaderData;
 		}
 
 		private void nodeGraphPanel1_onSelectionChanged(object sender, NodeGraphControl.NodeGraphPanelSelectionEventArgs args)
@@ -60,43 +84,43 @@ namespace Triton.MaterialEditor
 
 		private void floatToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
+			Point v_ViewPos = nodeGraphPanel1.ControlToView(_mouseLocation);
 			nodeGraphPanel1.AddNode(new FloatConstNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
 		private void vector3ToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
+			Point v_ViewPos = nodeGraphPanel1.ControlToView(_mouseLocation);
 			nodeGraphPanel1.AddNode(new Vector3ConstNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
 		private void vector4ToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
+            Point v_ViewPos = nodeGraphPanel1.ControlToView(_mouseLocation);
 			nodeGraphPanel1.AddNode(new Vector4ConstNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
 		private void textureToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
+			Point v_ViewPos = nodeGraphPanel1.ControlToView(_mouseLocation);
 			nodeGraphPanel1.AddNode(new TextureConstNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
 		private void normalMapToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
+			Point v_ViewPos = nodeGraphPanel1.ControlToView(_mouseLocation);
 			nodeGraphPanel1.AddNode(new NormalMapNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
 		private void addToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
+			Point v_ViewPos = nodeGraphPanel1.ControlToView(_mouseLocation);
 			nodeGraphPanel1.AddNode(new Vector4AddNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
 		private void multiplyScalarToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
+			Point v_ViewPos = nodeGraphPanel1.ControlToView(_mouseLocation);
 			nodeGraphPanel1.AddNode(new Vector4MulScalarNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
@@ -111,7 +135,7 @@ namespace Triton.MaterialEditor
 			{
 				if (i_Node is RootNode)
 				{
-					RootNode = i_Node as RootNode;
+					_rootNode = i_Node as RootNode;
 				}
 			}
 		}
@@ -134,13 +158,13 @@ namespace Triton.MaterialEditor
 
 		private void colorToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
+			Point v_ViewPos = nodeGraphPanel1.ControlToView(_mouseLocation);
 			nodeGraphPanel1.AddNode(new ColorConstNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 
 		private void lerpToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			Point v_ViewPos = nodeGraphPanel1.ControlToView(MouseLocation);
+			Point v_ViewPos = nodeGraphPanel1.ControlToView(_mouseLocation);
 			nodeGraphPanel1.AddNode(new FloatLerpNode(v_ViewPos.X, v_ViewPos.Y, nodeGraphPanel1.View, true));
 		}
 	}
