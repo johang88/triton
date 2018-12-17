@@ -1,8 +1,7 @@
 {
     "Shader": "/shaders/deferred/gbuffer",
     "Textures": {
-        "DiffuseMap": "/textures/floor_d",
-        "NormalMap": "/textures/floor_n",
-        "RoughnessMetalMap": "/textures/floor_rm"
+        "DiffuseMap": "/textures/Ground_MuddyMoss_1k_alb",
+        "NormalMap": "/textures/Ground_MuddyMoss_1k_n"
     }
 }

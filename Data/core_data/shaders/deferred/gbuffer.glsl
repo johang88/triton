@@ -109,7 +109,7 @@ uniform vec3 cameraPosition;
 
 uniform sampler2D samplerDiffuseMap;
 uniform sampler2D samplerNormalMap;
-uniform sampler2D samplerRoughnessMetallicMap;
+uniform sampler2D samplerRoughnessMetalMap;
 
 uniform vec4 uDiffuseColor;
 uniform float uRoughness;
@@ -124,14 +124,21 @@ void get_material(out vec3 diffuse, out vec3 normals, out float metallic, out fl
 #endif
 	
 #ifdef HAS_SAMPLER_NORMALMAP
+	vec4 NR = texture(samplerNormalMap, texCoord);
+
 	mat3x3 TBN = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
-	normals = normalize(TBN * normalize(texture(samplerNormalMap, texCoord).xyz * 2.0 - 1.0));
+	normals = normalize(TBN * normalize(NR.xyz * 2.0 - 1.0));
+
+	#if !defined(HAS_SAMPLER_ROUGHNESSMETALMAP)
+	roughness = NR.w;
+	metallic = 0.0;
+	#endif
 #else
 	normals = normalize(normal);
 #endif
 	
 #ifdef HAS_SAMPLER_ROUGHNESSMETALMAP
-	vec4 materialParameters = texture(samplerRoughnessMetallicMap, texCoord);
+	vec4 materialParameters = texture(samplerRoughnessMetalMap, texCoord);
 	
 	roughness = materialParameters.x;
 	metallic = materialParameters.y;

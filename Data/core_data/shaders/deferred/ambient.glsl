@@ -29,9 +29,9 @@ uniform sampler2D samplerGBuffer0;
 uniform sampler2D samplerGBuffer1;
 uniform sampler2D samplerGBuffer2;
 uniform sampler2D samplerDepth;
-uniform sampler2D samplerSpecularIntegration;
 uniform samplerCube samplerIrradiance;
 uniform samplerCube samplerSpecular;
+uniform sampler2D samplerSpecularIntegration;
 uniform vec3 ambientColor;
 
 uniform int mode;
@@ -69,31 +69,33 @@ void main()
 			vec3 V = normalize(cameraPosition - position);
 			vec3 R = normalize(reflect(-V, N));
 
+			float vDotN = saturate(dot(V, N));
+
 			const float MAX_REFLECTION_LOD = 9.0;
-			float mipLevel = MAX_REFLECTION_LOD * roughness;
+			float mipLevel = clamp(MAX_REFLECTION_LOD * roughness, 0.0, MAX_REFLECTION_LOD);
 
-			vec3 F0 = vec3(0.04);
-			F0 = mix(F0, diffuse, metallic);
+			vec3 F0 = mix(vec3(0.08), diffuse, metallic);
 
-			vec3 F = f_schlick_roughness(max(dot(N, V), 0.0), F0, roughness);
+			vec3 irradianceIBL = textureLod(samplerIrradiance, N, 0).xyz * irradianceStrength;
+			vec3 specularIBL = textureLod(samplerSpecular, R, mipLevel).xyz * specularStrength;
+
+			vec3 F = f_schlick_roughness(vDotN, F0, roughness);
 
 			vec3 kS = F;
 			vec3 kD = vec3(1.0) - kS;
 			kD *= 1.0 - metallic;
-
-			vec3 specularIBL = textureLod(samplerSpecular, R, mipLevel).xyz * specularStrength;
-			vec2 brdf = texture(samplerSpecularIntegration, vec2(max(dot(N, V), 0.0), 1.0 - roughness)).rg;
+			
+			vec2 brdf = texture(samplerSpecularIntegration, vec2(vDotN, 1.0 - roughness)).rg;
 			vec3 specular = specularIBL * (F * brdf.x + brdf.y);
 
-			vec3 irradianceIBL = textureLod(samplerIrradiance, N, 0).xyz * irradianceStrength;
 			lighting = (kD * irradianceIBL * diffuse) + specular;
 		} else {
-			lighting = ambientColor * diffuse;
+			vec3 ambient = mix(ambientColor * 0.1, ambientColor, N.y * 0.5 + 1.0);
+
+			lighting = ambient * diffuse;
 		}
 
 		oColor = vec4(lighting, 1.0);
-
-
 	}
 }
 #endif

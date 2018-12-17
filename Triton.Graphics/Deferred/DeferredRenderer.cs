@@ -1,4 +1,4 @@
-﻿using System;
+﻿    using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -145,7 +145,7 @@ namespace Triton.Graphics.Deferred
                 _lightComputeShader[i] = _resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/light_cs", shadowQualities[i]);
             }
             
-            _specularIntegarion = _resourceManager.Load<Resources.Texture>("/textures/specular_integration");
+            _specularIntegarion = _resourceManager.Load<Resources.Texture>("/textures/specular_integartion");
 
             _quadMesh = _backend.CreateBatchBuffer();
             _quadMesh.Begin();
@@ -259,7 +259,7 @@ namespace Triton.Graphics.Deferred
                 Matrix4.Mult(ref world, ref viewProjection, out worldViewProjection);
                 Matrix4.Mult(ref world, ref view, out worldView);
 
-                itWorld = Matrix4.Transpose(Matrix4.Invert(world));
+                itWorld = Matrix4.Invert(Matrix4.Transpose(world));
 
                 if (activeMaterial == null || activeMaterial.Id != operations[i].Material.Id)
                 {

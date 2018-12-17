@@ -82,4 +82,3 @@ vec3 brdf(vec3 N, vec3 V, vec3 L, float roughness, float metallic, vec3 radiance
 	kD *= 1.0 - metallic;
 	return (kD * albedo / PI + specular) * radiance;
 }
-

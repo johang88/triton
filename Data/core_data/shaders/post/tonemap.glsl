@@ -30,12 +30,12 @@ void main() {
 	float averageLuminance = get_average_luminance(samplerLuminance);
 	vec3 color = texture(samplerScene, texCoord).xyz;
 
-	color = tonemap(color, averageLuminance, 0);
-	
 	if (enableBloom) {
 		vec3 bloom = texture(samplerBloom, texCoord).xyz;
 		color += max(vec3(0), bloom) * bloomStrength;
 	}
+
+	color = tonemap(color, averageLuminance, 0);
 
 	oColor = vec4(color, 1);
 }

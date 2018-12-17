@@ -12,7 +12,8 @@
 				"Color": "0.9 0.5 0.3",
 				"Intensity": 50.0,
 				"Range": 16,
-				"CastShadows": true
+				"CastShadows": true,
+				"Enabled": true
 			}
 		]
 	  },

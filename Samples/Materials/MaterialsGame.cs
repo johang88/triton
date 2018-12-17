@@ -32,17 +32,17 @@ namespace Triton.Samples
         {
             base.LoadResources();
 
-            Stage.ClearColor = new Triton.Vector4(255 / 255.0f, 255 / 255.0f, 255 / 255.0f, 0) * 3;
+            Stage.ClearColor = new Triton.Vector4(255 / 255.0f, 255 / 255.0f, 255 / 255.0f, 0) * 0;
             Stage.AmbientColor = new Vector3(0.5f, 0.5f, 0.5f) * 0;
 
             PostEffectManager.HDRSettings.AutoKey = false;
             PostEffectManager.HDRSettings.TonemapOperator = Graphics.Post.TonemapOperator.ASEC;
 
-            //Stage.AmbientLight = new Graphics.AmbientLight
-            //{
-            //    Irradiance = Resources.Load<Graphics.Resources.Texture>("/textures/sky_irradiance"),
-            //    Specular = Resources.Load<Graphics.Resources.Texture>("/textures/sky_specular")
-            //};
+            Stage.AmbientLight = new Graphics.AmbientLight
+            {
+                Irradiance = Resources.Load<Graphics.Resources.Texture>("/textures/sky_irradiance"),
+                Specular = Resources.Load<Graphics.Resources.Texture>("/textures/sky_specular")
+            };
 
             Player = new GameObject();
             Player.Position = new Vector3(0, 2f, 0);
@@ -75,15 +75,15 @@ namespace Triton.Samples
                 ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
             }
 
-            //var knight = new GameObject();
-            //knight.Position = new Vector3(1, 0, 4);
-            //knight.Scale = new Vector3(1.6f, 1.6f, 1.6f);
-            //knight.Components.Add(new SkinnedMeshComponent
-            //{
-            //    Mesh = Resources.Load<Mesh>("/models/knight")
-            //});
-            //knight.Components.Add(new KnightAnimator());
-            //GameWorld.Add(knight);
+            var knight = new GameObject();
+            knight.Position = new Vector3(1, 0, 4);
+            knight.Scale = new Vector3(1.6f, 1.6f, 1.6f);
+            knight.Components.Add(new SkinnedMeshComponent
+            {
+                Mesh = Resources.Load<Mesh>("/models/knight")
+            });
+            knight.Components.Add(new KnightAnimator());
+            GameWorld.Add(knight);
 
             Light = new GameObject
             {
@@ -99,7 +99,7 @@ namespace Triton.Samples
                 OuterAngle = 0.98f,
                 CastShadows = true
             });
-            GameWorld.Add(Light);
+            //GameWorld.Add(Light);
 
             Stage.ClearColor = new Vector4(1, 1, 1, 1) * 2;
 

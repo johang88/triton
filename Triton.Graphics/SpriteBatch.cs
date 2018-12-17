@@ -3,178 +3,216 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Renderer;
+using Triton.Resources;
 
 namespace Triton.Graphics
 {
-	public class SpriteBatch
-	{
-		private readonly BatchBuffer Buffer;
-		private readonly Resources.ShaderProgram Shader;
-		private readonly Resources.ShaderProgram ShaderSRGB;
-		private ShaderParams Params;
-		private Backend Backend;
-		private List<QuadInfo> Quads = new List<QuadInfo>();
-		private int LastQuad = 0;
+    [Flags]
+    public enum SpriteFlags
+    {
+        None = 0x0,
+        Srgb = 0x01,
+        DistanceField = 0x02,
+        AlphaBlend = 0x04
+    }
 
-		private int RenderStateAlphaBlend;
-		private int RenderStateNoAlphaBlend;
+    public class SpriteBatch
+    {
+        private readonly BatchBuffer _buffer;
+        private readonly Resources.ShaderProgram _shader;
+        private ShaderParams _params;
+        private readonly Backend _backend;
+        private readonly List<QuadInfo> _quads = new List<QuadInfo>();
+        private int _lastQuad = 0;
 
-		/// <summary>
-		/// Should always be created through Backend.CreateSpriteBatch
-		/// </summary>
-		internal SpriteBatch(Backend backend, Renderer.RenderSystem renderSystem, Triton.Resources.ResourceManager resourceManager)
-		{
-			if (backend == null)
-				throw new ArgumentNullException("backend");
-			if (renderSystem == null)
-				throw new ArgumentNullException("renderSystem");
-			if (resourceManager == null)
-				throw new ArgumentNullException("resourceManager");
+        private readonly int _renderStateAlphaBlend;
+        private readonly int _renderStateNoAlphaBlend;
 
-			Backend = backend;
+        private Vector4 _shaderSettings = new Vector4(0, 0, 1.0f / 16.0f, 0);
+        private readonly int[] _samplers = new int[] { 0 };
 
-			Buffer = new BatchBuffer(renderSystem, new Renderer.VertexFormat(new Renderer.VertexFormatElement[]
-				{
-					new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Position, Renderer.VertexPointerType.Float, 3, 0),
-					new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.TexCoord, Renderer.VertexPointerType.Float, 2, sizeof(float) * 3),
-					new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Color, Renderer.VertexPointerType.Float, 4, sizeof(float) * 5),
-				}), 32);
+        private readonly int _samplerDistanceField;
 
-			Shader = resourceManager.Load<Resources.ShaderProgram>("/shaders/sprite");
-			ShaderSRGB = resourceManager.Load<Resources.ShaderProgram>("/shaders/sprite", "SRGB");
+        /// <summary>
+        /// Should always be created through Backend.CreateSpriteBatch
+        /// </summary>
+        internal SpriteBatch(Backend backend, Renderer.RenderSystem renderSystem, ResourceManager resourceManager)
+        {
+            if (backend == null)
+                throw new ArgumentNullException("backend");
+            if (renderSystem == null)
+                throw new ArgumentNullException("renderSystem");
+            if (resourceManager == null)
+                throw new ArgumentNullException("resourceManager");
 
-			Quads = new List<QuadInfo>();
-			for (var i = 0; i < 32; i++)
-			{
-				Quads.Add(new QuadInfo());
-			}
+            _backend = backend;
 
-			RenderStateAlphaBlend = Backend.CreateRenderState(true, false, false, Renderer.BlendingFactorSrc.SrcAlpha, Renderer.BlendingFactorDest.OneMinusSrcAlpha, Renderer.CullFaceMode.Front);
-			RenderStateNoAlphaBlend = Backend.CreateRenderState(false, false, false, Renderer.BlendingFactorSrc.Zero, Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Front);
-		}
+            _buffer = new BatchBuffer(renderSystem, new Renderer.VertexFormat(new Renderer.VertexFormatElement[]
+                {
+                    new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Position, Renderer.VertexPointerType.Float, 3, 0),
+                    new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.TexCoord, Renderer.VertexPointerType.Float, 2, sizeof(float) * 3),
+                    new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Color, Renderer.VertexPointerType.Float, 4, sizeof(float) * 5),
+                }), 32);
 
-		public void RenderQuad(Resources.Texture texture, Vector2 position)
-		{
-			RenderQuad(texture, position, new Vector2(texture.Width, texture.Height), Vector4.One);
-		}
+            _shader = resourceManager.Load<Resources.ShaderProgram>("/shaders/sprite");
 
-		public void RenderQuad(Resources.Texture texture, Vector2 position, Vector4 color)
-		{
-			RenderQuad(texture, position, new Vector2(texture.Width, texture.Height), color);
-		}
+            _quads = new List<QuadInfo>();
+            for (var i = 0; i < 32; i++)
+            {
+                _quads.Add(new QuadInfo());
+            }
 
-		public void RenderQuad(Resources.Texture texture, Vector2 position, Vector2 size)
-		{
-			RenderQuad(texture, position, size, Vector4.One);
-		}
+            _renderStateAlphaBlend = _backend.CreateRenderState(true, false, false, Renderer.BlendingFactorSrc.SrcAlpha, Renderer.BlendingFactorDest.OneMinusSrcAlpha, Renderer.CullFaceMode.Front);
+            _renderStateNoAlphaBlend = _backend.CreateRenderState(false, false, false, Renderer.BlendingFactorSrc.Zero, Renderer.BlendingFactorDest.One, Renderer.CullFaceMode.Front);
 
-		public void RenderQuad(Resources.Texture texture, Vector2 position, Vector2 size, Vector4 color)
-		{
-			RenderQuad(texture, position, size, Vector2.Zero, Vector2.One, color);
-		}
+            _samplerDistanceField = _backend.RenderSystem.CreateSampler(new Dictionary<SamplerParameterName, int>
+            {
+                { SamplerParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapNearest },
+                { SamplerParameterName.TextureMagFilter, (int)TextureMagFilter.Linear }
+            });
+        }
 
-		public void RenderQuad(Resources.Texture texture, Vector2 position, Vector2 size, Vector2 uvPosition, Vector2 uvSize)
-		{
-			RenderQuad(texture, position, size, uvPosition, uvSize, Vector4.One);
-		}
+        public void RenderQuad(Resources.Texture texture, Vector2 position)
+        {
+            RenderQuad(texture, position, new Vector2(texture.Width, texture.Height), Vector4.One);
+        }
 
-		public void RenderQuad(Resources.Texture texture, Vector2 position, Vector2 size, Vector2 uvPosition, Vector2 uvSize, Vector4 color, bool alphaBlend = true, bool srgb = false)
-		{
-			if (LastQuad == Quads.Count)
-			{
-				var quadsToCreate = Quads.Count / 2;
-				for (var i = 0; i < quadsToCreate; i++)
-				{
-					Quads.Add(new QuadInfo());
-				}
-			}
+        public void RenderQuad(Resources.Texture texture, Vector2 position, Vector4 color)
+        {
+            RenderQuad(texture, position, new Vector2(texture.Width, texture.Height), color);
+        }
 
-			var quad = Quads[LastQuad++];
-			quad.Init(texture, position, size, uvPosition, uvSize, color, alphaBlend, srgb);
-		}
+        public void RenderQuad(Resources.Texture texture, Vector2 position, Vector2 size)
+        {
+            RenderQuad(texture, position, size, Vector4.One);
+        }
 
-		public void Render(int width, int height)
-		{
-			if (Params == null)
-			{
-				Params = new ShaderParams();
-				Shader.BindUniformLocations(Params);
-			}
+        public void RenderQuad(Resources.Texture texture, Vector2 position, Vector2 size, Vector4 color)
+        {
+            RenderQuad(texture, position, size, Vector2.Zero, Vector2.One, color);
+        }
 
-			if (LastQuad == 0) // Bail out
-				return;
+        public void RenderQuad(Resources.Texture texture, Vector2 position, Vector2 size, Vector2 uvPosition, Vector2 uvSize)
+        {
+            RenderQuad(texture, position, size, uvPosition, uvSize, Vector4.One);
+        }
 
-			Resources.Texture lastTexture = null;
-			var lastAlpha = false;
-			var lastSRGB = false;
+        public void RenderQuad(Resources.Texture texture, Vector2 position, Vector2 size, Vector2 uvPosition, Vector2 uvSize, Vector4 color, SpriteFlags flags = SpriteFlags.AlphaBlend, float smoothing = 1.0f / 16.0f)
+        {
+            if (_lastQuad == _quads.Count)
+            {
+                var quadsToCreate = _quads.Count / 2;
+                for (var i = 0; i < quadsToCreate; i++)
+                {
+                    _quads.Add(new QuadInfo());
+                }
+            }
 
-			var projectionMatrix = Matrix4.CreateOrthographicOffCenter(0.0f, width, height, 0.0f, -1.0f, 1.0f);
+            var quad = _quads[_lastQuad++];
+            quad.Init(texture, position, size, uvPosition, uvSize, color, flags, smoothing);
+        }
 
-			for (var i = 0; i < LastQuad; i++)
-			{
-				var quad = Quads[i];
-				if (lastTexture != quad.Texture || lastAlpha != quad.AlphaBlend || lastSRGB != quad.SRGB)
-				{
-					if (lastTexture != null)
-					{
-						Buffer.EndInline(Backend);
+        public void Render(int width, int height)
+        {
+            if (_params == null)
+            {
+                _params = new ShaderParams();
+                _shader.BindUniformLocations(_params);
+            }
 
-						Backend.BeginInstance(lastSRGB ? ShaderSRGB.Handle : Shader.Handle, new int[] { lastTexture.Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, lastAlpha ? RenderStateAlphaBlend : RenderStateNoAlphaBlend);
-						Backend.BindShaderVariable(Params.HandleDiffuseTexture, 0);
-						Backend.BindShaderVariable(Params.HandleModelViewProjection, ref projectionMatrix);
-						Backend.DrawMesh(Buffer.MeshHandle);
-						Backend.EndInstance();
-					}
+            if (_lastQuad == 0) // Bail out
+                return;
 
-					Buffer.Begin();
-					lastSRGB = quad.SRGB;
-					lastTexture = quad.Texture;
-					lastAlpha = quad.AlphaBlend;
-				}
+            Resources.Texture lastTexture = null;
+            var lastFlags = SpriteFlags.None;
+            var lastSmoothing = 0.0f;
 
-				Buffer.AddQuadInverseUV(quad.Position, quad.Size, quad.UvPositon, quad.UvSize, quad.Color);
-			}
+            var projectionMatrix = Matrix4.CreateOrthographicOffCenter(0.0f, width, height, 0.0f, -1.0f, 1.0f);
 
-			Buffer.EndInline(Backend);
+            for (var i = 0; i < _lastQuad; i++)
+            {
+                var quad = _quads[i];
+                if (lastTexture != quad.Texture || lastFlags != quad.Flags || lastSmoothing != quad.Smoothing)
+                {
+                    if (lastTexture != null)
+                    {
+                        _buffer.EndInline(_backend);
+                        SubmitBatch(lastTexture, lastFlags, lastSmoothing, ref projectionMatrix);
+                    }
 
-			// Render final batch
-			Backend.BeginInstance(lastSRGB ? ShaderSRGB.Handle : Shader.Handle, new int[] { lastTexture.Handle }, new int[] { Backend.DefaultSamplerNoFiltering }, lastAlpha ? RenderStateAlphaBlend : RenderStateNoAlphaBlend);
-			Backend.BindShaderVariable(Params.HandleDiffuseTexture, 0);
-			Backend.BindShaderVariable(Params.HandleModelViewProjection, ref projectionMatrix);
-			Backend.DrawMesh(Buffer.MeshHandle);
-			Backend.EndInstance();
+                    _buffer.Begin();
+                    lastFlags = quad.Flags;
+                    lastTexture = quad.Texture;
+                    lastSmoothing = quad.Smoothing;
+                }
 
-			LastQuad = 0;
-		}
+                _buffer.AddQuadInverseUV(quad.Position, quad.Size, quad.UvPositon, quad.UvSize, quad.Color);
+            }
 
-		class ShaderParams
-		{
-			public int HandleModelViewProjection = 0;
-			public int HandleDiffuseTexture = 0;
-		}
+            _buffer.EndInline(_backend);
+            SubmitBatch(lastTexture, lastFlags, lastSmoothing, ref projectionMatrix);
 
-		class QuadInfo
-		{
-			public void Init(Resources.Texture texture, Vector2 position, Vector2 size, Vector2 uvPosition, Vector2 uvSize, Vector4 color, bool alphaBlend, bool srgb)
-			{
-				Texture = texture;
-				Position = position;
-				Size = size;
-				UvPositon = uvPosition;
-				UvSize = uvSize;
-				Color = color;
-				AlphaBlend = alphaBlend;
-				SRGB = srgb;
-			}
+            _lastQuad = 0;
+        }
 
-			public Resources.Texture Texture;
-			public Vector2 Position;
-			public Vector2 Size;
-			public Vector2 UvPositon;
-			public Vector2 UvSize;
-			public Vector4 Color;
-			public bool AlphaBlend;
-			public bool SRGB;
-		}
-	}
+        void SubmitBatch(Resources.Texture texture, SpriteFlags flags, float smoothing, ref Matrix4 projectionMatrix)
+        {
+            var alphaBlend = (flags & SpriteFlags.AlphaBlend) == SpriteFlags.AlphaBlend;
+
+            if ((flags & SpriteFlags.DistanceField) == SpriteFlags.DistanceField)
+            {
+                _samplers[0] = _samplerDistanceField;
+                _shaderSettings.Y = 1;
+            }
+            else
+            {
+                _samplers[0] = _backend.DefaultSamplerNoFiltering;
+                _shaderSettings.Y = 0;
+            }
+
+            _shaderSettings.X = (flags & SpriteFlags.Srgb) == SpriteFlags.Srgb ? 1 : 0;
+            _shaderSettings.Z = smoothing;
+
+            var renderStateId = alphaBlend ? _renderStateAlphaBlend : _renderStateNoAlphaBlend;
+
+            _backend.BeginInstance(_shader.Handle, new int[] { texture.Handle }, _samplers, renderStateId);
+            _backend.BindShaderVariable(_params.HandleDiffuseTexture, 0);
+            _backend.BindShaderVariable(_params.Settings, ref _shaderSettings);
+            _backend.BindShaderVariable(_params.HandleModelViewProjection, ref projectionMatrix);
+            _backend.DrawMesh(_buffer.MeshHandle);
+            _backend.EndInstance();
+        }
+
+        class ShaderParams
+        {
+            public int HandleModelViewProjection = 0;
+            public int HandleDiffuseTexture = 0;
+            public int Settings = 0;
+        }
+
+        class QuadInfo
+        {
+            public void Init(Resources.Texture texture, Vector2 position, Vector2 size, Vector2 uvPosition, Vector2 uvSize, Vector4 color, SpriteFlags flags, float smoothing)
+            {
+                Texture = texture;
+                Position = position;
+                Size = size;
+                UvPositon = uvPosition;
+                UvSize = uvSize;
+                Color = color;
+                Flags = flags;
+                Smoothing = smoothing;
+            }
+
+            public Resources.Texture Texture;
+            public Vector2 Position;
+            public Vector2 Size;
+            public Vector2 UvPositon;
+            public Vector2 UvSize;
+            public Vector4 Color;
+            public SpriteFlags Flags;
+            public float Smoothing = 1.0f / 16.0f;
+        }
+    }
 }
