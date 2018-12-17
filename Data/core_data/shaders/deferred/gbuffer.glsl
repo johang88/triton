@@ -111,14 +111,23 @@ uniform sampler2D samplerDiffuseMap;
 uniform sampler2D samplerNormalMap;
 uniform sampler2D samplerRoughnessMetallicMap;
 
+uniform vec4 uDiffuseColor;
+uniform float uRoughness;
+uniform float uMetalness;
+
 void get_material(out vec3 diffuse, out vec3 normals, out float metallic, out float specular, out float roughness) {
 #ifdef HAS_SAMPLER_DIFFUSEMAP
 	diffuse = pow(texture(samplerDiffuseMap, texCoord).xyz, vec3(2.2));
+#endif
+#ifdef HAS_DIFFUSECOLOR
+	diffuse = pow(uDiffuseColor.xyz, vec3(2.2));
 #endif
 	
 #ifdef HAS_SAMPLER_NORMALMAP
 	mat3x3 TBN = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
 	normals = normalize(TBN * normalize(texture(samplerNormalMap, texCoord).xyz * 2.0 - 1.0));
+#else
+	normals = normalize(normal);
 #endif
 	
 #ifdef HAS_SAMPLER_ROUGHNESSMETALMAP
@@ -126,8 +135,15 @@ void get_material(out vec3 diffuse, out vec3 normals, out float metallic, out fl
 	
 	roughness = materialParameters.x;
 	metallic = materialParameters.y;
-	specular = 0.5;
 #endif
+#ifdef HAS_ROUGHNESS
+	roughness = uRoughness;
+#endif
+#ifdef HAS_METALNESS
+	metallic = uMetalness;
+#endif
+
+	specular = 0.5;
 }
 
 void main() {

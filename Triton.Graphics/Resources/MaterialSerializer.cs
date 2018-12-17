@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Triton.Utility;
 
 namespace Triton.Graphics.Resources
 {
@@ -46,13 +47,39 @@ namespace Triton.Graphics.Resources
                     shaderDefines.Add("SKINNED");
                 }
 
-                foreach (var texture in materialDesc.Textures)
+                if (materialDesc.Textures != null)
                 {
-                    var samplerName = $"sampler{texture.Key}";
-                    var define = $"HAS_SAMPLER_{texture.Key.ToUpperInvariant()}";
+                    foreach (var texture in materialDesc.Textures)
+                    {
+                        var samplerName = $"sampler{texture.Key}";
+                        var define = $"HAS_SAMPLER_{texture.Key.ToUpperInvariant()}";
 
-                    shaderDefines.Add(define);
-                    material.Textures.Add(samplerName, await _resourceManager.LoadAsync<Texture>(texture.Value));
+                        shaderDefines.Add(define);
+                        material.Textures.Add(samplerName, await _resourceManager.LoadAsync<Texture>(texture.Value));
+                    }
+                }
+
+                if (materialDesc.Uniforms != null)
+                {
+                    foreach (var uniform in materialDesc.Uniforms)
+                    {
+                        var uniformName = $"u{uniform.Key}";
+                        var define = $"HAS_{uniform.Key.ToUpperInvariant()}";
+
+                        shaderDefines.Add(define);
+
+                        // Derive type
+                        if (uniform.Value.Contains(' '))
+                        {
+                            // Assume vec4 for now
+                            material.AddUniform(uniformName, StringConverter.ParseVector4(uniform.Value));
+                        }
+                        else
+                        {
+                            // Assume float for now
+                            material.AddUniform(uniformName, StringConverter.Parse<float>(uniform.Value));
+                        }
+                    }
                 }
 
                 material.Shader = await _resourceManager.LoadAsync<ShaderProgram>(materialDesc.Shader, string.Join(";", shaderDefines));
@@ -66,6 +93,7 @@ namespace Triton.Graphics.Resources
         {
             public string Shader { get; set; }
             public Dictionary<string, string> Textures { get; set; }
+            public Dictionary<string, string> Uniforms { get; set; }
         }
     }
 }

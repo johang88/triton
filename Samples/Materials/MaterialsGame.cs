@@ -60,20 +60,20 @@ namespace Triton.Samples
             var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
             roomPrefab.Instantiate(GameWorld);
 
-            //var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
-            //for (int i = 0; i < 5; i++)
-            //{
-            //    var ball = ballPrefab.Instantiate(GameWorld);
-            //    _balls.Add(ball);
-            //    ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
-            //}
+            var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
+            for (int i = 0; i < 5; i++)
+            {
+                var ball = ballPrefab.Instantiate(GameWorld);
+                _balls.Add(ball);
+                ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
+            }
 
-            //for (int i = 0; i < 5; i++)
-            //{
-            //    var ball = ballPrefab.Instantiate(GameWorld);
-            //    _balls.Add(ball);
-            //    ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
-            //}
+            for (int i = 0; i < 5; i++)
+            {
+                var ball = ballPrefab.Instantiate(GameWorld);
+                _balls.Add(ball);
+                ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
+            }
 
             //var knight = new GameObject();
             //knight.Position = new Vector3(1, 0, 4);
