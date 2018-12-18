@@ -17,7 +17,7 @@ namespace Triton.Graphics.Deferred
         private readonly BatchBuffer _quadMesh;
         private readonly int _shadowSampler;
 
-        private Resources.ShaderProgram _renderShadowsCSMShader = null;
+        private Resources.ShaderProgram[] _renderShadowsCSMShader = new Resources.ShaderProgram[(int)ShadowQuality.High + 1];
         private RenderShadowsCSMParams _renderShadowsCSMParams = new RenderShadowsCSMParams();
 
         private bool _handlesInitialized = false;
@@ -46,7 +46,11 @@ namespace Triton.Graphics.Deferred
             });
 
             // Load resources
-            _renderShadowsCSMShader = resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/csm");
+            var shadowQualities = new string[] { "SHADOW_QUALITY_LOWEST", "SHADOW_QUALITY_LOW", "SHADOW_QUALITY_MEDIUM", "SHADOW_QUALITY_HIGH" };
+            for (var i = 0; i < _renderShadowsCSMShader.Length; i++)
+            {
+                _renderShadowsCSMShader[i] = resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/csm", shadowQualities[i]);
+            }
         }
 
         internal void Resize(int width, int height)
@@ -55,11 +59,11 @@ namespace Triton.Graphics.Deferred
             _backend.ResizeRenderTarget(_renderTarget, width, height);
         }
 
-        public RenderTarget Render(Camera camera, RenderTarget gbuffer, List<RenderTarget> csmRenderTargets, Matrix4[] shadowViewProjections, float[] clipDistances)
+        public RenderTarget Render(Camera camera, RenderTarget gbuffer, List<RenderTarget> csmRenderTargets, Matrix4[] shadowViewProjections, float[] clipDistances, ShadowQuality quality)
         {
             if (!_handlesInitialized)
             {
-                _renderShadowsCSMShader.BindUniformLocations(_renderShadowsCSMParams);
+                _renderShadowsCSMShader[0].BindUniformLocations(_renderShadowsCSMParams);
                 _handlesInitialized = true;
             }
 
@@ -82,7 +86,7 @@ namespace Triton.Graphics.Deferred
             }
 
             // Render shadows
-            _backend.BeginInstance(_renderShadowsCSMShader.Handle, textures, samplers);
+            _backend.BeginInstance(_renderShadowsCSMShader[(int)quality].Handle, textures, samplers);
 
             _backend.BindShaderVariable(_renderShadowsCSMParams.SamplerDepth, 0);
 

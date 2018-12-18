@@ -13,7 +13,7 @@
 				"Intensity": 50.0,
 				"Range": 16,
 				"CastShadows": true,
-				"Enabled": true
+				"Enabled": false
 			}
 		]
 	  },
@@ -27,7 +27,7 @@
 				"Intensity": 50.0,
 				"Range": 32,
 				"CastShadows": true,
-				"Enabled": true
+				"Enabled": false
 			}
 		]
 	  },
@@ -41,7 +41,7 @@
 				"Intensity": 40.0,
 				"Range": 32,
 				"CastShadows": true,
-				"Enabled": true
+				"Enabled": false
 			}
 		]
 	  },
@@ -58,7 +58,7 @@
 				"Type": "SpotLight",
 				"InnerAngle": 0.8,
 				"OuterAngle": 0.9,
-				"Enabled": true
+				"Enabled": false
 			}
 		]
 	  },
@@ -76,7 +76,7 @@
 				"Type": "SpotLight",
 				"InnerAngle": 0.8,
 				"OuterAngle": 0.9,
-				"Enabled": true
+				"Enabled": false
 			}
 		]
 	  }

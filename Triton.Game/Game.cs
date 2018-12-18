@@ -295,7 +295,7 @@ namespace Triton.Game
                 GraphicsBackend.ProfileEndSection(Profiler.ShadowsGeneration);
 
                 GraphicsBackend.ProfileBeginSection(Profiler.ShadowsRender);
-                shadows = ShadowBufferRenderer.Render(Camera, gbuffer, csm, viewProjections, clipDistances);
+                shadows = ShadowBufferRenderer.Render(Camera, gbuffer, csm, viewProjections, clipDistances, DeferredRenderer.Settings.ShadowQuality);
                 GraphicsBackend.ProfileEndSection(Profiler.ShadowsRender);
             }
 

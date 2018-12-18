@@ -60,7 +60,7 @@ namespace Triton.Samples
             Player.Components.Add(new PlayerController());
             GameWorld.Add(Player);
 
-            var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
+            var roomPrefab = Resources.Load<Prefab>("/prefabs/city");
             roomPrefab.Instantiate(GameWorld);
 
             var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
@@ -90,13 +90,14 @@ namespace Triton.Samples
 
             Light = new GameObject
             {
-                Position = new Vector3(0, 0.4f, 0)
+                Position = new Vector3(0, 0.4f, 0),
+                Orientation = Quaternion.FromAxisAngle(Vector3.UnitX, 0.45f) * Quaternion.FromAxisAngle(Vector3.UnitY, -0.35f)
             };
             Light.Components.Add(new LightComponent
             {
-                Type = Graphics.LighType.SpotLight,
-                Intensity = 600,
-                Color = new Vector3(0.45f, 0.4f, 0.9f),
+                Type = Graphics.LighType.Directional,
+                Intensity = 10,
+                Color = new Vector3(1.1f, 1, 1),
                 Range = 100,
                 InnerAngle = 0.94f,
                 OuterAngle = 0.98f,
@@ -123,7 +124,7 @@ namespace Triton.Samples
                 CursorVisible = !CursorVisible;
             }
 
-            Light.Orientation *= Quaternion.FromAxisAngle(Vector3.UnitY, frameTime);
+            //Light.Orientation *= Quaternion.FromAxisAngle(Vector3.UnitY, frameTime);
         }
 
         protected override void RenderUI(float deltaTime)

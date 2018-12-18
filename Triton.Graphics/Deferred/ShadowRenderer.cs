@@ -28,17 +28,18 @@ namespace Triton.Graphics.Deferred
         private int _currentInstanceBuffer = 0;
 
         // Shader configurations
-        private readonly RenderShadowsParams _renderShadowsParams = new RenderShadowsParams();
-        private readonly RenderShadowsParams _renderShadowsSkinnedParams = new RenderShadowsParams();
+        private readonly RenderShadowsParams[] _renderShadowsParams = new RenderShadowsParams[3];
+        private readonly RenderShadowsParams[] _renderShadowsSkinnedParams = new RenderShadowsParams[3];
 
         private readonly int _shadowsRenderState;
 
-        private Resources.ShaderProgram _renderShadowsShader;
-        private Resources.ShaderProgram _renderShadowsSkinnedShader;
+        private Resources.ShaderProgram[] _renderShadowsShaders = new Resources.ShaderProgram[3];
+        private Resources.ShaderProgram[] _renderShadowsSkinnedShaders = new Resources.ShaderProgram[3];
 
         private bool _handlesInitialized = false;
 
         public float PSSMLambda { get; set; } = 0.95f;
+        public float[] ShadowBiases { get; set; } = new float[] { 0.01f, 0.001f, 0.001f, 0.001f, 0.001f };
         private int _diffuseSampler;
 
         private Backend _backend;
@@ -76,8 +77,18 @@ namespace Triton.Graphics.Deferred
             });
 
             // Load shaders
-            _renderShadowsShader = resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows");
-            _renderShadowsSkinnedShader = resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows", "SKINNED");
+            _renderShadowsShaders = new Resources.ShaderProgram[]
+            {
+                resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows", "POINT"),
+                resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows", "SPOT"),
+                resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows", "DIRECTIONAL")
+            };
+            _renderShadowsSkinnedShaders = new Resources.ShaderProgram[]
+            {
+                resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows", "SKINNED;POINT"),
+                resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows", "SKINNED;SPOT"),
+                resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows", "SKINNED;DIRECTIONAL")
+            };
         }
 
         public void SetCascadeCountAndResolution(int count, int resolution)
@@ -111,7 +122,6 @@ namespace Triton.Graphics.Deferred
                 {
                     _renderTargets.Add(_backend.CreateRenderTarget("directional_shadows", new Definition(resolution, resolution, true, new List<Definition.Attachment>()
                     {
-						//new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.R16f, Renderer.PixelType.Float, 0),
 						new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent16, Renderer.PixelType.Float, 0)
                     })));
                 }
@@ -143,6 +153,8 @@ namespace Triton.Graphics.Deferred
 
                 camera.FarClipDistance = CalculateFarClipPlane(i, clipDistanceNear, clipDistanceFar);
                 clipDistances[i + 1] = camera.FarClipDistance;
+
+                light.ShadowBias = ShadowBiases[i];
 
                 RenderCascade(_renderTargets[i], light, stage, camera, out _shadowViewProjections[i]);
             }
@@ -218,8 +230,15 @@ namespace Triton.Graphics.Deferred
         {
             if (!_handlesInitialized)
             {
-                _renderShadowsShader.BindUniformLocations(_renderShadowsParams);
-                _renderShadowsSkinnedShader.BindUniformLocations(_renderShadowsSkinnedParams);
+                for (var i = 0; i < _renderShadowsParams.Length; i++)
+                {
+                    _renderShadowsParams[i] = new RenderShadowsParams();
+                    _renderShadowsSkinnedParams[i] = new RenderShadowsParams();
+
+                    _renderShadowsShaders[i].BindUniformLocations(_renderShadowsParams[i]);
+                    _renderShadowsSkinnedShaders[i].BindUniformLocations(_renderShadowsSkinnedParams[i]);
+                }
+                
 
                 _handlesInitialized = true;
             }
@@ -257,21 +276,24 @@ namespace Triton.Graphics.Deferred
                 Resources.ShaderProgram program;
                 RenderShadowsParams shadowParams;
 
+                var lightTypeIndex = (int)light.Type;
+
                 if (operations[i].Skeleton != null)
                 {
-                    program = _renderShadowsSkinnedShader;
-                    shadowParams = _renderShadowsSkinnedParams;
+                    program = _renderShadowsSkinnedShaders[lightTypeIndex];
+                    shadowParams = _renderShadowsSkinnedParams[lightTypeIndex];
                 }
                 else
                 {
                     // TODO: Handle alpha cut off textures, you know for trees and stuff
-                    program = _renderShadowsShader;
-                    shadowParams = _renderShadowsParams;
+                    program = _renderShadowsShaders[lightTypeIndex];
+                    shadowParams = _renderShadowsParams[lightTypeIndex];
                 }
 
                 _backend.BeginInstance(program.Handle, textures, samplers, _shadowsRenderState);
 
-                var lightDirWSAndBias = new Vector4(light.Owner.Position, light.ShadowBias);
+                var lightDirWSAndBias = new Vector4(light.Type == LighType.PointLight? light.Owner.Position : lightDir, light.ShadowBias);
+
                 _backend.BindShaderVariable(shadowParams.LightDirectionAndBias, ref lightDirWSAndBias);
                 _backend.BindShaderVariable(shadowParams.View, ref view);
                 _backend.BindShaderVariable(shadowParams.Projection, ref projection);
