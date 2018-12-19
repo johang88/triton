@@ -8,7 +8,7 @@ namespace Triton.Graphics.SkeletalAnimation
 {
 	public class Skeleton
 	{
-		internal Animation[] Animations;
+		public Animation[] Animations;
 		internal Transform[] BindPose;
 		internal int[] BoneParents;
 

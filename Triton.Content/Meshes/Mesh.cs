@@ -9,6 +9,7 @@ namespace Triton.Content.Meshes
 	class Mesh
 	{
 		public string SkeletonPath = null;
+        public Skeletons.Skeleton Skeleton = null;
 		public List<SubMesh> SubMeshes = new List<SubMesh>();
 	}
 }

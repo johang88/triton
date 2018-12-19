@@ -1,5 +1,8 @@
 {
-	"diffuse-color": "128 128 128",
-	"metallic": 0.5,
-	"roughness": 0.5
+    "Shader": "/shaders/deferred/gbuffer",
+	"Uniforms": {
+		"DiffuseColor": "0.5 0.5 0.5 1.0",
+		"Metalness": 0.5,
+		"Roughness": 0.5
+	}
 }

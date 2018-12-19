@@ -18,6 +18,8 @@ namespace Triton.Graphics.SkeletalAnimation
 
 		private readonly List<AnimationState> _animationStates = new List<AnimationState>();
 
+        public IReadOnlyList<AnimationState> AnimationStates => _animationStates;
+
 		public SkeletonInstance(Skeleton skeleton)
 		{
 			Skeleton = skeleton;
@@ -27,7 +29,6 @@ namespace Triton.Graphics.SkeletalAnimation
 		public SkeletonInstance(Resources.Mesh mesh)
 		{
 		    Skeleton = mesh.Skeleton ?? throw new ArgumentNullException(nameof(mesh.Skeleton));
-
 			Init();
 		}
 
@@ -86,7 +87,7 @@ namespace Triton.Graphics.SkeletalAnimation
 				}
 			}
 
-			throw new ArgumentException("animation not found");
+            return null;
 		}
 
 		private void ApplyAnimation(Animation animation, float timePosition, float weight)
@@ -145,7 +146,7 @@ namespace Triton.Graphics.SkeletalAnimation
 				_boneTransforms[i].Orientation = Quaternion.Identity;
 			}
 
-			float weightFactor = 1.0f;
+            float weightFactor = 1.0f;
 			float totalWeights = 0.0f;
 
 			foreach (var state in _animationStates)

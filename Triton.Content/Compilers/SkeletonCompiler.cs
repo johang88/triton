@@ -24,73 +24,78 @@ namespace Triton.Content.Compilers
 		}
 
 		public void Compile(CompilationContext context, string inputPath, string outputPath, Database.ContentEntry contentData)
-		{
-			outputPath += ".skeleton";
+        {
+            outputPath += ".skeleton";
 
-			string extension = Path.GetExtension(inputPath.Replace(".skeleton.xml", ".xml")).ToLowerInvariant();
+            string extension = Path.GetExtension(inputPath.Replace(".skeleton.xml", ".xml")).ToLowerInvariant();
 
-			var importer = ImporterFactory.Create(extension);
-			var skeleton = importer.Import(File.OpenRead(inputPath));
+            var importer = ImporterFactory.Create(extension);
+            var skeleton = importer.Import(File.OpenRead(inputPath));
 
-			using (var stream = File.Open(outputPath, FileMode.Create))
-			using (var writer = new BinaryWriter(stream))
-			{
-				// Magic
-				writer.Write('S');
-				writer.Write('K');
-				writer.Write('E');
-				writer.Write('L');
+            SerializeSkeleton(outputPath, skeleton);
+        }
 
-				// Version
-				writer.Write(Version);
+        internal static void SerializeSkeleton(string outputPath, Skeleton skeleton)
+        {
+            using (var stream = File.Open(outputPath, FileMode.Create))
+            using (var writer = new BinaryWriter(stream))
+            {
+                // Magic
+                writer.Write('S');
+                writer.Write('K');
+                writer.Write('E');
+                writer.Write('L');
 
-				// Bone count
-				writer.Write(skeleton.Bones.Count);
+                // Version
+                writer.Write(Version);
 
-				// Bones
-				foreach (var bone in skeleton.Bones)
-				{
-					writer.Write(bone.Position);
-					writer.Write(bone.Orientation);
-				}
+                // Bone count
+                writer.Write(skeleton.Bones.Count);
 
-				// Parent count
-				writer.Write(skeleton.BoneParents.Count);
-				foreach (var parent in skeleton.BoneParents)
-				{
-					writer.Write(parent);
-				}
+                // Bones
+                foreach (var bone in skeleton.Bones)
+                {
+                    writer.Write(bone.Position);
+                    writer.Write(bone.Orientation);
+                }
 
-				// Animation count
-				writer.Write(skeleton.Animations.Count);
+                // Parent count
+                writer.Write(skeleton.BoneParents.Count);
+                foreach (var parent in skeleton.BoneParents)
+                {
+                    writer.Write(parent);
+                }
 
-				// Animations
-				foreach (var animation in skeleton.Animations)
-				{
-					writer.Write(animation.Name);
-					writer.Write(animation.Length);
+                // Animation count
+                writer.Write(skeleton.Animations.Count);
 
-					// Track count
-					writer.Write(animation.Tracks.Count);
+                // Animations
+                foreach (var animation in skeleton.Animations)
+                {
+                    writer.Write(animation.Name);
+                    writer.Write(animation.Length);
 
-					// Tracks
-					foreach (var track in animation.Tracks)
-					{
-						writer.Write(track.BoneIndex);
+                    // Track count
+                    writer.Write(animation.Tracks.Count);
 
-						// Key frame count
-						writer.Write(track.KeyFrames.Count);
+                    // Tracks
+                    foreach (var track in animation.Tracks)
+                    {
+                        writer.Write(track.BoneIndex);
 
-						// Key frames
-						foreach (var keyFrame in track.KeyFrames)
-						{
-							writer.Write(keyFrame.Time);
-							writer.Write(keyFrame.Transform.Position);
-							writer.Write(keyFrame.Transform.Orientation);
-						}
-					}
-				}
-			}
-		}
-	}
+                        // Key frame count
+                        writer.Write(track.KeyFrames.Count);
+
+                        // Key frames
+                        foreach (var keyFrame in track.KeyFrames)
+                        {
+                            writer.Write(keyFrame.Time);
+                            writer.Write(keyFrame.Transform.Position);
+                            writer.Write(keyFrame.Transform.Orientation);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

@@ -6,16 +6,19 @@ using System.Threading.Tasks;
 
 namespace Triton.Graphics.SkeletalAnimation
 {
-	class Animation
+	public class Animation
 	{
 		public readonly string Name;
 		public readonly float Length;
-		public Track[] Tracks;
+		internal Track[] Tracks;
 
 		public Animation(string name, float length)
 		{
 			Name = name;
 			Length = length;
 		}
-	}
+
+        public override string ToString()
+             => $"{Name} {Length}s";
+    }
 }

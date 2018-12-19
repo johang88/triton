@@ -9,7 +9,7 @@ namespace Triton.Graphics.Components
 {
     public class SkinnedMeshComponent : MeshComponent
     {
-        private SkeletonInstance _skeletonInstance = null;
+        public SkeletonInstance _skeletonInstance = null;
 
         public override void OnDeactivate()
         {
@@ -20,6 +20,10 @@ namespace Triton.Graphics.Components
 
         public AnimationState GetAnimationState(string animation)
             => _skeletonInstance.GetAnimationState(animation);
+
+        public IReadOnlyList<AnimationState> AnimationStates => _skeletonInstance.AnimationStates;
+
+        public Skeleton Skeleton => _skeletonInstance.Skeleton;
 
         protected override void UpdateDerviedMeshSettings()
         {

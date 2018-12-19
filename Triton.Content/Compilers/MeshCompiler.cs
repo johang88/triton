@@ -23,6 +23,7 @@ namespace Triton.Content.Compilers
 			ImporterFactory.Add(".xml", () => new Meshes.Converters.OgreXmlConverter());
 			ImporterFactory.Add(".dae", () => new Meshes.Converters.AssimpConverter());
 			ImporterFactory.Add(".fbx", () => new Meshes.Converters.AssimpConverter());
+			ImporterFactory.Add(".x", () => new Meshes.Converters.AssimpConverter());
 		}
 
 		public void Compile(CompilationContext context, string inputPath, string outputPath, Database.ContentEntry contentData)
@@ -33,6 +34,12 @@ namespace Triton.Content.Compilers
 
 			var importer = ImporterFactory.Create(extension);
 			var mesh = importer.Import(inputPath);
+
+            if (mesh.Skeleton != null)
+            {
+                mesh.SkeletonPath = contentData.Id.Substring(contentData.Id.IndexOf('/')).Replace("/models/", "/skeletons/");
+                SkeletonCompiler.SerializeSkeleton(outputPath.Replace(".mesh", ".skeleton").Replace("/models/", "/skeletons/"), mesh.Skeleton); // This is what we call a "hack"
+            }
 
 			using (var stream = File.Open(outputPath, FileMode.Create))
 			using (var writer = new BinaryWriter(stream))
@@ -97,6 +104,6 @@ namespace Triton.Content.Compilers
 					writer.Write(subMesh.Indices);
 				}
 			}
-		}
+        }
 	}
 }

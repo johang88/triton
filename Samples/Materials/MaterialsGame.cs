@@ -19,6 +19,7 @@ namespace Triton.Samples
     {
         private GameObject Player;
         private GameObject Light;
+        private KnightAnimator _animator;
 
         private List<GameObject> _balls = new List<GameObject>();
 
@@ -80,12 +81,14 @@ namespace Triton.Samples
 
             var knight = new GameObject();
             knight.Position = new Vector3(1, 0, 4);
-            knight.Scale = new Vector3(1.6f, 1.6f, 1.6f);
+            knight.Scale = new Vector3(0.024f, 0.024f, 0.024f);
+            //knight.Scale = new Vector3(1.6f, 1.6f, 1.6f);
             knight.Components.Add(new SkinnedMeshComponent
             {
-                Mesh = Resources.Load<Mesh>("/models/knight")
+                Mesh = Resources.Load<Mesh>("/models/knight_test")
             });
-            knight.Components.Add(new KnightAnimator());
+            _animator = new KnightAnimator();
+            knight.Components.Add(_animator);
             GameWorld.Add(knight);
 
             Light = new GameObject
@@ -130,6 +133,11 @@ namespace Triton.Samples
         protected override void RenderUI(float deltaTime)
         {
             base.RenderUI(deltaTime);
+            
+            if (ImGui.Button("NEXT ANIMATION!"))
+            {
+                _animator.NextAnimation();
+            }
         }
     }
 }

@@ -10,21 +10,50 @@ namespace Triton.Samples.Components
 {
     public class KnightAnimator : GameObjectComponent
     {
-        private AnimationState _idleState;
+        private SkinnedMeshComponent _skinnedMeshComponent;
+        private AnimationState _animationState;
+        private int _currentAniamtion = 0;
 
         public override void OnActivate()
         {
             base.OnActivate();
 
-            _idleState = Owner.GetComponent<SkinnedMeshComponent>().GetAnimationState("walk");
-            _idleState.Enabled = true;
+            _skinnedMeshComponent = Owner.GetComponent<SkinnedMeshComponent>();
+            NextAnimation();
+            //SetActiveAnimation("Soldier_walk");
+        }
+
+        public void SetActiveAnimation(string name)
+        {
+            if (_animationState != null)
+            {
+                _animationState.Enabled = false;
+            }
+
+            _animationState = _skinnedMeshComponent.GetAnimationState(name);
+
+            if (_animationState != null)
+            {
+                _animationState.Enabled = true;
+                _animationState.TimePosition = 0;
+            }
+        }
+
+        public void NextAnimation()
+        {
+            _currentAniamtion = ++_currentAniamtion % _skinnedMeshComponent.Skeleton.Animations.Length;
+
+            SetActiveAnimation(_skinnedMeshComponent.Skeleton.Animations[_currentAniamtion].Name);
         }
 
         public override void Update(float dt)
         {
             base.Update(dt);
 
-            _idleState.AddTime(dt);
+            if (_animationState != null)
+            {
+                _animationState.AddTime(dt);
+            }
         }
     }
 }
