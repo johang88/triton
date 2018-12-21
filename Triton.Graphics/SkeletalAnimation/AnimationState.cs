@@ -8,7 +8,7 @@ namespace Triton.Graphics.SkeletalAnimation
 {
 	public class AnimationState
 	{
-		internal Animation Animation;
+		public Animation Animation;
 
 		public bool Enabled = false;
 		public float TimePosition = 0;

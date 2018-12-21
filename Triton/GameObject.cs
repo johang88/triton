@@ -114,7 +114,7 @@ namespace Triton
 
             if (Active)
             {
-                component.OnDeactivate();
+                component.OnActivate();
             }
         }
 

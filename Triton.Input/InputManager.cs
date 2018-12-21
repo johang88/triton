@@ -9,13 +9,15 @@ namespace Triton.Input
     public class InputManager
     {
 		public Rectangle Bounds;
-		private Vector2 OldMousePosition;
+		private Vector2 _oldMousePosition;
 
-		private Vector2 _MouseDelta;
-		public Vector2 MouseDelta { get { return _MouseDelta; } }
+        private float _oldWheelPosition;
+        public float MouseWheelDelta { get;private set; }
 
-		private bool[] PreviousState = new bool[(int)Key.LastKey];
-		private bool[] WasPressedState = new bool[(int)Key.LastKey];
+        public Vector2 MouseDelta { get; private set; }
+
+        private bool[] _previousState = new bool[(int)Key.LastKey];
+		private bool[] _wasPressedState = new bool[(int)Key.LastKey];
 
         public bool UiHasFocus { get; set; }
 
@@ -24,12 +26,14 @@ namespace Triton.Input
 			Bounds = bounds;
 
 			Mouse.SetPosition(0, 0);
-			OldMousePosition = new Vector2(0, 0);
+			_oldMousePosition = new Vector2(0, 0);
 
-			for (int i = 0; i < PreviousState.Length; i++)
+            _oldWheelPosition = Mouse.GetState().WheelPrecise;
+
+            for (int i = 0; i < _previousState.Length; i++)
 			{
-				PreviousState[i] = false;
-				WasPressedState[i] = false;
+				_previousState[i] = false;
+				_wasPressedState[i] = false;
 			}
 		}
 
@@ -37,22 +41,25 @@ namespace Triton.Input
 		{
 			var state = Mouse.GetState();
 
-			_MouseDelta = new Vector2(state.X - OldMousePosition.X, state.Y - OldMousePosition.Y);
+            MouseWheelDelta = state.WheelPrecise - _oldWheelPosition;
+            _oldWheelPosition = state.WheelPrecise;
 
-			OldMousePosition.X = state.X;
-			OldMousePosition.Y = state.Y;
+            MouseDelta = new Vector2(state.X - _oldMousePosition.X, state.Y - _oldMousePosition.Y);
 
-			for (int i = 0; i < PreviousState.Length; i++)
+			_oldMousePosition.X = state.X;
+			_oldMousePosition.Y = state.Y;
+
+			for (int i = 0; i < _previousState.Length; i++)
 			{
-				if (PreviousState[i] && !Keyboard.GetState().IsKeyDown((OpenTK.Input.Key)i))
+				if (_previousState[i] && !Keyboard.GetState().IsKeyDown((OpenTK.Input.Key)i))
 				{
-					WasPressedState[i] = true;
-					PreviousState[i] = false;
+					_wasPressedState[i] = true;
+					_previousState[i] = false;
 				}
 				else
 				{
-					WasPressedState[i] = false;
-					PreviousState[i] = Keyboard.GetState().IsKeyDown((OpenTK.Input.Key)i);
+					_wasPressedState[i] = false;
+					_previousState[i] = Keyboard.GetState().IsKeyDown((OpenTK.Input.Key)i);
 				}
 			}
 		}
@@ -64,7 +71,7 @@ namespace Triton.Input
 
 		public bool WasKeyPressed(Key key)
 		{
-			return WasPressedState[(int)key];
+			return _wasPressedState[(int)key];
 		}
 
 		public bool IsMouseButtonDown(MouseButton button)

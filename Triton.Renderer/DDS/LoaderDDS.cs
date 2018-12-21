@@ -424,12 +424,12 @@ namespace Triton.Renderer.DDS
                             #endregion Create TexImage
 
                             #region Query Success
-                            GLError = GL.GetError();
-                            if (GLError != ErrorCode.NoError)
-                            {
-                                GL.DeleteTextures(1, ref texturehandle);
-                                throw new ArgumentException("ERROR: Something went wrong after GL.CompressedTexImage(); Last GL Error: " + GLError.ToString());
-                            }
+                            //GLError = GL.GetError();
+                            //if (GLError != ErrorCode.NoError)
+                            //{
+                            //    GL.DeleteTextures(1, ref texturehandle);
+                            //    throw new ArgumentException("ERROR: Something went wrong after GL.CompressedTexImage(); Last GL Error: " + GLError.ToString());
+                            //}
                             #endregion Query Success
                         }
                         else
@@ -464,11 +464,11 @@ namespace Triton.Renderer.DDS
                 GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
                 GL.TexParameter(OGL.TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 
-                GLError = GL.GetError();
-                if (GLError != ErrorCode.NoError)
-                {
-                    throw new ArgumentException("Error setting Texture Parameters. GL Error: " + GLError);
-                }
+                //GLError = GL.GetError();
+                //if (GLError != ErrorCode.NoError)
+                //{
+                //    throw new ArgumentException("Error setting Texture Parameters. GL Error: " + GLError);
+                //}
                 #endregion Set Texture Parameters
 
                 // If it made it here without throwing any Exception the result is a valid Texture.

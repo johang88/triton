@@ -67,3 +67,4 @@ Example: `ContentProcessor.exe in=..\Media out=..Data'
 
 ![Cewl screenshot](screenshot.jpg?raw=true "Basic Scene Sample")
 ![Cewl screenshot](screenshot2.jpg?raw=true "Tiled deferred lighting")
+![Cewl screenshot](screenshot_modelviewer.jpg?raw=true "Model viewer")
