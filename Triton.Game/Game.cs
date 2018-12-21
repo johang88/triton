@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using Triton.Graphics;
 using Triton.Logging;
 using Triton.Utility;
+using System.IO;
 
 namespace Triton.Game
 {
@@ -74,7 +75,7 @@ namespace Triton.Game
         private readonly Thread _ioThread;
 
         private Services _services = new Services();
-        
+
         public Game(string name, string logPath = "logs/")
         {
             _name = name;
@@ -93,7 +94,7 @@ namespace Triton.Game
             _mainThreadScheduler = new Concurrency.SingleThreadScheduler(System.Threading.Thread.CurrentThread);
             _ioThreadScheduler = new Concurrency.SingleThreadScheduler(_ioThread);
             Concurrency.TaskHelpers.Initialize(_mainThreadScheduler, _ioThreadScheduler);
-            
+
             Running = true;
         }
 
@@ -159,7 +160,7 @@ namespace Triton.Game
                 Triton.Graphics.Resources.ResourceSerializers.Init(Resources, GraphicsBackend, FileSystem, new Graphics.Resources.ShaderHotReloadConfig
                 {
                     Path = @"..\Data\core_data\shaders\",
-                    BasePath  = @"/shaders/",
+                    BasePath = @"/shaders/",
                     Enable = true
                 });
 
@@ -260,7 +261,7 @@ namespace Triton.Game
                     accumulator -= stepSize;
                     PhysicsWorld.Update(stepSize);
                 }
-                
+
                 AudioSystem.Update();
 
                 GameWorld.Update(_frameTime);
@@ -297,7 +298,7 @@ namespace Triton.Game
                 shadows = ShadowBufferRenderer.Render(Camera, gbuffer, csm, viewProjections, clipDistances, DeferredRenderer.Settings.ShadowQuality);
                 GraphicsBackend.ProfileEndSection(Profiler.ShadowsRender);
             }
-            
+
             var lightOutput = DeferredRenderer.RenderLighting(Stage, Camera, shadows);
 
             var postProcessedResult = PostEffectManager.Render(Camera, Stage, gbuffer, lightOutput, deltaTime);
@@ -464,7 +465,23 @@ namespace Triton.Game
             ImGui.SetCurrentContext(context);
 
             SetImGuiKeyMaps();
-            ImGui.GetIO().Fonts.AddFontDefault();
+
+            using (var stream = FileSystem.OpenRead("/fonts/Roboto-Regular.ttf"))
+            {
+                var data = new byte[stream.Length];
+
+                long bytesRead = 0;
+                while (bytesRead < stream.Length)
+                {
+                    bytesRead += stream.Read(data, (int)bytesRead, (int)(stream.Length - bytesRead));
+                }
+
+                fixed (byte* ptr = data)
+                {
+
+                    ImGui.GetIO().Fonts.AddFontFromMemoryTTF((IntPtr)ptr, data.Length, 16.0f);
+                }
+            }
 
             _window.KeyDown += Window_KeyDown;
             _window.KeyUp += Window_KeyUp;
@@ -507,7 +524,7 @@ namespace Triton.Game
         private void SetImGuiKeyMaps()
         {
             var io = ImGui.GetIO();
-            
+
             io.KeyMap[(int)ImGuiKey.Tab] = (int)Input.Key.Tab;
             io.KeyMap[(int)ImGuiKey.LeftArrow] = (int)Input.Key.Left;
             io.KeyMap[(int)ImGuiKey.RightArrow] = (int)Input.Key.Right;
