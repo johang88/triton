@@ -45,12 +45,13 @@ namespace Triton.Samples
         {
             base.RenderUI(deltaTime);
 
-            ImGui.SetNextWindowSize(new System.Numerics.Vector2(400, 190), Condition.Always);
-            ImGui.SetNextWindowPos(new System.Numerics.Vector2(10, RequestedHeight - 310), Condition.Always, System.Numerics.Vector2.Zero);
-            ImGui.BeginWindow("Settings", WindowFlags.NoResize | WindowFlags.NoMove | WindowFlags.NoCollapse);
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(400, 190));
+            ImGui.SetNextWindowPos(new System.Numerics.Vector2(10, RequestedHeight - 310));
+            ImGui.Begin("Settings", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoCollapse);
 
             int selectedValue = (int)DeferredRenderer.Settings.ShadowQuality;
-            if (ImGui.Combo("Shadow quality", ref selectedValue, Enum.GetNames(typeof(ShadowQuality))))
+            var values = Enum.GetNames(typeof(ShadowQuality));
+            if (ImGui.Combo("Shadow quality", ref selectedValue, values, values.Length))
             {
                 DeferredRenderer.Settings.ShadowQuality = (ShadowQuality)selectedValue;
             }
@@ -58,13 +59,15 @@ namespace Triton.Samples
             ImGui.Checkbox("Shadows", ref DeferredRenderer.Settings.EnableShadows);
 
             selectedValue = (int)PostEffectManager.AntiAliasing;
-            if (ImGui.Combo("Anti aliasing", ref selectedValue, Enum.GetNames(typeof(AntiAliasing))))
+            values = Enum.GetNames(typeof(AntiAliasing));
+            if (ImGui.Combo("Anti aliasing", ref selectedValue, values, values.Length))
             {
                 PostEffectManager.AntiAliasing = (AntiAliasing)selectedValue;
             }
 
             selectedValue = (int)PostEffectManager.AntiAliasingQuality;
-            if (ImGui.Combo("AA Quality", ref selectedValue, Enum.GetNames(typeof(AntiAliasingQuality))))
+            values = Enum.GetNames(typeof(AntiAliasingQuality));
+            if (ImGui.Combo("AA Quality", ref selectedValue, values, values.Length))
             {
                 PostEffectManager.AntiAliasingQuality = (AntiAliasingQuality)selectedValue;
             }
@@ -75,7 +78,8 @@ namespace Triton.Samples
             ImGui.SliderFloat("Eye adaption rate", ref PostEffectManager.HDRSettings.AdaptationRate, 0.1f, 10.0f, PostEffectManager.HDRSettings.AdaptationRate.ToString(), 1.0f);
 
             selectedValue = (int)PostEffectManager.HDRSettings.TonemapOperator;
-            if (ImGui.Combo("Tonemap operator", ref selectedValue, Enum.GetNames(typeof(TonemapOperator))))
+            values = Enum.GetNames(typeof(TonemapOperator));
+            if (ImGui.Combo("Tonemap operator", ref selectedValue, values, values.Length))
             {
                 PostEffectManager.HDRSettings.TonemapOperator = (TonemapOperator)selectedValue;
             }
@@ -83,11 +87,11 @@ namespace Triton.Samples
             ImGui.Checkbox("Auto Key", ref PostEffectManager.HDRSettings.AutoKey);
             ImGui.SliderFloat("Key Value", ref PostEffectManager.HDRSettings.KeyValue, 0.001f, 1.0f, PostEffectManager.HDRSettings.KeyValue.ToString(), 1.0f);
 
-            ImGui.EndWindow();
+            ImGui.End();
 
-            ImGui.SetNextWindowSize(new System.Numerics.Vector2(400, 100), Condition.Always);
-            ImGui.SetNextWindowPos(new System.Numerics.Vector2(10, RequestedHeight - 110), Condition.Always, System.Numerics.Vector2.Zero);
-            ImGui.BeginWindow("Debug Settings", WindowFlags.NoResize | WindowFlags.NoMove | WindowFlags.NoCollapse);
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(400, 100));
+            ImGui.SetNextWindowPos(new System.Numerics.Vector2(10, RequestedHeight - 110));
+            ImGui.Begin("Debug Settings", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoCollapse);
 
             bool isChecked = (DebugFlags & Game.DebugFlags.Physics) == Game.DebugFlags.Physics;
             if (ImGui.Checkbox("Physics visualizer", ref isChecked))
@@ -96,12 +100,13 @@ namespace Triton.Samples
             }
 
             selectedValue = (int)PostEffectManager.VisualizationMode;
-            if (ImGui.Combo("Visualize", ref selectedValue, Enum.GetNames(typeof(VisualizationMode))))
+            values = Enum.GetNames(typeof(VisualizationMode));
+            if (ImGui.Combo("Visualize", ref selectedValue, values, values.Length))
             {
                 PostEffectManager.VisualizationMode = (VisualizationMode)selectedValue;
             }
 
-            ImGui.EndWindow();
+            ImGui.End();
         }
     }
 }

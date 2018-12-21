@@ -29,9 +29,9 @@ namespace Triton.Game
 
             var vertexFormat = new Renderer.VertexFormat(new Renderer.VertexFormatElement[]
             {
-                new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Position, Renderer.VertexPointerType.Float, 2, DrawVert.PosOffset),
-                new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.TexCoord, Renderer.VertexPointerType.Float, 2, DrawVert.UVOffset),
-                new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Color, Renderer.VertexPointerType.UnsignedByte, 4, DrawVert.ColOffset, normalized: true),
+                new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Position, Renderer.VertexPointerType.Float, 2, 0),
+                new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.TexCoord, Renderer.VertexPointerType.Float, 2, 8),
+                new Renderer.VertexFormatElement(Renderer.VertexFormatSemantic.Color, Renderer.VertexPointerType.UnsignedByte, 4, 16, normalized: true),
             });
 
             _vertexBufferHandle = renderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, true, vertexFormat);
@@ -55,23 +55,23 @@ namespace Triton.Game
 
         unsafe void CreateTextures()
         {
-            ImGuiNET.IO io = ImGui.GetIO();
+            var io = ImGui.GetIO();
 
             // Build texture atlas
-            FontTextureData texData = io.FontAtlas.GetTexDataAsRGBA32();
+            io.Fonts.GetTexDataAsRGBA32(out var pixels, out var width, out var height, out var bytesPerPixel);
 
-            var length = texData.Width * texData.Height * texData.BytesPerPixel;
+            var length = width * height * bytesPerPixel;
             byte[] data = new byte[length];
-            Marshal.Copy((IntPtr)texData.Pixels, data, 0, length);
+            Marshal.Copy(new IntPtr(pixels), data, 0, data.Length);
 
-            var textureHandle = _backend.RenderSystem.CreateTexture(texData.Width, texData.Height, data, PixelFormat.Rgba, PixelInternalFormat.Rgba8, PixelType.UnsignedByte, false, null);
+            var textureHandle = _backend.RenderSystem.CreateTexture(width, height, data, PixelFormat.Rgba, PixelInternalFormat.Rgba8, PixelType.UnsignedByte, false, null);
 
             // Store the texture identifier in the ImFontAtlas substructure.
-            io.FontAtlas.SetTexID(textureHandle);
+            io.Fonts.SetTexID(new IntPtr(textureHandle));
 
             // Cleanup (don't clear the input data if you want to append new fonts later)
             //io.Fonts->ClearInputData();
-            io.FontAtlas.ClearTexData();
+            io.Fonts.ClearTexData();
         }
 
         public unsafe void SubmitDrawCommands()
@@ -88,22 +88,22 @@ namespace Triton.Game
             int width = (int)(io.DisplaySize.X * io.DisplayFramebufferScale.X);
             int height = (int)(io.DisplaySize.Y * io.DisplayFramebufferScale.Y);
 
-            ImGui.ScaleClipRects(drawData, io.DisplayFramebufferScale);
+            drawData.ScaleClipRects(io.DisplayFramebufferScale);
 
             var projectionMatrix = Matrix4.CreateOrthographicOffCenter(0.0f, io.DisplaySize.X, io.DisplaySize.Y, 0.0f, -1.0f, 1.0f);
 
-            for (int n = 0; n < drawData->CmdListsCount; n++)
+            for (int n = 0; n < drawData.CmdListsCount; n++)
             {
-                NativeDrawList* commandList = drawData->CmdLists[n];
-                byte* vertexBuffer = (byte*)commandList->VtxBuffer.Data;
+                var commandList = drawData.CmdListsRange[n];
+                byte* vertexBuffer = (byte*)commandList.VtxBuffer.Data;
                 var indexBufferOffset = 0u;
 
-                _backend.UpdateBufferInline(_vertexBufferHandle, commandList->VtxBuffer.Size * sizeof(DrawVert), (byte*)commandList->VtxBuffer.Data);
-                _backend.UpdateBufferInline(_indexBufferHandle, commandList->IdxBuffer.Size * sizeof(ushort), (byte*)commandList->IdxBuffer.Data);
+                _backend.UpdateBufferInline(_vertexBufferHandle, commandList.VtxBuffer.Size * sizeof(ImDrawVert), (byte*)commandList.VtxBuffer.Data);
+                _backend.UpdateBufferInline(_indexBufferHandle, commandList.IdxBuffer.Size * sizeof(ushort), (byte*)commandList.IdxBuffer.Data);
 
-                for (int i = 0; i < commandList->CmdBuffer.Size; i++)
+                for (int i = 0; i < commandList.CmdBuffer.Size; i++)
                 {
-                    var pcmd = &(((DrawCmd*)commandList->CmdBuffer.Data)[i]);
+                    var pcmd = &(((ImDrawCmd*)commandList.CmdBuffer.Data)[i]);
 
                     if (pcmd->UserCallback != IntPtr.Zero)
                     {

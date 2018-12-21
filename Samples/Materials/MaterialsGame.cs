@@ -133,11 +133,6 @@ namespace Triton.Samples
         protected override void RenderUI(float deltaTime)
         {
             base.RenderUI(deltaTime);
-            
-            if (ImGui.Button("NEXT ANIMATION!"))
-            {
-                _animator.NextAnimation();
-            }
         }
     }
 }

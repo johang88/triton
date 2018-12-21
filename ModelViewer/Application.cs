@@ -107,11 +107,11 @@ namespace ModelViewer
         {
             base.RenderUI(deltaTime);
 
-            ImGui.SetNextWindowSize(new System.Numerics.Vector2(400, RequestedHeight), Condition.Always);
-            ImGui.SetNextWindowPos(new System.Numerics.Vector2(0, 0), Condition.Always, System.Numerics.Vector2.Zero);
-            ImGui.BeginWindow("Model Viewer", WindowFlags.NoResize | WindowFlags.NoMove | WindowFlags.NoCollapse);
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(400, RequestedHeight));
+            ImGui.SetNextWindowPos(new System.Numerics.Vector2(0, 0));
+            ImGui.Begin("Model Viewer", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoCollapse);
 
-            if (ImGui.Combo("Models", ref _currentModelIndex, _models))
+            if (ImGui.Combo("Models", ref _currentModelIndex, _models, _models.Length))
             {
                 var mesh = Resources.Load<Mesh>(_models[_currentModelIndex].Replace(".mesh", ""));
                 if (mesh.Skeleton != null)
@@ -154,7 +154,7 @@ namespace ModelViewer
             if (_animations != null)
             {
                 ImGui.Separator();
-                if (ImGui.Combo("Animation", ref _currentAnimation, _animations))
+                if (ImGui.Combo("Animation", ref _currentAnimation, _animations, _animations.Length))
                 {
                     SetCurrentAnimation();
                 }
@@ -172,7 +172,7 @@ namespace ModelViewer
             ImGui.SliderFloat("Zoom speed", ref _zoomSpeed, 0.1f, 10.0f, "", 1f);
             ImGui.SliderFloat("Mouse sensitivity", ref _mouseSensivity, 0.01f, 1.0f, "", 1f);
 
-            ImGui.EndWindow();
+            ImGui.End();
         }
 
         private void SetCurrentAnimation()

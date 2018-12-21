@@ -346,21 +346,21 @@ namespace Triton.Game
             _imGuiRenderer.SubmitDrawCommands();
         }
 
-        void UpdateImGuiInput(ImGuiNET.IO io)
+        void UpdateImGuiInput(ImGuiIOPtr io)
         {
             try
             {
-                MouseState cursorState = Mouse.GetCursorState();
-                MouseState mouseState = Mouse.GetState();
+                var cursorState = Mouse.GetCursorState();
+                var mouseState = Mouse.GetState();
 
                 if (_window.Bounds.Contains(cursorState.X, cursorState.Y))
                 {
-                    Point windowPoint = _window.PointToClient(new Point(cursorState.X, cursorState.Y));
-                    io.MousePosition = new System.Numerics.Vector2(windowPoint.X / io.DisplayFramebufferScale.X, windowPoint.Y / io.DisplayFramebufferScale.Y);
+                    var windowPoint = _window.PointToClient(new Point(cursorState.X, cursorState.Y));
+                    io.MousePos = new System.Numerics.Vector2(windowPoint.X / io.DisplayFramebufferScale.X, windowPoint.Y / io.DisplayFramebufferScale.Y);
                 }
                 else
                 {
-                    io.MousePosition = new System.Numerics.Vector2(-1f, -1f);
+                    io.MousePos = new System.Numerics.Vector2(-1f, -1f);
                 }
 
                 io.MouseDown[0] = mouseState.LeftButton == ButtonState.Pressed;
@@ -395,9 +395,9 @@ namespace Triton.Game
 
             var allocatedMemory = GC.GetTotalMemory(false) / 1024 / 1024;
 
-            ImGui.SetNextWindowSize(new System.Numerics.Vector2(300, 300), Condition.Always);
-            ImGui.SetNextWindowPos(new System.Numerics.Vector2(10, 10), Condition.Always, System.Numerics.Vector2.Zero);
-            ImGui.BeginWindow("Frame stats", WindowFlags.NoResize | WindowFlags.NoMove | WindowFlags.NoCollapse);
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(300, 300));
+            ImGui.SetNextWindowPos(new System.Numerics.Vector2(10, 10));
+            ImGui.Begin("Frame stats", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoCollapse);
 
             var graphicsFrameTime = GraphicsBackend.FrameTime * 1000.0f;
             ImGui.Text($"Graphics frame time: {graphicsFrameTime:0.00}ms");
@@ -429,16 +429,16 @@ namespace Triton.Game
                 ImGui.Text($"\t{name} {section.ElapsedMs:0.00}ms");
             }
 
-            ImGui.EndWindow();
+            ImGui.End();
         }
 
         private void UpdateImGuiKeyModifiers()
         {
             var io = ImGui.GetIO();
 
-            io.AltPressed = InputManager.IsKeyDown(Input.Key.AltLeft);
-            io.CtrlPressed = InputManager.IsKeyDown(Input.Key.ControlLeft);
-            io.ShiftPressed = InputManager.IsKeyDown(Input.Key.ShiftLeft);
+            io.KeyAlt = InputManager.IsKeyDown(Input.Key.AltLeft);
+            io.KeyCtrl = InputManager.IsKeyDown(Input.Key.ControlLeft);
+            io.KeyShift = InputManager.IsKeyDown(Input.Key.ShiftLeft);
         }
 
         /// <summary>
@@ -460,8 +460,11 @@ namespace Triton.Game
 
         private unsafe void InitImGui()
         {
-            ImGui.GetIO().FontAtlas.AddDefaultFont();
+            var context = ImGui.CreateContext();
+            ImGui.SetCurrentContext(context);
+
             SetImGuiKeyMaps();
+            ImGui.GetIO().Fonts.AddFontDefault();
 
             _window.KeyDown += Window_KeyDown;
             _window.KeyUp += Window_KeyUp;
@@ -503,26 +506,27 @@ namespace Triton.Game
 
         private void SetImGuiKeyMaps()
         {
-            ImGuiNET.IO io = ImGui.GetIO();
-            io.KeyMap[GuiKey.Tab] = (int)Input.Key.Tab;
-            io.KeyMap[GuiKey.LeftArrow] = (int)Input.Key.Left;
-            io.KeyMap[GuiKey.RightArrow] = (int)Input.Key.Right;
-            io.KeyMap[GuiKey.UpArrow] = (int)Input.Key.Up;
-            io.KeyMap[GuiKey.DownArrow] = (int)Input.Key.Down;
-            io.KeyMap[GuiKey.PageUp] = (int)Input.Key.PageUp;
-            io.KeyMap[GuiKey.PageDown] = (int)Input.Key.PageDown;
-            io.KeyMap[GuiKey.Home] = (int)Input.Key.Home;
-            io.KeyMap[GuiKey.End] = (int)Input.Key.End;
-            io.KeyMap[GuiKey.Delete] = (int)Input.Key.Delete;
-            io.KeyMap[GuiKey.Backspace] = (int)Input.Key.BackSpace;
-            io.KeyMap[GuiKey.Enter] = (int)Input.Key.Enter;
-            io.KeyMap[GuiKey.Escape] = (int)Input.Key.Escape;
-            io.KeyMap[GuiKey.A] = (int)Input.Key.A;
-            io.KeyMap[GuiKey.C] = (int)Input.Key.C;
-            io.KeyMap[GuiKey.V] = (int)Input.Key.V;
-            io.KeyMap[GuiKey.X] = (int)Input.Key.X;
-            io.KeyMap[GuiKey.Y] = (int)Input.Key.Y;
-            io.KeyMap[GuiKey.Z] = (int)Input.Key.Z;
+            var io = ImGui.GetIO();
+            
+            io.KeyMap[(int)ImGuiKey.Tab] = (int)Input.Key.Tab;
+            io.KeyMap[(int)ImGuiKey.LeftArrow] = (int)Input.Key.Left;
+            io.KeyMap[(int)ImGuiKey.RightArrow] = (int)Input.Key.Right;
+            io.KeyMap[(int)ImGuiKey.UpArrow] = (int)Input.Key.Up;
+            io.KeyMap[(int)ImGuiKey.DownArrow] = (int)Input.Key.Down;
+            io.KeyMap[(int)ImGuiKey.PageUp] = (int)Input.Key.PageUp;
+            io.KeyMap[(int)ImGuiKey.PageDown] = (int)Input.Key.PageDown;
+            io.KeyMap[(int)ImGuiKey.Home] = (int)Input.Key.Home;
+            io.KeyMap[(int)ImGuiKey.End] = (int)Input.Key.End;
+            io.KeyMap[(int)ImGuiKey.Delete] = (int)Input.Key.Delete;
+            io.KeyMap[(int)ImGuiKey.Backspace] = (int)Input.Key.BackSpace;
+            io.KeyMap[(int)ImGuiKey.Enter] = (int)Input.Key.Enter;
+            io.KeyMap[(int)ImGuiKey.Escape] = (int)Input.Key.Escape;
+            io.KeyMap[(int)ImGuiKey.A] = (int)Input.Key.A;
+            io.KeyMap[(int)ImGuiKey.C] = (int)Input.Key.C;
+            io.KeyMap[(int)ImGuiKey.V] = (int)Input.Key.V;
+            io.KeyMap[(int)ImGuiKey.X] = (int)Input.Key.X;
+            io.KeyMap[(int)ImGuiKey.Y] = (int)Input.Key.Y;
+            io.KeyMap[(int)ImGuiKey.Z] = (int)Input.Key.Z;
         }
     }
 }
