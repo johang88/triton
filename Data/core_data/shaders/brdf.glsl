@@ -22,16 +22,14 @@ vec3 get_diffuse(vec3 diffuseColor, vec3 normal, vec3 viewer, vec3 light, float 
 #endif
 }
 
-vec3 f_schlick(float cosTheta, vec3 F0)
-{
+vec3 f_schlick(float cosTheta, vec3 F0) {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 } 
 
-float d_ggx(vec3 N, vec3 H, float roughness)
-{
+float d_ggx(vec3 N, vec3 H, float roughness) {
     float a      = roughness*roughness;
     float a2     = a*a;
-    float NdotH  = max(dot(N, H), 0.0);
+    float NdotH  = clamp(dot(N, H), 0.0, 1.0);
     float NdotH2 = NdotH*NdotH;
 	
     float num   = a2;
@@ -41,8 +39,7 @@ float d_ggx(vec3 N, vec3 H, float roughness)
     return num / denom;
 }
 
-float g_schlickggx(float NdotV, float roughness)
-{
+float g_schlickggx(float NdotV, float roughness) {
     float r = (roughness + 1.0);
     float k = (r*r) / 8.0;
 
@@ -51,10 +48,10 @@ float g_schlickggx(float NdotV, float roughness)
 	
     return num / denom;
 }
-float g_smith(vec3 N, vec3 V, vec3 L, float roughness)
-{
-    float NdotV = max(dot(N, V), 0.0);
-    float NdotL = max(dot(N, L), 0.0);
+
+float g_smith(vec3 N, vec3 V, vec3 L, float roughness) {
+    float NdotV = clamp(dot(N, V), 0.0, 1.0);
+    float NdotL = clamp(dot(N, L), 0.0, 1.0);
     float ggx2  = g_schlickggx(NdotV, roughness);
     float ggx1  = g_schlickggx(NdotL, roughness);
 	
@@ -73,7 +70,7 @@ vec3 brdf(vec3 N, vec3 V, vec3 L, float roughness, float metallic, vec3 radiance
 	vec3 F = f_schlick(max(dot(H, V), 0.0), F0);
 
 	vec3 numerator = NDF * G * F;
-	float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+	float denominator = 4.0 * clamp(dot(N, V), 0.0, 1.0) * clamp(dot(N, L), 0.0, 1.0);
 	vec3 specular = numerator / max(denominator, 0.001);
 
 	vec3 kS = F;

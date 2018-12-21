@@ -89,8 +89,10 @@ namespace Triton.Samples.Components
 
                 if (PhysicsWorld.Raycast(from, to, (component, _, __) => component.ColliderShape is Physics.Shapes.SphereColliderShape && component is RigidBodyComponent, out var hitComponent, out var hitNormal, out var hitFraction))
                 {
+                    var direction = to - from;
+                    direction = direction.Normalize();
                     var rigidyBodyComponent = hitComponent as RigidBodyComponent;
-                    rigidyBodyComponent.AddForce(hitNormal * 10);
+                    rigidyBodyComponent.AddForce(direction * 10);
                 }
             }
         }
