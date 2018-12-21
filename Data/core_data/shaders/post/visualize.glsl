@@ -26,6 +26,14 @@ uniform sampler2D samplerGBuffer2;
 uniform sampler2D samplerGBuffer3;
 uniform sampler2D samplerSSAO;
 uniform int visualizationMode;
+uniform vec2 cameraClipPlanes;
+
+float linearDepth(float zw) {
+	float n = cameraClipPlanes.x;
+	float f = cameraClipPlanes.y;
+
+	return (2.0 * n) / (f + n - zw * (f - n));
+}
 
 void main() {
 	vec4 gbuffer0 = texture(samplerGBuffer0, texCoord);
@@ -41,7 +49,8 @@ void main() {
 			res = gbuffer0.xyz;
 			break;
 		case 2: // depth
-			res = gbuffer3.xxx;
+			float depth = linearDepth(gbuffer3.x);
+			res = depth.xxx;
 			break;
 		case 3: // normal
 			res = decodeNormals(gbuffer1.xyz) * 0.5 + 0.5;

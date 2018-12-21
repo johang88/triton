@@ -24,7 +24,7 @@ namespace Triton.Graphics.Post.Effects
 			_shader = resourceManager.Load<Resources.ShaderProgram>("/shaders/post/visualize");
 		}
 
-		public void Render(VisualizationMode mode, RenderTarget gbuffer, RenderTarget ssao, RenderTarget input, RenderTarget output)
+		public void Render(VisualizationMode mode, Camera camera, RenderTarget gbuffer, RenderTarget ssao, RenderTarget input, RenderTarget output)
 		{
 			if (_shaderParams == null)
 			{
@@ -48,7 +48,10 @@ namespace Triton.Graphics.Post.Effects
 			_backend.BindShaderVariable(_shaderParams.SamplerSSAO, 4);
 			_backend.BindShaderVariable(_shaderParams.VisualizationMode, (int)mode);
 
-			_backend.DrawMesh(_quadMesh.MeshHandle);
+            var clipPlanes = new Vector2(camera.NearClipDistance, camera.FarClipDistance);
+			_backend.BindShaderVariable(_shaderParams.CameraClipPlanes, ref clipPlanes);
+
+            _backend.DrawMesh(_quadMesh.MeshHandle);
 
 			_backend.EndPass();
 		}
@@ -61,6 +64,7 @@ namespace Triton.Graphics.Post.Effects
 			public int SamplerGBuffer2 = 0;
 			public int SamplerGBuffer3 = 0;
 			public int SamplerSSAO = 0;
-		}
+            public int CameraClipPlanes = 0;
+        }
 	}
 }

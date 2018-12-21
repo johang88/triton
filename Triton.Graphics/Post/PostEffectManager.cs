@@ -184,7 +184,7 @@ namespace Triton.Graphics.Post
             if (VisualizationMode != VisualizationMode.None)
             {
                 // Visualize does it's own gamma, but only if it wants to (some things are linear)
-                _visualize.Render(VisualizationMode, gbuffer, _ssaoOutput, _temporaryRenderTargets[0], _temporaryRenderTargets[1]);
+                _visualize.Render(VisualizationMode, camera, gbuffer, _ssaoOutput, _temporaryRenderTargets[0], _temporaryRenderTargets[1]);
                 SwapRenderTargets();
             }
 

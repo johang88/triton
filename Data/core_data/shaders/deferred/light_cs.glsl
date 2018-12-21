@@ -69,8 +69,7 @@ float linearDepth(float zw) {
 	float n = cameraClipPlanes.x;
 	float f = cameraClipPlanes.y;
 
-	zw = 2.0 * zw - 1.0;
-	return (2 * n * f) / (f + n - zw * (f - n));
+	return (2.0 * n) / (f + n - zw * (f - n));
 }
 
 const uint ThreadGroupSize = LightTileSize * LightTileSize;

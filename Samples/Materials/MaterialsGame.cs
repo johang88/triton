@@ -42,11 +42,11 @@ namespace Triton.Samples
             PostEffectManager.HDRSettings.AutoKey = true;
             PostEffectManager.HDRSettings.TonemapOperator = Graphics.Post.TonemapOperator.ASEC;
 
-            Stage.AmbientLight = new Graphics.AmbientLight
-            {
-                Irradiance = Resources.Load<Graphics.Resources.Texture>("/textures/sky_irradiance"),
-                Specular = Resources.Load<Graphics.Resources.Texture>("/textures/sky_specular")
-            };
+            //Stage.AmbientLight = new Graphics.AmbientLight
+            //{
+            //    Irradiance = Resources.Load<Graphics.Resources.Texture>("/textures/sky_irradiance"),
+            //    Specular = Resources.Load<Graphics.Resources.Texture>("/textures/sky_specular")
+            //};
 
             Player = new GameObject();
             Player.Position = new Vector3(0, 2f, 0);
@@ -61,7 +61,7 @@ namespace Triton.Samples
             Player.Components.Add(new PlayerController());
             GameWorld.Add(Player);
 
-            var roomPrefab = Resources.Load<Prefab>("/prefabs/city");
+            var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
             roomPrefab.Instantiate(GameWorld);
 
             var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
@@ -106,7 +106,7 @@ namespace Triton.Samples
                 OuterAngle = 0.98f,
                 CastShadows = true
             });
-            GameWorld.Add(Light);
+            //GameWorld.Add(Light);
 
             Stage.ClearColor = new Vector4(1, 1, 1, 1) * 2;
 
