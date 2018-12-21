@@ -10,6 +10,7 @@ This might become a game engine sometime in the future, but right now a lot of c
 * PBR
 * FXAA, SMAA
 * Shadow Maps
+    * Point & spot light shadows
     * CSM for directional lights
     * Poisson tap PCF
 * HDR
@@ -28,7 +29,7 @@ This might become a game engine sometime in the future, but right now a lot of c
 Open up `Triton.sln` and hit compile.
 
 ## Samples
-There are several samples available in the samples folder.
+There are several samples available in the samples folder. Actually ... just the one.
 
 ## Content pipeline
 The content processor will process all media files in the specified folder and write optimized versions to the specified output folder. The `nVidia command lines tools` has to be installed and present in the PATH in order for the content processor to function properly.
@@ -38,7 +39,7 @@ Example: `ContentProcessor.exe in=..\Media out=..Data'
 ### Supported content file formats
 #### Meshes
 * Ogre mesh format
-* FBX
+* FBX + Whatever Assimp supports, probably
 
 #### Textures
 * tga
