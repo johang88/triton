@@ -124,7 +124,7 @@ namespace ModelViewer
                         _modelGameObject.Components.Add(_skinnedMeshComponent);
                     }
                     //_meshComponent.Mesh = null;
-                    
+
                     _animations = _skinnedMeshComponent.Skeleton.Animations.Select(x => x.Name).ToArray();
                     _currentAnimation = 0;
                     SetCurrentAnimation();
@@ -140,7 +140,7 @@ namespace ModelViewer
                     }
 
                     //_skinnedMeshComponent.Mesh = null;
-                    
+
                     _animations = null;
                     _animationState = null;
                 }
@@ -159,12 +159,15 @@ namespace ModelViewer
                     SetCurrentAnimation();
                 }
 
-                ImGui.Checkbox("Play", ref _animationPlay);
+                if (_animationState != null)
+                {
+                    ImGui.Checkbox("Play", ref _animationPlay);
 
-                ImGui.Checkbox("Loop", ref _animationLoop);
-                _animationState.Loop = _animationLoop;
+                    ImGui.Checkbox("Loop", ref _animationLoop);
 
-                ImGui.SliderFloat("Time", ref _animationState.TimePosition, 0.0f, _animationState.Animation.Length, $"{_animationState.TimePosition:0.00}s", 1.0f);
+                    _animationState.Loop = _animationLoop;
+                    ImGui.SliderFloat("Time", ref _animationState.TimePosition, 0.0f, _animationState.Animation.Length, $"{_animationState.TimePosition:0.00}s", 1.0f);
+                }
             }
 
             ImGui.Separator();
@@ -182,11 +185,14 @@ namespace ModelViewer
                 _animationState.Enabled = false;
             }
 
-            _animationState = _skinnedMeshComponent.GetAnimationState(_animations[_currentAnimation]);
-            _animationState.Enabled = true;
-            _animationState.TimePosition = 0.0f;
-            _animationState.Weight = 1.0f;
-            _animationState.Loop = _animationLoop;
+            if (_animations.Length > 0)
+            {
+                _animationState = _skinnedMeshComponent.GetAnimationState(_animations[_currentAnimation]);
+                _animationState.Enabled = true;
+                _animationState.TimePosition = 0.0f;
+                _animationState.Weight = 1.0f;
+                _animationState.Loop = _animationLoop;
+            }
         }
 
         protected override void Update(float frameTime)
@@ -197,7 +203,7 @@ namespace ModelViewer
             {
                 _animationState.AddTime(frameTime);
             }
-            
+
             if (!ImGui.GetIO().WantCaptureMouse)
             {
                 _cameraDistance -= InputManager.MouseWheelDelta * _zoomSpeed;

@@ -41,9 +41,9 @@ namespace Triton.Samples.Components
 
         public void NextAnimation()
         {
-            _currentAniamtion = ++_currentAniamtion % _skinnedMeshComponent.Skeleton.Animations.Length;
+            //_currentAniamtion = ++_currentAniamtion % _skinnedMeshComponent.Skeleton.Animations.Length;
 
-            SetActiveAnimation(_skinnedMeshComponent.Skeleton.Animations[_currentAniamtion].Name);
+            //SetActiveAnimation(_skinnedMeshComponent.Skeleton.Animations[_currentAniamtion].Name);
         }
 
         public override void Update(float dt)
