@@ -77,13 +77,13 @@ namespace Triton.Resources
 
         public async Task<object> LoadAsync(Type resourceType, string name, string parameters = "")
         {
-            var identifier = name + "?" + parameters;
-
             // Fetch serializer
             IResourceSerializer serializer = DefaultResourceSerializer;
             if (_resourceSerializers.ContainsKey(resourceType))
                 serializer = _resourceSerializers[resourceType];
-            
+
+            var identifier = name + serializer.Extension + "?" + parameters;
+
             await _loadingLock.WaitAsync();
 
             KnownResourceTypes.Add(resourceType);
