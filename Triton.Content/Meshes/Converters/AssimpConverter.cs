@@ -379,18 +379,16 @@ namespace Triton.Content.Meshes.Converters
 
         private void ParseParents(Dictionary<string, int> nameToIndex, Dictionary<string, int> parentIndexes, Dictionary<string, Node> nameToNode, Node node, bool isRootNode)
         {
-            if (!nameToIndex.ContainsKey(node.Name))
+            if (nameToIndex.ContainsKey(node.Name))
             {
-                return;
+                nameToNode.Add(node.Name, node);
             }
-
-            nameToNode.Add(node.Name, node);
-
+            
             if (isRootNode)
             {
                 parentIndexes.Add(node.Name, -1); // This is a root node!
             }
-            else
+            else if (nameToIndex.ContainsKey(node.Parent.Name))
             {
                 parentIndexes.Add(node.Name, nameToIndex[node.Parent.Name]);
             }

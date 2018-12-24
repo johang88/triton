@@ -20,7 +20,6 @@ namespace Triton.Samples.Components
 
             _skinnedMeshComponent = Owner.GetComponent<SkinnedMeshComponent>();
             NextAnimation();
-            //SetActiveAnimation("Soldier_walk");
         }
 
         public void SetActiveAnimation(string name)
@@ -41,9 +40,8 @@ namespace Triton.Samples.Components
 
         public void NextAnimation()
         {
-            //_currentAniamtion = ++_currentAniamtion % _skinnedMeshComponent.Skeleton.Animations.Length;
-
-            //SetActiveAnimation(_skinnedMeshComponent.Skeleton.Animations[_currentAniamtion].Name);
+            _currentAniamtion = ++_currentAniamtion % _skinnedMeshComponent.Skeleton.Animations.Length;
+            SetActiveAnimation(_skinnedMeshComponent.Skeleton.Animations[_currentAniamtion].Name);
         }
 
         public override void Update(float dt)

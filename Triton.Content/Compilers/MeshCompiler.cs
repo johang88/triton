@@ -37,8 +37,8 @@ namespace Triton.Content.Compilers
 
             if (mesh.Skeleton != null)
             {
-                mesh.SkeletonPath = contentData.Id.Substring(contentData.Id.IndexOf('/')).Replace("/models/", "/skeletons/");
-                SkeletonCompiler.SerializeSkeleton(outputPath.Replace(".mesh", ".skeleton").Replace("/models/", "/skeletons/"), mesh.Skeleton); // This is what we call a "hack"
+                mesh.SkeletonPath = contentData.Id.Substring(contentData.Id.IndexOf('/')); // A bit hacky until we can make stuff proper
+                SkeletonCompiler.SerializeSkeleton(outputPath.Replace(".mesh", ".skeleton"), mesh.Skeleton);
             }
 
 			using (var stream = File.Open(outputPath, FileMode.Create))
