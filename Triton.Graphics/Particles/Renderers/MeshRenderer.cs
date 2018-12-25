@@ -32,5 +32,10 @@ namespace Triton.Graphics.Particles.Renderers
                 }
             }
         }
+
+        public void Update(ParticleSystem particleSystem, Stage stage, float deltaTime)
+        {
+            // NOP
+        }
     }
 }

@@ -16,6 +16,9 @@ namespace Triton.Graphics.Particles
 
         [DataMember] public IParticleRenderer Renderer { get; set; }
 
+        public Vector3 Position;
+        public Quaternion Orientation;
+
         public ParticleSystem(int maxCount)
             => Particles = new ParticleData(maxCount);
 

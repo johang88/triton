@@ -101,7 +101,9 @@
     <Compile Include="Particles\ParticleData.cs" />
     <Compile Include="Particles\ParticleEmitter.cs" />
     <Compile Include="Particles\ParticleSystem.cs" />
+    <Compile Include="Particles\Renderers\BillboardRenderer.cs" />
     <Compile Include="Particles\Renderers\MeshRenderer.cs" />
+    <Compile Include="Particles\Renderers\OrientationMode.cs" />
     <Compile Include="Particles\Updaters\AttractorsUpdater.cs" />
     <Compile Include="Particles\Updaters\BasicColorUpdater.cs" />
     <Compile Include="Particles\Updaters\BasicTimeUpdater.cs" />

@@ -8,6 +8,7 @@ namespace Triton.Graphics.Particles
 {
     public interface IParticleRenderer
     {
+        void Update(ParticleSystem particleSystem, Stage stage, float deltaTime);
         void PrepareRenderOperations(ParticleSystem particleSystem, RenderOperations operations, Matrix4 worldOffset);
     }
 }

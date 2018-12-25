@@ -23,7 +23,7 @@ namespace Triton.Graphics.Components
         public override void Update(float dt)
         {
             base.Update(dt);
-
+            
             BoundingSphereRadius = 100f;
             ParticleSystem?.Update(dt);
         }
