@@ -183,7 +183,15 @@ namespace Triton
 			result = new Vector4(v.X, v.Y, v.Z, v.W);
 		}
 
-		public static bool operator ==(Vector4 left, Vector4 right)
+        public static void Lerp(ref Vector4 a, ref Vector4 b, float blend, out Vector4 result)
+        {
+            result.X = blend * (b.X - a.X) + a.X;
+            result.Y = blend * (b.Y - a.Y) + a.Y;
+            result.Z = blend * (b.Z - a.Z) + a.Z;
+            result.W = blend * (b.W - a.W) + a.W;
+        }
+
+        public static bool operator ==(Vector4 left, Vector4 right)
 		{
 			return left.Equals(right);
 		}

@@ -19,7 +19,34 @@ namespace Triton.Math
 		public const float Log10E = 0.434294482f;
 		public const float Log2E = 1.442695041f;
 
-		public static float DegreesToRadians(float degrees)
+        private static Random RNG = new Random();
+
+        public static float Random()
+        {
+            return (float)RNG.Next() / 2147483648;
+        }
+
+        public static float Random(float min, float max)
+        {
+            return min + Random() * (max - min);
+        }
+
+        public static void Random(ref Vector3 min, ref Vector3 max, out Vector3 res)
+        {
+            res.X = Random(min.X, max.X);
+            res.Y = Random(min.Y, max.Y);
+            res.Z = Random(min.Z, max.Z);
+        }
+
+        public static void Random(ref Vector4 min, ref Vector4 max, out Vector4 res)
+        {
+            res.X = Random(min.X, max.X);
+            res.Y = Random(min.Y, max.Y);
+            res.Z = Random(min.Z, max.Z);
+            res.W = Random(min.W, max.W);
+        }
+
+        public static float DegreesToRadians(float degrees)
 		{
 			const float degToRad = (float)System.Math.PI / 180.0f;
 			return degrees * degToRad;

@@ -35,7 +35,7 @@ namespace Triton.Samples
         protected override void LoadResources()
         {
             base.LoadResources();
-            
+
             Stage.ClearColor = new Triton.Vector4(255 / 255.0f, 255 / 255.0f, 255 / 255.0f, 0) * 0;
             Stage.AmbientColor = new Vector3(0.5f, 0.5f, 0.5f) * 0;
 
@@ -107,6 +107,40 @@ namespace Triton.Samples
                 CastShadows = true
             });
             //GameWorld.Add(Light);
+
+            var particles = new GameObject
+            {
+                Position = new Vector3(0, 0.1f, 0),
+            };
+            particles.Components.Add(new ParticleSystemComponent
+            {
+                Renderer = new Graphics.Particles.ParticleRenderer
+                {
+                    Mesh = Resources.Load<Mesh>("/models/sphere")
+                },
+                ParticleSystem = new Graphics.Particles.ParticleSystem(500)
+                {
+                    Emitters = new List<Graphics.Particles.ParticleEmitter>()
+                    {
+                        new Graphics.Particles.ParticleEmitter
+                        {
+                            Generators = new List<Graphics.Particles.IParticleGenerator>()
+                            {
+                                new Graphics.Particles.Generators.BasicTimeGenerator { MinTime = 0.1f, MaxTime = 0.3f },
+                                new Graphics.Particles.Generators.BasicVelocityGenerator { MinStartVelocity = new Vector3(-1, -1, -1) * 10, MaxStartVelocity = new Vector3(1, 1, 1) * 10 },
+                                new Graphics.Particles.Generators.BoxPositionGenerator() { Position = Vector3.Zero, MaxStartPosOffset = Vector3.Zero }
+                            }
+                        }
+                    },
+                    Updaters = new List<Graphics.Particles.IParticleUpdater>()
+                    {
+                        new Graphics.Particles.Updaters.BasicTimeUpdater(),
+                        new Graphics.Particles.Updaters.EulerUpdater() { GlobalAcceleration = new Vector3(0, 0, 0) },
+                        //new Graphics.Particles.Updaters.FloorUpdater() { BounceFactor = 0.5f, FloorPositionY = 0.0f }
+                    }
+                }
+            });
+            GameWorld.Add(particles);
 
             Stage.ClearColor = new Vector4(1, 1, 1, 1) * 2;
 
