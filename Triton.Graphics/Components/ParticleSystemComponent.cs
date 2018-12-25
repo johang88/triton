@@ -9,16 +9,15 @@ namespace Triton.Graphics.Components
 {
     public class ParticleSystemComponent : RenderableComponent
     {
-        [DataMember] public Particles.ParticleRenderer Renderer { get; set; }
         [DataMember] public Particles.ParticleSystem ParticleSystem { get; set; }
 
         public override void PrepareRenderOperations(RenderOperations operations)
         {
-            if (Renderer == null || ParticleSystem == null)
+            if (ParticleSystem == null || ParticleSystem.Renderer == null)
                 return;
 
             Owner.GetWorldMatrix(out var world);
-            Renderer.PrepareRenderOperations(ParticleSystem, operations, world);
+            ParticleSystem.Renderer.PrepareRenderOperations(ParticleSystem, operations, world);
         }
 
         public override void Update(float dt)

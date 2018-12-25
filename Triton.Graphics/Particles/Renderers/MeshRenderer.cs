@@ -5,9 +5,9 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Triton.Graphics.Particles
+namespace Triton.Graphics.Particles.Renderers
 {
-    public class ParticleRenderer
+    public class MeshRenderer : IParticleRenderer
     {
         [DataMember] public Resources.Mesh Mesh { get; set; }
 
@@ -21,7 +21,7 @@ namespace Triton.Graphics.Particles
 
             // TODO: this is very efficent ...
             var particles = particleSystem.Particles;
-            for (var i =0; i< particles.AliveCount; i++)
+            for (var i = 0; i < particles.AliveCount; i++)
             {
                 Matrix4.CreateTranslation(ref particles.Position[i], out var translation);
                 Matrix4.Mult(ref worldOffset, ref translation, out var world);

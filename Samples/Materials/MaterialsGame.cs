@@ -114,12 +114,12 @@ namespace Triton.Samples
             };
             particles.Components.Add(new ParticleSystemComponent
             {
-                Renderer = new Graphics.Particles.ParticleRenderer
-                {
-                    Mesh = Resources.Load<Mesh>("/models/sphere")
-                },
                 ParticleSystem = new Graphics.Particles.ParticleSystem(500)
                 {
+                    Renderer = new Graphics.Particles.Renderers.MeshRenderer
+                    {
+                        Mesh = Resources.Load<Mesh>("/models/sphere")
+                    },
                     Emitters = new List<Graphics.Particles.ParticleEmitter>()
                     {
                         new Graphics.Particles.ParticleEmitter

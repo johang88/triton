@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,15 +9,15 @@ namespace Triton.Graphics.Particles
 {
     public class ParticleSystem
     {
-        public ParticleData Particles;
+        public ParticleData Particles { get; }
 
-        public List<ParticleEmitter> Emitters = new List<ParticleEmitter>();
-        public List<IParticleUpdater> Updaters = new List<IParticleUpdater>();
+        [DataMember] public List<ParticleEmitter> Emitters { get; set; } = new List<ParticleEmitter>();
+        [DataMember] public List<IParticleUpdater> Updaters { get; set; } = new List<IParticleUpdater>();
+
+        [DataMember] public IParticleRenderer Renderer { get; set; }
 
         public ParticleSystem(int maxCount)
-        {
-            Particles = new ParticleData(maxCount);
-        }
+            => Particles = new ParticleData(maxCount);
 
         public void Update(float deltaTime)
         {
@@ -32,8 +33,6 @@ namespace Triton.Graphics.Particles
         }
 
         public void Reset()
-        {
-            Particles.AliveCount = 0;
-        }
+            => Particles.AliveCount = 0;
     }
 }

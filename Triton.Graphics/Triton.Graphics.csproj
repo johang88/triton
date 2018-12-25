@@ -96,11 +96,12 @@
     <Compile Include="Particles\Generators\BoxPositionGenerator.cs" />
     <Compile Include="Particles\Generators\CirclePositionGenerator.cs" />
     <Compile Include="Particles\IParticleGenerator.cs" />
+    <Compile Include="Particles\IParticleRenderer.cs" />
     <Compile Include="Particles\IParticleUpdater.cs" />
     <Compile Include="Particles\ParticleData.cs" />
     <Compile Include="Particles\ParticleEmitter.cs" />
-    <Compile Include="Particles\ParticleRenderer.cs" />
     <Compile Include="Particles\ParticleSystem.cs" />
+    <Compile Include="Particles\Renderers\MeshRenderer.cs" />
     <Compile Include="Particles\Updaters\AttractorsUpdater.cs" />
     <Compile Include="Particles\Updaters\BasicColorUpdater.cs" />
     <Compile Include="Particles\Updaters\BasicTimeUpdater.cs" />
