@@ -91,14 +91,14 @@ void main()
 			vec2 brdf = texture(samplerSpecularIntegration, vec2(vDotN, 1.0 - roughness)).rg;
 			vec3 specular = specularIBL * (F * brdf.x + brdf.y);
 
-			lighting = ((kD * irradianceIBL * diffuse) + specular) * occlusion * ssao;
+			lighting = ((kD * irradianceIBL * diffuse) + specular);
 		} else {
 			vec3 ambient = mix(ambientColor * 0.1, ambientColor, N.y * 0.5 + 1.0);
 
 			lighting = ambient * diffuse;
 		}
 
-		oColor = vec4(lighting, 1.0);
+		oColor = vec4(lighting * occlusion * ssao, 1.0);
 	}
 }
 #endif

@@ -304,7 +304,7 @@ namespace Triton.Game
             GraphicsBackend.ProfileBeginSection(Profiler.SSAO);
             var ssao = PostEffectManager.RenderSSAO(Camera, gbuffer);
             GraphicsBackend.ProfileEndSection(Profiler.SSAO);
-            var lightOutput = DeferredRenderer.RenderLighting(Stage, Camera, shadows);
+            var lightOutput = DeferredRenderer.RenderLighting(Stage, Camera, shadows, ssao);
             var postProcessedResult = PostEffectManager.Render(Camera, Stage, gbuffer, lightOutput, deltaTime);
 
             GraphicsBackend.BeginPass(null, Vector4.Zero, ClearFlags.Color);

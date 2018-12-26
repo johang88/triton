@@ -125,6 +125,7 @@ namespace Triton.Graphics.Post.Effects
             _backend.BindShaderVariable(_shaderParams.ItView, ref itViewMatrix);
             _backend.BindShaderVariable(_shaderParams.Proj, ref projectionMatrix);
             _backend.BindShaderVariable(_shaderParams.SampleKernel, ref _sampleKernel);
+            _backend.BindShaderVariable(_shaderParams.CameraPosition, ref camera.Position);
 
             var tanHalfFov = (float)System.Math.Tan(camera.Fov / 2.0f);
             var aspectRatio = camera.Viewport.X / camera.Viewport.Y;
@@ -165,6 +166,7 @@ namespace Triton.Graphics.Post.Effects
             public int AspectRatio = 0;
             public int SampleKernel = 0;
             public int SamplerNoise = 0;
+            public int CameraPosition = 0;
         }
     }
 }

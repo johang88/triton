@@ -208,7 +208,7 @@ namespace Triton.Graphics.Deferred
             return _gbuffer;
         }
 
-        public RenderTarget RenderLighting(Stage stage, Camera camera, RenderTarget shadowBuffer)
+        public RenderTarget RenderLighting(Stage stage, Camera camera, RenderTarget shadowBuffer, RenderTarget ssao)
         {
             Initialize();
 
@@ -225,7 +225,7 @@ namespace Triton.Graphics.Deferred
 
             _backend.BeginPass(_lightAccumulationTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), ClearFlags.All);
             RenderLights(camera, ref view, ref projection, stage.GetLights(), stage);
-            RenderAmbientLight(camera, stage);
+            RenderAmbientLight(camera, stage, ssao);
 
             _backend.EndPass();
             _backend.ProfileEndSection(Profiler.Lighting);
@@ -271,7 +271,7 @@ namespace Triton.Graphics.Deferred
             }
         }
 
-        private void RenderAmbientLight(Camera camera, Stage stage)
+        private void RenderAmbientLight(Camera camera, Stage stage, RenderTarget ssao)
         {
             Matrix4 modelViewProjection = Matrix4.Identity;
 
@@ -285,8 +285,8 @@ namespace Triton.Graphics.Deferred
             //var ambientColor = new Vector3((float)System.Math.Pow(stage.AmbientColor.X, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Y, 2.2f), (float)System.Math.Pow(stage.AmbientColor.Z, 2.2f));
             var ambientColor = stage.AmbientColor;
             _backend.BeginInstance(_ambientLightShader.Handle,
-                new int[] { _gbuffer.Textures[0].Handle, _gbuffer.Textures[1].Handle, _gbuffer.Textures[2].Handle, _gbuffer.Textures[3].Handle, irradianceHandle, specularHandle, _specularIntegarion.Handle },
-                new int[] { _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSampler, _backend.DefaultSampler, _backend.DefaultSamplerNoFiltering },
+                new int[] { _gbuffer.Textures[0].Handle, _gbuffer.Textures[1].Handle, _gbuffer.Textures[2].Handle, _gbuffer.Textures[3].Handle, irradianceHandle, specularHandle, _specularIntegarion.Handle, ssao.Textures[0].Handle },
+                new int[] { _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSampler, _backend.DefaultSampler, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering },
                 _ambientRenderState);
             _backend.BindShaderVariable(_ambientLightParams.SamplerGBuffer0, 0);
             _backend.BindShaderVariable(_ambientLightParams.SamplerGBuffer1, 1);
@@ -295,6 +295,7 @@ namespace Triton.Graphics.Deferred
             _backend.BindShaderVariable(_ambientLightParams.SamplerIrradiance, 4);
             _backend.BindShaderVariable(_ambientLightParams.SamplerSpecular, 5);
             _backend.BindShaderVariable(_ambientLightParams.SamplerSpecularIntegration, 6);
+            _backend.BindShaderVariable(_ambientLightParams.SamplerSSAO, 7);
             _backend.BindShaderVariable(_ambientLightParams.ModelViewProjection, ref modelViewProjection);
             _backend.BindShaderVariable(_ambientLightParams.AmbientColor, ref ambientColor);
             _backend.BindShaderVariable(_ambientLightParams.Mode, irradianceHandle == 0 ? 0 : 1);

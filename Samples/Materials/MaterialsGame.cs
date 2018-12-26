@@ -23,6 +23,9 @@ namespace Triton.Samples
 
         private List<GameObject> _balls = new List<GameObject>();
 
+        private float _rotationX = 0.43f;
+        private float _rotationY = -0.38f;
+
         public MaterialsGame()
             : base("Materials")
         {
@@ -96,12 +99,12 @@ namespace Triton.Samples
             Light = new GameObject
             {
                 Position = new Vector3(0, 0.4f, 0),
-                Orientation = Quaternion.FromAxisAngle(Vector3.UnitX, 0.45f) * Quaternion.FromAxisAngle(Vector3.UnitY, -0.35f)
+                Orientation = Quaternion.FromAxisAngle(Vector3.UnitX, 0.43f) * Quaternion.FromAxisAngle(Vector3.UnitY, -0.38f)
             };
             Light.Components.Add(new LightComponent
             {
                 Type = Graphics.LighType.Directional,
-                Intensity = 10,
+                Intensity = 20,
                 Color = new Vector3(1.1f, 1, 1),
                 Range = 100,
                 InnerAngle = 0.94f,
@@ -166,12 +169,15 @@ namespace Triton.Samples
                 CursorVisible = !CursorVisible;
             }
 
-            //Light.Orientation *= Quaternion.FromAxisAngle(Vector3.UnitY, frameTime);
+            Light.Orientation = Quaternion.FromAxisAngle(Vector3.UnitX, _rotationX) * Quaternion.FromAxisAngle(Vector3.UnitY, _rotationY);
         }
 
         protected override void RenderUI(float deltaTime)
         {
             base.RenderUI(deltaTime);
+
+            ImGui.SliderFloat("LightRotation X", ref _rotationX, -3.14f, 3.14f);
+            ImGui.SliderFloat("LightRotation Y", ref _rotationY, -3.14f, 3.14f);
         }
     }
 }
