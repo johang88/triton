@@ -315,6 +315,23 @@ namespace Triton.Game
 
                 SpriteRenderer.RenderQuad(DeferredRenderer.PointShadowAtlas.Textures[0], new Vector2(x - 256 - 10, y), new Vector2(256, 256));
                 SpriteRenderer.RenderQuad(DeferredRenderer.SpotShadowAtlas.Textures[0], new Vector2(x, y), new Vector2(256, 256));
+
+                
+
+                if (csm != null)
+                {
+                    x = _window.Width;
+                    y = RequestedHeight - 256 - 10;
+
+                    var cascadeOffset = 256 + 10;
+                    var xOffset = csm.Count * (cascadeOffset);
+
+                    for (var i = 0; i < csm.Count; i++)
+                    {
+                        SpriteRenderer.RenderQuad(csm[i].Textures[0], new Vector2(x - xOffset + (i * cascadeOffset), y), new Vector2(256, 256));
+                    }
+                }
+
                 SpriteRenderer.Render(_window.Width, _window.Height);
             }
 

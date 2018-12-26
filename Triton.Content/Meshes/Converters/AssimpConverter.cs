@@ -17,12 +17,13 @@ namespace Triton.Content.Meshes.Converters
         {
             using (var importer = new AssimpContext())
             {
+                //var log = new Assimp.ConsoleLogStream();
+                //log.Attach();
+
                 var mesh = new Mesh();
 
                 importer.SetConfig(new Assimp.Configs.VertexBoneWeightLimitConfig(4));
-
-                var model = importer.ImportFile(filename, PostProcessSteps.CalculateTangentSpace | PostProcessSteps.Triangulate
-                    | PostProcessSteps.GenerateNormals | PostProcessSteps.LimitBoneWeights | PostProcessSteps.FlipUVs);
+                var model = importer.ImportFile(filename, PostProcessSteps.CalculateTangentSpace | PostProcessSteps.LimitBoneWeights | PostProcessSteps.FlipUVs);
 
                 var nameToIndex = new Dictionary<string, int>();
                 ParseSkeleton(mesh, model, nameToIndex);

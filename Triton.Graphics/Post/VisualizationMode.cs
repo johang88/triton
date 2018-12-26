@@ -15,5 +15,6 @@ namespace Triton.Graphics.Post
 		Roughness,
 		Metallic,
 		Specular,
+        Occlusion
 	}
 }

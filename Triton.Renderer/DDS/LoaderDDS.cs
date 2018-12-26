@@ -103,6 +103,8 @@ namespace Triton.Renderer.DDS
             DXT3 = 0x33545844,
             DXT4 = 0x34545844,
             DXT5 = 0x35545844,
+
+            BC5_UNORM = 843666497
         }
 
         [Flags] // dwCaps1
@@ -293,6 +295,11 @@ namespace Triton.Renderer.DDS
                             _bytesPerBlock = 16;
                             pixelType = OGL.PixelType.Float;
                             break;
+                        case eFOURCC.BC5_UNORM:
+                            _pixelInternalFormat = (OGL.PixelInternalFormat)(int)OpenTK.Graphics.OpenGL4.PixelInternalFormat.CompressedRgRgtc2;
+                            _isCompressed = true;
+                            _bytesPerBlock = 16;
+                            break;
                         default:
                             throw Unfinished; // handle uncompressed formats 
                     }
@@ -424,12 +431,12 @@ namespace Triton.Renderer.DDS
                             #endregion Create TexImage
 
                             #region Query Success
-                            //GLError = GL.GetError();
-                            //if (GLError != ErrorCode.NoError)
-                            //{
-                            //    GL.DeleteTextures(1, ref texturehandle);
-                            //    throw new ArgumentException("ERROR: Something went wrong after GL.CompressedTexImage(); Last GL Error: " + GLError.ToString());
-                            //}
+                            GLError = GL.GetError();
+                            if (GLError != ErrorCode.NoError)
+                            {
+                                GL.DeleteTextures(1, ref texturehandle);
+                                throw new ArgumentException("ERROR: Something went wrong after GL.CompressedTexImage(); Last GL Error: " + GLError.ToString());
+                            }
                             #endregion Query Success
                         }
                         else

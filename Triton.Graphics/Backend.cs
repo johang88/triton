@@ -15,6 +15,7 @@ using Triton.Graphics.Resources;
 using Triton.Resources;
 using Triton.Utility;
 using Triton.IO;
+using System.Runtime.CompilerServices;
 
 namespace Triton.Graphics
 {
@@ -50,6 +51,8 @@ namespace Triton.Graphics
 
         private CommandBuffer _primaryBuffer = new CommandBuffer();
         private CommandBuffer _secondaryBuffer = new CommandBuffer();
+
+        private BinaryWriter _writer = null;
 
         private Profiler _primaryProfiler;
         public Profiler SecondaryProfiler;
@@ -587,6 +590,7 @@ namespace Triton.Graphics
         public void BeginScene()
         {
             _primaryBuffer.Stream.Position = 0;
+            _writer = _primaryBuffer.Writer;
         }
 
         /// <summary>
@@ -607,18 +611,18 @@ namespace Triton.Graphics
 
         public void ChangeRenderTarget(RenderTarget renderTarget)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.ChangeRenderTarget);
+            _writer.Write((byte)OpCode.ChangeRenderTarget);
             if (renderTarget == null)
             {
-                _primaryBuffer.Writer.Write(0);
-                _primaryBuffer.Writer.Write(Width);
-                _primaryBuffer.Writer.Write(Height);
+                _writer.Write(0);
+                _writer.Write(Width);
+                _writer.Write(Height);
             }
             else
             {
-                _primaryBuffer.Writer.Write(renderTarget.Handle);
-                _primaryBuffer.Writer.Write(renderTarget.Width);
-                _primaryBuffer.Writer.Write(renderTarget.Height);
+                _writer.Write(renderTarget.Handle);
+                _writer.Write(renderTarget.Width);
+                _writer.Write(renderTarget.Height);
             }
         }
 
@@ -629,21 +633,21 @@ namespace Triton.Graphics
         /// <param name="clearColor"></param>
         public void BeginPass(RenderTarget renderTarget)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BeginPass);
+            _writer.Write((byte)OpCode.BeginPass);
             if (renderTarget == null)
             {
-                _primaryBuffer.Writer.Write(0);
-                _primaryBuffer.Writer.Write(Width);
-                _primaryBuffer.Writer.Write(Height);
+                _writer.Write(0);
+                _writer.Write(Width);
+                _writer.Write(Height);
             }
             else
             {
-                _primaryBuffer.Writer.Write(renderTarget.Handle);
-                _primaryBuffer.Writer.Write(renderTarget.Width);
-                _primaryBuffer.Writer.Write(renderTarget.Height);
+                _writer.Write(renderTarget.Handle);
+                _writer.Write(renderTarget.Width);
+                _writer.Write(renderTarget.Height);
             }
 
-            _primaryBuffer.Writer.Write(false);
+            _writer.Write(false);
         }
 
         /// <summary>
@@ -653,38 +657,38 @@ namespace Triton.Graphics
         /// <param name="clearColor"></param>
         public void BeginPass(RenderTarget renderTarget, Vector4 clearColor, ClearFlags clearFlags = ClearFlags.Depth | ClearFlags.Color)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BeginPass);
+            _writer.Write((byte)OpCode.BeginPass);
             if (renderTarget == null)
             {
-                _primaryBuffer.Writer.Write(0);
-                _primaryBuffer.Writer.Write(Width);
-                _primaryBuffer.Writer.Write(Height);
+                _writer.Write(0);
+                _writer.Write(Width);
+                _writer.Write(Height);
             }
             else
             {
-                _primaryBuffer.Writer.Write(renderTarget.Handle);
-                _primaryBuffer.Writer.Write(renderTarget.Width);
-                _primaryBuffer.Writer.Write(renderTarget.Height);
+                _writer.Write(renderTarget.Handle);
+                _writer.Write(renderTarget.Width);
+                _writer.Write(renderTarget.Height);
             }
 
-            _primaryBuffer.Writer.Write(true);
-            _primaryBuffer.Writer.Write(clearColor);
-            _primaryBuffer.Writer.Write((byte)clearFlags);
+            _writer.Write(true);
+            _writer.Write(clearColor);
+            _writer.Write((byte)clearFlags);
         }
 
         public void BeginPass(RenderTarget renderTarget, Vector4 clearColor, int x, int y, int w, int h, ClearFlags clearFlags = ClearFlags.Depth | ClearFlags.Color)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BeginPass2);
-            _primaryBuffer.Writer.Write(renderTarget?.Handle ?? 0);
+            _writer.Write((byte)OpCode.BeginPass2);
+            _writer.Write(renderTarget?.Handle ?? 0);
 
-            _primaryBuffer.Writer.Write(x);
-            _primaryBuffer.Writer.Write(y);
-            _primaryBuffer.Writer.Write(w);
-            _primaryBuffer.Writer.Write(h);
+            _writer.Write(x);
+            _writer.Write(y);
+            _writer.Write(w);
+            _writer.Write(h);
 
-            _primaryBuffer.Writer.Write(true);
-            _primaryBuffer.Writer.Write(clearColor);
-            _primaryBuffer.Writer.Write((byte)clearFlags);
+            _writer.Write(true);
+            _writer.Write(clearColor);
+            _writer.Write((byte)clearFlags);
         }
 
         /// <summary>
@@ -692,7 +696,7 @@ namespace Triton.Graphics
         /// </summary>
         public void EndPass()
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.EndPass);
+            _writer.Write((byte)OpCode.EndPass);
         }
 
         /// <summary>
@@ -702,36 +706,36 @@ namespace Triton.Graphics
         /// <param name="textures"></param>
         public void BeginInstance(int shaderHandle, int[] textures, int[] samplers, int renderStateId = 0)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BeginInstance);
+            _writer.Write((byte)OpCode.BeginInstance);
 
-            _primaryBuffer.Writer.Write(shaderHandle);
+            _writer.Write(shaderHandle);
             if (textures != null)
             {
-                _primaryBuffer.Writer.Write(textures.Length);
+                _writer.Write(textures.Length);
 
                 for (var i = 0; i < textures.Length; i++)
                 {
-                    _primaryBuffer.Writer.Write(textures[i]);
+                    _writer.Write(textures[i]);
                 }
             }
             else
             {
-                _primaryBuffer.Writer.Write(0);
+                _writer.Write(0);
             }
 
-            _primaryBuffer.Writer.Write(renderStateId);
+            _writer.Write(renderStateId);
 
             if (samplers != null)
             {
-                _primaryBuffer.Writer.Write(samplers.Length);
+                _writer.Write(samplers.Length);
                 foreach (var sampler in samplers)
                 {
-                    _primaryBuffer.Writer.Write(sampler);
+                    _writer.Write(sampler);
                 }
             }
             else
             {
-                _primaryBuffer.Writer.Write(0);
+                _writer.Write(0);
             }
         }
 
@@ -746,71 +750,73 @@ namespace Triton.Graphics
         /// </summary>
         /// <param name="uniformHandle"></param>
         /// <param name="value"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BindShaderVariable(int uniformHandle, ref Matrix4 value)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableMatrix4);
-            _primaryBuffer.Writer.Write(uniformHandle);
+            _writer.Write((byte)OpCode.BindShaderVariableMatrix4);
+            _writer.Write(uniformHandle);
 
-            _primaryBuffer.Writer.Write(ref value);
+            _writer.Write(ref value);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BindShaderVariable(int uniformHandle, uint v0, uint v1)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableUint2);
-            _primaryBuffer.Writer.Write(uniformHandle);
+            _writer.Write((byte)OpCode.BindShaderVariableUint2);
+            _writer.Write(uniformHandle);
 
-            _primaryBuffer.Writer.Write(v0);
-            _primaryBuffer.Writer.Write(v1);
+            _writer.Write(v0);
+            _writer.Write(v1);
         }
 
         public void BindShaderVariable(int uniformHandle, ref int[] value)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableIntArray);
-            _primaryBuffer.Writer.Write(uniformHandle);
+            _writer.Write((byte)OpCode.BindShaderVariableIntArray);
+            _writer.Write(uniformHandle);
 
-            _primaryBuffer.Writer.Write(value.Length);
+            _writer.Write(value.Length);
             for (var i = 0; i < value.Length; i++)
-                _primaryBuffer.Writer.Write(value[i]);
+                _writer.Write(value[i]);
         }
 
         public void BindShaderVariable(int uniformHandle, ref float[] value)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableFloatArray);
-            _primaryBuffer.Writer.Write(uniformHandle);
+            _writer.Write((byte)OpCode.BindShaderVariableFloatArray);
+            _writer.Write(uniformHandle);
 
-            _primaryBuffer.Writer.Write(value.Length);
+            _writer.Write(value.Length);
             for (var i = 0; i < value.Length; i++)
-                _primaryBuffer.Writer.Write(value[i]);
+                _writer.Write(value[i]);
         }
 
         public void BindShaderVariable(int uniformHandle, ref Vector3[] value)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableVector3Array);
-            _primaryBuffer.Writer.Write(uniformHandle);
+            _writer.Write((byte)OpCode.BindShaderVariableVector3Array);
+            _writer.Write(uniformHandle);
 
-            _primaryBuffer.Writer.Write(value.Length);
+            _writer.Write(value.Length);
             for (var i = 0; i < value.Length; i++)
-                _primaryBuffer.Writer.Write(ref value[i]);
+                _writer.Write(ref value[i]);
         }
 
         public void BindShaderVariable(int uniformHandle, ref Vector4[] value)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableVector4Array);
-            _primaryBuffer.Writer.Write(uniformHandle);
+            _writer.Write((byte)OpCode.BindShaderVariableVector4Array);
+            _writer.Write(uniformHandle);
 
-            _primaryBuffer.Writer.Write(value.Length);
+            _writer.Write(value.Length);
             for (var i = 0; i < value.Length; i++)
-                _primaryBuffer.Writer.Write(ref value[i]);
+                _writer.Write(ref value[i]);
         }
 
         public void BindShaderVariable(int uniformHandle, ref Matrix4[] value)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableMatrix4Array);
-            _primaryBuffer.Writer.Write(uniformHandle);
+            _writer.Write((byte)OpCode.BindShaderVariableMatrix4Array);
+            _writer.Write(uniformHandle);
 
-            _primaryBuffer.Writer.Write(value.Length);
+            _writer.Write(value.Length);
             for (var i = 0; i < value.Length; i++)
-                _primaryBuffer.Writer.Write(ref value[i]);
+                _writer.Write(ref value[i]);
         }
 
         /// <summary>
@@ -818,11 +824,12 @@ namespace Triton.Graphics
         /// </summary>
         /// <param name="uniformHandle"></param>
         /// <param name="value"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BindShaderVariable(int uniformHandle, int value)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableInt);
-            _primaryBuffer.Writer.Write(uniformHandle);
-            _primaryBuffer.Writer.Write(value);
+            _writer.Write((byte)OpCode.BindShaderVariableInt);
+            _writer.Write(uniformHandle);
+            _writer.Write(value);
         }
 
         /// <summary>
@@ -830,11 +837,12 @@ namespace Triton.Graphics
         /// </summary>
         /// <param name="uniformHandle"></param>
         /// <param name="value"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BindShaderVariable(int uniformHandle, float value)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableFloat);
-            _primaryBuffer.Writer.Write(uniformHandle);
-            _primaryBuffer.Writer.Write(value);
+            _writer.Write((byte)OpCode.BindShaderVariableFloat);
+            _writer.Write(uniformHandle);
+            _writer.Write(value);
         }
 
         /// <summary>
@@ -842,11 +850,12 @@ namespace Triton.Graphics
         /// </summary>
         /// <param name="uniformHandle"></param>
         /// <param name="value"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BindShaderVariable(int uniformHandle, ref Vector4 value)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableVector4);
-            _primaryBuffer.Writer.Write(uniformHandle);
-            _primaryBuffer.Writer.Write(value);
+            _writer.Write((byte)OpCode.BindShaderVariableVector4);
+            _writer.Write(uniformHandle);
+            _writer.Write(value);
         }
 
         /// <summary>
@@ -854,11 +863,12 @@ namespace Triton.Graphics
         /// </summary>
         /// <param name="uniformHandle"></param>
         /// <param name="value"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BindShaderVariable(int uniformHandle, ref Vector3 value)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableVector3);
-            _primaryBuffer.Writer.Write(uniformHandle);
-            _primaryBuffer.Writer.Write(value);
+            _writer.Write((byte)OpCode.BindShaderVariableVector3);
+            _writer.Write(uniformHandle);
+            _writer.Write(value);
         }
 
         /// <summary>
@@ -866,11 +876,12 @@ namespace Triton.Graphics
         /// </summary>
         /// <param name="uniformHandle"></param>
         /// <param name="value"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BindShaderVariable(int uniformHandle, ref Vector2 value)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BindShaderVariableVector2);
-            _primaryBuffer.Writer.Write(uniformHandle);
-            _primaryBuffer.Writer.Write(value);
+            _writer.Write((byte)OpCode.BindShaderVariableVector2);
+            _writer.Write(uniformHandle);
+            _writer.Write(value);
         }
 
         /// <summary>
@@ -878,24 +889,27 @@ namespace Triton.Graphics
         /// BeginInstance has to be called before calling this and all shader variables should be bound
         /// </summary>
         /// <param name="handle"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void DrawMesh(int handle)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.DrawMesh);
-            _primaryBuffer.Writer.Write(handle);
+            _writer.Write((byte)OpCode.DrawMesh);
+            _writer.Write(handle);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void DrawMeshOffset(int handle, int offset, int count)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.DrawMeshOffset);
-            _primaryBuffer.Writer.Write(handle);
-            _primaryBuffer.Writer.Write(offset);
-            _primaryBuffer.Writer.Write(count);
+            _writer.Write((byte)OpCode.DrawMeshOffset);
+            _writer.Write(handle);
+            _writer.Write(offset);
+            _writer.Write(count);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void DrawMeshTesselated(int handle)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.DrawMeshTesselated);
-            _primaryBuffer.Writer.Write(handle);
+            _writer.Write((byte)OpCode.DrawMeshTesselated);
+            _writer.Write(handle);
         }
 
         /// <summary>
@@ -903,12 +917,13 @@ namespace Triton.Graphics
         /// </summary>
         /// <param name="handle"></param>
         /// <param name="instanceCount"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void DrawMeshInstanced(int handle, int instanceCount, int instanceBufferId)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.DrawMeshInstanced);
-            _primaryBuffer.Writer.Write(handle);
-            _primaryBuffer.Writer.Write(instanceCount);
-            _primaryBuffer.Writer.Write(instanceBufferId);
+            _writer.Write((byte)OpCode.DrawMeshInstanced);
+            _writer.Write(handle);
+            _writer.Write(instanceCount);
+            _writer.Write(instanceBufferId);
         }
 
         /// <summary>
@@ -916,41 +931,41 @@ namespace Triton.Graphics
         /// </summary>
         public void UpdateMeshInline(int handle, int triangleCount, int vertexCount, int indexCount, float[] vertexData, int[] indexData, bool stream)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.UpdateMesh);
-            _primaryBuffer.Writer.Write(handle);
-            _primaryBuffer.Writer.Write(triangleCount);
-            _primaryBuffer.Writer.Write(stream);
+            _writer.Write((byte)OpCode.UpdateMesh);
+            _writer.Write(handle);
+            _writer.Write(triangleCount);
+            _writer.Write(stream);
 
-            _primaryBuffer.Writer.Write(vertexCount);
-            _primaryBuffer.Writer.Write(indexCount);
+            _writer.Write(vertexCount);
+            _writer.Write(indexCount);
 
             for (var i = 0; i < vertexCount; i++)
             {
-                _primaryBuffer.Writer.Write(vertexData[i]);
+                _writer.Write(vertexData[i]);
             }
 
             for (var i = 0; i < indexCount; i++)
             {
-                _primaryBuffer.Writer.Write(indexData[i]);
+                _writer.Write(indexData[i]);
             }
         }
 
         public void UpdateBufferInline(int handle, int dataCount, Matrix4[] data)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.UpdateBuffer);
-            _primaryBuffer.Writer.Write(handle);
-            _primaryBuffer.Writer.Write(dataCount * sizeof(float) * 16);
+            _writer.Write((byte)OpCode.UpdateBuffer);
+            _writer.Write(handle);
+            _writer.Write(dataCount * sizeof(float) * 16);
             for (var i = 0; i < dataCount; i++)
             {
-                _primaryBuffer.Writer.Write(ref data[i]);
+                _writer.Write(ref data[i]);
             }
         }
 
         public unsafe void UpdateBufferInline(int handle, int size, byte* data)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.UpdateBuffer);
-            _primaryBuffer.Writer.Write(handle);
-            _primaryBuffer.Writer.Write(size);
+            _writer.Write((byte)OpCode.UpdateBuffer);
+            _writer.Write(handle);
+            _writer.Write(size);
 
             var buffer = ((MemoryStream)_primaryBuffer.Writer.BaseStream).GetBuffer();
             var offset = _primaryBuffer.Writer.BaseStream.Position;
@@ -968,66 +983,66 @@ namespace Triton.Graphics
 
         public void GenerateMips(int textureHandle)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.GenerateMips);
-            _primaryBuffer.Writer.Write(textureHandle);
+            _writer.Write((byte)OpCode.GenerateMips);
+            _writer.Write(textureHandle);
         }
 
         public void ProfileBeginSection(HashedString name)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.ProfileBegin);
-            _primaryBuffer.Writer.Write((int)name);
+            _writer.Write((byte)OpCode.ProfileBegin);
+            _writer.Write((int)name);
         }
 
         public void ProfileEndSection(HashedString name)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.ProfileEnd);
-            _primaryBuffer.Writer.Write((int)name);
+            _writer.Write((byte)OpCode.ProfileEnd);
+            _writer.Write((int)name);
         }
 
         public void DispatchCompute(int numGroupsX, int numGroupsY, int numGroupsZ)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.DispatchCompute);
-            _primaryBuffer.Writer.Write(numGroupsX);
-            _primaryBuffer.Writer.Write(numGroupsY);
-            _primaryBuffer.Writer.Write(numGroupsZ);
+            _writer.Write((byte)OpCode.DispatchCompute);
+            _writer.Write(numGroupsX);
+            _writer.Write(numGroupsY);
+            _writer.Write(numGroupsZ);
         }
 
         public void Barrier(OpenTK.Graphics.OpenGL.MemoryBarrierFlags barrier)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.Barrier);
-            _primaryBuffer.Writer.Write((int)barrier);
+            _writer.Write((byte)OpCode.Barrier);
+            _writer.Write((int)barrier);
         }
 
         public void WireFrame(bool enable)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.WireFrame);
-            _primaryBuffer.Writer.Write(enable);
+            _writer.Write((byte)OpCode.WireFrame);
+            _writer.Write(enable);
         }
 
         public void Scissor(bool enable, int x, int y, int w, int h)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.Scissor);
-            _primaryBuffer.Writer.Write(enable);
-            _primaryBuffer.Writer.Write(x);
-            _primaryBuffer.Writer.Write(y);
-            _primaryBuffer.Writer.Write(w);
-            _primaryBuffer.Writer.Write(h);
+            _writer.Write((byte)OpCode.Scissor);
+            _writer.Write(enable);
+            _writer.Write(x);
+            _writer.Write(y);
+            _writer.Write(w);
+            _writer.Write(h);
         }
 
         public void BindImageTexture(int unit, int texture, OGL.TextureAccess access, OGL.SizedInternalFormat format)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BindImageTexture);
-            _primaryBuffer.Writer.Write(unit);
-            _primaryBuffer.Writer.Write(texture);
-            _primaryBuffer.Writer.Write((int)access);
-            _primaryBuffer.Writer.Write((int)format);
+            _writer.Write((byte)OpCode.BindImageTexture);
+            _writer.Write(unit);
+            _writer.Write(texture);
+            _writer.Write((int)access);
+            _writer.Write((int)format);
         }
 
         public void BindBufferBase(int index, int handle)
         {
-            _primaryBuffer.Writer.Write((byte)OpCode.BindBufferBase);
-            _primaryBuffer.Writer.Write(index);
-            _primaryBuffer.Writer.Write(handle);
+            _writer.Write((byte)OpCode.BindBufferBase);
+            _writer.Write(index);
+            _writer.Write(handle);
         }
 
         public RenderTarget CreateRenderTarget(string name, Renderer.RenderTargets.Definition definition)

@@ -109,27 +109,36 @@ uniform vec3 cameraPosition;
 
 uniform sampler2D samplerDiffuseMap;
 uniform sampler2D samplerNormalMap;
+uniform sampler2D samplerNormalMapBC5;
 uniform sampler2D samplerRoughnessMetalMap;
+uniform sampler2D samplerOcclusionRoughnessMetalness;
 
 uniform vec4 uDiffuseColor;
 uniform float uRoughness;
 uniform float uMetalness;
 
-void get_material(out vec3 diffuse, out vec3 normals, out float metallic, out float specular, out float roughness) {
+void get_material(out vec3 diffuse, out vec3 normals, out float metallic, out float specular, out float roughness, out float occlusion) {
 #ifdef HAS_SAMPLER_DIFFUSEMAP
 	diffuse = pow(texture(samplerDiffuseMap, texCoord).xyz, vec3(2.2));
 #endif
 #ifdef HAS_DIFFUSECOLOR
 	diffuse = pow(uDiffuseColor.xyz, vec3(2.2));
 #endif
+
+	occlusion = 1.0;
 	
-#ifdef HAS_SAMPLER_NORMALMAP
+#if defined(HAS_SAMPLER_NORMALMAP) || defined(HAS_SAMPLER_NORMALMAPBC5)
+	#ifdef HAS_SAMPLER_NORMALMAP
 	vec4 NR = texture(samplerNormalMap, texCoord);
+	#else
+	vec4 NR = texture(samplerNormalMapBC5, texCoord);
+	NR.z = sqrt(1 - NR.x * NR.x - NR.y * NR.y);
+	#endif
 
 	mat3x3 TBN = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
 	normals = normalize(TBN * normalize(NR.xyz * 2.0 - 1.0));
 
-	#if !defined(HAS_SAMPLER_ROUGHNESSMETALMAP)
+	#if !defined(HAS_SAMPLER_ROUGHNESSMETALMAP) && !defined(HAS_SAMPLER_OCCLUSIONROUGHNESSMETALNESS)
 	roughness = NR.w;
 	metallic = 0.0;
 	#endif
@@ -142,6 +151,13 @@ void get_material(out vec3 diffuse, out vec3 normals, out float metallic, out fl
 	
 	roughness = materialParameters.x;
 	metallic = materialParameters.y;
+#endif
+#ifdef HAS_SAMPLER_OCCLUSIONROUGHNESSMETALNESS
+	vec4 materialParameters = texture(samplerOcclusionRoughnessMetalness, texCoord);
+	
+	roughness = materialParameters.y;
+	metallic = materialParameters.z;
+	//occlusion = materialParameters.x;
 #endif
 #ifdef HAS_ROUGHNESS
 	roughness = uRoughness;
@@ -156,14 +172,14 @@ void get_material(out vec3 diffuse, out vec3 normals, out float metallic, out fl
 void main() {
 	vec3 diffuse;
 	vec3 normals;
-	float metallic, specular, roughness;
+	float metallic, specular, roughness, occlusion;
 
-	get_material(diffuse, normals, metallic, specular, roughness);
+	get_material(diffuse, normals, metallic, specular, roughness, occlusion);
 	roughness = max(0.01, roughness);
 
 	oColor = vec4(encodeDiffuse(diffuse), 0);
 	oNormal = vec4(encodeNormals(normals), 1);
-	oSpecular = vec4(metallic, roughness, specular, 0);
+	oSpecular = vec4(metallic, roughness, specular, occlusion);
 	
 #ifdef UNLIT
 	oNormal.w = 0;

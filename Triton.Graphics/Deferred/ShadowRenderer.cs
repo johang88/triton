@@ -39,10 +39,13 @@ namespace Triton.Graphics.Deferred
         private bool _handlesInitialized = false;
 
         public float PSSMLambda { get; set; } = 0.95f;
-        public float[] ShadowBiases { get; set; } = new float[] { 0.01f, 0.001f, 0.001f, 0.001f, 0.001f };
+        public float[] ShadowBiases { get; set; } = new float[] { 0.015f, 0.0015f, 0.0015f, 0.0015f, 0.0015f };
         private int _diffuseSampler;
 
         private Backend _backend;
+
+        private readonly PerFrameData[] _perFrameData = new PerFrameData[1];
+        private int _perFrameDataBuffer;
 
         public ShadowRenderer(Backend backend, Triton.Resources.ResourceManager resourceManager, int cascadeCount = MaxCascadeCount, int resolution = DefaultResolution)
         {
@@ -52,7 +55,7 @@ namespace Triton.Graphics.Deferred
             SetCascadeCountAndResolution(cascadeCount, DefaultResolution);
 
             // Setup render states
-            _shadowsRenderState = _backend.CreateRenderState(false, true, true, enableCullFace: true);
+            _shadowsRenderState = _backend.CreateRenderState(false, true, true, enableCullFace: false);
 
             var vertexFormat = new VertexFormat(new VertexFormatElement[]
             {
@@ -89,6 +92,9 @@ namespace Triton.Graphics.Deferred
                 resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows", "SKINNED;SPOT"),
                 resourceManager.Load<Resources.ShaderProgram>("/shaders/deferred/render_shadows", "SKINNED;DIRECTIONAL")
             };
+
+            _perFrameDataBuffer = _backend.RenderSystem.CreateBuffer(BufferTarget.UniformBuffer, true);
+			_backend.RenderSystem.SetBufferData(_perFrameDataBuffer, _perFrameData, true, true);
         }
 
         public void SetCascadeCountAndResolution(int count, int resolution)
@@ -207,7 +213,7 @@ namespace Triton.Graphics.Deferred
             lightPosition = new Vector3((float)System.Math.Floor(lightPosition.X), (float)System.Math.Floor(lightPosition.Y), (float)System.Math.Floor(lightPosition.Z)) * texelSize;
 
             view = Matrix4.LookAt(lightPosition, lightPosition - lightDir, Vector3.UnitY);
-            projection = Matrix4.CreateOrthographic(boxSize.X, boxSize.Y, -boxSize.Z * 2.0f, boxSize.Z);
+            projection = Matrix4.CreateOrthographic(boxSize.X, boxSize.Y, -boxSize.Z * 4.0f, boxSize.Z);
         }
 
         private void RenderCascade(RenderTarget renderTarget, Components.LightComponent light, Stage stage, Camera camera, out Matrix4 viewProjection)
@@ -226,8 +232,11 @@ namespace Triton.Graphics.Deferred
             _backend.EndPass();
         }
 
-        public void RenderShadowMap(Components.LightComponent light, Stage stage, Vector3 lightDir, Matrix4 view, Matrix4 projection)
+        public unsafe void RenderShadowMap(Components.LightComponent light, Stage stage, Vector3 lightDir, Matrix4 view, Matrix4 projection)
         {
+            var textures = new int[] { 0 };
+            var samplers = new int[] { _diffuseSampler };
+
             if (!_handlesInitialized)
             {
                 for (var i = 0; i < _renderShadowsParams.Length; i++)
@@ -238,41 +247,30 @@ namespace Triton.Graphics.Deferred
                     _renderShadowsShaders[i].BindUniformLocations(_renderShadowsParams[i]);
                     _renderShadowsSkinnedShaders[i].BindUniformLocations(_renderShadowsSkinnedParams[i]);
                 }
-                
 
                 _handlesInitialized = true;
             }
 
             _shadowRenderOperations.Reset();
             stage.PrepareRenderOperations(view, _shadowRenderOperations, true, false);
-
-            int[] textures = new int[] { 0 };
-            int[] samplers = new int[] { _diffuseSampler };
-
+            
             _shadowRenderOperations.GetOperations(out var operations, out var count);
+
+            // Upload per shadow render data
+            _perFrameData[0].LightDirWSAndBias = new Vector4(light.Type == LighType.PointLight ? light.Owner.Position : lightDir, light.ShadowBias);
+            _perFrameData[0].View = view;
+            _perFrameData[0].Projection = projection;
+
+            fixed (PerFrameData* data = _perFrameData)
+            {
+                _backend.UpdateBufferInline(_perFrameDataBuffer, sizeof(PerFrameData), (byte*)data);
+            }
+            _backend.BindBufferBase(0, _perFrameDataBuffer);
+
+            var activeHandle = -1;
 
             for (var i = 0; i < count; i++)
             {
-                var instanceCount = 0;
-
-                for (var index = i; index < count; index++)
-                {
-                    if (instanceCount == NumInstances || index != i &&
-                        (operations[i].Skeleton != null || operations[index].Material.Id != operations[i].Material.Id ||
-                         operations[index].MeshHandle != operations[i].MeshHandle))
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        _worldMatrices[instanceCount] = operations[index].WorldMatrix;
-                        instanceCount++;
-                        i = index;
-                    }
-                }
-
-                _backend.UpdateBufferInline(_instanceBuffers[_currentInstanceBuffer], instanceCount, _worldMatrices);
-
                 Resources.ShaderProgram program;
                 RenderShadowsParams shadowParams;
 
@@ -290,25 +288,28 @@ namespace Triton.Graphics.Deferred
                     shadowParams = _renderShadowsParams[lightTypeIndex];
                 }
 
-                _backend.BeginInstance(program.Handle, textures, samplers, _shadowsRenderState);
+                if (activeHandle != program.Handle)
+                {
+                    _backend.BeginInstance(program.Handle, textures, samplers, _shadowsRenderState);
+                    activeHandle = program.Handle;
+                }
 
-                var lightDirWSAndBias = new Vector4(light.Type == LighType.PointLight? light.Owner.Position : lightDir, light.ShadowBias);
-
-                _backend.BindShaderVariable(shadowParams.LightDirectionAndBias, ref lightDirWSAndBias);
-                _backend.BindShaderVariable(shadowParams.View, ref view);
-                _backend.BindShaderVariable(shadowParams.Projection, ref projection);
+                _backend.BindShaderVariable(shadowParams.World, ref operations[i].WorldMatrix);
 
                 if (operations[i].Skeleton != null)
                 {
                     _backend.BindShaderVariable(shadowParams.Bones, ref operations[i].Skeleton.FinalBoneTransforms);
                 }
 
-                _backend.DrawMeshInstanced(operations[i].MeshHandle, instanceCount, _instanceBuffers[_currentInstanceBuffer]);
-
-                _currentInstanceBuffer = (_currentInstanceBuffer + 1) % _instanceBuffers.Length;
-
-                _backend.EndInstance();
+                _backend.DrawMesh(operations[i].MeshHandle);
             }
+        }
+
+        private struct PerFrameData
+        {
+            public Vector4 LightDirWSAndBias;
+            public Matrix4 View;
+            public Matrix4 Projection;
         }
     }
 }

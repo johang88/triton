@@ -42,14 +42,16 @@ namespace Triton.Samples
             PostEffectManager.HDRSettings.AutoKey = true;
             PostEffectManager.HDRSettings.TonemapOperator = Graphics.Post.TonemapOperator.ASEC;
 
-            //Stage.AmbientLight = new Graphics.AmbientLight
-            //{
-            //    Irradiance = Resources.Load<Graphics.Resources.Texture>("/textures/sky_irradiance"),
-            //    Specular = Resources.Load<Graphics.Resources.Texture>("/textures/sky_specular")
-            //};
+            Stage.AmbientLight = new Graphics.AmbientLight
+            {
+                Irradiance = Resources.Load<Graphics.Resources.Texture>("/textures/skyboxDiffuseHDR"),
+                Specular = Resources.Load<Graphics.Resources.Texture>("/textures/skyboxSpecularHDR"),
+                IrradianceStrength = 4,
+                SpecularStrength = 4
+            };
 
             Player = new GameObject();
-            Player.Position = new Vector3(0, 2f, 0);
+            Player.Position = new Vector3(0, 10f, -2);
             Player.Components.Add(new CharacterControllerComponent
             {
                 ColliderShape = new Triton.Physics.Shapes.CapsuleColliderShape
@@ -61,7 +63,7 @@ namespace Triton.Samples
             Player.Components.Add(new PlayerController());
             GameWorld.Add(Player);
 
-            var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
+            var roomPrefab = Resources.Load<Prefab>("/prefabs/suntemple");
             roomPrefab.Instantiate(GameWorld);
 
             var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
@@ -69,27 +71,27 @@ namespace Triton.Samples
             {
                 var ball = ballPrefab.Instantiate(GameWorld);
                 _balls.Add(ball);
-                ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, 2);
+                ball.Position = new Vector3(-3 + i * 1.5f, 10f, 2);
             }
 
             for (int i = 0; i < 5; i++)
             {
                 var ball = ballPrefab.Instantiate(GameWorld);
                 _balls.Add(ball);
-                ball.Position = new Vector3(-3 + i * 1.5f, 1.5f, -2);
+                ball.Position = new Vector3(-3 + i * 1.5f, 10f, -2);
             }
 
-            var knight = new GameObject();
-            knight.Position = new Vector3(1, 0, 4);
-            knight.Scale = new Vector3(0.024f, 0.024f, 0.024f);
-            //knight.Scale = new Vector3(1.6f, 1.6f, 1.6f);
-            knight.Components.Add(new SkinnedMeshComponent
-            {
-                Mesh = Resources.Load<Mesh>("/models/knight_test")
-            });
-            _animator = new KnightAnimator();
-            knight.Components.Add(_animator);
-            GameWorld.Add(knight);
+            //var knight = new GameObject();
+            //knight.Position = new Vector3(1, 0, 4);
+            //knight.Scale = new Vector3(0.024f, 0.024f, 0.024f);
+            ////knight.Scale = new Vector3(1.6f, 1.6f, 1.6f);
+            //knight.Components.Add(new SkinnedMeshComponent
+            //{
+            //    Mesh = Resources.Load<Mesh>("/models/knight_test")
+            //});
+            //_animator = new KnightAnimator();
+            //knight.Components.Add(_animator);
+            //GameWorld.Add(knight);
 
             Light = new GameObject
             {
@@ -106,54 +108,51 @@ namespace Triton.Samples
                 OuterAngle = 0.98f,
                 CastShadows = true
             });
-            //GameWorld.Add(Light);
+            GameWorld.Add(Light);
 
-            var particles = new GameObject
-            {
-                Position = new Vector3(0, 0.1f, 0),
-            };
-            particles.Components.Add(new ParticleSystemComponent
-            {
-                ParticleSystem = new Graphics.Particles.ParticleSystem(500)
-                {
-                    //Renderer = new Graphics.Particles.Renderers.MeshRenderer
-                    //{
-                    //    Mesh = Resources.Load<Mesh>("/models/sphere")
-                    //},
-                    Renderer = new Graphics.Particles.Renderers.BillboardRenderer(GraphicsBackend)
-                    {
-                        Material = Resources.Load<Material>("/materials/sphere")
-                    },
-                    Emitters = new List<Graphics.Particles.ParticleEmitter>()
-                    {
-                        new Graphics.Particles.ParticleEmitter
-                        {
-                            Generators = new List<Graphics.Particles.IParticleGenerator>()
-                            {
-                                new Graphics.Particles.Generators.BasicTimeGenerator { MinTime = 0.1f, MaxTime = 0.3f },
-                                new Graphics.Particles.Generators.BasicVelocityGenerator { MinStartVelocity = new Vector3(-1, -1, -1) * 10, MaxStartVelocity = new Vector3(1, 1, 1) * 10 },
-                                new Graphics.Particles.Generators.BoxPositionGenerator() { Position = Vector3.Zero, MaxStartPosOffset = Vector3.Zero }
-                            }
-                        }
-                    },
-                    Updaters = new List<Graphics.Particles.IParticleUpdater>()
-                    {
-                        new Graphics.Particles.Updaters.BasicTimeUpdater(),
-                        new Graphics.Particles.Updaters.EulerUpdater() { GlobalAcceleration = new Vector3(0, 0, 0) },
-                        //new Graphics.Particles.Updaters.FloorUpdater() { BounceFactor = 0.5f, FloorPositionY = 0.0f }
-                    }
-                }
-            });
-            GameWorld.Add(particles);
+            //var particles = new GameObject
+            //{
+            //    Position = new Vector3(0, 0.1f, 0),
+            //};
+            //particles.Components.Add(new ParticleSystemComponent
+            //{
+            //    ParticleSystem = new Graphics.Particles.ParticleSystem(500)
+            //    {
+            //        //Renderer = new Graphics.Particles.Renderers.MeshRenderer
+            //        //{
+            //        //    Mesh = Resources.Load<Mesh>("/models/sphere")
+            //        //},
+            //        Renderer = new Graphics.Particles.Renderers.BillboardRenderer(GraphicsBackend)
+            //        {
+            //            Material = Resources.Load<Material>("/materials/sphere")
+            //        },
+            //        Emitters = new List<Graphics.Particles.ParticleEmitter>()
+            //        {
+            //            new Graphics.Particles.ParticleEmitter
+            //            {
+            //                Generators = new List<Graphics.Particles.IParticleGenerator>()
+            //                {
+            //                    new Graphics.Particles.Generators.BasicTimeGenerator { MinTime = 0.1f, MaxTime = 0.3f },
+            //                    new Graphics.Particles.Generators.BasicVelocityGenerator { MinStartVelocity = new Vector3(-1, -1, -1) * 10, MaxStartVelocity = new Vector3(1, 1, 1) * 10 },
+            //                    new Graphics.Particles.Generators.BoxPositionGenerator() { Position = Vector3.Zero, MaxStartPosOffset = Vector3.Zero }
+            //                }
+            //            }
+            //        },
+            //        Updaters = new List<Graphics.Particles.IParticleUpdater>()
+            //        {
+            //            new Graphics.Particles.Updaters.BasicTimeUpdater(),
+            //            new Graphics.Particles.Updaters.EulerUpdater() { GlobalAcceleration = new Vector3(0, 0, 0) },
+            //            //new Graphics.Particles.Updaters.FloorUpdater() { BounceFactor = 0.5f, FloorPositionY = 0.0f }
+            //        }
+            //    }
+            //});
+            //GameWorld.Add(particles);
 
             Stage.ClearColor = new Vector4(1, 1, 1, 1) * 2;
 
-            //var sunLight = Stage.CreateDirectionalLight(new Vector3(-0.3f, -0.7f, 0.66f), new Vector3(1.64f, 1.57f, 1.49f), true, shadowBias: 0.0025f, intensity: 2f);
-            //sunLight.Enabled = true;
-
             DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.High;
             DebugFlags |= Game.DebugFlags.RenderStats;
-            //DebugFlags |= Game.DebugFlags.ShadowMaps;
+            DebugFlags |= Game.DebugFlags.ShadowMaps;
         }
 
         protected override void Update(float frameTime)

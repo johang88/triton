@@ -13,7 +13,7 @@ layout(local_size_x = LightTileSize, local_size_y = LightTileSize) in;
 #define MaxShadowCastingSpotLights 8
 
 #define PointLightShadowIndexOffset 0
-#define MaxShadowCastingPointLights 5
+#define MaxShadowCastingPointLights 6
 
 struct PointLight {
 	vec4 positionRange;
@@ -247,14 +247,16 @@ void main() {
 				luv.z = -luv.z;
 
 				int face = vec3_to_face(luv);
-				shadowMapIndex += face;
 
 				// Sample shadows!
-				vec4 shadowUv = pointShadowMatrices[shadowMapIndex] * vec4(positionWS, 1.0);
+				vec4 shadowUv = pointShadowMatrices[shadowMapIndex * 6 + face] * vec4(positionWS, 1.0);
 				shadowUv.xyz = 0.5 * shadowUv.xyz / shadowUv.w + vec3(0.5);
 
-				shadowUv.x += shadowMapIndex;
-				shadowUv.x *= 1.0 / float(MaxShadowCastingPointLights * 6);
+				shadowUv.x += face;
+				shadowUv.x *= 1.0 / float(6);
+
+				shadowUv.y += shadowMapIndex;
+				shadowUv.y *= 1.0 / float(MaxShadowCastingPointLights);
 
 				float distance = shadowUv.z;
 				vec2 uv = shadowUv.xy;

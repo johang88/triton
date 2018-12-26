@@ -82,6 +82,7 @@ namespace Triton.Physics.Components
                 if (_nativeCollisionShape == null)
                 {
                     _nativeCollisionShape = CreateNativeCollisionShape();
+                    _nativeCollisionShape.LocalScaling = Conversion.ToBulletVector(ref Owner.Scale);
                 }
 
                 return _nativeCollisionShape;

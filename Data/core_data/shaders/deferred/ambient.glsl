@@ -51,6 +51,7 @@ void main()
 	
 	float metallic = gbuffer2.x;
 	float roughness = gbuffer2.y;
+	float occlusion = gbuffer2.w;
 
 	float depth = texture(samplerDepth, texCoord).x;
 	vec3 position = decodeWorldPosition(texCoord, depth);
@@ -58,7 +59,7 @@ void main()
 	if (gbuffer1.w == 0) {
 		if (mode == 1) {
 			vec3 sky = textureLod(samplerSpecular, position, 0).xyz;
-			oColor = vec4(sky, 1.0);
+			oColor = vec4(sky * irradianceStrength, 1.0);
 		} else {
 			oColor = vec4(diffuse, 1.0);
 		}
@@ -88,7 +89,7 @@ void main()
 			vec2 brdf = texture(samplerSpecularIntegration, vec2(vDotN, 1.0 - roughness)).rg;
 			vec3 specular = specularIBL * (F * brdf.x + brdf.y);
 
-			lighting = (kD * irradianceIBL * diffuse) + specular;
+			lighting = ((kD * irradianceIBL * diffuse) + specular) * occlusion;
 		} else {
 			vec3 ambient = mix(ambientColor * 0.1, ambientColor, N.y * 0.5 + 1.0);
 

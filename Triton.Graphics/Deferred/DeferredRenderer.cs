@@ -15,9 +15,9 @@ namespace Triton.Graphics.Deferred
         private const int SpotShadowResolution = 256;
         private const int MaxShadowCastingSpotLights = SpotShadowAtlasResolution / SpotShadowResolution;
 
-        private const int MaxShadowCastingPointLights = 5;
+        private const int MaxShadowCastingPointLights = 6;
         private const int PointShadowResolution = 256;
-        private const int PointShadowAtlasResolution = PointShadowResolution * MaxShadowCastingPointLights * 6;
+        private const int PointShadowAtlasResolution = PointShadowResolution * 6;
 
         private readonly Triton.Resources.ResourceManager _resourceManager;
         private readonly Backend _backend;
@@ -110,7 +110,7 @@ namespace Triton.Graphics.Deferred
 						new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent16, Renderer.PixelType.Float, 0)
                     }));
 
-            PointShadowAtlas = _backend.CreateRenderTarget("point_shadow_atlas", new Definition(PointShadowAtlasResolution, PointShadowResolution, true, new List<Definition.Attachment>()
+            PointShadowAtlas = _backend.CreateRenderTarget("point_shadow_atlas", new Definition(PointShadowAtlasResolution, PointShadowAtlasResolution, true, new List<Definition.Attachment>()
                     {
 						new Definition.Attachment(Definition.AttachmentPoint.Depth, Renderer.PixelFormat.DepthComponent, Renderer.PixelInternalFormat.DepthComponent16, Renderer.PixelType.Float, 0)
                     }));
@@ -400,6 +400,9 @@ namespace Triton.Graphics.Deferred
             _spotShadowCount = 0;
             _pointShadowCount = 0;
 
+            // Sort by distance, this prioritizes closer shadow casting lights
+            // TODO: This generates the garbage
+            lights = lights.OrderBy(x => (x.Owner.Position - camera.Position).LengthSquared).ToList();
             foreach (var light in lights)
             {
                 if (!light.Enabled || (light.Type != LighType.PointLight && light.Type != LighType.SpotLight))
@@ -564,7 +567,7 @@ namespace Triton.Graphics.Deferred
             }
 
             // Calculate index and viewport
-            var index = (_pointShadowCount++) * 6;
+            var index = _pointShadowCount++;
 
             var dir = new Vector3[]
             {
@@ -590,14 +593,14 @@ namespace Triton.Graphics.Deferred
 
             for (var i = 0; i < 6; i++)
             {
-                var x = (index + i) * PointShadowResolution;
-                var y = 0;
+                var x = i * PointShadowResolution;
+                var y = index * PointShadowResolution;
 
                 // Camera matrix
                 var view = Matrix4.LookAt(light.Owner.Position, light.Owner.Position + dir[i], up[i]);
 
                 var viewProjection = view * projection;
-                _pointShadowMatrices[index + i] = viewProjection;
+                _pointShadowMatrices[(index * 6) + i] = viewProjection;
 
                 // Render the shadow map!
                 _backend.BeginPass(PointShadowAtlas, new Vector4(0, 0, 0, 1), x, y, PointShadowResolution, PointShadowResolution, ClearFlags.All);

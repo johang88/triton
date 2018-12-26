@@ -207,7 +207,14 @@ namespace Triton
 			return result;
 		}
 
-		public void Intersects(ref BoundingSphere sphere, out bool result)
+        public bool Intersects(ref BoundingSphere sphere)
+        {
+            var result = default(bool);
+            this.Intersects(ref sphere, out result);
+            return result;
+        }
+
+        public void Intersects(ref BoundingSphere sphere, out bool result)
 		{
 			var containment = default(ContainmentType);
 			this.Contains(ref sphere, out containment);

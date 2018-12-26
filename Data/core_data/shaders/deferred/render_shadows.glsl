@@ -6,15 +6,18 @@ layout(location = ATTRIB_NORMAL) in vec3 iNormal;
 layout(location = ATTRIB_TEXCOORD_0) in vec2 iTexCoord;
 layout(location = ATTRIB_BONE_INDEX) in vec4 iBoneIndex;
 layout(location = ATTRIB_BONE_WEIGHT) in vec4 iBoneWeight;
-layout(location = ATTRIB_INSTANCE_TRANSFORM) in mat4x4 iInstanceTransform;
 
 out vec4 position;
 out vec2 texCoord;
 
-uniform vec4 lightDirectionAndBias;
 uniform mat4x4[96] bones;
-uniform mat4x4 view;
-uniform mat4x4 projection;
+uniform mat4x4 world;
+
+layout(std140, binding = 0) uniform PerFrameData {
+	vec4 lightDirectionAndBias;
+	mat4x4 view;
+	mat4x4 projection;
+};
 
 void main()
 {
@@ -34,16 +37,16 @@ void main()
 		blendNormal += (worldRot * iNormal) * weight;
 	}
 	
-	vec3 positionWS = (iInstanceTransform * blendPos).xyz;
+	vec3 positionWS = (world * blendPos).xyz;
 	vec3 normal = normalize(blendNormal);
 #else
-	vec3 positionWS = (iInstanceTransform * vec4(iPosition, 1)).xyz;
+	vec3 positionWS = (world * vec4(iPosition, 1)).xyz;
 	vec3 normal = normalize(iNormal);
 #endif
 
-	mat3x3 itInstanceTransform = inverse(transpose(mat3x3(iInstanceTransform)));
+	mat3x3 itWorld = inverse(transpose(mat3x3(world)));
 
-	vec3 N = itInstanceTransform * normal;
+	vec3 N = itWorld * normal;
 #ifdef POINT
 	vec3 L = normalize(lightDirectionAndBias.xyz - positionWS);
 #else
@@ -51,7 +54,7 @@ void main()
 #endif
 
 	float nDotL = dot(N, L);
-	float cosTheta = clamp(nDotL, 0.0, 1.0);
+	float cosTheta = clamp(1.0 - nDotL, 0.0, 1.0);
 	float bias = lightDirectionAndBias.w * tan(acos(cosTheta));
 	bias = clamp(bias, 0, lightDirectionAndBias.w * 2.0);
 

@@ -67,6 +67,9 @@ void main() {
 		case 7: // ssao
 			res = ssao.xyz;
 			break;
+		case 8: // occlusion
+			res = gbuffer2.www;
+			break;
 	}
 	
 
