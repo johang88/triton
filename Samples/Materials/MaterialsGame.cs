@@ -154,7 +154,7 @@ namespace Triton.Samples
             DebugFlags |= Game.DebugFlags.RenderStats;
             DebugFlags |= Game.DebugFlags.ShadowMaps;
 
-            PostEffectManager.VisualizationMode = Graphics.Post.VisualizationMode.SSAO;
+            //PostEffectManager.VisualizationMode = Graphics.Post.VisualizationMode.SSAO;
         }
 
         protected override void Update(float frameTime)
