@@ -47,22 +47,21 @@ vec2 rand(vec2 coord) {
 	return vec2(noiseX,noiseY)*0.0002;
 }
 
+const float radius = 0.5;
+const float bias = 0.25;
+
 void main() {
 	vec2 noiseScale = viewportResolution / vec2(4.0, 4.0);
 
 	float depth = texture(samplerDepth, texCoord).x;
 	vec3 fragPos = decodeViewPosition(texCoord, depth);
-	//fragPos.z = linearDepth(depth);
 	
-	// float fragPos = linearDepth(texture(samplerDepth, texCoord).x);
 	vec3 normal = normalize(mat3(itView) * decodeNormals(texture(samplerGBuffer1, texCoord).xyz));
 	vec3 randomVec = texture(samplerNoise, texCoord * noiseScale).xyz;
 
 	vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
 	vec3 bitangent = cross(normal, tangent);
 	mat3 TBN = mat3(tangent, bitangent, normal);
-	
-	const float radius = 8.0;
 	
 	float occlusion = 0.0;
 	for (int i = 0; i < 64; ++i) {
@@ -78,10 +77,10 @@ void main() {
         vec3 sampleFragPos = decodeViewPosition(texCoord, depth);
 		
 		float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPos.z - sampleFragPos.z));
-		occlusion += (sampleFragPos.z >= ssample.z ? 1.0 : 0.0) * rangeCheck;
+		occlusion += (sampleFragPos.z >= ssample.z + bias ? 1.0 : 0.0) * rangeCheck;
 	}
 	
-	occlusion = 1.0 - (occlusion / 64.0);
+	occlusion = pow(1.0 - (occlusion / 64.0), 2.0);
 	
 	oColor.xyz = occlusion.xxx;
 	oColor.a = 1;

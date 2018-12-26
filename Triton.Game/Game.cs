@@ -301,7 +301,9 @@ namespace Triton.Game
             }
 
             // Light + post, ssao needed for ambient so we render it first
+            GraphicsBackend.ProfileBeginSection(Profiler.SSAO);
             var ssao = PostEffectManager.RenderSSAO(Camera, gbuffer);
+            GraphicsBackend.ProfileEndSection(Profiler.SSAO);
             var lightOutput = DeferredRenderer.RenderLighting(Stage, Camera, shadows);
             var postProcessedResult = PostEffectManager.Render(Camera, Stage, gbuffer, lightOutput, deltaTime);
 

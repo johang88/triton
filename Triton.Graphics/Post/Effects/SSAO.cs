@@ -12,8 +12,10 @@ namespace Triton.Graphics.Post.Effects
     public class SSAO : BaseEffect
     {
         private Resources.ShaderProgram _shader;
+        private Resources.ShaderProgram _shaderBlur;
         private SSAOShaderParams _shaderParams;
         private RenderTarget _renderTarget;
+        private RenderTarget _renderTargetBlur;
         private Vector3[] _sampleKernel;
         private Resources.Texture _noiseTexture;
         private int _noiseSampler;
@@ -23,7 +25,12 @@ namespace Triton.Graphics.Post.Effects
             var width = backend.Width;
             var height = backend.Height;
 
-            _renderTarget = _backend.CreateRenderTarget("ssao_blur_down_2", new Definition(width, height, false, new List<Definition.Attachment>()
+            _renderTarget = _backend.CreateRenderTarget("ssao", new Definition(width, height, false, new List<Definition.Attachment>()
+                {
+                    new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba8, Renderer.PixelType.Float, 0),
+                }));
+
+            _renderTargetBlur = _backend.CreateRenderTarget("ssao_blur", new Definition(width, height, false, new List<Definition.Attachment>()
                 {
                     new Definition.Attachment(Definition.AttachmentPoint.Color, Renderer.PixelFormat.Rgba, Renderer.PixelInternalFormat.Rgba8, Renderer.PixelType.Float, 0),
                 }));
@@ -88,6 +95,7 @@ namespace Triton.Graphics.Post.Effects
             base.LoadResources(resourceManager);
 
             _shader = resourceManager.Load<Resources.ShaderProgram>("/shaders/post/ssao");
+            _shaderBlur = resourceManager.Load<Resources.ShaderProgram>("/shaders/post/ssao_blur");
         }
 
         public RenderTarget Render(Camera camera, RenderTarget gbuffer)
@@ -103,7 +111,7 @@ namespace Triton.Graphics.Post.Effects
 
             var invViewProjectionMatrix = Matrix4.Invert(viewMatrix * projectionMatrix);
             var invProjectionMatrix = Matrix4.Invert(projectionMatrix);
-            var itViewMatrix = Matrix4.Transpose(Matrix4.Invert(viewMatrix));
+            var itViewMatrix = Matrix4.Invert(Matrix4.Transpose(viewMatrix));
 
             _backend.BeginPass(_renderTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
             _backend.BeginInstance(_shader.Handle, new int[] { gbuffer.Textures[1].Handle, gbuffer.Textures[3].Handle, _noiseTexture.Handle },
@@ -133,7 +141,13 @@ namespace Triton.Graphics.Post.Effects
             _backend.DrawMesh(_quadMesh.MeshHandle);
             _backend.EndPass();
 
-            return _renderTarget;
+            _backend.BeginPass(_renderTargetBlur, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+            _backend.BeginInstance(_shaderBlur.Handle, new int[] { _renderTarget.Textures[0].Handle }, samplers: new int[] { _backend.DefaultSamplerNoFiltering });
+
+            _backend.DrawMesh(_quadMesh.MeshHandle);
+            _backend.EndPass();
+
+            return _renderTargetBlur;
         }
 
         class SSAOShaderParams
