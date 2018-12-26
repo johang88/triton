@@ -16,6 +16,8 @@ namespace Triton.Graphics.Particles
 
         [DataMember] public IParticleRenderer Renderer { get; set; }
 
+        [DataMember] public bool WorldSpace { get; set; }
+
         public Vector3 Position;
         public Quaternion Orientation;
 
@@ -24,9 +26,12 @@ namespace Triton.Graphics.Particles
 
         public void Update(float deltaTime)
         {
+            var position = WorldSpace ? Position : Vector3.Zero;
+            var orientation = WorldSpace ? Orientation : Quaternion.Identity;
+
             foreach (var emitter in Emitters)
             {
-                emitter.Emit(deltaTime, Particles);
+                emitter.Emit(deltaTime, Particles, position, orientation);
             }
 
             foreach (var updater in Updaters)

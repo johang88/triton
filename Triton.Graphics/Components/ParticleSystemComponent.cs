@@ -23,9 +23,16 @@ namespace Triton.Graphics.Components
         public override void Update(float dt)
         {
             base.Update(dt);
-            
+
             BoundingSphereRadius = 100f;
-            ParticleSystem?.Update(dt);
+            if (ParticleSystem != null)
+            {
+                ParticleSystem.Position = Owner.Position;
+                ParticleSystem.Orientation = Owner.Orientation;
+
+                ParticleSystem.Update(dt);
+                ParticleSystem.Renderer?.Update(ParticleSystem, Stage, dt);
+            }
         }
     }
 }

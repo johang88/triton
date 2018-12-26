@@ -39,6 +39,7 @@ namespace Triton.Graphics.Particles.Renderers
 
         public void PrepareRenderOperations(ParticleSystem particleSystem, RenderOperations operations, Matrix4 worldOffset)
         {
+            operations.Add(_buffer.MeshHandle, Matrix4.Identity, Material);
         }
 
         public void Update(ParticleSystem particleSystem, Stage stage, float deltaTime)
@@ -50,20 +51,25 @@ namespace Triton.Graphics.Particles.Renderers
 
             var camera = stage.Camera;
 
-            // TODO: Support world space particles?
-            // For now tranform everything!
-            Quaternion.Invert(ref particleSystem.Orientation, out var invOrientation);
+            var cameraOrientation = stage.Camera.Orientation;
+            if (!particleSystem.WorldSpace)
+            {
+                Quaternion.Invert(ref particleSystem.Orientation, out var invOrientation);
 
-            Quaternion.Multiply(ref invOrientation, ref camera.Orientation, out var cameraOrientation);
+                Quaternion.Multiply(ref invOrientation, ref camera.Orientation, out cameraOrientation);
 
-            Vector3.Subtract(ref particleSystem.Position, ref camera.Position, out var cameraPosition);
-            Vector3.Transform(ref cameraPosition, ref invOrientation, out cameraPosition);
+                Vector3.Subtract(ref particleSystem.Position, ref camera.Position, out var cameraPosition);
+                Vector3.Transform(ref cameraPosition, ref invOrientation, out cameraPosition);
+            }
 
             camera.GetUpVector(out var upVector);
+            
+            Vector3 camDir = Vector3.Zero, x = Vector3.Zero, y = Vector3.Zero, unitX = Vector3.UnitX, unitY = Vector3.UnitY;
 
-            var camDir = Vector3.Transform(-Vector3.UnitZ, cameraOrientation);
-
-            Vector3 x = Vector3.Zero, y = Vector3.Zero, unitX = Vector3.UnitX, unitY = Vector3.UnitY;
+            if (!AccurateFacing)
+            {
+                camDir = Vector3.Transform(-Vector3.UnitZ, cameraOrientation);
+            }
 
             _commonDirection.Normalize();
             _commonUpVector.Normalize();
@@ -117,10 +123,11 @@ namespace Triton.Graphics.Particles.Renderers
                         }
                         break;
                     case OrientationMode.OrientedSelf:
-                        // TODO
+                        Vector3.Cross(ref camDir, ref particles.Velocity[i], out x);
                         break;
                     case OrientationMode.PerpendicularSelf:
-                        // TODO
+                        Vector3.Cross(ref _commonUpVector, ref particles.Velocity[i], out x);
+                        Vector3.Cross(ref particles.Velocity[i], ref x, out y);
                         break;
                 }
 
@@ -162,7 +169,7 @@ namespace Triton.Graphics.Particles.Renderers
                 _buffer.AddVector4(ref color);
 
                 _buffer.AddTriangle(index + 0, index + 1, index + 2);
-                _buffer.AddTriangle(index + 1, index + 2, index + 3);
+                _buffer.AddTriangle(index + 1, index + 3, index + 2);
                 index += 4;
             }
 
