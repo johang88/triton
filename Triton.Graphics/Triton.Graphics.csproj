@@ -120,6 +120,7 @@
     <Compile Include="Post\Effects\FXAA.cs" />
     <Compile Include="Post\Effects\Gamma.cs" />
     <Compile Include="Post\Effects\SMAA.cs" />
+    <Compile Include="Post\Effects\SSAO.cs" />
     <Compile Include="Post\Effects\Tonemap.cs" />
     <Compile Include="Post\Effects\Visualize.cs" />
     <Compile Include="Post\HDRSettings.cs" />

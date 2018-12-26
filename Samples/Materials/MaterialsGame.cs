@@ -153,6 +153,8 @@ namespace Triton.Samples
             DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.High;
             DebugFlags |= Game.DebugFlags.RenderStats;
             DebugFlags |= Game.DebugFlags.ShadowMaps;
+
+            //PostEffectManager.VisualizationMode = Graphics.Post.VisualizationMode.SSAO;
         }
 
         protected override void Update(float frameTime)

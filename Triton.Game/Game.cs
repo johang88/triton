@@ -287,6 +287,7 @@ namespace Triton.Game
             var gbuffer = DeferredRenderer.RenderGBuffer(Stage, Camera);
             var sunLight = Stage.GetSunLight();
 
+            // Prepare shadow buffer for sunlight
             List<RenderTarget> csm = null; RenderTarget shadows = null;
             if (sunLight != null)
             {
@@ -299,8 +300,9 @@ namespace Triton.Game
                 GraphicsBackend.ProfileEndSection(Profiler.ShadowsRender);
             }
 
+            // Light + post, ssao needed for ambient so we render it first
+            var ssao = PostEffectManager.RenderSSAO(Camera, gbuffer);
             var lightOutput = DeferredRenderer.RenderLighting(Stage, Camera, shadows);
-
             var postProcessedResult = PostEffectManager.Render(Camera, Stage, gbuffer, lightOutput, deltaTime);
 
             GraphicsBackend.BeginPass(null, Vector4.Zero, ClearFlags.Color);

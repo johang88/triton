@@ -29,6 +29,7 @@ uniform sampler2D samplerGBuffer0;
 uniform sampler2D samplerGBuffer1;
 uniform sampler2D samplerGBuffer2;
 uniform sampler2D samplerDepth;
+uniform sampler2D samplerSSAO;
 uniform samplerCube samplerIrradiance;
 uniform samplerCube samplerSpecular;
 uniform sampler2D samplerSpecularIntegration;
@@ -45,6 +46,7 @@ void main()
 	vec4 gbuffer0 = texture2D(samplerGBuffer0, texCoord);
 	vec4 gbuffer1 = texture2D(samplerGBuffer1, texCoord);
 	vec4 gbuffer2 = texture2D(samplerGBuffer2, texCoord);
+	float ssao = texture2D(samplerSSAO, texCoord).x;
 	
 	vec3 diffuse = decodeDiffuse(gbuffer0.xyz);
 	vec3 N = decodeNormals(gbuffer1.xyz);
@@ -89,7 +91,7 @@ void main()
 			vec2 brdf = texture(samplerSpecularIntegration, vec2(vDotN, 1.0 - roughness)).rg;
 			vec3 specular = specularIBL * (F * brdf.x + brdf.y);
 
-			lighting = ((kD * irradianceIBL * diffuse) + specular) * occlusion;
+			lighting = ((kD * irradianceIBL * diffuse) + specular) * occlusion * ssao;
 		} else {
 			vec3 ambient = mix(ambientColor * 0.1, ambientColor, N.y * 0.5 + 1.0);
 

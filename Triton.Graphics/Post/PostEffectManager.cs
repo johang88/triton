@@ -36,6 +36,7 @@ namespace Triton.Graphics.Post
         private readonly Effects.SMAA _smaa;
         private readonly Effects.Fog _fog;
         private readonly Effects.Visualize _visualize;
+        private readonly Effects.SSAO _ssao;
 
         public bool EnablePostEffects = true;
 
@@ -72,6 +73,7 @@ namespace Triton.Graphics.Post
             _smaa = new Effects.SMAA(_backend, fileSystem, _quadMesh);
             _fog = new Fog(_backend, _quadMesh);
             _visualize = new Visualize(_backend, _quadMesh);
+            _ssao = new SSAO(_backend, _quadMesh);
 
             _effects.Add(_adaptLuminance);
             _effects.Add(_bloom);
@@ -81,6 +83,7 @@ namespace Triton.Graphics.Post
             _effects.Add(_smaa);
             _effects.Add(_fog);
             _effects.Add(_visualize);
+            _effects.Add(_ssao);
 
             // Default settings
             AntiAliasing = AntiAliasing.FXAA;
@@ -157,6 +160,12 @@ namespace Triton.Graphics.Post
         {
             _fog.Render(camera, stage, gbuffer, _temporaryRenderTargets[0], _temporaryRenderTargets[1]);
             SwapRenderTargets();
+        }
+
+        public RenderTarget RenderSSAO(Camera camera, RenderTarget gbuffer)
+        {
+            _ssaoOutput = _ssao.Render(camera, gbuffer);
+            return _ssaoOutput;
         }
 
         public RenderTarget Render(Camera camera, Stage stage, RenderTarget gbuffer, RenderTarget input, float deltaTime)
