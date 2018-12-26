@@ -108,6 +108,7 @@ layout(location = 2) out vec4 oSpecular;
 uniform vec3 cameraPosition;
 
 uniform sampler2D samplerDiffuseMap;
+uniform sampler2D samplerDiffuseMapAlpha;
 uniform sampler2D samplerNormalMap;
 uniform sampler2D samplerNormalMapBC5;
 uniform sampler2D samplerRoughnessMetalMap;
@@ -120,6 +121,12 @@ uniform float uMetalness;
 void get_material(out vec3 diffuse, out vec3 normals, out float metallic, out float specular, out float roughness, out float occlusion) {
 #ifdef HAS_SAMPLER_DIFFUSEMAP
 	diffuse = pow(texture(samplerDiffuseMap, texCoord).xyz, vec3(2.2));
+#endif
+#ifdef HAS_SAMPLER_DIFFUSEMAPALPHA
+	vec4 D = texture(samplerDiffuseMap, texCoord);
+	diffuse = pow(D.xyz, vec3(2.2));
+
+	if (D.a < 0.5) discard;
 #endif
 #ifdef HAS_DIFFUSECOLOR
 	diffuse = pow(uDiffuseColor.xyz, vec3(2.2));
