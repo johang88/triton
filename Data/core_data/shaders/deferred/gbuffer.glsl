@@ -137,13 +137,15 @@ void get_material(out vec3 diffuse, out vec3 normals, out float metallic, out fl
 #if defined(HAS_SAMPLER_NORMALMAP) || defined(HAS_SAMPLER_NORMALMAPBC5)
 	#ifdef HAS_SAMPLER_NORMALMAP
 	vec4 NR = texture(samplerNormalMap, texCoord);
+	NR.xyz = normalize(NR.xyz * 2.0 - 1.0);
 	#else
 	vec4 NR = texture(samplerNormalMapBC5, texCoord);
 	NR.z = sqrt(1 - NR.x * NR.x - NR.y * NR.y);
+	NR.xyz = normalize(NR.xyz * 2.0 - 1.0);
 	#endif
 
 	mat3x3 TBN = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
-	normals = normalize(TBN * normalize(NR.xyz * 2.0 - 1.0));
+	normals = normalize(TBN * NR.xyz);
 
 	#if !defined(HAS_SAMPLER_ROUGHNESSMETALMAP) && !defined(HAS_SAMPLER_OCCLUSIONROUGHNESSMETALNESS)
 	roughness = NR.w;

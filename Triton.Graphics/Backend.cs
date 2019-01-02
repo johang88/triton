@@ -751,12 +751,28 @@ namespace Triton.Graphics
         /// <param name="uniformHandle"></param>
         /// <param name="value"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void BindShaderVariable(int uniformHandle, ref Matrix4 value)
+        public unsafe void BindShaderVariable(int uniformHandle, ref Matrix4 value)
         {
             _writer.Write((byte)OpCode.BindShaderVariableMatrix4);
             _writer.Write(uniformHandle);
 
-            _writer.Write(ref value);
+            var buffer = ((MemoryStream)_primaryBuffer.Stream).GetBuffer();
+            var offset = _primaryBuffer.Stream.Position;
+
+            var size = 0;
+            fixed (byte* d = buffer)
+            {
+                //*(d + offset + size) = (byte)OpCode.BindShaderVariableMatrix4;
+                //size += sizeof(byte);
+
+                //*((int*)(d + offset + size)) = uniformHandle;
+                //size += sizeof(int);
+
+                *((Matrix4*)(d + offset + size)) = value;
+                size += Marshal.SizeOf<Matrix4>();
+            }
+
+            _primaryBuffer.Writer.BaseStream.Position += size;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

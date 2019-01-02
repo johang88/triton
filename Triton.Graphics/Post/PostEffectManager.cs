@@ -86,7 +86,8 @@ namespace Triton.Graphics.Post
             _effects.Add(_ssao);
 
             // Default settings
-            AntiAliasing = AntiAliasing.FXAA;
+            AntiAliasing = AntiAliasing.SMAA;
+            AntiAliasingQuality = AntiAliasingQuality.Ultra;
 
             HDRSettings = new HDRSettings
             {
@@ -193,7 +194,7 @@ namespace Triton.Graphics.Post
             if (VisualizationMode != VisualizationMode.None)
             {
                 // Visualize does it's own gamma, but only if it wants to (some things are linear)
-                _visualize.Render(VisualizationMode, camera, gbuffer, _ssaoOutput, _temporaryRenderTargets[0], _temporaryRenderTargets[1]);
+                _visualize.Render(VisualizationMode, camera, gbuffer, _ssaoOutput, _smaa, _temporaryRenderTargets[0], _temporaryRenderTargets[1]);
                 SwapRenderTargets();
             }
 

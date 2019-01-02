@@ -17,5 +17,7 @@ namespace Triton.Graphics.Post
 		Specular,
         SSAO,
         Occlusion,
+        SMAAEdge,
+        SMAABlend
     }
 }

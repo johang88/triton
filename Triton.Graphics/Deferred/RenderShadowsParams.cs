@@ -13,7 +13,8 @@ namespace Triton.Graphics.Deferred
 		public int Bones = 0;
 		public int Model = 0;
 		public int ViewProjectionMatrices = 0;
-		public int LightPosition = 0;
+        public int WorldViewProjection = 0;
+        public int LightPosition = 0;
         public int LightDirectionAndBias = 0;
         public int View = 0;
         public int World = 0;

@@ -61,6 +61,8 @@ void main()
 	vec4 position = (projection * view) * vec4(positionWS, 1);
 	position.z += bias;
 
+	position.z = max(position.z, position.w * -1);
+
 	gl_Position = position;
 	texCoord = iTexCoord;
 }

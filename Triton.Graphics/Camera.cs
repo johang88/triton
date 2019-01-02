@@ -21,8 +21,9 @@ namespace Triton.Graphics
 
 		Vector3 Look = Vector3.UnitZ;
 		Vector3 Up = Vector3.UnitY;
+        Vector3 Right = Vector3.UnitX;
 
-		public Quaternion Orientation;
+        public Quaternion Orientation;
 		public Vector3 Position;
 
 		private BoundingFrustum Frustum = new BoundingFrustum(Matrix4.Identity);
@@ -43,7 +44,13 @@ namespace Triton.Graphics
 			Vector3.Transform(ref Up, ref Orientation, out up);
 		}
 
-		public void GetViewMatrix(out Matrix4 viewMatrix, bool noTranslation = false)
+        public void GetRightVector(out Vector3 right)
+        {
+            Orientation.Normalize();
+            Vector3.Transform(ref Right, ref Orientation, out right);
+        }
+
+        public void GetViewMatrix(out Matrix4 viewMatrix, bool noTranslation = false)
 		{
 			if (CustomViewMatrix != null)
 			{
@@ -127,5 +134,5 @@ namespace Triton.Graphics
 
 			return Frustum;
 		}
-	}
+    }
 }

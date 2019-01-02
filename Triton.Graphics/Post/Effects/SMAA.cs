@@ -28,7 +28,10 @@ namespace Triton.Graphics.Post.Effects
 		private readonly int _linearClampSampler = 0;
 		private readonly int _nearClampSampler = 0;
 
-		public SMAA(Backend backend, IO.FileSystem fileSystem, BatchBuffer quadMesh)
+        public int EdgeRenderTargetTexture => _edgeRenderTarget.Textures[0].Handle;
+        public int BlendRenderTarget => _blendRenderTarget.Textures[0].Handle;
+
+        public SMAA(Backend backend, IO.FileSystem fileSystem, BatchBuffer quadMesh)
 			: base(backend, quadMesh)
 		{
 			var width = _backend.Width;

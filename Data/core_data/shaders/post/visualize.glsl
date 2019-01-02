@@ -25,6 +25,8 @@ uniform sampler2D samplerGBuffer1;
 uniform sampler2D samplerGBuffer2;
 uniform sampler2D samplerGBuffer3;
 uniform sampler2D samplerSSAO;
+uniform sampler2D samplerSMAAEdge;
+uniform sampler2D samplerSMAABlend;
 uniform int visualizationMode;
 uniform vec2 cameraClipPlanes;
 
@@ -41,6 +43,8 @@ void main() {
 	vec4 gbuffer2 = texture(samplerGBuffer2, texCoord);
 	vec4 gbuffer3 = texture(samplerGBuffer3, texCoord);
 	vec4 ssao = texture(samplerSSAO, texCoord);
+	vec4 smaaEdge = texture(samplerSMAAEdge, texCoord);
+	vec4 smaaBlend = texture(samplerSMAABlend, texCoord);
 
 	vec3 res = vec3(0);
 
@@ -70,8 +74,13 @@ void main() {
 		case 8: // occlusion
 			res = gbuffer2.www;
 			break;
+		case 9: // smaa edge
+			res = smaaEdge.xyz;
+			break;
+		case 10: // smaa blend
+			res = smaaBlend.xyz;
+			break;
 	}
-	
 
 	oColor = vec4(res, 1);
 }
