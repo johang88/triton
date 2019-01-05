@@ -17,6 +17,7 @@ This might become a game engine sometime in the future, but right now a lot of c
 * Filmic tonemapping (Reinard / Unhcarted / Filmic / ASEC)
 * Bloom
 * Eye adaptation
+* SSAO
 
 ## Dependencies
 * OpenTK
