@@ -9,6 +9,8 @@ using OGL = OpenTK.Graphics.OpenGL;
 using System.Runtime.InteropServices;
 using Triton.Utility;
 using Triton.Logging;
+using System.Runtime.CompilerServices;
+using Triton.Renderer.Meshes;
 
 namespace Triton.Renderer
 {
@@ -132,7 +134,7 @@ namespace Triton.Renderer
 
         private void DebugCallback(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
         {
-            if (severity >= DebugSeverity.DebugSeverityLow)
+            if (severity == DebugSeverity.DebugSeverityLow || severity == DebugSeverity.DebugSeverityMedium || severity == DebugSeverity.DebugSeverityHigh)
             {
                 var msg = Marshal.PtrToStringAnsi(message, length);
                 Log.WriteLine(string.Format("{0} {1} {2}", severity, type, msg));
@@ -268,14 +270,6 @@ namespace Triton.Renderer
             _meshManager.SetTriangleCount(handle, triangleCount);
         }
 
-        public void SetIndexBuffer(int handle, int indexBufferHandle, int triangleCount)
-        {
-            _addToWorkQueue(() =>
-            {
-                _meshManager.SetIndexBuffer(handle, indexBufferHandle, triangleCount);
-            });
-        }
-
         public void MeshSetTriangleCount(int handle, int triangleCount, bool queue)
         {
             if (queue)
@@ -288,19 +282,21 @@ namespace Triton.Renderer
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RenderMesh(int handle, PrimitiveType primitiveType)
         {
             _meshManager.Render(handle, primitiveType);
         }
 
+        public unsafe void RenderMesh(DrawMeshMultiData* meshIndices, int count)
+        {
+            _meshManager.Render(meshIndices, count);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RenderMesh(int handle, PrimitiveType primitiveType, int offset, int count)
         {
             _meshManager.Render(handle, primitiveType, offset, count);
-        }
-
-        public void RenderMeshInstanced(int handle, int instanceCount, int instanceBufferId)
-        {
-            _meshManager.RenderInstanced(handle, instanceCount, instanceBufferId);
         }
 
         public void BeginScene(int renderTargetHandle, int width, int height)
@@ -494,7 +490,7 @@ namespace Triton.Renderer
 
             return renderTargetHandle;
         }
-
+        
         public void ResizeRenderTarget(int handle, int width, int height)
         {
             _addToWorkQueue(() =>

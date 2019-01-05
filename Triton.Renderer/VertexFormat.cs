@@ -30,5 +30,16 @@ namespace Triton.Renderer
                     Size += 1 * element.Count;
             }
 		}
-	}
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            foreach (var element in Elements)
+            {
+                sb.AppendLine($"{element.Semantic} {element.Type} {element.Count} {element.Offset} {element.Divisor} {element.Normalized}");
+            }
+
+            return sb.ToString();
+        }
+    }
 }

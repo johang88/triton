@@ -146,7 +146,8 @@ namespace ModelViewer
                 }
 
                 _modelGameObject.Position = Vector3.Zero;
-                _cameraDistance = mesh.BoundingSphereRadius * 3.0f;
+                // TODO
+                //_cameraDistance = mesh.BoundingSphereRadius * 3.0f;
                 _rotationY = 0;
                 _rotationX = 0;
             }

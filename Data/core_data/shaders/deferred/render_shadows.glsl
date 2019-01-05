@@ -17,6 +17,11 @@ layout(std140, binding = 0) uniform PerFrameData {
 	vec4 lightDirectionAndBias;
 	mat4x4 view;
 	mat4x4 projection;
+	mat4x4 viewProjection;
+};
+
+layout(std430, binding = 1) buffer PerObjectData {
+	mat4x4 worldMatrices[];
 };
 
 void main()
@@ -39,12 +44,16 @@ void main()
 	
 	vec3 positionWS = (world * blendPos).xyz;
 	vec3 normal = normalize(blendNormal);
+
+	mat4x4 worldMatrix = world;
 #else
-	vec3 positionWS = (world * vec4(iPosition, 1)).xyz;
+	mat4x4 worldMatrix = worldMatrices[gl_DrawID];
+
+	vec3 positionWS = (worldMatrix * vec4(iPosition, 1)).xyz;
 	vec3 normal = normalize(iNormal);
 #endif
 
-	mat3x3 itWorld = inverse(transpose(mat3x3(world)));
+	mat3x3 itWorld = inverse(transpose(mat3x3(worldMatrix)));
 
 	vec3 N = itWorld * normal;
 #ifdef POINT
@@ -56,9 +65,9 @@ void main()
 	float nDotL = dot(N, L);
 	float cosTheta = clamp(1.0 - nDotL, 0.0, 1.0);
 	float bias = lightDirectionAndBias.w * tan(acos(cosTheta));
-	bias = clamp(bias, 0, lightDirectionAndBias.w * 2.0);
+	bias = clamp(bias, 0.0, lightDirectionAndBias.w * 2.0);
 
-	vec4 position = (projection * view) * vec4(positionWS, 1);
+	vec4 position = viewProjection * vec4(positionWS, 1);
 	position.z += bias;
 
 	position.z = max(position.z, position.w * -1);

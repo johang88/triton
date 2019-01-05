@@ -6,11 +6,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace Triton.Renderer.Meshes
 {
     public class MeshManager : IDisposable
     {
+        const int MaxVertexArrayObjects = 128;
         const int MaxHandles = 4096;
         private readonly MeshData[] _handles = new MeshData[MaxHandles];
         private int _nextFree = 0;
@@ -18,6 +20,12 @@ namespace Triton.Renderer.Meshes
         private readonly object _lock = new object();
         private readonly BufferManager _bufferManager;
         private int _activeMeshHandle = 0;
+        private VertexArrayObjects[] _vertexArrayObjects = new VertexArrayObjects[MaxVertexArrayObjects];
+        private int _vertexArrayObjectCount = 0;
+        private DrawElementsIndirectCommand[] _drawIndirectCommands = new DrawElementsIndirectCommand[4096];
+
+        private int[] _indirectBufferHandles = new int[16];
+        private int _currentIndirectBuffer = 0;
 
         public MeshManager(BufferManager bufferManager)
         {
@@ -30,6 +38,9 @@ namespace Triton.Renderer.Meshes
             }
 
             _handles[_handles.Length - 1].Id = -1;
+
+
+            GL.CreateBuffers(_indirectBufferHandles.Length, _indirectBufferHandles);
         }
 
         public void Dispose()
@@ -43,13 +54,9 @@ namespace Triton.Renderer.Meshes
             if (!isDisposing || _disposed)
                 return;
 
-            for (var i = 0; i < _handles.Length; i++)
+            for (var i = 0; i < _vertexArrayObjects.Length; i++)
             {
-                if (_handles[i].Initialized)
-                {
-                    GL.DeleteVertexArrays(1, ref _handles[i].VertexArrayObjectID);
-                }
-                _handles[i].Initialized = false;
+                GL.DeleteVertexArrays(1, ref _vertexArrayObjects[i].VertexArrayObjectId);
             }
 
             _disposed = true;
@@ -60,6 +67,7 @@ namespace Triton.Renderer.Meshes
             return (index << 16) | id;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void ExtractHandle(int handle, out int index, out int id)
         {
             id = handle & 0x0000FFFF;
@@ -82,18 +90,16 @@ namespace Triton.Renderer.Meshes
 
             var id = ++_handles[index].Id;
             _handles[index].Initialized = false;
-            _handles[index].VertexBufferID = null;
-            _handles[index].IndexBufferID = -1;
+            _handles[index].VertexBufferId = -1;
+            _handles[index].IndexBufferId = -1;
             _handles[index].Type = IndexType.UnsignedInt;
-
 
             return CreateHandle(index, id);
         }
 
         public void Destroy(int handle)
         {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
+            ExtractHandle(handle, out var index, out var id);
 
             if (id == -1 || _handles[index].Id != id)
                 return;
@@ -104,26 +110,12 @@ namespace Triton.Renderer.Meshes
                 _nextFree = index;
             }
 
-            if (_handles[index].Initialized)
-            {
-                GL.DeleteVertexArrays(1, ref _handles[index].VertexArrayObjectID);
-            }
-
             _handles[index].Initialized = false;
         }
 
         public void Initialize(int handle, int triangleCount, int vertexBufferId, int indexBufferId, IndexType indexType = IndexType.UnsignedInt)
         {
-            Initialize(handle, triangleCount, new int[] { vertexBufferId }, indexBufferId, indexType);
-        }
-
-        public void Initialize(int handle, int triangleCount, int[] vertexBufferId, int indexBufferId, IndexType indexType = IndexType.UnsignedInt)
-        {
-            if (vertexBufferId.Length == 0)
-                throw new ArgumentException("missing vertex buffer");
-
-            int index, id;
-            ExtractHandle(handle, out index, out id);
+            ExtractHandle(handle, out var index, out var id);
 
             if (id == -1 || _handles[index].Id != id)
                 return;
@@ -131,34 +123,51 @@ namespace Triton.Renderer.Meshes
             if (_handles[index].Initialized)
                 return;
 
-            _handles[index].VertexBufferID = vertexBufferId;
-            _handles[index].IndexBufferID = indexBufferId;
-            _handles[index].TriangleCount = triangleCount;
+            _handles[index].VertexBufferId = vertexBufferId;
+            _handles[index].IndexBufferId = indexBufferId;
+            _handles[index].PrimitiveCount = triangleCount * 3;
             _handles[index].Type = indexType;
 
-            GL.GenVertexArrays(1, out _handles[index].VertexArrayObjectID);
-            GL.BindVertexArray(_handles[index].VertexArrayObjectID);
+            var vertexBufferGLHandle = _bufferManager.GetOpenGLHandle(_handles[index].VertexBufferId);
+            var indexBufferGLHandle = _bufferManager.GetOpenGLHandle(_handles[index].IndexBufferId);
 
-            for (var i = 0; i < vertexBufferId.Length; i++)
+            // Find vertex array object
+            var vaoIndex = -1;
+            for (var i = 0; i < _vertexArrayObjectCount; i++)
             {
-                var bufferHandle = _bufferManager.GetOpenGLHandle(_handles[index].VertexBufferID[i]);
-                var vertexFormat = _bufferManager.GetVertexFormat(vertexBufferId[i]);
-
-                if (GLWrapper.ExtDirectStateAccess)
+                if (_vertexArrayObjects[i].VertexBufferGLHandle == vertexBufferGLHandle && _vertexArrayObjects[i].IndexBufferGLHandle == indexBufferGLHandle)
                 {
-                    GL.Ext.VertexArrayBindVertexBuffer(_handles[index].VertexArrayObjectID, i, bufferHandle, IntPtr.Zero, vertexFormat.Size);
-                    SetVertexFormat(_handles[index].VertexArrayObjectID, i, vertexFormat);
-                }
-                else
-                {
-                    _bufferManager.Bind(_handles[index].VertexBufferID[i]);
-                    SetVertexFormat(vertexFormat);
+                    vaoIndex = i;
                 }
             }
 
-            _bufferManager.Bind(_handles[index].IndexBufferID);
-            GL.BindVertexArray(_activeMeshHandle);
+            // Allocate new if neeed
+            if (vaoIndex == -1)
+            {
+                vaoIndex = _vertexArrayObjectCount++;
+                if (vaoIndex >= MaxVertexArrayObjects) throw new InvalidOperationException("out of vertex array objects");
 
+                _vertexArrayObjects[vaoIndex].VertexBufferGLHandle = vertexBufferGLHandle;
+                _vertexArrayObjects[vaoIndex].IndexBufferGLHandle = indexBufferGLHandle;
+                _vertexArrayObjects[vaoIndex].VertexBufferId = vertexBufferId;
+                _vertexArrayObjects[vaoIndex].IndexBufferId = indexBufferId;
+
+                GL.GenVertexArrays(1, out _vertexArrayObjects[vaoIndex].VertexArrayObjectId);
+
+                GL.BindVertexArray(_vertexArrayObjects[vaoIndex].VertexArrayObjectId);
+
+                var bufferHandle = _bufferManager.GetOpenGLHandle(_vertexArrayObjects[vaoIndex].VertexBufferId);
+                var vertexFormat = _bufferManager.GetVertexFormat(_vertexArrayObjects[vaoIndex].VertexBufferId);
+
+                GL.Ext.VertexArrayBindVertexBuffer(_vertexArrayObjects[vaoIndex].VertexArrayObjectId, 0, bufferHandle, IntPtr.Zero, vertexFormat.Size);
+                SetVertexFormat(_vertexArrayObjects[vaoIndex].VertexArrayObjectId, 0, vertexFormat);
+
+                _bufferManager.Bind(_vertexArrayObjects[vaoIndex].IndexBufferId);
+
+                GL.BindVertexArray(_activeMeshHandle);
+            }
+
+            _handles[index].VertexArrayObjectIndex = vaoIndex;
             _handles[index].Initialized = true;
         }
 
@@ -170,26 +179,7 @@ namespace Triton.Renderer.Meshes
             if (id == -1 || _handles[index].Id != id)
                 return;
 
-            _handles[index].TriangleCount = triangleCount;
-        }
-
-        public void SetIndexBuffer(int handle, int indexBufferId, int triangleCount)
-        {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
-
-            if (id == -1 || _handles[index].Id != id)
-                return;
-
-            _handles[index].TriangleCount = triangleCount;
-
-            GL.BindVertexArray(_handles[index].VertexArrayObjectID);
-            _handles[index].IndexBufferID = indexBufferId;
-
-            _bufferManager.Bind(_handles[index].IndexBufferID);
-
-            ExtractHandle(_activeMeshHandle, out index, out id);
-            GL.BindVertexArray(_handles[index].VertexArrayObjectID);
+            _handles[index].PrimitiveCount = triangleCount * 3;
         }
 
         private void SetVertexFormat(int vao, int bindingIndex, VertexFormat vertexFormat)
@@ -219,95 +209,104 @@ namespace Triton.Renderer.Meshes
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Render(int handle, PrimitiveType primitiveType)
         {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
+            ExtractHandle(handle, out var index, out var id);
 
             if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
             {
                 return;
             }
 
-            if (_activeMeshHandle != handle)
+            var vao = _vertexArrayObjects[_handles[index].VertexArrayObjectIndex].VertexArrayObjectId;
+            if (_activeMeshHandle != vao)
             {
-                GL.BindVertexArray(_handles[index].VertexArrayObjectID);
-                _activeMeshHandle = handle;
+                GL.BindVertexArray(vao);
+                _activeMeshHandle = vao;
             }
 
-            GL.DrawElements(primitiveType, _handles[index].TriangleCount * 3, (DrawElementsType)_handles[index].Type, IntPtr.Zero);
+            var offset = _bufferManager.GetOffset(_handles[index].IndexBufferId);
+
+            var baseVertex = _bufferManager.GetOffset(_handles[index].VertexBufferId);
+            var vertexFormat = _bufferManager.GetVertexFormat(_handles[index].VertexBufferId);
+
+            baseVertex /= vertexFormat.Size;
+
+            GL.DrawElementsBaseVertex(primitiveType, _handles[index].PrimitiveCount, (DrawElementsType)_handles[index].Type, (IntPtr)offset, baseVertex);
+        }
+
+        public unsafe void Render(DrawMeshMultiData* meshIndices, int count)
+        {
+            // Prepare indirect buffer
+
+            var vao = -1; DrawElementsType drawElementsType = DrawElementsType.UnsignedByte; VertexFormat vertexFormat = null;
+            for (var i = 0; i < count; i++)
+            {
+                ExtractHandle(meshIndices[i].MeshHandle, out var index, out var id);
+
+                if (vao == -1)
+                {
+                    vao = _vertexArrayObjects[_handles[index].VertexArrayObjectIndex].VertexArrayObjectId;
+                    drawElementsType = (DrawElementsType)_handles[index].Type;
+                    vertexFormat = _bufferManager.GetVertexFormat(_handles[index].VertexBufferId);
+                }
+
+                if (vao != _vertexArrayObjects[_handles[index].VertexArrayObjectIndex].VertexArrayObjectId)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                var offset = _bufferManager.GetOffset(_handles[index].IndexBufferId);
+
+                var baseVertex = _bufferManager.GetOffset(_handles[index].VertexBufferId);
+                baseVertex /= vertexFormat.Size;
+
+                _drawIndirectCommands[i].Count = (uint)_handles[index].PrimitiveCount;
+                _drawIndirectCommands[i].InstanceCount = 1;
+                _drawIndirectCommands[i].FirstIndex = (uint)(offset / sizeof(uint));
+                _drawIndirectCommands[i].BaseVertex = (uint)baseVertex;
+                _drawIndirectCommands[i].BaseInstance = (uint)meshIndices[i].BaseInstance;
+            }
+
+            // Upload indirect buffer
+            GL.InvalidateBufferData(_indirectBufferHandles[_currentIndirectBuffer]);
+            fixed (DrawElementsIndirectCommand* draw = _drawIndirectCommands)
+            {
+                GL.NamedBufferData(_indirectBufferHandles[_currentIndirectBuffer], sizeof(DrawElementsIndirectCommand) * count, (IntPtr)draw, BufferUsageHint.StreamDraw);
+            }
+            
+            // Draw
+            if (_activeMeshHandle != vao)
+            {
+                GL.BindVertexArray(vao);
+                _activeMeshHandle = vao;
+            }
+
+            GL.BindBuffer(OGL.BufferTarget.DrawIndirectBuffer, _indirectBufferHandles[_currentIndirectBuffer]);
+            GL.MultiDrawElementsIndirect(PrimitiveType.Triangles, drawElementsType, IntPtr.Zero, count, 0);
+            GL.BindBuffer(OGL.BufferTarget.DrawIndirectBuffer, 0);
+
+            _currentIndirectBuffer = ++_currentIndirectBuffer % _indirectBufferHandles.Length; // Advance ring buffer
         }
 
         public void Render(int handle, PrimitiveType primitiveType, int offset, int count)
         {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
+            ExtractHandle(handle, out var index, out var id);
 
             if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
             {
                 return;
             }
 
-            if (_activeMeshHandle != handle)
+            var vao = _vertexArrayObjects[_handles[index].VertexArrayObjectIndex].VertexArrayObjectId;
+            if (_activeMeshHandle != vao)
             {
-                GL.BindVertexArray(_handles[index].VertexArrayObjectID);
-                _activeMeshHandle = handle;
+                GL.BindVertexArray(vao);
+                _activeMeshHandle = vao;
             }
 
             GL.DrawElements(primitiveType, count, (DrawElementsType)_handles[index].Type, offset);
-        }
-
-        public void RenderInstanced(int handle, int count, int instanceBufferId)
-        {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
-
-            if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
-            {
-                return;
-            }
-
-            var vao = _handles[index].VertexArrayObjectID;
-
-            if (_activeMeshHandle != handle)
-            {
-                GL.BindVertexArray(vao);
-                _activeMeshHandle = handle;
-            }
-
-            // Setup the instancing buffer data
-            var instanceBufferHandle = _bufferManager.GetOpenGLHandle(instanceBufferId);
-            var vertexFormat = _bufferManager.GetVertexFormat(instanceBufferId);
-            var instanceBufferIndex = _handles[index].VertexBufferID.Length;
-
-            if (GLWrapper.ExtDirectStateAccess)
-            {
-                GL.Ext.VertexArrayBindVertexBuffer(_handles[index].VertexArrayObjectID, instanceBufferIndex, instanceBufferHandle, IntPtr.Zero, vertexFormat.Size);
-                SetVertexFormat(vao, instanceBufferIndex, vertexFormat);
-            }
-            else
-            {
-                _bufferManager.Bind(instanceBufferId);
-                SetVertexFormat(vertexFormat);
-            }
-
-            // And draw all the stuff
-            GL.DrawElementsInstanced(PrimitiveType.Triangles, _handles[index].TriangleCount * 3, (DrawElementsType)_handles[index].Type, IntPtr.Zero, count);
-        }
-
-        public void GetRenderData(int handle, out int triangleCount, out int vertexArrayObjectId)
-        {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
-
-            if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
-            {
-                triangleCount = vertexArrayObjectId = -1;
-                return;
-            }
-
-            triangleCount = _handles[index].TriangleCount;
-            vertexArrayObjectId = _handles[index].VertexArrayObjectID;
         }
 
         public bool GetMeshData(int handle, out int vertexBufferId, out int indexBufferId)
@@ -321,8 +320,8 @@ namespace Triton.Renderer.Meshes
                 return false;
             }
 
-            vertexBufferId = _handles[index].VertexBufferID[0];
-            indexBufferId = _handles[index].IndexBufferID;
+            vertexBufferId = _handles[index].VertexBufferId;
+            indexBufferId = _handles[index].IndexBufferId;
 
             return true;
         }
@@ -332,11 +331,31 @@ namespace Triton.Renderer.Meshes
             public bool Initialized;
             public short Id;
 
-            public int VertexArrayObjectID;
-            public int[] VertexBufferID;
-            public int IndexBufferID;
-            public int TriangleCount;
+            public int VertexArrayObjectIndex;
+            public int VertexBufferId;
+            public int IndexBufferId;
+            public int PrimitiveCount;
             public IndexType Type;
+        }
+
+        struct VertexArrayObjects
+        {
+            public int VertexArrayObjectId;
+            public int VertexBufferId;
+            public int IndexBufferId;
+            public int VertexBufferGLHandle;
+            public int IndexBufferGLHandle;
+            public IndexType Type;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct DrawElementsIndirectCommand
+        {
+            public uint Count;
+            public uint InstanceCount;
+            public uint FirstIndex;
+            public uint BaseVertex;
+            public uint BaseInstance;
         }
     }
 }

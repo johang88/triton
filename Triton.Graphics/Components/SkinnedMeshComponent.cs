@@ -42,7 +42,7 @@ namespace Triton.Graphics.Components
             _skeletonInstance?.Update();
         }
 
-        public override void PrepareRenderOperations(RenderOperations operations)
+        public override void PrepareRenderOperations(BoundingFrustum frustum, RenderOperations operations)
         {
             if (_mesh == null)
                 return;

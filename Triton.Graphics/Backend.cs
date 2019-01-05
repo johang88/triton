@@ -16,6 +16,7 @@ using Triton.Resources;
 using Triton.Utility;
 using Triton.IO;
 using System.Runtime.CompilerServices;
+using Triton.Renderer.Meshes;
 
 namespace Triton.Graphics
 {
@@ -45,14 +46,12 @@ namespace Triton.Graphics
     /// The instructions are encoded in byte buffers and double buffering is used to so that it is possible to
     /// write and read to the buffers at the same time.
     /// </summary>
-    public class Backend : IDisposable
+    public partial class Backend : IDisposable
     {
         public Triton.Renderer.RenderSystem RenderSystem { get; private set; }
 
         private CommandBuffer _primaryBuffer = new CommandBuffer();
         private CommandBuffer _secondaryBuffer = new CommandBuffer();
-
-        private BinaryWriter _writer = null;
 
         private Profiler _primaryProfiler;
         public Profiler SecondaryProfiler;
@@ -136,7 +135,13 @@ namespace Triton.Graphics
 
         protected virtual void Dispose(bool isDisposing)
         {
-            if (!isDisposing || Disposed)
+            if (Disposed)
+                return;
+
+            _primaryBuffer.Dispose();
+            _secondaryBuffer.Dispose();
+
+            if (!isDisposing)
                 return;
 
             _primaryProfiler.Dispose();
@@ -205,7 +210,7 @@ namespace Triton.Graphics
                 }
                 _endOfFrameActions.Clear();
 
-                _secondaryBuffer.Stream.Position = 0;
+                _secondaryBuffer.Length = 0;
 
                 FrameTime = (float)Watch.Elapsed.TotalSeconds;
                 ElapsedTime += FrameTime;
@@ -221,366 +226,238 @@ namespace Triton.Graphics
 
             // We never clear the stream so there can be a lot of crap after the written position, 
             // this means that we cant use Stream.Length
-            var length = _secondaryBuffer.Stream.Position;
+            var length = _secondaryBuffer.Length;
 
-            _secondaryBuffer.Stream.Position = 0;
-            var reader = _secondaryBuffer.Reader;
+            var ptr = (byte*)_secondaryBuffer.Buffer;
+            var position = 0L;
 
-            var buffer = ((MemoryStream)reader.BaseStream).GetBuffer();
-            fixed (byte* p = buffer)
+            while (position < length)
             {
-                while (_secondaryBuffer.Stream.Position < length)
+                var header = *(PacketHeader*)ptr;
+                ptr += sizeof(PacketHeader);
+                position += sizeof(PacketHeader);
+
+                switch (header.OpCode)
                 {
-                    var cmd = (OpCode)reader.ReadByte();
+                    case OpCode.BeginPass:
+                        {
+                            var packet = (PacketBeginPass*)(ptr);
 
-                    switch (cmd)
-                    {
-                        case OpCode.BeginPass:
+                            RenderSystem.BeginScene(packet->Handle, packet->Width, packet->Height);
+                            if (packet->ClearFlags != ClearFlags.None)
                             {
-                                var renderTargetHandle = reader.ReadInt32();
+                                RenderSystem.Clear(packet->ClearColor, packet->ClearFlags);
+                            }
+                        }
+                        break;
+                    case OpCode.BeginPass2:
+                        {
+                            var packet = (PacketBeginPass2*)(ptr);
 
-                                var width = reader.ReadInt32();
-                                var height = reader.ReadInt32();
+                            RenderSystem.BeginScene(packet->Handle, packet->X, packet->Y, packet->W, packet->H);
+                            if (packet->ClearFlags != ClearFlags.None)
+                            {
+                                RenderSystem.Scissor(true, packet->X, packet->Y, packet->W, packet->H);
+                                RenderSystem.Clear(packet->ClearColor, packet->ClearFlags);
+                                RenderSystem.Scissor(false, packet->X, packet->Y, packet->W, packet->H);
+                            }
+                        }
+                        break;
+                    case OpCode.BeginInstance:
+                        {
+                            var packet = *(PacketBeginInstance*)(ptr);
+                            var data = (int*)(ptr + sizeof(PacketBeginInstance));
 
-                                RenderSystem.BeginScene(renderTargetHandle, width, height);
+                            RenderSystem.BindShader(packet.ShaderHandle);
+                            RenderSystem.SetRenderState(packet.RenderStateId);
 
-                                var clear = reader.ReadBoolean();
-
-                                if (clear)
+                            for (var i = 0; i < packet.NumberOfTextures; i++)
+                            {
+                                var textureHandle = *data++;
+                                if (textureHandle != 0)
                                 {
-                                    var color = reader.ReadVector4();
-                                    var flags = (ClearFlags)reader.ReadByte();
-
-                                    RenderSystem.Clear(color, flags);
+                                    RenderSystem.BindTexture(textureHandle, i);
                                 }
                             }
-                            break;
-                        case OpCode.BeginPass2:
+
+                            var texUnit = 0;
+                            for (int i = 0; i < packet.NumberOfSamplers; i++)
                             {
-                                var renderTargetHandle = reader.ReadInt32();
-
-                                var x = reader.ReadInt32();
-                                var y = reader.ReadInt32();
-                                var w = reader.ReadInt32();
-                                var h = reader.ReadInt32();
-
-                                RenderSystem.BeginScene(renderTargetHandle, x, y, w, h);
-
-                                var clear = reader.ReadBoolean();
-
-                                if (clear)
+                                var samplerHandle = *data++;
+                                if (samplerHandle != 0)
                                 {
-                                    var color = reader.ReadVector4();
-                                    var flags = (ClearFlags)reader.ReadByte();
-
-                                    RenderSystem.Scissor(true, x, y, w, h);
-                                    RenderSystem.Clear(color, flags);
-                                    RenderSystem.Scissor(false, x, y, w, h);
+                                    RenderSystem.BindSampler(texUnit++, samplerHandle);
                                 }
                             }
-                            break;
-                        case OpCode.ChangeRenderTarget:
-                            {
-                                var renderTargetHandle = reader.ReadInt32();
+                        }
+                        break;
+                    case OpCode.EndInstance:
+                        break;
+                    case OpCode.BindShaderVariableMatrix4:
+                        {
+                            var packet = (PacketBindShaderVariableMatrix4*)(ptr);
+                            RenderSystem.SetUniformMatrix4(packet->UniformHandle, 1, &packet->Value.Row0.X);
+                        }
+                        break;
+                    case OpCode.BindShaderVariableMatrix4Array:
+                        {
+                            var packet = *(PacketBindShaderVariableArray*)(ptr);
+                            var m = (float*)(ptr + sizeof(PacketBindShaderVariableArray));
+                            RenderSystem.SetUniformMatrix4(packet.UniformHandle, packet.Count, m);
+                        }
+                        break;
+                    case OpCode.BindShaderVariableInt:
+                        {
+                            var packet = (PacketBindShaderVariableInt*)(ptr);
+                            RenderSystem.SetUniformInt(packet->UniformHandle, packet->X);
+                        }
+                        break;
+                    case OpCode.BindShaderVariableIntArray:
+                        {
+                            var packet = *(PacketBindShaderVariableArray*)(ptr);
+                            var m = (int*)(ptr + sizeof(PacketBindShaderVariableArray));
+                            RenderSystem.SetUniformInt(packet.UniformHandle, packet.Count, m);
+                        }
+                        break;
+                    case OpCode.BindShaderVariableFloat:
+                        {
+                            var packet = (PacketBindShaderVariableFloat*)(ptr);
+                            RenderSystem.SetUniformFloat(packet->UniformHandle, packet->X);
+                        }
+                        break;
+                    case OpCode.BindShaderVariableFloatArray:
+                        {
+                            var packet = *(PacketBindShaderVariableArray*)(ptr);
+                            var m = (float*)(ptr + sizeof(PacketBindShaderVariableArray));
+                            RenderSystem.SetUniformFloat(packet.UniformHandle, packet.Count, m);
+                        }
+                        break;
+                    case OpCode.BindShaderVariableVector4:
+                        {
+                            var packet = (PacketBindShaderVariableVector4*)(ptr);
+                            RenderSystem.SetUniformVector4(packet->UniformHandle, 1, &packet->Value.X);
+                        }
+                        break;
+                    case OpCode.BindShaderVariableVector3:
+                        {
+                            var packet = (PacketBindShaderVariableVector3*)(ptr);
+                            RenderSystem.SetUniformVector3(packet->UniformHandle, 1, &packet->Value.X);
+                        }
+                        break;
+                    case OpCode.BindShaderVariableVector3Array:
+                        {
+                            var packet = *(PacketBindShaderVariableArray*)(ptr);
+                            var m = (float*)(ptr + sizeof(PacketBindShaderVariableArray));
+                            RenderSystem.SetUniformVector3(packet.UniformHandle, packet.Count, m);
+                        }
+                        break;
+                    case OpCode.BindShaderVariableVector2:
+                        {
+                            var packet = (PacketBindShaderVariableVector2*)(ptr);
+                            RenderSystem.SetUniformVector2(packet->UniformHandle, 1, &packet->Value.X);
+                        }
+                        break;
+                    case OpCode.BindShaderVariableUint2:
+                        {
+                            var packet = (PacketBindShaderVariableUint2*)(ptr);
+                            RenderSystem.SetUniformVector2u(packet->UniformHandle, 1, &packet->X);
+                        }
+                        break;
+                    case OpCode.DrawMesh:
+                        {
+                            DrawCalls++;
+                            var packet = *(PacketDrawMesh*)(ptr);
+                            RenderSystem.RenderMesh(packet.MeshHandle, OGL.PrimitiveType.Triangles);
+                        }
+                        break;
+                    case OpCode.DrawMeshMulti:
+                        {
+                            DrawCalls++;
+                            var packet = *(PacketDrawMeshMulti*)(ptr);
+                            var meshIndices = (DrawMeshMultiData*)(ptr + sizeof(PacketDrawMeshMulti));
+                            RenderSystem.RenderMesh(meshIndices, packet.Count);
+                        }
+                        break;
+                    case OpCode.DrawMeshOffset:
+                        {
+                            DrawCalls++;
+                            var packet = *(PacketDrawMeshOffset*)(ptr);
+                            RenderSystem.RenderMesh(packet.MeshHandle, OGL.PrimitiveType.Triangles, packet.Offset, packet.Count);
+                        }
+                        break;
+                    case OpCode.UpdateMesh:
+                        {
+                            var packet = *(PacketUpdateMesh*)(ptr);
 
-                                RenderSystem.BeginScene(renderTargetHandle, reader.ReadInt32(), reader.ReadInt32());
-                            }
-                            break;
-                        case OpCode.EndPass:
-                            break;
-                        case OpCode.BeginInstance:
-                            {
-                                var shaderHandle = reader.ReadInt32();
-                                RenderSystem.BindShader(shaderHandle);
+                            var vertexLength = packet.VertexCount * sizeof(float);
+                            var indexLength = packet.IndexCount * sizeof(int);
 
-                                var numTextures = reader.ReadInt32();
+                            var vertices = (ptr + sizeof(PacketUpdateMesh));
+                            var indices = (ptr + sizeof(PacketUpdateMesh) + vertexLength);
 
-                                for (var i = 0; i < numTextures; i++)
-                                {
-                                    var textureHandle = reader.ReadInt32();
-                                    if (textureHandle != 0)
-                                        RenderSystem.BindTexture(textureHandle, i);
-                                }
+                            RenderSystem.SetMeshDataDirect(packet.Handle, packet.TriangleCount, (IntPtr)vertexLength, (IntPtr)indexLength, (IntPtr)vertices, (IntPtr)indices, packet.Stream);
+                        }
+                        break;
+                    case OpCode.UpdateBuffer:
+                        {
+                            var packet = *(PacketUpdateBuffer*)(ptr);
 
-                                var renderStateId = reader.ReadInt32();
-
-                                RenderSystem.SetRenderState(renderStateId);
-
-                                var numSamplers = reader.ReadInt32();
-                                var texUnit = 0;
-                                for (int i = 0; i < numSamplers; i++)
-                                {
-                                    var samplerHandle = reader.ReadInt32();
-                                    if (samplerHandle != 0)
-                                        RenderSystem.BindSampler(texUnit++, samplerHandle);
-                                }
-                            }
-                            break;
-                        case OpCode.EndInstance:
-                            break;
-                        case OpCode.BindShaderVariableMatrix4:
-                            {
-                                var uniformHandle = reader.ReadInt32();
-
-                                var m = (float*)(p + reader.BaseStream.Position);
-                                RenderSystem.SetUniformMatrix4(uniformHandle, 1, m);
-
-                                reader.BaseStream.Position += sizeof(float) * 16;
-                            }
-                            break;
-                        case OpCode.BindShaderVariableMatrix4Array:
-                            {
-                                var uniformHandle = reader.ReadInt32();
-                                var count = reader.ReadInt32();
-
-                                var m = (float*)(p + reader.BaseStream.Position);
-                                RenderSystem.SetUniformMatrix4(uniformHandle, count, m);
-
-                                reader.BaseStream.Position += sizeof(float) * 16 * count;
-                            }
-                            break;
-                        case OpCode.BindShaderVariableInt:
-                            {
-                                var uniformHandle = reader.ReadInt32();
-                                var v = reader.ReadInt32();
-                                RenderSystem.SetUniformInt(uniformHandle, v);
-                            }
-                            break;
-                        case OpCode.BindShaderVariableIntArray:
-                            {
-                                var uniformHandle = reader.ReadInt32();
-                                var count = reader.ReadInt32();
-
-                                var m = (int*)(p + reader.BaseStream.Position);
-                                RenderSystem.SetUniformInt(uniformHandle, count, m);
-
-                                reader.BaseStream.Position += sizeof(int) * count;
-                            }
-                            break;
-                        case OpCode.BindShaderVariableFloat:
-                            {
-                                var uniformHandle = reader.ReadInt32();
-                                var v = reader.ReadSingle();
-                                RenderSystem.SetUniformFloat(uniformHandle, v);
-                            }
-                            break;
-                        case OpCode.BindShaderVariableFloatArray:
-                            {
-                                var uniformHandle = reader.ReadInt32();
-                                var count = reader.ReadInt32();
-
-                                var m = (float*)(p + reader.BaseStream.Position);
-                                RenderSystem.SetUniformFloat(uniformHandle, count, m);
-
-                                reader.BaseStream.Position += sizeof(float) * count;
-                            }
-                            break;
-                        case OpCode.BindShaderVariableVector4:
-                            {
-                                var uniformHandle = reader.ReadInt32();
-
-                                var m = (float*)(p + reader.BaseStream.Position);
-                                RenderSystem.SetUniformVector4(uniformHandle, 1, m);
-
-                                reader.BaseStream.Position += sizeof(float) * 4;
-                            }
-                            break;
-                        case OpCode.BindShaderVariableVector3:
-                            {
-                                var uniformHandle = reader.ReadInt32();
-
-                                var m = (float*)(p + reader.BaseStream.Position);
-                                RenderSystem.SetUniformVector3(uniformHandle, 1, m);
-
-                                reader.BaseStream.Position += sizeof(float) * 3;
-                            }
-                            break;
-                        case OpCode.BindShaderVariableVector3Array:
-                            {
-                                var uniformHandle = reader.ReadInt32();
-                                var count = reader.ReadInt32();
-
-                                var m = (float*)(p + reader.BaseStream.Position);
-                                RenderSystem.SetUniformVector3(uniformHandle, count, m);
-
-                                reader.BaseStream.Position += sizeof(float) * 3 * count;
-                            }
-                            break;
-                        case OpCode.BindShaderVariableVector4Array:
-                            {
-                                var uniformHandle = reader.ReadInt32();
-                                var count = reader.ReadInt32();
-
-                                var m = (float*)(p + reader.BaseStream.Position);
-                                RenderSystem.SetUniformVector4(uniformHandle, count, m);
-
-                                reader.BaseStream.Position += sizeof(float) * 4 * count;
-                            }
-                            break;
-                        case OpCode.BindShaderVariableVector2:
-                            {
-                                var uniformHandle = reader.ReadInt32();
-
-                                var m = (float*)(p + reader.BaseStream.Position);
-                                RenderSystem.SetUniformVector2(uniformHandle, 1, m);
-
-                                reader.BaseStream.Position += sizeof(float) * 2;
-                            }
-                            break;
-                        case OpCode.BindShaderVariableUint2:
-                            {
-                                var uniformHandle = reader.ReadInt32();
-
-                                var m = (uint*)(p + reader.BaseStream.Position);
-                                RenderSystem.SetUniformVector2u(uniformHandle, 1, m);
-
-                                reader.BaseStream.Position += sizeof(uint) * 2;
-                            }
-                            break;
-                        case OpCode.DrawMesh:
-                            {
-                                DrawCalls++;
-                                var meshHandle = reader.ReadInt32();
-                                RenderSystem.RenderMesh(meshHandle, OGL.PrimitiveType.Triangles);
-                            }
-                            break;
-                        case OpCode.DrawMeshOffset:
-                            {
-                                DrawCalls++;
-                                var meshHandle = reader.ReadInt32();
-                                var offset = reader.ReadInt32();
-                                var count = reader.ReadInt32();
-                                RenderSystem.RenderMesh(meshHandle, OGL.PrimitiveType.Triangles, offset, count);
-                            }
-                            break;
-                        case OpCode.DrawMeshTesselated:
-                            {
-                                DrawCalls++;
-                                var meshHandle = reader.ReadInt32();
-                                RenderSystem.RenderMesh(meshHandle, OGL.PrimitiveType.Patches);
-                            }
-                            break;
-                        case OpCode.DrawMeshInstanced:
-                            {
-                                DrawCalls++;
-                                var meshHandle = reader.ReadInt32();
-                                var instanceCount = reader.ReadInt32();
-                                var instanceBufferId = reader.ReadInt32();
-
-                                RenderSystem.RenderMeshInstanced(meshHandle, instanceCount, instanceBufferId);
-                            }
-                            break;
-                        case OpCode.UpdateMesh:
-                            {
-                                var meshHandle = reader.ReadInt32();
-                                var triangleCount = reader.ReadInt32();
-                                var stream = reader.ReadBoolean();
-
-                                var vertexCount = reader.ReadInt32();
-                                var indexCount = reader.ReadInt32();
-
-                                var vertexLength = vertexCount * sizeof(float);
-                                var indexLength = indexCount * sizeof(int);
-
-                                var vertices = (p + reader.BaseStream.Position);
-                                var indices = (p + reader.BaseStream.Position + vertexLength);
-
-                                RenderSystem.SetMeshDataDirect(meshHandle, triangleCount, (IntPtr)vertexLength, (IntPtr)indexLength, (IntPtr)vertices, (IntPtr)indices, stream);
-
-                                reader.BaseStream.Position += vertexLength + indexLength;
-                            }
-                            break;
-                        case OpCode.UpdateBuffer:
-                            {
-                                var handle = reader.ReadInt32();
-                                var dataLength = reader.ReadInt32();
-
-                                var data = (p + reader.BaseStream.Position);
-                                RenderSystem.SetBufferDataDirect(handle, (IntPtr)dataLength, (IntPtr)data, true);
-
-                                reader.BaseStream.Position += dataLength;
-                            }
-                            break;
-                        case OpCode.GenerateMips:
-                            {
-                                var textureHandle = reader.ReadInt32();
-                                RenderSystem.GenreateMips(textureHandle);
-                            }
-                            break;
-                        case OpCode.ProfileBegin:
-                            {
-                                int name = reader.ReadInt32();
-                                _primaryProfiler.Begin(name);
-                            }
-                            break;
-                        case OpCode.ProfileEnd:
-                            {
-                                int name = reader.ReadInt32();
-                                _primaryProfiler.End(name);
-                            }
-                            break;
-                        case OpCode.DispatchCompute:
-                            {
-                                var numGroupsX = reader.ReadInt32();
-                                var numGroupsY = reader.ReadInt32();
-                                var numGroupsZ = reader.ReadInt32();
-
-                                RenderSystem.DispatchCompute(numGroupsX, numGroupsY, numGroupsZ);
-                            }
-                            break;
-                        case OpCode.WireFrame:
-                            {
-                                var enabled = reader.ReadBoolean();
-
-                                RenderSystem.SetWireFrameEnabled(enabled);
-                            }
-                            break;
-                        case OpCode.Scissor:
-                            {
-                                var enable = reader.ReadBoolean();
-                                var x = reader.ReadInt32();
-                                var y = reader.ReadInt32();
-                                var w = reader.ReadInt32();
-                                var h = reader.ReadInt32();
-
-                                RenderSystem.Scissor(enable, x, y, w, h);
-                            }
-                            break;
-                        case OpCode.BindImageTexture:
-                            {
-                                var unit = reader.ReadInt32();
-                                var texture = reader.ReadInt32();
-                                var access = (OGL.TextureAccess)reader.ReadInt32();
-                                var format = (OGL.SizedInternalFormat)reader.ReadInt32();
-
-                                RenderSystem.BindImageTexture(unit, texture, access, format);
-                            }
-                            break;
-                        case OpCode.BindBufferBase:
-                            {
-                                var index = reader.ReadInt32();
-                                var handle = reader.ReadInt32();
-
-                                RenderSystem.BindBufferBase(index, handle);
-                            }
-                            break;
-
-                        case OpCode.BindBufferRange:
-                            {
-                                var index = reader.ReadInt32();
-                                var handle = reader.ReadInt32();
-                                var offset = reader.ReadInt32();
-                                var size = reader.ReadInt32();
-
-                                RenderSystem.BindBufferRange(index, handle, (IntPtr)offset, (IntPtr)size);
-                            }
-                            break;
-                        case OpCode.Barrier:
-                            var barrier = (OpenTK.Graphics.OpenGL.MemoryBarrierFlags)reader.ReadInt32();
-                            OGL.GL.MemoryBarrier(barrier);
-                            break;
-                    }
+                            var data = (ptr + sizeof(PacketUpdateBuffer));
+                            RenderSystem.SetBufferDataDirect(packet.Handle, (IntPtr)packet.Size, (IntPtr)data, true);
+                        }
+                        break;
+                    case OpCode.GenerateMips:
+                        {
+                            var packet = *(PacketGenerateMips*)(ptr);
+                            RenderSystem.GenreateMips(packet.Handle);
+                        }
+                        break;
+                    case OpCode.ProfileBegin:
+                        {
+                            var packet = *(PacketProfileSection*)(ptr);
+                            _primaryProfiler.Begin(packet.Name);
+                        }
+                        break;
+                    case OpCode.ProfileEnd:
+                        {
+                            var packet = *(PacketProfileSection*)(ptr);
+                            _primaryProfiler.End(packet.Name);
+                        }
+                        break;
+                    case OpCode.DispatchCompute:
+                        {
+                            var packet = *(PacketDispatchCompute*)(ptr);
+                            RenderSystem.DispatchCompute(packet.NumGroupsX, packet.NumGroupsY, packet.NumGroupsZ);
+                        }
+                        break;
+                    case OpCode.Scissor:
+                        {
+                            var packet = *(PacketScissor*)(ptr);
+                            RenderSystem.Scissor(packet.Enable, packet.X, packet.Y, packet.W, packet.H);
+                        }
+                        break;
+                    case OpCode.BindImageTexture:
+                        {
+                            var packet = *(PacketBindImageTexture*)(ptr);
+                            RenderSystem.BindImageTexture(packet.Unit, packet.TextureHandle, packet.Access, packet.Format);
+                        }
+                        break;
+                    case OpCode.BindBufferBase:
+                        {
+                            var packet = *(PacketBindBufferBase*)(ptr);
+                            RenderSystem.BindBufferBase(packet.Index, packet.Handle);
+                        }
+                        break;
+                    case OpCode.Barrier:
+                        {
+                            var packet = *(PacketBarrier*)(ptr);
+                            OGL.GL.MemoryBarrier(packet.Barrier);
+                        }
+                        break;
                 }
+
+                ptr += header.Size;
+                position += header.Size;
             }
         }
 
@@ -589,8 +466,7 @@ namespace Triton.Graphics
         /// </summary>
         public void BeginScene()
         {
-            _primaryBuffer.Stream.Position = 0;
-            _writer = _primaryBuffer.Writer;
+            _primaryBuffer.Length = 0;
         }
 
         /// <summary>
@@ -609,21 +485,34 @@ namespace Triton.Graphics
             _doubleBufferSynchronizer.Release();
         }
 
-        public void ChangeRenderTarget(RenderTarget renderTarget)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private unsafe void WriteHeader<T>(OpCode opCode, int dataSize, out T* ptr) where T : unmanaged
         {
-            _writer.Write((byte)OpCode.ChangeRenderTarget);
-            if (renderTarget == null)
+            var offset = _primaryBuffer.Length;
+
+            var bodySize = sizeof(T) + dataSize;
+
+            // Pad end of packet in order to align to IntPtr size
+            // Assume that header and base pointer is already aligned
+            var end = offset + sizeof(PacketHeader) + bodySize;
+            var align = sizeof(IntPtr);
+
+            var mod = end % align;
+            if (mod > 0)
             {
-                _writer.Write(0);
-                _writer.Write(Width);
-                _writer.Write(Height);
+                bodySize += (align - mod);
             }
-            else
+
+            *(PacketHeader*)(_primaryBuffer.Buffer + offset) = new PacketHeader
             {
-                _writer.Write(renderTarget.Handle);
-                _writer.Write(renderTarget.Width);
-                _writer.Write(renderTarget.Height);
-            }
+                OpCode = opCode,
+                Size = bodySize
+            };
+
+            _primaryBuffer.Length += sizeof(PacketHeader) + bodySize;
+            offset += sizeof(PacketHeader);
+
+            ptr = (T*)(_primaryBuffer.Buffer + offset);
         }
 
         /// <summary>
@@ -631,23 +520,15 @@ namespace Triton.Graphics
         /// </summary>
         /// <param name="renderTarget"></param>
         /// <param name="clearColor"></param>
-        public void BeginPass(RenderTarget renderTarget)
+        public unsafe void BeginPass(RenderTarget renderTarget)
         {
-            _writer.Write((byte)OpCode.BeginPass);
-            if (renderTarget == null)
-            {
-                _writer.Write(0);
-                _writer.Write(Width);
-                _writer.Write(Height);
-            }
-            else
-            {
-                _writer.Write(renderTarget.Handle);
-                _writer.Write(renderTarget.Width);
-                _writer.Write(renderTarget.Height);
-            }
+            WriteHeader<PacketBeginPass>(OpCode.BeginPass, 0, out var packet);
 
-            _writer.Write(false);
+            packet->Handle = renderTarget?.Handle ?? 0;
+            packet->Width = renderTarget?.Width ?? Width;
+            packet->Height = renderTarget?.Height ?? Height;
+            packet->ClearColor = Vector4.Zero;
+            packet->ClearFlags = ClearFlags.None;
         }
 
         /// <summary>
@@ -655,40 +536,28 @@ namespace Triton.Graphics
         /// </summary>
         /// <param name="renderTarget"></param>
         /// <param name="clearColor"></param>
-        public void BeginPass(RenderTarget renderTarget, Vector4 clearColor, ClearFlags clearFlags = ClearFlags.Depth | ClearFlags.Color)
+        public unsafe void BeginPass(RenderTarget renderTarget, Vector4 clearColor, ClearFlags clearFlags = ClearFlags.Depth | ClearFlags.Color)
         {
-            _writer.Write((byte)OpCode.BeginPass);
-            if (renderTarget == null)
-            {
-                _writer.Write(0);
-                _writer.Write(Width);
-                _writer.Write(Height);
-            }
-            else
-            {
-                _writer.Write(renderTarget.Handle);
-                _writer.Write(renderTarget.Width);
-                _writer.Write(renderTarget.Height);
-            }
+            WriteHeader<PacketBeginPass>(OpCode.BeginPass, 0, out var packet);
 
-            _writer.Write(true);
-            _writer.Write(clearColor);
-            _writer.Write((byte)clearFlags);
+            packet->Handle = renderTarget?.Handle ?? 0;
+            packet->Width = renderTarget?.Width ?? Width;
+            packet->Height = renderTarget?.Height ?? Height;
+            packet->ClearColor = clearColor;
+            packet->ClearFlags = clearFlags;
         }
 
-        public void BeginPass(RenderTarget renderTarget, Vector4 clearColor, int x, int y, int w, int h, ClearFlags clearFlags = ClearFlags.Depth | ClearFlags.Color)
+        public unsafe void BeginPass(RenderTarget renderTarget, Vector4 clearColor, int x, int y, int w, int h, ClearFlags clearFlags = ClearFlags.Depth | ClearFlags.Color)
         {
-            _writer.Write((byte)OpCode.BeginPass2);
-            _writer.Write(renderTarget?.Handle ?? 0);
+            WriteHeader<PacketBeginPass2>(OpCode.BeginPass2, 0, out var packet);
 
-            _writer.Write(x);
-            _writer.Write(y);
-            _writer.Write(w);
-            _writer.Write(h);
-
-            _writer.Write(true);
-            _writer.Write(clearColor);
-            _writer.Write((byte)clearFlags);
+            packet->Handle = renderTarget?.Handle ?? 0;
+            packet->X = x;
+            packet->Y = y;
+            packet->W = w;
+            packet->H = h;
+            packet->ClearColor = clearColor;
+            packet->ClearFlags = clearFlags;
         }
 
         /// <summary>
@@ -696,7 +565,7 @@ namespace Triton.Graphics
         /// </summary>
         public void EndPass()
         {
-            _writer.Write((byte)OpCode.EndPass);
+            // NOP
         }
 
         /// <summary>
@@ -704,45 +573,34 @@ namespace Triton.Graphics
         /// </summary>
         /// <param name="shaderHandle"></param>
         /// <param name="textures"></param>
-        public void BeginInstance(int shaderHandle, int[] textures, int[] samplers, int renderStateId = 0)
+        public unsafe void BeginInstance(int shaderHandle, int[] textures, int[] samplers, int renderStateId = 0)
         {
-            _writer.Write((byte)OpCode.BeginInstance);
+            var dataSize = sizeof(int) * (textures.Length + samplers.Length);
+            WriteHeader<PacketBeginInstance>(OpCode.BeginInstance, dataSize, out var packet);
 
-            _writer.Write(shaderHandle);
-            if (textures != null)
+            *packet = new PacketBeginInstance
             {
-                _writer.Write(textures.Length);
+                ShaderHandle = shaderHandle,
+                RenderStateId = renderStateId,
+                NumberOfTextures = textures.Length,
+                NumberOfSamplers = samplers.Length
+            };
 
-                for (var i = 0; i < textures.Length; i++)
-                {
-                    _writer.Write(textures[i]);
-                }
+            var data = (int*)(packet + 1);
+            for (var i = 0; i < textures.Length; i++)
+            {
+                *data++ = textures[i];
             }
-            else
-            {
-                _writer.Write(0);
-            }
 
-            _writer.Write(renderStateId);
-
-            if (samplers != null)
+            for (var i = 0; i < samplers.Length; i++)
             {
-                _writer.Write(samplers.Length);
-                foreach (var sampler in samplers)
-                {
-                    _writer.Write(sampler);
-                }
-            }
-            else
-            {
-                _writer.Write(0);
+                *data++ = samplers[i];
             }
         }
 
         public void EndInstance()
         {
             // no op
-            //PrimaryBuffer.Writer.Write((byte)OpCode.EndInstance);
         }
 
         /// <summary>
@@ -753,86 +611,76 @@ namespace Triton.Graphics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void BindShaderVariable(int uniformHandle, ref Matrix4 value)
         {
-            _writer.Write((byte)OpCode.BindShaderVariableMatrix4);
-            _writer.Write(uniformHandle);
+            WriteHeader<PacketBindShaderVariableMatrix4>(OpCode.BindShaderVariableMatrix4, 0, out var packet);
 
-            var buffer = ((MemoryStream)_primaryBuffer.Stream).GetBuffer();
-            var offset = _primaryBuffer.Stream.Position;
-
-            var size = 0;
-            fixed (byte* d = buffer)
-            {
-                //*(d + offset + size) = (byte)OpCode.BindShaderVariableMatrix4;
-                //size += sizeof(byte);
-
-                //*((int*)(d + offset + size)) = uniformHandle;
-                //size += sizeof(int);
-
-                *((Matrix4*)(d + offset + size)) = value;
-                size += Marshal.SizeOf<Matrix4>();
-            }
-
-            _primaryBuffer.Writer.BaseStream.Position += size;
+            packet->UniformHandle = uniformHandle;
+            packet->Value = value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void BindShaderVariable(int uniformHandle, uint v0, uint v1)
+        public unsafe void BindShaderVariable(int uniformHandle, uint v0, uint v1)
         {
-            _writer.Write((byte)OpCode.BindShaderVariableUint2);
-            _writer.Write(uniformHandle);
+            WriteHeader<PacketBindShaderVariableUint2>(OpCode.BindShaderVariableUint2, 0, out var packet);
 
-            _writer.Write(v0);
-            _writer.Write(v1);
+            packet->UniformHandle = uniformHandle;
+            packet->X = v0;
+            packet->Y = v1;
         }
 
-        public void BindShaderVariable(int uniformHandle, ref int[] value)
+        public unsafe void BindShaderVariable(int uniformHandle, ref int[] value)
         {
-            _writer.Write((byte)OpCode.BindShaderVariableIntArray);
-            _writer.Write(uniformHandle);
+            WriteHeader<PacketBindShaderVariableArray>(OpCode.BindShaderVariableIntArray, sizeof(int) * value.Length, out var packet);
 
-            _writer.Write(value.Length);
+            packet->UniformHandle = uniformHandle;
+            packet->Count = value.Length;
+
+            var data = (int*)(packet + 1);
             for (var i = 0; i < value.Length; i++)
-                _writer.Write(value[i]);
+            {
+                *data++ = value[i];
+            }
         }
 
-        public void BindShaderVariable(int uniformHandle, ref float[] value)
+        public unsafe void BindShaderVariable(int uniformHandle, ref float[] value)
         {
-            _writer.Write((byte)OpCode.BindShaderVariableFloatArray);
-            _writer.Write(uniformHandle);
+            WriteHeader<PacketBindShaderVariableArray>(OpCode.BindShaderVariableFloatArray, sizeof(float) * value.Length, out var packet);
 
-            _writer.Write(value.Length);
+            packet->UniformHandle = uniformHandle;
+            packet->Count = value.Length;
+
+            var data = (float*)(packet + 1);
             for (var i = 0; i < value.Length; i++)
-                _writer.Write(value[i]);
+            {
+                *data++ = value[i];
+            }
         }
 
-        public void BindShaderVariable(int uniformHandle, ref Vector3[] value)
+        public unsafe void BindShaderVariable(int uniformHandle, ref Vector3[] value)
         {
-            _writer.Write((byte)OpCode.BindShaderVariableVector3Array);
-            _writer.Write(uniformHandle);
+            WriteHeader<PacketBindShaderVariableArray>(OpCode.BindShaderVariableVector3Array, sizeof(Vector3) * value.Length, out var packet);
 
-            _writer.Write(value.Length);
+            packet->UniformHandle = uniformHandle;
+            packet->Count = value.Length;
+
+            var data = (Vector3*)(packet + 1);
             for (var i = 0; i < value.Length; i++)
-                _writer.Write(ref value[i]);
+            {
+                *data++ = value[i];
+            }
         }
 
-        public void BindShaderVariable(int uniformHandle, ref Vector4[] value)
+        public unsafe void BindShaderVariable(int uniformHandle, ref Matrix4[] value)
         {
-            _writer.Write((byte)OpCode.BindShaderVariableVector4Array);
-            _writer.Write(uniformHandle);
+            WriteHeader<PacketBindShaderVariableArray>(OpCode.BindShaderVariableMatrix4Array, sizeof(Matrix4) * value.Length, out var packet);
 
-            _writer.Write(value.Length);
+            packet->UniformHandle = uniformHandle;
+            packet->Count = value.Length;
+
+            var data = (Matrix4*)(packet + 1);
             for (var i = 0; i < value.Length; i++)
-                _writer.Write(ref value[i]);
-        }
-
-        public void BindShaderVariable(int uniformHandle, ref Matrix4[] value)
-        {
-            _writer.Write((byte)OpCode.BindShaderVariableMatrix4Array);
-            _writer.Write(uniformHandle);
-
-            _writer.Write(value.Length);
-            for (var i = 0; i < value.Length; i++)
-                _writer.Write(ref value[i]);
+            {
+                *data++ = value[i];
+            }
         }
 
         /// <summary>
@@ -841,11 +689,12 @@ namespace Triton.Graphics
         /// <param name="uniformHandle"></param>
         /// <param name="value"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void BindShaderVariable(int uniformHandle, int value)
+        public unsafe void BindShaderVariable(int uniformHandle, int value)
         {
-            _writer.Write((byte)OpCode.BindShaderVariableInt);
-            _writer.Write(uniformHandle);
-            _writer.Write(value);
+            WriteHeader<PacketBindShaderVariableInt>(OpCode.BindShaderVariableInt, 0, out var packet);
+
+            packet->UniformHandle = uniformHandle;
+            packet->X = value;
         }
 
         /// <summary>
@@ -854,11 +703,12 @@ namespace Triton.Graphics
         /// <param name="uniformHandle"></param>
         /// <param name="value"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void BindShaderVariable(int uniformHandle, float value)
+        public unsafe void BindShaderVariable(int uniformHandle, float value)
         {
-            _writer.Write((byte)OpCode.BindShaderVariableFloat);
-            _writer.Write(uniformHandle);
-            _writer.Write(value);
+            WriteHeader<PacketBindShaderVariableFloat>(OpCode.BindShaderVariableFloat, 0, out var packet);
+
+            packet->UniformHandle = uniformHandle;
+            packet->X = value;
         }
 
         /// <summary>
@@ -867,11 +717,12 @@ namespace Triton.Graphics
         /// <param name="uniformHandle"></param>
         /// <param name="value"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void BindShaderVariable(int uniformHandle, ref Vector4 value)
+        public unsafe void BindShaderVariable(int uniformHandle, ref Vector4 value)
         {
-            _writer.Write((byte)OpCode.BindShaderVariableVector4);
-            _writer.Write(uniformHandle);
-            _writer.Write(value);
+            WriteHeader<PacketBindShaderVariableVector4>(OpCode.BindShaderVariableVector4, 0, out var packet);
+
+            packet->UniformHandle = uniformHandle;
+            packet->Value = value;
         }
 
         /// <summary>
@@ -880,11 +731,12 @@ namespace Triton.Graphics
         /// <param name="uniformHandle"></param>
         /// <param name="value"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void BindShaderVariable(int uniformHandle, ref Vector3 value)
+        public unsafe void BindShaderVariable(int uniformHandle, ref Vector3 value)
         {
-            _writer.Write((byte)OpCode.BindShaderVariableVector3);
-            _writer.Write(uniformHandle);
-            _writer.Write(value);
+            WriteHeader<PacketBindShaderVariableVector3>(OpCode.BindShaderVariableVector3, 0, out var packet);
+
+            packet->UniformHandle = uniformHandle;
+            packet->Value = value;
         }
 
         /// <summary>
@@ -893,11 +745,12 @@ namespace Triton.Graphics
         /// <param name="uniformHandle"></param>
         /// <param name="value"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void BindShaderVariable(int uniformHandle, ref Vector2 value)
+        public unsafe void BindShaderVariable(int uniformHandle, ref Vector2 value)
         {
-            _writer.Write((byte)OpCode.BindShaderVariableVector2);
-            _writer.Write(uniformHandle);
-            _writer.Write(value);
+            WriteHeader<PacketBindShaderVariableVector2>(OpCode.BindShaderVariableVector2, 0, out var packet);
+
+            packet->UniformHandle = uniformHandle;
+            packet->Value = value;
         }
 
         /// <summary>
@@ -906,159 +759,145 @@ namespace Triton.Graphics
         /// </summary>
         /// <param name="handle"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void DrawMesh(int handle)
+        public unsafe void DrawMesh(int handle)
         {
-            _writer.Write((byte)OpCode.DrawMesh);
-            _writer.Write(handle);
+            WriteHeader<PacketDrawMesh>(OpCode.DrawMesh, 0, out var packet);
+
+            packet->MeshHandle = handle;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void DrawMeshOffset(int handle, int offset, int count)
+        public unsafe void DrawMesh(DrawMeshMultiData[] drawData, int count)
         {
-            _writer.Write((byte)OpCode.DrawMeshOffset);
-            _writer.Write(handle);
-            _writer.Write(offset);
-            _writer.Write(count);
+            WriteHeader<PacketDrawMeshMulti>(OpCode.DrawMeshMulti, sizeof(DrawMeshMultiData) * count, out var packet);
+
+            packet->Count = count;
+
+            var data = (DrawMeshMultiData*)(packet + 1);
+            for (var i = 0; i < count; i++)
+            {
+                *data++ = drawData[i];
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void DrawMeshTesselated(int handle)
+        public unsafe void DrawMeshOffset(int handle, int offset, int count)
         {
-            _writer.Write((byte)OpCode.DrawMeshTesselated);
-            _writer.Write(handle);
-        }
+            WriteHeader<PacketDrawMeshOffset>(OpCode.DrawMeshOffset, 0, out var packet);
 
-        /// <summary>
-        /// Draw an instanced mesh.
-        /// </summary>
-        /// <param name="handle"></param>
-        /// <param name="instanceCount"></param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void DrawMeshInstanced(int handle, int instanceCount, int instanceBufferId)
-        {
-            _writer.Write((byte)OpCode.DrawMeshInstanced);
-            _writer.Write(handle);
-            _writer.Write(instanceCount);
-            _writer.Write(instanceBufferId);
+            packet->MeshHandle = handle;
+            packet->Offset = offset;
+            packet->Count = count;
         }
 
         /// <summary>
         /// Uploads a mesh inline in the command stream, UpdateMesh() is preferred if it not neccecary to change a mesh while rendering.
         /// </summary>
-        public void UpdateMeshInline(int handle, int triangleCount, int vertexCount, int indexCount, float[] vertexData, int[] indexData, bool stream)
+        public unsafe void UpdateMeshInline(int handle, int triangleCount, int vertexCount, int indexCount, float[] vertexData, int[] indexData, bool stream)
         {
-            _writer.Write((byte)OpCode.UpdateMesh);
-            _writer.Write(handle);
-            _writer.Write(triangleCount);
-            _writer.Write(stream);
+            var dataSize = sizeof(float) * vertexCount + sizeof(int) * indexCount;
+            WriteHeader<PacketUpdateMesh>(OpCode.UpdateMesh, dataSize, out var packet);
 
-            _writer.Write(vertexCount);
-            _writer.Write(indexCount);
+            var vd = (float*)(packet + 1);
+            var id = (int*)(vd + vertexCount);
+
+            packet->Handle = handle;
+            packet->TriangleCount = triangleCount;
+            packet->TriangleCount = triangleCount;
+            packet->Stream = stream;
+            packet->VertexCount = vertexCount;
+            packet->IndexCount = indexCount;
 
             for (var i = 0; i < vertexCount; i++)
             {
-                _writer.Write(vertexData[i]);
+                *vd++ = vertexData[i];
             }
 
             for (var i = 0; i < indexCount; i++)
             {
-                _writer.Write(indexData[i]);
-            }
-        }
-
-        public void UpdateBufferInline(int handle, int dataCount, Matrix4[] data)
-        {
-            _writer.Write((byte)OpCode.UpdateBuffer);
-            _writer.Write(handle);
-            _writer.Write(dataCount * sizeof(float) * 16);
-            for (var i = 0; i < dataCount; i++)
-            {
-                _writer.Write(ref data[i]);
+                *id++ = indexData[i];
             }
         }
 
         public unsafe void UpdateBufferInline(int handle, int size, byte* data)
         {
-            _writer.Write((byte)OpCode.UpdateBuffer);
-            _writer.Write(handle);
-            _writer.Write(size);
+            WriteHeader<PacketUpdateBuffer>(OpCode.UpdateBuffer, size, out var packet);
 
-            var buffer = ((MemoryStream)_primaryBuffer.Writer.BaseStream).GetBuffer();
-            var offset = _primaryBuffer.Writer.BaseStream.Position;
+            var d = (byte*)(packet + 1);
 
-            fixed (byte* d = buffer)
+            packet->Handle = handle;
+            packet->Size = size;
+
+            for (var i = 0; i < size; i++)
             {
-                for (var i = 0; i < size; i++)
-                {
-                    *(d + i + offset) = *(data + i);
-                }
+                *d++ = *data++;
             }
-
-            _primaryBuffer.Writer.Seek(size, SeekOrigin.Current);
         }
 
-        public void GenerateMips(int textureHandle)
+        public unsafe void GenerateMips(int textureHandle)
         {
-            _writer.Write((byte)OpCode.GenerateMips);
-            _writer.Write(textureHandle);
+            WriteHeader<PacketGenerateMips>(OpCode.GenerateMips, 0, out var packet);
+
+            packet->Handle = textureHandle;
         }
 
-        public void ProfileBeginSection(HashedString name)
+        public unsafe void ProfileBeginSection(HashedString name)
         {
-            _writer.Write((byte)OpCode.ProfileBegin);
-            _writer.Write((int)name);
+            WriteHeader<PacketProfileSection>(OpCode.ProfileBegin, 0, out var packet);
+
+            packet->Name = name;
         }
 
-        public void ProfileEndSection(HashedString name)
+        public unsafe void ProfileEndSection(HashedString name)
         {
-            _writer.Write((byte)OpCode.ProfileEnd);
-            _writer.Write((int)name);
+            WriteHeader<PacketProfileSection>(OpCode.ProfileEnd, 0, out var packet);
+
+            packet->Name = name;
         }
 
-        public void DispatchCompute(int numGroupsX, int numGroupsY, int numGroupsZ)
+        public unsafe void DispatchCompute(int numGroupsX, int numGroupsY, int numGroupsZ)
         {
-            _writer.Write((byte)OpCode.DispatchCompute);
-            _writer.Write(numGroupsX);
-            _writer.Write(numGroupsY);
-            _writer.Write(numGroupsZ);
+            WriteHeader<PacketDispatchCompute>(OpCode.DispatchCompute, 0, out var packet);
+
+            packet->NumGroupsX = numGroupsX;
+            packet->NumGroupsY = numGroupsY;
+            packet->NumGroupsZ = numGroupsZ;
         }
 
-        public void Barrier(OpenTK.Graphics.OpenGL.MemoryBarrierFlags barrier)
+        public unsafe void Barrier(OpenTK.Graphics.OpenGL.MemoryBarrierFlags barrier)
         {
-            _writer.Write((byte)OpCode.Barrier);
-            _writer.Write((int)barrier);
+            WriteHeader<PacketBarrier>(OpCode.Barrier, 0, out var packet);
+
+            packet->Barrier = barrier;
         }
 
-        public void WireFrame(bool enable)
+        public unsafe void Scissor(bool enable, int x, int y, int w, int h)
         {
-            _writer.Write((byte)OpCode.WireFrame);
-            _writer.Write(enable);
+            WriteHeader<PacketScissor>(OpCode.Scissor, 0, out var packet);
+
+            packet->Enable = enable;
+            packet->X = x;
+            packet->Y = y;
+            packet->W = w;
+            packet->H = h;
         }
 
-        public void Scissor(bool enable, int x, int y, int w, int h)
+        public unsafe void BindImageTexture(int unit, int texture, OGL.TextureAccess access, OGL.SizedInternalFormat format)
         {
-            _writer.Write((byte)OpCode.Scissor);
-            _writer.Write(enable);
-            _writer.Write(x);
-            _writer.Write(y);
-            _writer.Write(w);
-            _writer.Write(h);
+            WriteHeader<PacketBindImageTexture>(OpCode.BindImageTexture, 0, out var packet);
+
+            packet->Unit = unit;
+            packet->TextureHandle = texture;
+            packet->Access = access;
+            packet->Format = format;
         }
 
-        public void BindImageTexture(int unit, int texture, OGL.TextureAccess access, OGL.SizedInternalFormat format)
+        public unsafe void BindBufferBase(int index, int handle)
         {
-            _writer.Write((byte)OpCode.BindImageTexture);
-            _writer.Write(unit);
-            _writer.Write(texture);
-            _writer.Write((int)access);
-            _writer.Write((int)format);
-        }
+            WriteHeader<PacketBindBufferBase>(OpCode.BindBufferBase, 0, out var packet);
 
-        public void BindBufferBase(int index, int handle)
-        {
-            _writer.Write((byte)OpCode.BindBufferBase);
-            _writer.Write(index);
-            _writer.Write(handle);
+            packet->Index = index;
+            packet->Handle = handle;
         }
 
         public RenderTarget CreateRenderTarget(string name, Renderer.RenderTargets.Definition definition)
@@ -1162,8 +1001,7 @@ namespace Triton.Graphics
         enum OpCode : int
         {
             BeginPass,
-            ChangeRenderTarget,
-            EndPass,
+            EndPass, // NOP
             BeginInstance,
             EndInstance,
             BindShaderVariableUint2,
@@ -1177,22 +1015,19 @@ namespace Triton.Graphics
             BindShaderVariableVector3,
             BindShaderVariableVector3Array,
             BindShaderVariableVector4,
-            BindShaderVariableVector4Array,
             UpdateMesh,
             DrawMesh,
+            DrawMeshMulti,
             DrawMeshOffset,
             DrawMeshInstanced,
             GenerateMips,
             ProfileBegin,
             ProfileEnd,
             DispatchCompute,
-            WireFrame,
-            DrawMeshTesselated,
             UpdateBuffer,
             Scissor,
             BindImageTexture,
             BindBufferBase,
-            BindBufferRange,
             Barrier,
             BeginPass2
         }
@@ -1214,17 +1049,22 @@ namespace Triton.Graphics
         /// Buffer class used to encode the instruction stream.
         /// Provides access to readers / writers on the byte buffer.
         /// </summary>
-        class CommandBuffer
+        class CommandBuffer : IDisposable
         {
-            public readonly MemoryStream Stream;
-            public readonly BinaryReader Reader;
-            public readonly BinaryWriter Writer;
+            private const int DefaultMemoryStreamSize = 1024 * 1024 * 64;
+
+            public IntPtr Buffer;
+            public int Length;
 
             public CommandBuffer()
             {
-                Stream = new MemoryStream(1024 * 1024 * 16); // 16mb default size
-                Reader = new BinaryReader(Stream);
-                Writer = new BinaryWriter(Stream);
+                Buffer = Marshal.AllocHGlobal(DefaultMemoryStreamSize);
+            }
+
+            public void Dispose()
+            {
+                Marshal.FreeHGlobal(Buffer);
+                Buffer = IntPtr.Zero;
             }
         }
     }

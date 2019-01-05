@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,11 +12,15 @@ namespace Triton.Renderer.Meshes
 {
     public class BufferManager : IDisposable
     {
+        const int SharedBufferSize = 128 * 1024 * 1024;
         const int MaxHandles = 8192;
+
         private readonly BufferData[] _handles = new BufferData[MaxHandles];
         private int _nextFree = 0;
         private bool _disposed = false;
         private readonly object _lock = new object();
+
+        private List<SharedBufferInfo> _sharedBuffers = new List<SharedBufferInfo>();
 
         public BufferManager()
         {
@@ -41,11 +46,16 @@ namespace Triton.Renderer.Meshes
 
             for (var i = 0; i < _handles.Length; i++)
             {
-                if (_handles[i].Initialized)
+                if (_handles[i].Initialized && !_handles[i].Shared)
                 {
                     GL.DeleteBuffers(1, new int[] { _handles[i].BufferID });
                 }
                 _handles[i].Initialized = false;
+            }
+
+            foreach (var sharedBuffer in _sharedBuffers)
+            {
+                GL.DeleteBuffers(1, new int[] { sharedBuffer.BufferId });
             }
 
             _disposed = true;
@@ -56,6 +66,7 @@ namespace Triton.Renderer.Meshes
             return (index << 16) | id;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void ExtractHandle(int handle, out int index, out int id)
         {
             id = handle & 0x0000FFFF;
@@ -112,14 +123,16 @@ namespace Triton.Renderer.Meshes
 
         public void SetDataDirect(int handle, IntPtr dataLength, IntPtr data, bool stream)
         {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
+            if (data == IntPtr.Zero)
+                return;
+
+            ExtractHandle(handle, out var index, out var id);
 
             if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
                 return;
 
-            if (data == IntPtr.Zero)
-                return;
+            if (!_handles[index].Mutable)
+                throw new InvalidOperationException();
 
             GL.InvalidateBufferData(_handles[index].BufferID);
             GLWrapper.NamedBufferData(_handles[index].Target, _handles[index].BufferID, dataLength, data, stream ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
@@ -139,7 +152,7 @@ namespace Triton.Renderer.Meshes
             if (data == null)
                 return;
 
-            if (!_handles[index].Initialized)
+            if (!_handles[index].Initialized && _handles[index].Mutable)
             {
                 GL.GenBuffers(1, out _handles[index].BufferID);
             }
@@ -153,10 +166,74 @@ namespace Triton.Renderer.Meshes
             }
             else
             {
-                GLWrapper.NamedBufferStorage(_handles[index].Target, _handles[index].BufferID, (IntPtr)dataLength, data, 0);
+                if (_handles[index].Target != OGL.BufferTarget.ArrayBuffer && _handles[index].Target != OGL.BufferTarget.ElementArrayBuffer)
+                    throw new InvalidOperationException();
+
+                // Find shared buffer
+                var vertexFormatDescription = _handles[index].VertexFormat?.ToString();
+                SharedBufferInfo sharedBuffer = null;
+                foreach (var buffer in _sharedBuffers)
+                {
+                    if (buffer.Target == _handles[index].Target)
+                    {
+                        if (buffer.Target == OGL.BufferTarget.ArrayBuffer && buffer.VertexFormatDescription != vertexFormatDescription)
+                            continue;
+
+                        sharedBuffer = buffer;
+                    }
+                }
+
+                // Allocate new shared buffer in none exists
+                if (sharedBuffer == null)
+                {
+                    GL.CreateBuffers(1, out int bufferId);
+
+                    sharedBuffer = new SharedBufferInfo
+                    {
+                        CurrentSize = 0,
+                        MaxSize = SharedBufferSize,
+                        Target = _handles[index].Target,
+                        VertexFormatDescription = _handles[index].VertexFormat?.ToString(),
+                        VertexFormat = _handles[index].VertexFormat,
+                        BufferId = bufferId
+                    };
+
+                    _sharedBuffers.Add(sharedBuffer);
+
+                    // Upload initial data
+                    CheckError();
+                    GL.NamedBufferData(sharedBuffer.BufferId, sharedBuffer.MaxSize, IntPtr.Zero, BufferUsageHint.StaticDraw);
+                    CheckError();
+                }
+
+                _handles[index].BufferID = sharedBuffer.BufferId;
+
+                // TODO: Memory management with blocks and stuff!
+
+                // Calculate offsets and upload data
+                var offset = sharedBuffer.CurrentSize;
+
+                if (offset + (int)dataLength > sharedBuffer.MaxSize)
+                    throw new InvalidOperationException("shared buffer to small");
+
+                sharedBuffer.CurrentSize += (int)dataLength;
+                _handles[index].Shared = true;
+                _handles[index].Offset = offset;
+
+                GL.NamedBufferSubData(sharedBuffer.BufferId, (IntPtr)offset, dataLength, data);
+                CheckError();
             }
 
             _handles[index].Initialized = true;
+        }
+
+        void CheckError()
+        {
+            var error = GL.GetError();
+            if (error != ErrorCode.NoError)
+            {
+                throw new InvalidOperationException();
+            }
         }
 
         public void GetOpenGLHandle(int handle, out int glHandle, out OGL.BufferTarget target)
@@ -175,10 +252,10 @@ namespace Triton.Renderer.Meshes
             target = _handles[index].Target;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetOpenGLHandle(int handle)
         {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
+            ExtractHandle(handle, out var index, out var id);
 
             if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
                 return -1;
@@ -186,10 +263,10 @@ namespace Triton.Renderer.Meshes
             return _handles[index].BufferID;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public VertexFormat GetVertexFormat(int handle)
         {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
+            ExtractHandle(handle, out var index, out var id);
 
             if (id == -1 || _handles[index].Id != id)
                 return null;
@@ -197,26 +274,26 @@ namespace Triton.Renderer.Meshes
             return _handles[index].VertexFormat;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetOffset(int handle)
+        {
+            ExtractHandle(handle, out var index, out var id);
+
+            if (id == -1 || _handles[index].Id != id)
+                return 0;
+
+            return _handles[index].Offset;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Bind(int handle)
         {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
+            ExtractHandle(handle, out var index, out var id);
 
             if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
                 return;
 
             GL.BindBuffer(_handles[index].Target, _handles[index].BufferID);
-        }
-
-        public void Unbind(int handle)
-        {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
-
-            if (id == -1 || _handles[index].Id != id || !_handles[index].Initialized)
-                return;
-
-            GL.BindBuffer(_handles[index].Target, 0);
         }
 
         struct BufferData
@@ -228,7 +305,19 @@ namespace Triton.Renderer.Meshes
             public OGL.BufferTarget Target;
             public VertexFormat VertexFormat;
             public bool Mutable;
+            public int Offset;
             public int Size;
+            public bool Shared;
+        }
+
+        class SharedBufferInfo
+        {
+            public OGL.BufferTarget Target;
+            public string VertexFormatDescription;
+            public VertexFormat VertexFormat;
+            public int BufferId;
+            public int MaxSize;
+            public int CurrentSize;
         }
     }
 }

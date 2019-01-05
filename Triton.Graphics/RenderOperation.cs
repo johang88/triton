@@ -18,7 +18,10 @@ namespace Triton.Graphics
 		/// </summary>
 		public Matrix4 WorldMatrix;
 
-		public Resources.Material Material;
+        public Vector3 PositionWS;
+        public Vector3 PositionVS;
+
+        public Resources.Material Material;
 
 		/// <summary>
 		/// Attached skeleton, can be null

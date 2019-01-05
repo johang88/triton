@@ -61,6 +61,9 @@ namespace Triton.Game
         private float _frameTime = 0.0f;
         protected float ElapsedTime = 0.0f;
 
+        private float _updateFrameTime = 0.0f;
+        private float _graphicsFrameTime = 0.0f;
+
         private OpenTK.INativeWindow _window;
 
         private readonly string _name;
@@ -142,7 +145,7 @@ namespace Triton.Game
                 CursorVisible = CursorVisible
             };
 
-            var context = new GraphicsContext(graphicsMode, _window.WindowInfo, 4, 5, GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug);
+            var context = new GraphicsContext(graphicsMode, _window.WindowInfo, 4, 6, GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug);
             context.MakeCurrent(_window.WindowInfo);
             context.LoadAll();
 
@@ -269,8 +272,7 @@ namespace Triton.Game
                 Update(_frameTime);
 
                 RenderScene(_frameTime, watch);
-
-                Thread.Sleep(1);
+                Thread.Sleep(0);
             }
 
             UnloadResources();
@@ -349,6 +351,8 @@ namespace Triton.Game
             DoRenderUI(deltaTime);
             SpriteRenderer.Render(_window.Width, _window.Height);
 
+            _updateFrameTime = (float)watch.Elapsed.TotalSeconds;
+
             GraphicsBackend.EndScene();
         }
 
@@ -424,7 +428,7 @@ namespace Triton.Game
             var graphicsFrameTime = GraphicsBackend.FrameTime * 1000.0f;
             ImGui.Text($"Graphics frame time: {graphicsFrameTime:0.00}ms");
             var updateFrameTime = _frameTime * 1000.0f;
-            ImGui.Text($"Update frame time: {updateFrameTime:0.00}ms");
+            ImGui.Text($"Update frame time: {_updateFrameTime:0.00}ms");
             ImGui.Text($"Average FPS: {averageFPS:0}");
             ImGui.Text($"FPS: {fps:0}");
             ImGui.Text($"Light count: {DeferredRenderer.RenderedLights}");

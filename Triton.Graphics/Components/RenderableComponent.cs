@@ -11,12 +11,12 @@ namespace Triton.Graphics.Components
     {
         [DataMember] public bool CastShadows { get; set; } = true;
 
-        public float BoundingSphereRadius;
+        public BoundingSphere BoundingSphere;
         public BoundingBox BoundingBox;
 
         internal Stage Stage => Owner.World.Services.Get<Stage>();
 
-        public abstract void PrepareRenderOperations(RenderOperations operations);
+        public abstract void PrepareRenderOperations(BoundingFrustum frustum, RenderOperations operations);
 
         public override void OnActivate()
         {

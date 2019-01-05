@@ -34,6 +34,7 @@ namespace Triton.Graphics.Resources
         static readonly char[] Magic = new char[] { 'M', 'E', 'S', 'H' };
         const int Version_1_4 = 0x0140;
         const int Version_1_5 = 0x0150;
+        const int Version_1_6 = 0x0160;
 
         private readonly Backend _backend;
         private readonly Triton.IO.FileSystem _fileSystem;
@@ -71,7 +72,7 @@ namespace Triton.Graphics.Resources
 
                 var version = reader.ReadInt32();
 
-                var validVersions = new int[] { Version_1_4, Version_1_5 };
+                var validVersions = new int[] { Version_1_4, Version_1_5, Version_1_6 };
 
                 if (!validVersions.Contains(version))
                     throw new ArgumentException("invalid mesh, unknown version");
@@ -118,13 +119,17 @@ namespace Triton.Graphics.Resources
 
                     vertexFormat = new Renderer.VertexFormat(vertexFormatElements.ToArray());
 
-                    float boundingSphereRadius = reader.ReadSingle();
+                    var boundingSphere = new BoundingSphere(Vector3.Zero, reader.ReadSingle());
+                    if (version >= Version_1_6)
+                    {
+                        reader.ReadVector3(ref boundingSphere.Center);
+                    }
 
-                    Vector3 min = new Vector3(boundingSphereRadius, boundingSphereRadius, boundingSphereRadius), max = new Vector3(boundingSphereRadius, boundingSphereRadius, boundingSphereRadius);
+                    var boundingBox = BoundingBox.CreateFromSphere(boundingSphere); ;
                     if (version >= Version_1_5)
                     {
-                        reader.ReadVector3(ref min);
-                        reader.ReadVector3(ref max);
+                        reader.ReadVector3(ref boundingBox.Min);
+                        reader.ReadVector3(ref boundingBox.Max);
                     }
 
                     var vertices = reader.ReadBytes(vertexCount);
@@ -137,8 +142,8 @@ namespace Triton.Graphics.Resources
                         VertexData = vertices,
                         TriangleCount = triangleCount,
                         Material = material,
-                        BoundingSphereRadius = boundingSphereRadius,
-                        BoundingBox = new BoundingBox(min, max),
+                        BoundingSphere = boundingSphere,
+                        BoundingBox = boundingBox,
                         VertexBufferHandle = _backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ArrayBuffer, false, vertexFormat),
                         IndexBufferHandle = _backend.RenderSystem.CreateBuffer(Renderer.BufferTarget.ElementArrayBuffer, false)
                     };
@@ -150,8 +155,6 @@ namespace Triton.Graphics.Resources
 
                     mesh.SubMeshes[i] = subMesh;
                 }
-
-                mesh.BoundingSphereRadius = mesh.SubMeshes.Max(s => s.BoundingSphereRadius);
             }
         }
 

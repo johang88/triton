@@ -56,7 +56,6 @@ namespace Triton.Content.Meshes.Converters
                     }
 
                     var subMesh = new SubMesh();
-                    subMesh.BoundingSphereRadius = 0;
 
                     // Create vertex format
                     if (meshToImport.HasBones)
@@ -101,9 +100,9 @@ namespace Triton.Content.Meshes.Converters
                         vertices[i].BoneAssignments = new List<BoneAssignment>();
 
                         var length = vertices[i].Position.Length;
-                        if (subMesh.BoundingSphereRadius < length)
-                            subMesh.BoundingSphereRadius = length;
                     }
+
+                    subMesh.BoundingSphere = BoundingSphere.CreateFromPoints(vertices.Select(x => x.Position));
 
                     // Map bone weights if they are available
                     if (meshToImport.HasBones)

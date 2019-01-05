@@ -12,6 +12,9 @@ namespace Triton.Graphics.Components
     {
         protected bool _meshDirty = false;
 
+        // Used for world space transform
+        private BoundingSphere _boundingSphereLocalSpace;
+
         protected Mesh _mesh;
         [DataMember]
         public Mesh Mesh
@@ -36,17 +39,16 @@ namespace Triton.Graphics.Components
             if (_mesh == null)
                 return;
 
-            BoundingBox = BoundingBox.Empty;
+            BoundingBox = _mesh.SubMeshes[0].BoundingBox;
+            BoundingSphere = _mesh.SubMeshes[0].BoundingSphere;
 
-            for (var i = 0; i < _mesh.SubMeshes.Length; i++)
+            for (var i = 1; i < _mesh.SubMeshes.Length; i++)
             {
-                if (_mesh.SubMeshes[i].BoundingSphereRadius > BoundingSphereRadius)
-                {
-                    BoundingSphereRadius = _mesh.SubMeshes[i].BoundingSphereRadius;
-                }
-
+                BoundingSphere = BoundingSphere.CreateMerged(BoundingSphere, _mesh.SubMeshes[i].BoundingSphere);
                 BoundingBox = BoundingBox.CreateMerged(BoundingBox, _mesh.SubMeshes[i].BoundingBox);
             }
+
+            _boundingSphereLocalSpace = BoundingSphere;
 
             _meshDirty = false;
         }
@@ -59,9 +61,12 @@ namespace Triton.Graphics.Components
             {
                 UpdateDerviedMeshSettings();
             }
+
+            Owner.GetWorldMatrix(out var world);
+            _boundingSphereLocalSpace.Transform(ref world, out BoundingSphere);
         }
 
-        public override void PrepareRenderOperations(RenderOperations operations)
+        public override void PrepareRenderOperations(BoundingFrustum frustum, RenderOperations operations)
         {
             if (_mesh == null)
                 return;
@@ -71,7 +76,13 @@ namespace Triton.Graphics.Components
             for (var i = 0; i < Mesh.SubMeshes.Length; i++)
             {
                 var subMesh = Mesh.SubMeshes[i];
-                operations.Add(subMesh.Handle, world, subMesh.Material, null, false, CastShadows);
+
+                Mesh.SubMeshes[i].BoundingSphere.Transform(ref world, out var subMeshBoundingSphere);
+
+                if (frustum == null || frustum.Intersects(ref subMeshBoundingSphere))
+                {
+                    operations.Add(subMesh.Handle, world, subMesh.Material, null, false, CastShadows);
+                }
             }
         }
     }

@@ -404,6 +404,7 @@ namespace Triton.Graphics.Deferred
             // Sort by distance, this prioritizes closer shadow casting lights
             // TODO: This generates the garbage
             lights = lights.OrderBy(x => (x.Owner.Position - camera.Position).LengthSquared).ToList();
+            _backend.ProfileBeginSection(Profiler.ShadowsRenderPoint);
             foreach (var light in lights)
             {
                 if (!light.Enabled || (light.Type != LighType.PointLight && light.Type != LighType.SpotLight))
@@ -464,6 +465,9 @@ namespace Triton.Graphics.Deferred
                 }
             }
 
+            _backend.Barrier(OpenTK.Graphics.OpenGL.MemoryBarrierFlags.AllBarrierBits);
+            _backend.ProfileEndSection(Profiler.ShadowsRenderPoint);
+
             // Reset render target
             _backend.BeginPass(_lightAccumulationTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), ClearFlags.All);
 
@@ -519,7 +523,6 @@ namespace Triton.Graphics.Deferred
             _backend.BindImageTexture(2, _gbuffer.Textures[2].Handle, OpenTK.Graphics.OpenGL.TextureAccess.ReadOnly, OpenTK.Graphics.OpenGL.SizedInternalFormat.Rgba8);
             _backend.BindImageTexture(3, _lightAccumulationTarget.Textures[0].Handle, OpenTK.Graphics.OpenGL.TextureAccess.ReadWrite, OpenTK.Graphics.OpenGL.SizedInternalFormat.Rgba16f);
 
-            _backend.Barrier(OpenTK.Graphics.OpenGL.MemoryBarrierFlags.AllBarrierBits);
             _backend.DispatchCompute((int)numTilesX, (int)numTilesY, 1);
             _backend.Barrier(OpenTK.Graphics.OpenGL.MemoryBarrierFlags.AllBarrierBits);
         }

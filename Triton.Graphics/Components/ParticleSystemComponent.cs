@@ -11,7 +11,7 @@ namespace Triton.Graphics.Components
     {
         [DataMember] public Particles.ParticleSystem ParticleSystem { get; set; }
 
-        public override void PrepareRenderOperations(RenderOperations operations)
+        public override void PrepareRenderOperations(BoundingFrustum frustum, RenderOperations operations)
         {
             if (ParticleSystem == null || ParticleSystem.Renderer == null)
                 return;
@@ -24,7 +24,8 @@ namespace Triton.Graphics.Components
         {
             base.Update(dt);
 
-            BoundingSphereRadius = 100f;
+            BoundingSphere.Center = Owner.Position;
+            BoundingSphere.Radius = 100f;
             if (ParticleSystem != null)
             {
                 ParticleSystem.Position = Owner.Position;

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Triton.Renderer
 {
     [Flags]
-    public enum ClearFlags
+    public enum ClearFlags : byte
     {
         None = 0x0,
         Depth = 0x01,

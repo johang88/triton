@@ -14,7 +14,6 @@ namespace Triton.Graphics.Resources
         private ResourceManager _resourceManager;
 
         public SubMesh[] SubMeshes { get; set; }
-        public float BoundingSphereRadius { get; set; }
         public SkeletalAnimation.Skeleton Skeleton { get; set; }
 
         public Mesh(Backend backend, ResourceManager resourceManager)
@@ -52,7 +51,7 @@ namespace Triton.Graphics.Resources
     public class SubMesh
     {
         public Material Material;
-        public float BoundingSphereRadius;
+        public BoundingSphere BoundingSphere;
         public BoundingBox BoundingBox;
         public VertexFormat VertexFormat;
         public int TriangleCount;

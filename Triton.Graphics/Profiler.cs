@@ -16,6 +16,7 @@ namespace Triton.Graphics
         public static readonly HashedString Lighting = "lighting";
         public static readonly HashedString ShadowsGeneration = "shadows_generation";
         public static readonly HashedString ShadowsRender = "shadows_render";
+        public static readonly HashedString ShadowsRenderPoint = "shadows_render_point";
         public static readonly HashedString SSAO = "ssao";
         public static readonly HashedString Post = "post";
         public static readonly HashedString AntiAliasing = "anti aliasing";

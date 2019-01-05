@@ -38,19 +38,11 @@ namespace Triton.Graphics
         public void PrepareRenderOperations(Matrix4 viewMatrix, RenderOperations operations, bool shadowCastersOnly = false, bool frustumCull = true)
         {
             _frustum.Matrix = viewMatrix;
-            var sphere = new BoundingSphere();
-            var zero = Vector3.Zero;
-
             for (var i = 0; i < _renderableComponents.Count; i++)
             {
-                _renderableComponents[i].Owner.GetWorldMatrix(out var world);
-
-                Vector3.Transform(ref zero, ref world, out sphere.Center);
-                sphere.Radius = _renderableComponents[i].BoundingSphereRadius;
-
-                if ((!shadowCastersOnly || _renderableComponents[i].CastShadows) && (!frustumCull || _frustum.Intersects(ref sphere)))
+                if ((!shadowCastersOnly || _renderableComponents[i].CastShadows) && (!frustumCull || _frustum.Intersects(ref _renderableComponents[i].BoundingSphere)))
                 {
-                    _renderableComponents[i].PrepareRenderOperations(operations);
+                    _renderableComponents[i].PrepareRenderOperations(frustumCull ? _frustum : null, operations);
                 }
             }
         }

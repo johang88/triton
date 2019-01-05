@@ -75,6 +75,7 @@
     <Compile Include="GLWrapper.cs" />
     <Compile Include="IndexType.cs" />
     <Compile Include="Meshes\BufferManager.cs" />
+    <Compile Include="Meshes\DrawMeshMultiData.cs" />
     <Compile Include="Meshes\MeshManager.cs" />
     <Compile Include="RenderStates\RenderStateManager.cs" />
     <Compile Include="RenderSystem.cs" />

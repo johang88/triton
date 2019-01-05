@@ -43,7 +43,6 @@ namespace Triton.Content.Meshes.Converters
             var subReader = reader.ReadSubtree();
 
             var subMesh = new SubMesh();
-            subMesh.BoundingSphereRadius = 0;
             bool hasBones = false;
             int vertexCount = 0;
             Vertex[] vertices = null;
@@ -124,9 +123,9 @@ namespace Triton.Content.Meshes.Converters
                             vertices[i] = vertex;
 
                             var length = vertex.Position.Length;
-                            if (subMesh.BoundingSphereRadius < length)
-                                subMesh.BoundingSphereRadius = length;
                         }
+
+                        subMesh.BoundingSphere = BoundingSphere.CreateFromPoints(vertices.Select(x => x.Position));
                     }
 
                     subMesh.BoundingBox = BoundingBox.CreateFromPoints(vertices.Select(x => x.Position));

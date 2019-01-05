@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Triton.Renderer;
+using Triton.Renderer.Meshes;
 using Triton.Renderer.RenderTargets;
 
 namespace Triton.Graphics.Deferred
@@ -46,6 +47,11 @@ namespace Triton.Graphics.Deferred
         private readonly PerFrameData[] _perFrameData = new PerFrameData[1];
         private int _perFrameDataBuffer;
 
+        private int[] _perObjectDataBuffers = new int[16];
+        private int _currentPerObjectDataBuffer = 0;
+        private Matrix4[] _worldMatrices = new Matrix4[4096];
+        private DrawMeshMultiData[] _drawMeshMultiData = new DrawMeshMultiData[4096];
+
         public ShadowRenderer(Backend backend, Triton.Resources.ResourceManager resourceManager, int cascadeCount = MaxCascadeCount, int resolution = DefaultResolution)
         {
             _backend = backend ?? throw new ArgumentNullException(nameof(backend));
@@ -80,6 +86,12 @@ namespace Triton.Graphics.Deferred
 
             _perFrameDataBuffer = _backend.RenderSystem.CreateBuffer(BufferTarget.UniformBuffer, true);
             _backend.RenderSystem.SetBufferData(_perFrameDataBuffer, _perFrameData, true, true);
+
+            for (var i = 0; i < _perObjectDataBuffers.Length; i++)
+            {
+                _perObjectDataBuffers[i] = _backend.RenderSystem.CreateBuffer(BufferTarget.ShaderStorageBuffer, true);
+                _backend.RenderSystem.SetBufferData(_perObjectDataBuffers[i], new Matrix4[0], true, true);
+            }
         }
 
         public void SetCascadeCountAndResolution(int count, int resolution)
@@ -296,14 +308,15 @@ namespace Triton.Graphics.Deferred
             }
 
             _shadowRenderOperations.Reset();
-            stage.PrepareRenderOperations(view, _shadowRenderOperations, true, false);
+            stage.PrepareRenderOperations(view * projection, _shadowRenderOperations, true, light.Type != LighType.Directional);
 
-            _shadowRenderOperations.GetOperations(out var operations, out var count);
+            _shadowRenderOperations.GetOperations(ref view, out var operations, out var count);
 
             // Upload per shadow render data
             _perFrameData[0].LightDirWSAndBias = new Vector4(light.Type == LighType.PointLight ? light.Owner.Position : lightDir, light.ShadowBias);
             _perFrameData[0].View = view;
             _perFrameData[0].Projection = projection;
+            _perFrameData[0].ViewProjection = view * projection;
 
             fixed (PerFrameData* data = _perFrameData)
             {
@@ -311,40 +324,57 @@ namespace Triton.Graphics.Deferred
             }
             _backend.BindBufferBase(0, _perFrameDataBuffer);
 
-            var activeHandle = -1;
-
+            // Prepare world matrices
             for (var i = 0; i < count; i++)
             {
-                Resources.ShaderProgram program;
-                RenderShadowsParams shadowParams;
+                _worldMatrices[i] = operations[i].WorldMatrix;
+            }
 
-                var lightTypeIndex = (int)light.Type;
+            // Upload world matrices!
+            fixed (Matrix4* worldMatrices = _worldMatrices)
+            {
+                _backend.UpdateBufferInline(_perObjectDataBuffers[_currentPerObjectDataBuffer], sizeof(Matrix4) * count, (byte*)worldMatrices);
+            }
+            _backend.BindBufferBase(1, _perObjectDataBuffers[_currentPerObjectDataBuffer]);
 
+            _currentPerObjectDataBuffer = ++_currentPerObjectDataBuffer % _perObjectDataBuffers.Length;
+
+            var lightTypeIndex = (int)light.Type;
+
+            // Render ordinary meshes first
+            var program = _renderShadowsShaders[lightTypeIndex];
+            var shadowParams = _renderShadowsParams[lightTypeIndex];
+
+            _backend.BeginInstance(program.Handle, textures, samplers, _shadowsRenderState);
+
+            var drawCount = 0;
+            for (var i = 0; i < count; i++)
+            {
                 if (operations[i].Skeleton != null)
-                {
-                    program = _renderShadowsSkinnedShaders[lightTypeIndex];
-                    shadowParams = _renderShadowsSkinnedParams[lightTypeIndex];
-                }
-                else
-                {
-                    // TODO: Handle alpha cut off textures, you know for trees and stuff
-                    program = _renderShadowsShaders[lightTypeIndex];
-                    shadowParams = _renderShadowsParams[lightTypeIndex];
-                }
+                    continue;
 
-                if (activeHandle != program.Handle)
-                {
-                    _backend.BeginInstance(program.Handle, textures, samplers, _shadowsRenderState);
-                    activeHandle = program.Handle;
-                }
+                _drawMeshMultiData[drawCount].BaseInstance = 0;
+                _drawMeshMultiData[drawCount].MeshHandle = operations[i].MeshHandle;
+                drawCount++;
+            }
+
+            if (drawCount > 0)
+            {
+                _backend.DrawMesh(_drawMeshMultiData, drawCount);
+            }
+
+            program = _renderShadowsSkinnedShaders[lightTypeIndex];
+            shadowParams = _renderShadowsSkinnedParams[lightTypeIndex];
+
+            // Render skeletal meshes
+            _backend.BeginInstance(program.Handle, textures, samplers, _shadowsRenderState);
+            for (var i = 0; i < count; i++)
+            {
+                if (operations[i].Skeleton == null)
+                    continue;
 
                 _backend.BindShaderVariable(shadowParams.World, ref operations[i].WorldMatrix);
-
-                if (operations[i].Skeleton != null)
-                {
-                    _backend.BindShaderVariable(shadowParams.Bones, ref operations[i].Skeleton.FinalBoneTransforms);
-                }
-
+                _backend.BindShaderVariable(shadowParams.Bones, ref operations[i].Skeleton.FinalBoneTransforms);
                 _backend.DrawMesh(operations[i].MeshHandle);
             }
         }
@@ -354,6 +384,7 @@ namespace Triton.Graphics.Deferred
             public Vector4 LightDirWSAndBias;
             public Matrix4 View;
             public Matrix4 Projection;
+            public Matrix4 ViewProjection;
         }
     }
 
