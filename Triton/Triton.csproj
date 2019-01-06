@@ -56,6 +56,7 @@
     <Compile Include="Prefab.cs" />
     <Compile Include="Resources\GenericResourceSerializer.cs" />
     <Compile Include="Services.cs" />
+    <Compile Include="Terrain\TerrainData.cs" />
     <Compile Include="Utility\HashedString.cs" />
     <Compile Include="Utility\HashedStringTable.cs" />
     <Compile Include="IGameObjectComponent.cs" />

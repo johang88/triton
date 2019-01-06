@@ -12,6 +12,7 @@ using Triton.Graphics.Resources;
 using Triton.Input;
 using Triton.Physics.Components;
 using Triton.Samples.Components;
+using Triton.Terrain;
 
 namespace Triton.Samples
 {
@@ -19,7 +20,6 @@ namespace Triton.Samples
     {
         private GameObject Player;
         private GameObject Light;
-        private KnightAnimator _animator;
 
         private List<GameObject> _balls = new List<GameObject>();
 
@@ -55,7 +55,7 @@ namespace Triton.Samples
             };
 
             var terrain = new GameObject();
-            var terrainData = Graphics.Terrain.TerrainData.CreateFromFile(FileSystem, "/terrain.raw");
+            var terrainData = TerrainData.CreateFromFile(FileSystem, "/terrain.raw");
             terrainData.MaxHeight = 512;
             terrain.Components.Add(new TerrainComponent
             {

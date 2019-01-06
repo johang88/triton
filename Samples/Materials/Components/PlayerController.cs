@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Triton.Game.World;
 using Triton.Game.World.Components;
-using Triton.Graphics.Terrain;
 using Triton.Input;
 using Triton.Physics.Components;
+using Triton.Terrain;
 
 namespace Triton.Samples.Components
 {

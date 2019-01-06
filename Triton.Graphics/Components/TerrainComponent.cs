@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Triton.Graphics.Resources;
-using Triton.Graphics.Terrain;
 using Triton.Renderer;
+using Triton.Terrain;
 
 namespace Triton.Graphics.Components
 {

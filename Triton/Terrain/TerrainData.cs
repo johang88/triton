@@ -4,10 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Triton.Graphics.Resources;
 using Triton.IO;
 
-namespace Triton.Graphics.Terrain
+namespace Triton.Terrain
 {
     public class TerrainData
     {
@@ -26,7 +25,7 @@ namespace Triton.Graphics.Terrain
                 var size = (int)(stream.Length / sizeof(ushort));
                 var data = new ushort[size];
 
-                for (var i = 0; i< size; i++)
+                for (var i = 0; i < size; i++)
                 {
                     data[i] = reader.ReadUInt16();
                 }
@@ -36,7 +35,7 @@ namespace Triton.Graphics.Terrain
                 return new TerrainData
                 {
                     Size = size,
-                    MaxHeight= 512.0f,
+                    MaxHeight = 512.0f,
                     NumberOfLodLevels = 7,
                     MeshBaseLODExtentHeightfieldTexels = 128,
                     MetersPerHeightfieldTexel = 0.5f,

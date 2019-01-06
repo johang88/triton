@@ -160,7 +160,6 @@
     <Compile Include="SkeletalAnimation\Transform.cs" />
     <Compile Include="SpriteBatch.cs" />
     <Compile Include="Stage.cs" />
-    <Compile Include="Terrain\TerrainData.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">

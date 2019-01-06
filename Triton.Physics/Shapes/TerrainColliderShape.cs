@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BulletSharp;
+using Triton.Terrain;
 
 namespace Triton.Physics.Shapes
 {
     public class TerrainColliderShape : IColliderShape
     {
-        public Graphics.Terrain.TerrainData TerrainData { get; set; }
+        public TerrainData TerrainData { get; set; }
         private float[] _data;
 
         unsafe internal CollisionShape CreateCollisionShape()
