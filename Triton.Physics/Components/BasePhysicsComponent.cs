@@ -13,6 +13,7 @@ namespace Triton.Physics.Components
         protected BulletSharp.CollisionObject _nativeCollisionObject;
 
         protected World PhysicsWorld => Owner.World.Services.Get<World>();
+        internal bool SynchronizePosition = true;
 
         private bool _canSleep = false;
         [DataMember]
@@ -82,7 +83,10 @@ namespace Triton.Physics.Components
                 if (_nativeCollisionShape == null)
                 {
                     _nativeCollisionShape = CreateNativeCollisionShape();
-                    _nativeCollisionShape.LocalScaling = Conversion.ToBulletVector(ref Owner.Scale);
+                    if (!(_nativeCollisionShape is HeightfieldTerrainShape))
+                    {
+                        _nativeCollisionShape.LocalScaling = Conversion.ToBulletVector(ref Owner.Scale);
+                    }
                 }
 
                 return _nativeCollisionShape;
@@ -101,6 +105,8 @@ namespace Triton.Physics.Components
                     return new CapsuleShape(capsule.Radius, capsule.Height);
                 case Shapes.MeshColliderShape mesh:
                     return mesh.Mesh.Shape;
+                case Shapes.TerrainColliderShape terrain:
+                    return terrain.CreateCollisionShape();
                 default:
                     throw new InvalidOperationException();
             }
@@ -116,8 +122,11 @@ namespace Triton.Physics.Components
             Friction = _friction;
             RollingFriction = _rollingFriction;
 
-            var world = Matrix4.CreateTranslation(Owner.Position) * Matrix4.Rotate(Owner.Orientation);
-            _nativeCollisionObject.WorldTransform = Conversion.ToBulletMatrix(ref world);
+            if (!(ColliderShape is Shapes.TerrainColliderShape terrainShape))
+            {
+                var world = Matrix4.CreateTranslation(Owner.Position) * Matrix4.Rotate(Owner.Orientation);
+                _nativeCollisionObject.WorldTransform = Conversion.ToBulletMatrix(ref world);
+            }
         }
 
         public override void OnDeactivate()
@@ -136,8 +145,10 @@ namespace Triton.Physics.Components
         {
             base.Update(dt);
 
-            // We probably dont have to do this all the time
-            UpdateTransformFromPhysicsTransform();
+            if (SynchronizePosition)
+            {
+                UpdateTransformFromPhysicsTransform();
+            }
         }
 
         protected void UpdateTransformFromPhysicsTransform()

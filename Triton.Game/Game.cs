@@ -209,6 +209,7 @@ namespace Triton.Game
 
             InputManager = new Input.InputManager(_window.Bounds);
 
+            _services.Add(GraphicsBackend);
             _services.Add(Stage);
             _services.Add(InputManager);
             _services.Add(Resources);
@@ -291,7 +292,7 @@ namespace Triton.Game
 
             // Prepare shadow buffer for sunlight
             List<RenderTarget> csm = null; RenderTarget shadows = null;
-            if (sunLight != null)
+            if (sunLight != null && sunLight.CastShadows)
             {
                 GraphicsBackend.ProfileBeginSection(Profiler.ShadowsGeneration);
                 csm = ShadowRenderer.RenderCSM(gbuffer, sunLight, Stage, Camera, out var viewProjections, out var clipDistances);

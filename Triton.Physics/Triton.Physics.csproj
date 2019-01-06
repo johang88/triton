@@ -84,6 +84,7 @@
     <Compile Include="Shapes\CapsuleColliderShape.cs" />
     <Compile Include="Shapes\MeshColliderShape.cs" />
     <Compile Include="Shapes\SphereColliderShape.cs" />
+    <Compile Include="Shapes\TerrainColliderShape.cs" />
     <Compile Include="World.cs" />
   </ItemGroup>
   <ItemGroup>

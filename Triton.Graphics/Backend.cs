@@ -955,7 +955,8 @@ namespace Triton.Graphics
             return new BatchBuffer(RenderSystem, vertexFormat, initialCount);
         }
 
-        public Resources.Texture CreateTexture(string name, int width, int height, PixelFormat pixelFormat, PixelInternalFormat interalFormat, PixelType pixelType, byte[] data, bool mipmap)
+        public Resources.Texture CreateTexture<T>(string name, int width, int height, PixelFormat pixelFormat, PixelInternalFormat interalFormat, PixelType pixelType, T[] data, bool mipmap)
+            where T : struct
         {
             var handle = RenderSystem.CreateTexture(width, height, data, pixelFormat, interalFormat, pixelType, mipmap, null);
 

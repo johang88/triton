@@ -60,7 +60,8 @@ void main()
 	
 	if (gbuffer1.w == 0) {
 		if (mode == 1) {
-			vec3 sky = textureLod(samplerSpecular, position, 0).xyz;
+			vec3 V = normalize(position - cameraPosition);
+			vec3 sky = textureLod(samplerSpecular, V, 0).xyz;
 			oColor = vec4(sky * irradianceStrength, 1.0);
 		} else {
 			oColor = vec4(diffuse, 1.0);

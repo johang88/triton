@@ -82,6 +82,7 @@
     <Compile Include="Components\ParticleSystemComponent.cs" />
     <Compile Include="Components\RenderableComponent.cs" />
     <Compile Include="Components\SkinnedMeshComponent.cs" />
+    <Compile Include="Components\TerrainComponent.cs" />
     <Compile Include="Deferred\AmbientLightParams.cs" />
     <Compile Include="Deferred\CombineParams.cs" />
     <Compile Include="Deferred\ShadowRenderer.cs" />
@@ -159,6 +160,7 @@
     <Compile Include="SkeletalAnimation\Transform.cs" />
     <Compile Include="SpriteBatch.cs" />
     <Compile Include="Stage.cs" />
+    <Compile Include="Terrain\TerrainData.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">

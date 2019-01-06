@@ -126,6 +126,18 @@ namespace Triton.Graphics.Resources
         public void AddUniform(string name, Vector4 value)
             => _uniforms.Add(new Uniform { Name = name, Type = UniformType.Vector4, Value = value });
 
+        public void SetUniform(string name, Vector4 value)
+        {
+            for (var i = 0; i < _uniforms.Count; i++)
+            {
+                if (_uniforms[i].Name == name)
+                {
+                    _uniforms[i].Value = value;
+                    break;
+                }
+            }
+        }
+
         class ShaderHandles
         {
             public int ModelViewProjection = 0;

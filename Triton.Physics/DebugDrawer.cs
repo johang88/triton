@@ -59,7 +59,7 @@ namespace Triton.Physics
 
             Batch.End();
 
-            Backend.BeginInstance(Shader.Handle, new int[0], null, RenderStateId);
+            Backend.BeginInstance(Shader.Handle, new int[0], new int[0], RenderStateId);
 
             Backend.BindShaderVariable(Params.HandleModelViewProjection, ref modelViewProjectionMatrix);
             Backend.BindShaderVariable(Params.HandleColor, ref Color);

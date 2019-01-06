@@ -141,7 +141,8 @@ namespace Triton.Renderer
             }
         }
 
-        public int CreateTexture(int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap, OnLoadedCallback loadedCallback)
+        public int CreateTexture<T>(int width, int height, T[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap, OnLoadedCallback loadedCallback)
+            where T : struct
         {
             var handle = _textureManager.Create();
             SetTextureData(handle, width, height, data, format, internalFormat, type, mipmap, loadedCallback);
@@ -163,7 +164,8 @@ namespace Triton.Renderer
             return handle;
         }
 
-        public void SetTextureData(int handle, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap, OnLoadedCallback loadedCallback)
+        public void SetTextureData<T>(int handle, int width, int height, T[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap, OnLoadedCallback loadedCallback)
+            where T : struct
         {
             Action loadAction = () =>
             {
@@ -476,7 +478,7 @@ namespace Triton.Renderer
                             target = TextureTarget.TextureCubeMap;
                         }
 
-                        _textureManager.SetPixelData(attachment.TextureHandle, target, definition.Width, definition.Height, null, attachment.PixelFormat, attachment.PixelInternalFormat, attachment.PixelType, attachment.MipMaps);
+                        _textureManager.SetPixelData<byte>(attachment.TextureHandle, target, definition.Width, definition.Height, null, attachment.PixelFormat, attachment.PixelInternalFormat, attachment.PixelType, attachment.MipMaps);
                         // Replace with gl handle
                         attachment.TextureHandle = _textureManager.GetOpenGLHande(attachment.TextureHandle);
                     }

@@ -11,6 +11,8 @@ namespace Triton
     public abstract class GameObjectComponent : IGameObjectComponent
     {
         public GameObject Owner { get; private set; }
+        public GameObjectManager World => Owner.World;
+        public Services Services => World.Services;
 
         public virtual void OnAttached(GameObject owner)
             => Owner = owner ?? throw new ArgumentNullException("owner");

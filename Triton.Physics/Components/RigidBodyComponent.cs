@@ -62,6 +62,17 @@ namespace Triton.Physics.Components
 
             NativeCollisionShape.CalculateLocalInertia(_mass, out var localInertia);
 
+            // TODO: This is a little hacky
+            if (ColliderShape is Shapes.TerrainColliderShape terrainShape)
+            {
+                var terrainSize = terrainShape.TerrainData.Size * terrainShape.TerrainData.MetersPerHeightfieldTexel;
+                var terrainHalfSize = terrainSize / 2.0f;
+
+                SynchronizePosition = false;
+
+                motionState = new DefaultMotionState(BulletSharp.Math.Matrix.Translation(terrainHalfSize, terrainShape.TerrainData.MaxHeight * 0.5f, terrainHalfSize));
+            }
+
             _nativeRigidBody = new RigidBody(new RigidBodyConstructionInfo(_mass, motionState, NativeCollisionShape, localInertia));
             _nativeRigidBody.UserObject = this;
             

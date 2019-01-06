@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Triton.Game.World;
 using Triton.Game.World.Components;
+using Triton.Graphics.Terrain;
 using Triton.Input;
 using Triton.Physics.Components;
 
@@ -21,6 +22,8 @@ namespace Triton.Samples.Components
         private bool _wasMouseLeftPressed;
 
         private bool _wasSpaceDown = false;
+
+        public TerrainData Terrain { get; set; }
 
         public override void OnActivate()
         {
@@ -63,6 +66,9 @@ namespace Triton.Samples.Components
             Camera.Yaw(_cameraYaw);
             Camera.Pitch(_cameraPitch);
 
+            //Owner.Position += movement * dt * 5.0f * (Input.IsKeyDown(Key.ShiftLeft) ? 15.0f : 1.0f);
+            //Owner.Position.Y = Terrain.GetHeightAt(Owner.Position.X, Owner.Position.Z) + 1.75f;
+
             _characterController.SetTargetVelocity(movement * 5.0f);
             if (Input.IsKeyDown(Key.Space) && !_wasSpaceDown)
             {
@@ -74,27 +80,27 @@ namespace Triton.Samples.Components
                 _wasSpaceDown = false;
             }
 
-            Camera.Position = Owner.Position + new Vector3(0, 0.7f, 0);
+            Camera.Position = Owner.Position + new Vector3(0, 1.8f, 0);
 
-            if (Input.IsMouseButtonDown(MouseButton.Left))
-            {
-                _wasMouseLeftPressed = true;
-            }
-            else if (_wasMouseLeftPressed)
-            {
-                _wasMouseLeftPressed = false;
+            //if (Input.IsMouseButtonDown(MouseButton.Left))
+            //{
+            //    _wasMouseLeftPressed = true;
+            //}
+            //else if (_wasMouseLeftPressed)
+            //{
+            //    _wasMouseLeftPressed = false;
 
-                var from = Camera.Position;
-                var to = from + Vector3.Transform(new Vector3(0, 0, 100), Camera.Orientation);
+            //    var from = Camera.Position;
+            //    var to = from + Vector3.Transform(new Vector3(0, 0, 100), Camera.Orientation);
 
-                if (PhysicsWorld.Raycast(from, to, (component, _, __) => component.ColliderShape is Physics.Shapes.SphereColliderShape && component is RigidBodyComponent, out var hitComponent, out var hitNormal, out var hitFraction))
-                {
-                    var direction = to - from;
-                    direction = direction.Normalize();
-                    var rigidyBodyComponent = hitComponent as RigidBodyComponent;
-                    rigidyBodyComponent.AddForce(direction * 10);
-                }
-            }
+            //    if (PhysicsWorld.Raycast(from, to, (component, _, __) => component.ColliderShape is Physics.Shapes.SphereColliderShape && component is RigidBodyComponent, out var hitComponent, out var hitNormal, out var hitFraction))
+            //    {
+            //        var direction = to - from;
+            //        direction = direction.Normalize();
+            //        var rigidyBodyComponent = hitComponent as RigidBodyComponent;
+            //        rigidyBodyComponent.AddForce(direction * 10);
+            //    }
+            //}
         }
     }
 }

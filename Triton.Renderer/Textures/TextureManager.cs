@@ -117,7 +117,8 @@ namespace Triton.Renderer.Textures
             _handles[index].Initialized = false;
         }
 
-        public void SetPixelData(int handle, TextureTarget target, int width, int height, byte[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap = true)
+        public void SetPixelData<T>(int handle, TextureTarget target, int width, int height, T[] data, PixelFormat format, PixelInternalFormat internalFormat, PixelType type, bool mipmap = true)
+            where T : struct
         {
             ExtractHandle(handle, out int index, out int id);
 
