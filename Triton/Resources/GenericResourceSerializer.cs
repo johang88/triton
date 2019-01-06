@@ -135,7 +135,7 @@ namespace Triton.Resources
             foreach (var property in type.GetProperties())
             {
                 var propertyType = property.PropertyType;
-                if (!propertyType.IsClass || propertyType == typeof(string) || !property.CanRead)
+                if (!propertyType.IsClass || propertyType == typeof(string) || !property.CanRead || !property.CanWrite)
                     continue;
 
                 var value = property.GetValue(resource, null);

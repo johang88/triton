@@ -27,6 +27,7 @@ uniform mat4x4[5] shadowViewProjCsm;
 uniform float[6] shadowClipDistances;
 uniform float texelSize;
 uniform vec2 cameraClipPlane;
+uniform int debugCascades;
 
 void main()
 {
@@ -62,8 +63,13 @@ void main()
 			break;
 		}
 	}
-	
-	oColor.xyz = shadow.xxx;
+
+	if (debugCascades == 1) {
+		oColor.xyz = shadow.xxx * cascadeColor;
+	} else {
+		oColor.xyz = shadow.xxx;
+	}
+
 	oColor.w = 1.0;
 }
 #endif

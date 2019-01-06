@@ -62,7 +62,6 @@ namespace Triton.Game
         protected float ElapsedTime = 0.0f;
 
         private float _updateFrameTime = 0.0f;
-        private float _graphicsFrameTime = 0.0f;
 
         private OpenTK.INativeWindow _window;
 
@@ -108,6 +107,7 @@ namespace Triton.Game
             AudioSystem.Dispose();
             Resources.Dispose();
             _window.Dispose();
+            GraphicsBackend?.Dispose();
         }
 
         public void Run()
@@ -131,8 +131,8 @@ namespace Triton.Game
 
             while (Running)
             {
+                _ioThreadScheduler.WorkAvailable.WaitOne(100);
                 _ioThreadScheduler.Tick(timer, 1000);
-                Thread.Sleep(0);
             }
         }
 
@@ -158,35 +158,33 @@ namespace Triton.Game
             var timer = new System.Diagnostics.Stopwatch();
             timer.Start();
 
-            using (GraphicsBackend = new Triton.Graphics.Backend(Resources, _window.Width, _window.Height, ctx))
+            GraphicsBackend = new Triton.Graphics.Backend(Resources, _window.Width, _window.Height, ctx);
+            Triton.Graphics.Resources.ResourceSerializers.Init(Resources, GraphicsBackend, FileSystem, new Graphics.Resources.ShaderHotReloadConfig
             {
-                Triton.Graphics.Resources.ResourceSerializers.Init(Resources, GraphicsBackend, FileSystem, new Graphics.Resources.ShaderHotReloadConfig
-                {
-                    Path = @"..\Data\core_data\shaders\",
-                    BasePath = @"/shaders/",
-                    Enable = true
-                });
+                Path = @"..\Data\core_data\shaders\",
+                BasePath = @"/shaders/",
+                Enable = true
+            });
 
-                _rendererReady.Set();
+            _rendererReady.Set();
 
-                while (Running)
-                {
-                    _window.CursorVisible = CursorVisible;
-                    _window.ProcessEvents();
+            while (Running)
+            {
+                _window.CursorVisible = CursorVisible;
+                _window.ProcessEvents();
 
-                    if (!_window.Exists)
-                        break;
+                if (!_window.Exists)
+                    break;
 
-                    _mainThreadScheduler.Tick(timer, 16);
+                _mainThreadScheduler.Tick(timer, 16);
 
-                    if (!GraphicsBackend.Process())
-                        break;
+                if (!GraphicsBackend.Process())
+                    break;
 
-                    Thread.Sleep(0);
-                }
-
-                Running = false;
+                Thread.Sleep(0);
             }
+
+            Running = false;
         }
 
         void UpdateLoop()
@@ -298,6 +296,8 @@ namespace Triton.Game
                 csm = ShadowRenderer.RenderCSM(gbuffer, sunLight, Stage, Camera, out var viewProjections, out var clipDistances);
                 GraphicsBackend.ProfileEndSection(Profiler.ShadowsGeneration);
 
+                ShadowBufferRenderer.DebugCascades = PostEffectManager.VisualizationMode == Graphics.Post.VisualizationMode.CSM;
+
                 GraphicsBackend.ProfileBeginSection(Profiler.ShadowsRender);
                 shadows = ShadowBufferRenderer.Render(Camera, gbuffer, csm, viewProjections, clipDistances, DeferredRenderer.Settings.ShadowQuality);
                 GraphicsBackend.ProfileEndSection(Profiler.ShadowsRender);
@@ -308,7 +308,7 @@ namespace Triton.Game
             var ssao = PostEffectManager.RenderSSAO(Camera, gbuffer);
             GraphicsBackend.ProfileEndSection(Profiler.SSAO);
             var lightOutput = DeferredRenderer.RenderLighting(Stage, Camera, shadows, ssao);
-            var postProcessedResult = PostEffectManager.Render(Camera, Stage, gbuffer, lightOutput, deltaTime);
+            var postProcessedResult = PostEffectManager.Render(Camera, Stage, gbuffer, lightOutput, shadows, deltaTime);
 
             GraphicsBackend.BeginPass(null, Vector4.Zero, ClearFlags.Color);
 
@@ -322,8 +322,6 @@ namespace Triton.Game
 
                 SpriteRenderer.RenderQuad(DeferredRenderer.PointShadowAtlas.Textures[0], new Vector2(x - 256 - 10, y), new Vector2(256, 256));
                 SpriteRenderer.RenderQuad(DeferredRenderer.SpotShadowAtlas.Textures[0], new Vector2(x, y), new Vector2(256, 256));
-
-                
 
                 if (csm != null)
                 {

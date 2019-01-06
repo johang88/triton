@@ -22,6 +22,8 @@ namespace Triton.Graphics.Deferred
 
         private bool _handlesInitialized = false;
 
+        public bool DebugCascades = false;
+
         public ShadowBufferRenderer(Backend backend, Triton.Resources.ResourceManager resourceManager, int width, int height)
         {
             _backend = backend ?? throw new ArgumentNullException("backend");
@@ -41,7 +43,7 @@ namespace Triton.Graphics.Deferred
             {
                 { SamplerParameterName.TextureMinFilter, (int)TextureMinFilter.Linear },
                 { SamplerParameterName.TextureMagFilter, (int)TextureMagFilter.Linear },
-				{ SamplerParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge },
+                { SamplerParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge },
                 { SamplerParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge }
             });
 
@@ -103,6 +105,8 @@ namespace Triton.Graphics.Deferred
             _backend.BindShaderVariable(_renderShadowsCSMParams.TexelSize, texelSize);
 
             _backend.BindShaderVariable(_renderShadowsCSMParams.InvViewProjection, ref inverseViewProjectionMatrix);
+            _backend.BindShaderVariable(_renderShadowsCSMParams.DebugCascades, DebugCascades ? 1 : 0);
+
 
             _backend.DrawMesh(_quadMesh.MeshHandle);
 
@@ -120,7 +124,8 @@ namespace Triton.Graphics.Deferred
             public int ShadowClipDistances = 0;
             public int TexelSize = 0;
             public int InvViewProjection = 0;
-            public int CameraClipPlane;
+            public int CameraClipPlane = 0;
+            public int DebugCascades = 0;
         }
     }
 }

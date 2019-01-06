@@ -13,6 +13,7 @@ namespace Triton.Concurrency
     {
         private readonly ConcurrentQueue<Task> _pending = new ConcurrentQueue<Task>();
         private readonly Thread _thread;
+        public readonly ManualResetEvent WorkAvailable = new ManualResetEvent(false);
 
         public SingleThreadScheduler(Thread thread)
         {
@@ -29,6 +30,7 @@ namespace Triton.Concurrency
         protected override void QueueTask(Task task)
         {
             _pending.Enqueue(task);
+            WorkAvailable.Set();
         }
 
         protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
@@ -52,6 +54,11 @@ namespace Triton.Concurrency
                 {
                     TryExecuteTask(task);
                 }
+            }
+
+            if (_pending.Count == 0)
+            {
+                WorkAvailable.Reset();
             }
         }
     }

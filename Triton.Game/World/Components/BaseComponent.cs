@@ -12,7 +12,6 @@ namespace Triton.Game.World.Components
     [DataContract]
     public class BaseComponent : GameObjectComponent
     {
-        protected GameObjectManager World => Owner.World;
         protected Graphics.Stage Stage => Owner.World.Services.Get<Graphics.Stage>();
         protected GameObject Parent => Owner.Parent;
         protected Camera Camera => Stage.Camera;

@@ -18,6 +18,7 @@ namespace Triton.Graphics.Post
         SSAO,
         Occlusion,
         SMAAEdge,
-        SMAABlend
+        SMAABlend,
+        CSM
     }
 }

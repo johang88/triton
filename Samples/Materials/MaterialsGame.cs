@@ -56,6 +56,7 @@ namespace Triton.Samples
 
             var terrain = new GameObject();
             var terrainData = Graphics.Terrain.TerrainData.CreateFromFile(FileSystem, "/terrain.raw");
+            terrainData.MaxHeight = 512;
             terrain.Components.Add(new TerrainComponent
             {
                 Material = Resources.Load<Material>("/materials/terrain"),
@@ -72,7 +73,8 @@ namespace Triton.Samples
             GameWorld.Add(terrain);
 
             Player = new GameObject();
-            Player.Position = new Vector3(200, 225, 193);
+            Player.Position = new Vector3(200, 0, 193);
+            Player.Position.Y = terrainData.GetHeightAt(Player.Position.X, Player.Position.Z) + 1f;
             Player.Components.Add(new CharacterControllerComponent
             {
                 ColliderShape = new Triton.Physics.Shapes.CapsuleColliderShape

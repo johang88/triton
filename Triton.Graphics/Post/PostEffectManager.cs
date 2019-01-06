@@ -169,7 +169,7 @@ namespace Triton.Graphics.Post
             return _ssaoOutput;
         }
 
-        public RenderTarget Render(Camera camera, Stage stage, RenderTarget gbuffer, RenderTarget input, float deltaTime)
+        public RenderTarget Render(Camera camera, Stage stage, RenderTarget gbuffer, RenderTarget input, RenderTarget csmShadowBuffer, float deltaTime)
         {
             _backend.ProfileBeginSection(Profiler.Post);
 
@@ -194,7 +194,7 @@ namespace Triton.Graphics.Post
             if (VisualizationMode != VisualizationMode.None)
             {
                 // Visualize does it's own gamma, but only if it wants to (some things are linear)
-                _visualize.Render(VisualizationMode, camera, gbuffer, _ssaoOutput, _smaa, _temporaryRenderTargets[0], _temporaryRenderTargets[1]);
+                _visualize.Render(VisualizationMode, camera, gbuffer, _ssaoOutput, _smaa, csmShadowBuffer, _temporaryRenderTargets[0], _temporaryRenderTargets[1]);
                 SwapRenderTargets();
             }
 

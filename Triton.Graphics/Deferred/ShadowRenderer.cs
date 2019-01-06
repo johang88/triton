@@ -35,9 +35,9 @@ namespace Triton.Graphics.Deferred
         private bool _handlesInitialized = false;
 
         public float MinCascadeDistance = 0.0f;
-        public float MaxCascadeDistance = 0.35f;
+        public float MaxCascadeDistance = 0.5f;
         public PartitionMode PartitionMode = PartitionMode.PSSM;
-        public float PSSMLambda = 0.92f;
+        public float PSSMLambda = 0.8f;
         public readonly float[] SplitDistances = new float[5] { 0.05f, 0.15f, 0.5f, 0.75f, 1.0f };
         public readonly float[] SplitBiases = new float[5] { 0.015f, 0.0015f, 0.0015f, 0.0015f, 0.0015f };
         public bool StabilizeCascades = true;
@@ -51,7 +51,7 @@ namespace Triton.Graphics.Deferred
         private int _currentPerObjectDataBuffer = 0;
         private Matrix4[] _worldMatrices = new Matrix4[4096];
         private DrawMeshMultiData[] _drawMeshMultiData = new DrawMeshMultiData[4096];
-
+        
         public ShadowRenderer(Backend backend, Triton.Resources.ResourceManager resourceManager, int cascadeCount = MaxCascadeCount, int resolution = DefaultResolution)
         {
             _backend = backend ?? throw new ArgumentNullException(nameof(backend));
@@ -137,7 +137,7 @@ namespace Triton.Graphics.Deferred
         public List<RenderTarget> RenderCSM(RenderTarget gbuffer, Components.LightComponent light, Stage stage, Camera camera, out Matrix4[] viewProjections, out float[] clipDistances)
         {
             // Basic camera setup
-            clipDistances = new float[_renderTargets.Count];
+            clipDistances = new float[_renderTargets.Count + 1];
 
             var minDistance = MinCascadeDistance;
             var maxDistance = MaxCascadeDistance;
@@ -160,6 +160,7 @@ namespace Triton.Graphics.Deferred
             var range = maxZ - minZ;
             var ratio = maxZ / minZ;
 
+            clipDistances[0] = (minZ - nearClip) / clipRange;
             for (var i = 0; i < _renderTargets.Count; i++)
             {
                 var p = (i + 1) / (float)_renderTargets.Count;
@@ -167,14 +168,14 @@ namespace Triton.Graphics.Deferred
                 var uniform = minZ + range * p;
                 var d = lambda * (log - uniform) + uniform;
 
-                clipDistances[i] = (d - nearClip) / clipRange;
+                clipDistances[i + 1] = (d - nearClip) / clipRange;
             }
 
             // Render each cascade in turn
             for (var i = 0; i < _renderTargets.Count; i++)
             {
-                var prevSplitDistance = i == 0 ? minDistance : clipDistances[i - 1];
-                var splitDistance = clipDistances[i];
+                var prevSplitDistance = clipDistances[i];
+                var splitDistance = clipDistances[i + 1];
 
                 light.ShadowBias = SplitBiases[i];
                 RenderCascade(_renderTargets[i], light, stage, camera, prevSplitDistance, splitDistance, i, out _shadowViewProjections[i]);

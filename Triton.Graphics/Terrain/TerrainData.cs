@@ -38,8 +38,8 @@ namespace Triton.Graphics.Terrain
                     Size = size,
                     MaxHeight= 512.0f,
                     NumberOfLodLevels = 7,
-                    MeshBaseLODExtentHeightfieldTexels = (int)(size / 2.0f),
-                    MetersPerHeightfieldTexel = 2.0f,
+                    MeshBaseLODExtentHeightfieldTexels = 128,
+                    MetersPerHeightfieldTexel = 0.5f,
                     HeightMap = data
                 };
             }
@@ -49,12 +49,6 @@ namespace Triton.Graphics.Terrain
         {
             x /= (Size * MetersPerHeightfieldTexel);
             z /= (Size * MetersPerHeightfieldTexel);
-
-            //x *= _size;
-            //z *= _size;
-
-            //if (x < 0.0f || x >= _size || z < 0 || z >= _size)
-            //	return -1;
 
             return GetHeightAtTerrainPosition(x, z);
         }
