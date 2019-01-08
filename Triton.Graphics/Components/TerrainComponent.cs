@@ -16,6 +16,7 @@ namespace Triton.Graphics.Components
 
         private BatchBuffer _batchBuffer;
         private Texture _heightMap;
+        private Texture _normalMap;
 
         public override void OnActivate()
         {
@@ -39,10 +40,23 @@ namespace Triton.Graphics.Components
                 data[i] = TerrainData.HeightMap[i] / (float)ushort.MaxValue;
             }
 
-            // Create GPU heightmap texture
+            // Calculate normal map
+            var normalMapData = new Vector3[TerrainData.Size * TerrainData.Size];
+            for (var z = 0; z < TerrainData.Size; z++)
+            {
+                for (var x = 0; x < TerrainData.Size; x++)
+                {
+                    var position = new Vector2(x * TerrainData.MetersPerHeightfieldTexel, z * TerrainData.MetersPerHeightfieldTexel);
+                    normalMapData[z * TerrainData.Size + x] = TerrainData.GetNormalAt(position.X, position.Y) * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
+                }
+            }
+
+            // Create GPU heightmap & normalmap textures
             _heightMap = backend.CreateTexture("/system/terrain_heightmap", TerrainData.Size, TerrainData.Size, PixelFormat.Red, PixelInternalFormat.R16f, PixelType.Float, data, true);
+            _normalMap = backend.CreateTexture("/system/terrain_normalmap", TerrainData.Size, TerrainData.Size, PixelFormat.Rgb, PixelInternalFormat.Rgb8, PixelType.Float, normalMapData, true);
 
             Material.Textures["samplerHeightMap"] = _heightMap;
+            Material.Textures["samplerNormalMap"] = _normalMap;
             Material.SetUniform("uTerrainParameters", new Vector4(
                 TerrainData.MetersPerHeightfieldTexel,
                 1.0f / TerrainData.MetersPerHeightfieldTexel,
@@ -171,6 +185,9 @@ namespace Triton.Graphics.Components
 
             _heightMap?.Dispose();
             _heightMap = null;
+
+            _normalMap?.Dispose();
+            _normalMap = null;
         }
 
         public override void PrepareRenderOperations(BoundingFrustum frustum, RenderOperations operations)

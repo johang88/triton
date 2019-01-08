@@ -129,7 +129,9 @@ void get_material(out vec3 diffuse, out vec3 normals, out float metallic, out fl
 	
 	float r = position.y / 512.0;
 	
-	vec4 splat = textureLod(samplerSplatMap, texCoord, 0);
+	vec4 splat = texture(samplerSplatMap, texCoord);
+	float total = splat.x + splat.y + splat.z + splat.w;
+	splat.w += 1.0 - min(1.0, total);
 
 	vec3 dh0 = texture(samplerDiffuse0, texCoord * uDetailMapScale.x).xyz;
 	vec3 dh1 = texture(samplerDiffuse1, texCoord * uDetailMapScale.y).xyz;
@@ -146,10 +148,9 @@ void get_material(out vec3 diffuse, out vec3 normals, out float metallic, out fl
 	
 	diffuse = pow(dh, vec3(2.2));
 	
-	mat3x3 TBN = mat3x3(normalize(tangent), normalize(bitangent), normalize(normal));
-	vec3 N = normalize(TBN * normalize(texture(samplerNormalMap, texCoord).xyz * 2.0 - 1.0));
+	vec3 N = normalize(texture(samplerNormalMap, texCoord).xyz * 2.0 - 1.0);
 
-	TBN = mat3x3(normalize(tangent), normalize(bitangent), normalize(N));
+	mat3x3 TBN = mat3x3(normalize(tangent), normalize(bitangent), normalize(N));
 	normals = normalize(TBN * normalize(nr.xyz * 2.0 - 1.0));
 
     metallic = 0;

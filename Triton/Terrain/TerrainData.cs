@@ -143,7 +143,9 @@ namespace Triton.Terrain
 
         private float At(int x, int z)
         {
-            return HeightMap[z * Size + x] / (float)ushort.MaxValue;
+            var index = z * Size + x;
+            if (index < 0) return ushort.MaxValue;
+            else return HeightMap[z * Size + x] / (float)ushort.MaxValue;
         }
 
         public Vector3 GetNormalAt(float x, float z)

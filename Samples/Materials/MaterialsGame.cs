@@ -23,8 +23,8 @@ namespace Triton.Samples
 
         private List<GameObject> _balls = new List<GameObject>();
 
-        private float _rotationX = 0.43f;
-        private float _rotationY = -0.38f;
+        private float _rotationX = 1.026f;
+        private float _rotationY = -0.025f;
 
         public MaterialsGame()
             : base("Materials")
@@ -200,8 +200,8 @@ namespace Triton.Samples
         {
             base.RenderUI(deltaTime);
 
-            ImGui.SliderFloat("LightRotation X", ref _rotationX, -3.14f, 3.14f);
-            ImGui.SliderFloat("LightRotation Y", ref _rotationY, -3.14f, 3.14f);
+            ImGui.SliderFloat("LightRotation X", ref _rotationX, -3.14f * 2.0f, 3.14f * 2.0f);
+            ImGui.SliderFloat("LightRotation Y", ref _rotationY, -3.14f * 2.0f, 3.14f * 2.0f);
         }
     }
 }
