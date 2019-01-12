@@ -37,6 +37,7 @@ namespace Triton.Graphics.Post
         private readonly Effects.Fog _fog;
         private readonly Effects.Visualize _visualize;
         private readonly Effects.SSAO _ssao;
+        private readonly Effects.AtmosphericScattering _atmosphericScattering;
 
         public bool EnablePostEffects = true;
 
@@ -74,6 +75,7 @@ namespace Triton.Graphics.Post
             _fog = new Fog(_backend, _quadMesh);
             _visualize = new Visualize(_backend, _quadMesh);
             _ssao = new SSAO(_backend, _quadMesh);
+            _atmosphericScattering = new AtmosphericScattering(_backend, _quadMesh);
 
             _effects.Add(_adaptLuminance);
             _effects.Add(_bloom);
@@ -84,6 +86,7 @@ namespace Triton.Graphics.Post
             _effects.Add(_fog);
             _effects.Add(_visualize);
             _effects.Add(_ssao);
+            _effects.Add(_atmosphericScattering);
 
             // Default settings
             AntiAliasing = AntiAliasing.SMAA;
@@ -157,10 +160,12 @@ namespace Triton.Graphics.Post
             SwapRenderTargets();
         }
 
-        private void ApplyFog(Camera camera, RenderTarget gbuffer, Stage stage)
+        private void ApplyAtmosphere(Camera camera, RenderTarget gbuffer, Stage stage)
         {
-            _fog.Render(camera, stage, gbuffer, _temporaryRenderTargets[0], _temporaryRenderTargets[1]);
-            SwapRenderTargets();
+            if (_atmosphericScattering.Render(camera, stage, gbuffer, _temporaryRenderTargets[0], _temporaryRenderTargets[1]))
+            {
+                SwapRenderTargets();
+            }
         }
 
         public RenderTarget RenderSSAO(Camera camera, RenderTarget gbuffer)
@@ -183,6 +188,7 @@ namespace Triton.Graphics.Post
 
             if (EnablePostEffects)
             {
+                ApplyAtmosphere(camera, gbuffer, stage);
                 ApplyLumianceBloomAndTonemap(deltaTime);
                 ApplyAA();
             }

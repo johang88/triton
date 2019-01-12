@@ -118,6 +118,7 @@
     <Compile Include="Post\AntiAliasingQuality.cs" />
     <Compile Include="Post\DofSettings.cs" />
     <Compile Include="Post\Effects\AdaptLuminance.cs" />
+    <Compile Include="Post\Effects\AtmosphericScattering.cs" />
     <Compile Include="Post\Effects\BaseEffect.cs" />
     <Compile Include="Post\Effects\Bloom.cs" />
     <Compile Include="Post\Effects\Fog.cs" />
