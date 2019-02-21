@@ -15,7 +15,6 @@ namespace Triton.Graphics.Resources
         public ShaderProgram Shader;
         private ShaderHandles _handles;
         private Triton.Resources.ResourceManager _resourceManager;
-        public bool IsSkinned;
 
         private int[] _textureHandles;
         private int[] _samplerToTexture;

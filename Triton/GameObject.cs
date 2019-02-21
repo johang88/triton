@@ -98,11 +98,14 @@ namespace Triton
             {
                 child.World = World;
             }
+
+            child.Parent = this;
         }
 
         private void Children_OnRemove(GameObject child)
         {
             child.World = null;
+            child.Parent = null;
         }
 
         private void Components_OnAdd(IGameObjectComponent component)

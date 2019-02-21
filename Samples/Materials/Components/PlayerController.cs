@@ -15,9 +15,6 @@ namespace Triton.Samples.Components
     {
         private const float MouseSensitivity = 0.0025f;
 
-        private float _cameraYaw = 0;
-        private float _cameraPitch = 0;
-
         private CharacterControllerComponent _characterController;
         private bool _wasMouseLeftPressed;
 
@@ -25,11 +22,17 @@ namespace Triton.Samples.Components
 
         public TerrainData Terrain { get; set; }
 
+        private KnightAnimator _animator;
+
+        private ThirdPersonCamera _camera;
+
         public override void OnActivate()
         {
             base.OnActivate();
 
             _characterController = Owner.GetComponent<CharacterControllerComponent>();
+            _animator = Owner.Children.First().GetComponent<KnightAnimator>();
+            _camera = Owner.GetComponent<ThirdPersonCamera>();
         }
 
         public override void Update(float dt)
@@ -50,57 +53,40 @@ namespace Triton.Samples.Components
                 movement.X = 1.0f;
             else if (Input.IsKeyDown(Key.D))
                 movement.X = -1.0f;
-
+            
             if (movement.LengthSquared > 0.0f)
             {
-                movement = movement.Normalize();
+                var cameraYawOrientation = Quaternion.FromAxisAngle(Vector3.UnitY, _camera.YawAmount);
+                var faceDirection = Vector3.Zero;
+
+                faceDirection += movement.Z * cameraYawOrientation.ZAxis();
+                faceDirection += movement.X * cameraYawOrientation.XAxis();
+                faceDirection.Y = 0.0f;
+
+                faceDirection = faceDirection.Normalize();
+
+                var orientation = Vector3.GetRotationTo(Owner.Orientation.ZAxis(), faceDirection);
+                Owner.Orientation *= orientation;
+
+                _characterController.SetTargetVelocity(faceDirection * 3.5f * (Input.IsKeyDown(Key.ShiftLeft) ? 15.0f : 1.0f));
+
+                _animator.SetActiveAnimation("Soldier_walk");
             }
-
-            var movementDir = Quaternion.FromAxisAngle(Vector3.UnitY, _cameraYaw);
-            movement = Vector3.Transform(movement, movementDir);
-
-            _cameraYaw += -Input.MouseDelta.X * MouseSensitivity;
-            _cameraPitch += Input.MouseDelta.Y * MouseSensitivity;
-
-            Camera.Orientation = Quaternion.Identity;
-            Camera.Yaw(_cameraYaw);
-            Camera.Pitch(_cameraPitch);
-
-            //Owner.Position += movement * dt * 5.0f * (Input.IsKeyDown(Key.ShiftLeft) ? 15.0f : 1.0f);
-            //Owner.Position.Y = Terrain.GetHeightAt(Owner.Position.X, Owner.Position.Z) + 1.75f;
-
-            _characterController.SetTargetVelocity(movement * 5.0f * (Input.IsKeyDown(Key.ShiftLeft) ? 15.0f : 1.0f));
-            if (Input.IsKeyDown(Key.Space) && !_wasSpaceDown)
+            else
             {
-                _characterController.Jump();
-                _wasSpaceDown = true;
+                _animator.SetActiveAnimation("Idle");
+                _characterController.SetTargetVelocity(Vector3.Zero);
             }
-            else if (!Input.IsKeyDown(Key.Space))
+
+            _camera.Zoom(-Input.MouseWheelDelta);
+
+            if (Input.IsMouseButtonDown(MouseButton.Right))
             {
-                _wasSpaceDown = false;
+                _camera.Yaw(-Input.MouseDelta.X * MouseSensitivity);
+                _camera.Pitch(Input.MouseDelta.Y * MouseSensitivity);
             }
 
-            Camera.Position = Owner.Position + new Vector3(0, 1.8f, 0);
-
-            if (Input.IsMouseButtonDown(MouseButton.Left))
-            {
-                _wasMouseLeftPressed = true;
-            }
-            else if (_wasMouseLeftPressed)
-            {
-                _wasMouseLeftPressed = false;
-
-                var from = Camera.Position;
-                var to = from + Vector3.Transform(new Vector3(0, 0, 100), Camera.Orientation);
-
-                if (PhysicsWorld.Raycast(from, to, (component, _, __) => component.ColliderShape is Physics.Shapes.SphereColliderShape && component is RigidBodyComponent, out var hitComponent, out var hitNormal, out var hitFraction))
-                {
-                    var direction = to - from;
-                    direction = direction.Normalize();
-                    var rigidyBodyComponent = hitComponent as RigidBodyComponent;
-                    rigidyBodyComponent.AddForce(direction * 10);
-                }
-            }
+            _camera.TargetPosition = Owner.Position;
         }
     }
 }

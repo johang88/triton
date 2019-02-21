@@ -24,6 +24,9 @@ namespace Triton.Samples.Components
 
         public void SetActiveAnimation(string name)
         {
+            if (_animationState?.Name == name)
+                return;
+
             if (_animationState != null)
             {
                 _animationState.Enabled = false;
@@ -47,6 +50,10 @@ namespace Triton.Samples.Components
         public override void Update(float dt)
         {
             base.Update(dt);
+
+            // TODO: Proper child transforms
+            Owner.Position = Owner.Parent.Position - new Vector3(0, 0.9f, 0);
+            Owner.Orientation = Owner.Parent.Orientation * Quaternion.FromAxisAngle(Vector3.UnitY, Math.Util.DegreesToRadians(180.0f));
 
             if (_animationState != null)
             {

@@ -220,6 +220,8 @@ namespace Triton.Renderer.DDS
                 oWidth = _width;
                 oHeight = _height;
 
+                var pixelFormat = OGL.PixelFormat.Rgba;
+
                 if (CheckFlag(_dwFlags, (uint)eDDSD.DEPTH) && CheckFlag(_dwCaps2, (uint)eDDSCAPS2.VOLUME))
                 {
                     dimension = OGL.TextureTarget.Texture3D; // image is 3D Volume
@@ -307,10 +309,11 @@ namespace Triton.Renderer.DDS
                 else
                 {
                     // TODO: Do not assume ARGB8
-                    _pixelInternalFormat = (OGL.PixelInternalFormat)OGL.PixelInternalFormat.Rgba8;
+                    _pixelInternalFormat = OGL.PixelInternalFormat.Rgba8;
                     _isCompressed = false;
                     _bytesPerBlock = 4;
-                    pixelType = OGL.PixelType.UnsignedByte;
+                    pixelType = OGL.PixelType.UnsignedInt8888Reversed;
+                    pixelFormat = OGL.PixelFormat.Bgra;
                     /*sourceFormat = convertPixelFormat(pfRGBBitCount,
 								pfRBitMask, pfGBitMask,
 								pfBBitMask,
@@ -380,7 +383,7 @@ namespace Triton.Renderer.DDS
                                             Width,
                                             Height,
                                             0,
-                                            OGL.PixelFormat.Rgba, // TODO: don't hardcode this dude
+                                            pixelFormat,
                                             pixelType,
                                             RawDataOfSurface
                                             );

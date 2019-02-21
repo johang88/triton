@@ -92,6 +92,9 @@ namespace Triton.Physics.Components
             MaxSlope = _maxSlope;
             JumpSpeed = _jumpSpeed;
             Gravity = _gravity;
+
+            // Syncrhonize manually
+            SynchronizePosition = false;
         }
 
         public override void OnDeactivate()
@@ -117,6 +120,9 @@ namespace Triton.Physics.Components
             base.Update(dt);
 
             _kinematicCharacterController.SetWalkDirection(Conversion.ToBulletVector(ref _targetVelocity) * dt);
+
+            _nativeCollisionObject.WorldTransform.Decompose(out _, out var rotation, out var translation);
+            Owner.Position = Conversion.ToTritonVector(ref translation);
         }
 
         public void Jump()

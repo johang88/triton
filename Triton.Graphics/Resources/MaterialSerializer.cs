@@ -33,7 +33,6 @@ namespace Triton.Graphics.Resources
             material.Dispose();
 
             var (_, parameters) = _resourceManager.GetResourceProperties(material);
-            material.IsSkinned = parameters.Contains("SKINNED");
 
             using (var stream = new System.IO.MemoryStream(data))
 			using (var reader = new System.IO.StreamReader(stream))
@@ -42,10 +41,6 @@ namespace Triton.Graphics.Resources
                 var materialDesc = JsonConvert.DeserializeObject<MaterialDesc>(materialJsonData);
 
                 var shaderDefines = new List<string>();
-                if (material.IsSkinned)
-                {
-                    shaderDefines.Add("SKINNED");
-                }
 
                 if (materialDesc.Textures != null)
                 {
@@ -57,6 +52,11 @@ namespace Triton.Graphics.Resources
                         shaderDefines.Add(define);
                         material.Textures.Add(samplerName, await _resourceManager.LoadAsync<Texture>(texture.Value));
                     }
+                }
+
+                if (materialDesc.Defines?.Length > 0)
+                {
+                    shaderDefines.AddRange(materialDesc.Defines);
                 }
 
                 if (materialDesc.Uniforms != null)
@@ -94,6 +94,7 @@ namespace Triton.Graphics.Resources
             public string Shader { get; set; }
             public Dictionary<string, string> Textures { get; set; }
             public Dictionary<string, string> Uniforms { get; set; }
+            public string[] Defines { get; set; }
         }
     }
 }

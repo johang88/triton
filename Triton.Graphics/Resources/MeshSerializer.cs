@@ -77,14 +77,11 @@ namespace Triton.Graphics.Resources
                 if (!validVersions.Contains(version))
                     throw new ArgumentException("invalid mesh, unknown version");
 
-                var materialFlags = "";
-
                 bool hasSkeleton = reader.ReadBoolean();
                 if (hasSkeleton)
                 {
                     var skeletonPath = reader.ReadString();
                     mesh.Skeleton = await _resourceManager.LoadAsync<SkeletalAnimation.Skeleton>(skeletonPath);
-                    materialFlags = "SKINNED";
                 }
 
                 var meshCount = reader.ReadInt32();
@@ -96,7 +93,7 @@ namespace Triton.Graphics.Resources
 
                     Material material = null;
                     if (materialName != "no_material")
-                        material = await _resourceManager.LoadAsync<Material>(materialName, materialFlags);
+                        material = await _resourceManager.LoadAsync<Material>(materialName);
 
                     var triangleCount = reader.ReadInt32();
                     var vertexCount = reader.ReadInt32();

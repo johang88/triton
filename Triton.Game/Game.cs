@@ -420,9 +420,9 @@ namespace Triton.Game
 
             var allocatedMemory = GC.GetTotalMemory(false) / 1024 / 1024;
 
-            ImGui.SetNextWindowSize(new System.Numerics.Vector2(300, 300));
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(300, 600));
             ImGui.SetNextWindowPos(new System.Numerics.Vector2(10, 10));
-            ImGui.Begin("Frame stats", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoCollapse);
+            ImGui.Begin("Frame stats", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoSavedSettings);
 
             var graphicsFrameTime = GraphicsBackend.FrameTime * 1000.0f;
             ImGui.Text($"Graphics frame time: {graphicsFrameTime:0.00}ms");
@@ -451,7 +451,7 @@ namespace Triton.Game
                 var section = sections[i];
                 var name = HashedStringTable.GetString(new HashedString(section.Name));
 
-                ImGui.Text($"\t{name} {section.ElapsedMs:0.00}ms");
+                ImGui.Text($"{new string('\t', section.Depth + 1)}{(section.Depth > 0 ? "- " : "")}{name} {section.ElapsedMs:0.00}ms");
             }
 
             ImGui.End();
@@ -530,6 +530,7 @@ namespace Triton.Game
         /// </summary>
         protected virtual void LoadResources()
         {
+            PostEffectManager.ColorCorrectLUT = Resources.Load<Graphics.Resources.Texture>("/textures/lookup");
         }
 
         protected virtual void UnloadResources()

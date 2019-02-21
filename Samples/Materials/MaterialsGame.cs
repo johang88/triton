@@ -48,33 +48,33 @@ namespace Triton.Samples
 
             Stage.AmbientLight = new Graphics.AmbientLight
             {
-                Irradiance = Resources.Load<Graphics.Resources.Texture>("/textures/sky_irradiance"),
-                Specular = Resources.Load<Graphics.Resources.Texture>("/textures/sky_specular"),
+                Irradiance = Resources.Load<Graphics.Resources.Texture>("/textures/sunTempleInteriorDiffuseHDR"),
+                Specular = Resources.Load<Graphics.Resources.Texture>("/textures/sunTempleInteriorSpecularHDR"),
                 IrradianceStrength = 2,
                 SpecularStrength = 2
             };
 
-            var terrain = new GameObject();
-            var terrainData = TerrainData.CreateFromFile(FileSystem, "/terrain.raw");
-            terrainData.MaxHeight = 512;
-            terrain.Components.Add(new TerrainComponent
-            {
-                Material = Resources.Load<Material>("/materials/terrain"),
-                TerrainData = terrainData
-            });
-            terrain.Components.Add(new RigidBodyComponent
-            {
-                RigidBodyType = Physics.RigidBodyType.Static,
-                ColliderShape = new Triton.Physics.Shapes.TerrainColliderShape
-                {
-                    TerrainData = terrainData
-                }
-            });
-            GameWorld.Add(terrain);
+            //var terrain = new GameObject();
+            //var terrainData = TerrainData.CreateFromFile(FileSystem, "/terrain.raw");
+            //terrainData.MaxHeight = 512;
+            //terrain.Components.Add(new TerrainComponent
+            //{
+            //    Material = Resources.Load<Material>("/materials/terrain"),
+            //    TerrainData = terrainData
+            //});
+            //terrain.Components.Add(new RigidBodyComponent
+            //{
+            //    RigidBodyType = Physics.RigidBodyType.Static,
+            //    ColliderShape = new Triton.Physics.Shapes.TerrainColliderShape
+            //    {
+            //        TerrainData = terrainData
+            //    }
+            //});
+            //GameWorld.Add(terrain);
 
             Player = new GameObject();
-            Player.Position = new Vector3(200, 0, 193);
-            Player.Position.Y = terrainData.GetHeightAt(Player.Position.X, Player.Position.Z) + 1f;
+            Player.Position = new Vector3(0, 10.2f, -2);
+            //Player.Position.Y = terrainData.GetHeightAt(Player.Position.X, Player.Position.Z) + 1f;
             Player.Components.Add(new CharacterControllerComponent
             {
                 ColliderShape = new Triton.Physics.Shapes.CapsuleColliderShape
@@ -85,14 +85,28 @@ namespace Triton.Samples
             });
             Player.Components.Add(new PlayerController
             {
-                Terrain = terrainData
+                //Terrain = terrainData
             });
+            Player.Components.Add(new ThirdPersonCamera());
+
+            var knight = new GameObject
+            {
+                Position = Vector3.Zero,
+                Scale = new Vector3(0.024f, 0.024f, 0.024f)
+            };
+            knight.Components.Add(new SkinnedMeshComponent
+            {
+                Mesh = Resources.Load<Mesh>("/models/knight_test")
+            });
+            knight.Components.Add(new KnightAnimator());
+            Player.Children.Add(knight);
+
             GameWorld.Add(Player);
 
-            //var roomPrefab = Resources.Load<Prefab>("/prefabs/suntemple");
-            //roomPrefab.Instantiate(GameWorld);
+            var roomPrefab = Resources.Load<Prefab>("/prefabs/suntemple");
+            roomPrefab.Instantiate(GameWorld);
 
-            var center = new Vector3(200, 225, 193);
+            var center = new Vector3(-3, 10.2f, 2);
             var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
             for (int i = 0; i < 5; i++)
             {
@@ -107,18 +121,6 @@ namespace Triton.Samples
                 _balls.Add(ball);
                 ball.Position = center + new Vector3(-3 + i * 1.5f, 0.3f, -2);
             }
-
-            //var knight = new GameObject();
-            //knight.Position = new Vector3(1, 2.79f - 0.5f, 4);
-            //knight.Scale = new Vector3(0.024f, 0.024f, 0.024f);
-            ////knight.Scale = new Vector3(1.6f, 1.6f, 1.6f);
-            //knight.Components.Add(new SkinnedMeshComponent
-            //{
-            //    Mesh = Resources.Load<Mesh>("/models/knight_test")
-            //});
-            //_animator = new KnightAnimator();
-            //knight.Components.Add(_animator);
-            //GameWorld.Add(knight);
 
             Light = new GameObject
             {

@@ -48,12 +48,41 @@ namespace Triton
 
 		public float W { get { return w; } set { w = value; } }
 
-		/// <summary>
-		/// Convert the current quaternion to axis angle representation
-		/// </summary>
-		/// <param name="axis">The resultant axis</param>
-		/// <param name="angle">The resultant angle</param>
-		public void ToAxisAngle(out Vector3 axis, out float angle)
+        public Vector3 ZAxis()
+        {
+            var fTx = 2.0f * X;
+            var fTy = 2.0f * Y;
+            var fTz = 2.0f * Z;
+            var fTwx = fTx * W;
+            var fTwy = fTy * W;
+            var fTxx = fTx * X;
+            var fTxz = fTz * X;
+            var fTyy = fTy * Y;
+            var fTyz = fTz * Y;
+
+            return new Vector3(fTxz + fTwy, fTyz - fTwx, 1.0f - (fTxx + fTyy));
+        }
+
+        public Vector3 XAxis()
+        {
+            var fTy = 2.0f * Y;
+            var fTz = 2.0f * Z;
+            var fTwy = fTy * W;
+            var fTwz = fTz * W;
+            var fTxy = fTy * X;
+            var fTxz = fTz * X;
+            var fTyy = fTy * Y;
+            var fTzz = fTz * Z;
+
+            return new Vector3(1.0f - (fTyy + fTzz), fTxy + fTwz, fTxz - fTwy);
+        }
+
+        /// <summary>
+        /// Convert the current quaternion to axis angle representation
+        /// </summary>
+        /// <param name="axis">The resultant axis</param>
+        /// <param name="angle">The resultant angle</param>
+        public void ToAxisAngle(out Vector3 axis, out float angle)
 		{
 			Vector4 result = ToAxisAngle();
 			axis = result.Xyz;

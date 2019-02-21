@@ -51,7 +51,7 @@ namespace Triton.Graphics.Post.Effects
             camera.GetViewMatrix(out var view);
             camera.GetProjectionMatrix(out var projection);
             var inverseViewProjectionMatrix = Matrix4.Invert(view * projection);
-
+            
             _backend.BeginInstance(_shader.Handle, _textures, samplers: _samplers);
             _backend.BindShaderVariable(_shaderParams.SamplerScene, 0);
             _backend.BindShaderVariable(_shaderParams.SamplerDepth, 1);

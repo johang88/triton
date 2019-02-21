@@ -43,6 +43,14 @@ namespace Triton.Graphics.Post
 
         private List<BaseEffect> _effects = new List<BaseEffect>();
 
+        public Resources.Texture ColorCorrectLUT
+        {
+            get => _gamma.ColorCorrectLUT;
+            set => _gamma.ColorCorrectLUT = value;
+        }
+
+        public bool EnableAtmosphere { get; set; } = false;
+
         public PostEffectManager(IO.FileSystem fileSystem, ResourceManager resourceManager, Backend backend, int width, int height)
         {
             if (fileSystem == null) throw new ArgumentNullException("fileSystem");
@@ -128,6 +136,7 @@ namespace Triton.Graphics.Post
 
         private void ApplyAA()
         {
+            _backend.ProfileBeginSection(Profiler.AntiAliasing);
             switch (AntiAliasing)
             {
                 case AntiAliasing.FXAA:
@@ -142,30 +151,39 @@ namespace Triton.Graphics.Post
                 default:
                     break;
             }
+            _backend.ProfileEndSection(Profiler.AntiAliasing);
         }
 
         private void ApplyLumianceBloomAndTonemap(float deltaTime)
         {
             RenderTarget bloom = null, lensFlares = null;
 
+            _backend.ProfileBeginSection(Profiler.LuminanceAdaptation);
             var luminance = _adaptLuminance.Render(HDRSettings, _temporaryRenderTargets[0], deltaTime);
+            _backend.ProfileEndSection(Profiler.LuminanceAdaptation);
 
             if (HDRSettings.EnableBloom)
             {
+                _backend.ProfileBeginSection(Profiler.Bloom);
                 bloom = _bloom.Render(HDRSettings, _temporaryRenderTargets[0], luminance);
+                _backend.ProfileEndSection(Profiler.Bloom);
             }
 
+            _backend.ProfileBeginSection(Profiler.Tonemap);
             _tonemap.Render(HDRSettings, _temporaryRenderTargets[0], _temporaryRenderTargets[1], bloom, lensFlares, luminance);
+            _backend.ProfileEndSection(Profiler.Tonemap);
 
             SwapRenderTargets();
         }
 
         private void ApplyAtmosphere(Camera camera, RenderTarget gbuffer, Stage stage)
         {
+            _backend.ProfileBeginSection(Profiler.AtmosphericScattering);
             if (_atmosphericScattering.Render(camera, stage, gbuffer, _temporaryRenderTargets[0], _temporaryRenderTargets[1]))
             {
                 SwapRenderTargets();
             }
+            _backend.ProfileEndSection(Profiler.AtmosphericScattering);
         }
 
         public RenderTarget RenderSSAO(Camera camera, RenderTarget gbuffer)
@@ -188,7 +206,10 @@ namespace Triton.Graphics.Post
 
             if (EnablePostEffects)
             {
-                ApplyAtmosphere(camera, gbuffer, stage);
+                if (EnableAtmosphere)
+                {
+                    ApplyAtmosphere(camera, gbuffer, stage);
+                }
                 ApplyLumianceBloomAndTonemap(deltaTime);
                 ApplyAA();
             }

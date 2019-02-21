@@ -14,9 +14,11 @@ namespace Triton.Graphics
         public static readonly HashedString Total = "total";
         public static readonly HashedString GBuffer = "gbuffer";
         public static readonly HashedString Lighting = "lighting";
-        public static readonly HashedString ShadowsGeneration = "shadows_generation";
-        public static readonly HashedString ShadowsRender = "shadows_render";
-        public static readonly HashedString ShadowsRenderPoint = "shadows_render_point";
+        public static readonly HashedString ShadowsGeneration = "shadow generation (csm)";
+        public static readonly HashedString ShadowsRender = "shadow render (csm)";
+        public static readonly HashedString ShadowRenderPointSpot = "shadow render (point / spot)";
+        public static readonly HashedString TiledLights = "tiled lights";
+        public static readonly HashedString DirectionaLight = "directional lights";
         public static readonly HashedString SSAO = "ssao";
         public static readonly HashedString Post = "post";
         public static readonly HashedString AntiAliasing = "anti aliasing";
@@ -24,11 +26,13 @@ namespace Triton.Graphics
         public static readonly HashedString LensFlares = "lensflares";
         public static readonly HashedString Bloom = "bloom";
         public static readonly HashedString Tonemap = "tonemap";
+        public static readonly HashedString AtmosphericScattering = "atmospheric scattering";
 
         private const int MaxSections = 32;
         private readonly ProfilerSection[] Sections = new ProfilerSection[MaxSections];
         private int _sectionCount = 0;
         private uint _lastHandle = 0;
+        private int _depth = 0;
 
         public Profiler()
         {
@@ -56,12 +60,16 @@ namespace Triton.Graphics
         public void Begin(int name)
         {
             Sections[_sectionCount].Name = name;
+            Sections[_sectionCount].Depth = _depth++;
             GL.QueryCounter(Sections[_sectionCount].StartHandle, QueryCounterTarget.Timestamp);
+
             _sectionCount++;
         }
 
         public void End(int name)
         {
+            _depth--;
+
             for (var i = 0; i < _sectionCount; i++)
             {
                 if (Sections[i].Name == name)
@@ -102,6 +110,7 @@ namespace Triton.Graphics
         public struct ProfilerSection
         {
             public int Name;
+            public int Depth;
             public uint StartHandle;
             public uint StopHandle;
             public long Start;

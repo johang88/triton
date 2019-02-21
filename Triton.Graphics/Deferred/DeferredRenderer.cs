@@ -313,6 +313,7 @@ namespace Triton.Graphics.Deferred
 
             RenderTiledLights(camera, frustum, ref view, ref projection, stage, lights);
 
+            _backend.ProfileBeginSection(Profiler.DirectionaLight);
             foreach (var light in lights)
             {
                 if (!light.Enabled || light.Type != LighType.Directional)
@@ -320,13 +321,14 @@ namespace Triton.Graphics.Deferred
 
                 RenderDirectionalLight(camera, frustum, ref view, ref projection, stage, light);
             }
+            _backend.ProfileEndSection(Profiler.DirectionaLight);
         }
 
         private void RenderDirectionalLight(Camera camera, BoundingFrustum cameraFrustum, ref Matrix4 view, ref Matrix4 projection, Stage stage, Components.LightComponent light)
         {
             if (light.Type != LighType.Directional)
                 return;
-
+            
             RenderedLights++;
 
             var renderStateId = _directionalRenderState;
@@ -404,7 +406,7 @@ namespace Triton.Graphics.Deferred
             // Sort by distance, this prioritizes closer shadow casting lights
             // TODO: This generates the garbage
             lights = lights.OrderBy(x => (x.Owner.Position - camera.Position).LengthSquared).ToList();
-            _backend.ProfileBeginSection(Profiler.ShadowsRenderPoint);
+            _backend.ProfileBeginSection(Profiler.ShadowRenderPointSpot);
             foreach (var light in lights)
             {
                 if (!light.Enabled || (light.Type != LighType.PointLight && light.Type != LighType.SpotLight))
@@ -466,13 +468,15 @@ namespace Triton.Graphics.Deferred
             }
 
             _backend.Barrier(OpenTK.Graphics.OpenGL.MemoryBarrierFlags.AllBarrierBits);
-            _backend.ProfileEndSection(Profiler.ShadowsRenderPoint);
+            _backend.ProfileEndSection(Profiler.ShadowRenderPointSpot);
 
             // Reset render target
             _backend.BeginPass(_lightAccumulationTarget, new Vector4(0.0f, 0.0f, 0.0f, 1.0f), ClearFlags.All);
 
             if (pointLightCount == 0 && spotLightCount == 0)
                 return;
+
+            _backend.ProfileBeginSection(Profiler.TiledLights);
 
             fixed (PointLightDataCS* data = _pointLightDataCS)
             {
@@ -525,6 +529,8 @@ namespace Triton.Graphics.Deferred
 
             _backend.DispatchCompute((int)numTilesX, (int)numTilesY, 1);
             _backend.Barrier(OpenTK.Graphics.OpenGL.MemoryBarrierFlags.AllBarrierBits);
+
+            _backend.ProfileEndSection(Profiler.TiledLights);
         }
 
         /// <summary>

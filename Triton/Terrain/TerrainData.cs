@@ -35,7 +35,7 @@ namespace Triton.Terrain
                 return new TerrainData
                 {
                     Size = size,
-                    MaxHeight = 512.0f,
+                    MaxHeight = 64.0f,
                     NumberOfLodLevels = 7,
                     MeshBaseLODExtentHeightfieldTexels = 128,
                     MetersPerHeightfieldTexel = 0.5f,
