@@ -1,3 +1,5 @@
+#extension GL_ARB_shader_draw_parameters : require
+
 #include "/shaders/core"
 #ifdef VERTEX_SHADER
 
@@ -47,7 +49,7 @@ void main()
 
 	mat4x4 worldMatrix = world;
 #else
-	mat4x4 worldMatrix = worldMatrices[gl_DrawID];
+	mat4x4 worldMatrix = worldMatrices[gl_DrawIDARB];
 
 	vec3 positionWS = (worldMatrix * vec4(iPosition, 1)).xyz;
 	vec3 normal = normalize(iNormal);

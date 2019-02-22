@@ -46,13 +46,13 @@ namespace Triton.Samples
             PostEffectManager.HDRSettings.AutoKey = true;
             PostEffectManager.HDRSettings.TonemapOperator = Graphics.Post.TonemapOperator.ASEC;
 
-            Stage.AmbientLight = new Graphics.AmbientLight
-            {
-                Irradiance = Resources.Load<Graphics.Resources.Texture>("/textures/sunTempleInteriorDiffuseHDR"),
-                Specular = Resources.Load<Graphics.Resources.Texture>("/textures/sunTempleInteriorSpecularHDR"),
-                IrradianceStrength = 2,
-                SpecularStrength = 2
-            };
+            //Stage.AmbientLight = new Graphics.AmbientLight
+            //{
+            //    Irradiance = Resources.Load<Graphics.Resources.Texture>("/textures/sunTempleInteriorDiffuseHDR"),
+            //    Specular = Resources.Load<Graphics.Resources.Texture>("/textures/sunTempleInteriorSpecularHDR"),
+            //    IrradianceStrength = 2,
+            //    SpecularStrength = 2
+            //};
 
             //var terrain = new GameObject();
             //var terrainData = TerrainData.CreateFromFile(FileSystem, "/terrain.raw");
@@ -73,7 +73,7 @@ namespace Triton.Samples
             //GameWorld.Add(terrain);
 
             Player = new GameObject();
-            Player.Position = new Vector3(0, 10.2f, -2);
+            Player.Position = new Vector3(0, 1.5f, 0);
             //Player.Position.Y = terrainData.GetHeightAt(Player.Position.X, Player.Position.Z) + 1f;
             Player.Components.Add(new CharacterControllerComponent
             {
@@ -92,21 +92,25 @@ namespace Triton.Samples
             var knight = new GameObject
             {
                 Position = Vector3.Zero,
-                Scale = new Vector3(0.024f, 0.024f, 0.024f)
+                //Scale = new Vector3(0.024f, 0.024f, 0.024f)
             };
-            knight.Components.Add(new SkinnedMeshComponent
+            knight.Components.Add(new MeshComponent
             {
-                Mesh = Resources.Load<Mesh>("/models/knight_test")
+                Mesh = Resources.Load<Mesh>("/models/sphere")
             });
+            //knight.Components.Add(new SkinnedMeshComponent
+            //{
+            //    Mesh = Resources.Load<Mesh>("/models/knight_test")
+            //});
             knight.Components.Add(new KnightAnimator());
             Player.Children.Add(knight);
 
             GameWorld.Add(Player);
 
-            var roomPrefab = Resources.Load<Prefab>("/prefabs/suntemple");
+            var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
             roomPrefab.Instantiate(GameWorld);
 
-            var center = new Vector3(-3, 10.2f, 2);
+            var center = new Vector3(0, 1, -3);
             var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
             for (int i = 0; i < 5; i++)
             {
@@ -122,22 +126,22 @@ namespace Triton.Samples
                 ball.Position = center + new Vector3(-3 + i * 1.5f, 0.3f, -2);
             }
 
-            Light = new GameObject
-            {
-                Position = new Vector3(0, 0.4f, 0),
-                Orientation = Quaternion.FromAxisAngle(Vector3.UnitX, 0.43f)
-            };
-            Light.Components.Add(new LightComponent
-            {
-                Type = Graphics.LighType.Directional,
-                Intensity = 4,
-                Color = new Vector3(1.1f, 1, 1),
-                Range = 100,
-                InnerAngle = 0.94f,
-                OuterAngle = 0.98f,
-                CastShadows = true
-            });
-            GameWorld.Add(Light);
+            //Light = new GameObject
+            //{
+            //    Position = new Vector3(0, 0.4f, 0),
+            //    Orientation = Quaternion.FromAxisAngle(Vector3.UnitX, 0.43f)
+            //};
+            //Light.Components.Add(new LightComponent
+            //{
+            //    Type = Graphics.LighType.Directional,
+            //    Intensity = 4,
+            //    Color = new Vector3(1.1f, 1, 1),
+            //    Range = 100,
+            //    InnerAngle = 0.94f,
+            //    OuterAngle = 0.98f,
+            //    CastShadows = true
+            //});
+            //GameWorld.Add(Light);
 
             //var particles = new GameObject
             //{
@@ -195,15 +199,15 @@ namespace Triton.Samples
                 CursorVisible = !CursorVisible;
             }
 
-            Light.Orientation = Quaternion.FromAxisAngle(Vector3.UnitX, _rotationX) * Quaternion.FromAxisAngle(Vector3.UnitY, _rotationY);
+            //Light.Orientation = Quaternion.FromAxisAngle(Vector3.UnitX, _rotationX) * Quaternion.FromAxisAngle(Vector3.UnitY, _rotationY);
         }
 
         protected override void RenderUI(float deltaTime)
         {
             base.RenderUI(deltaTime);
 
-            ImGui.SliderFloat("LightRotation X", ref _rotationX, -3.14f * 2.0f, 3.14f * 2.0f);
-            ImGui.SliderFloat("LightRotation Y", ref _rotationY, -3.14f * 2.0f, 3.14f * 2.0f);
+            //ImGui.SliderFloat("LightRotation X", ref _rotationX, -3.14f * 2.0f, 3.14f * 2.0f);
+            //ImGui.SliderFloat("LightRotation Y", ref _rotationY, -3.14f * 2.0f, 3.14f * 2.0f);
         }
     }
 }

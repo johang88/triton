@@ -39,7 +39,7 @@ namespace Triton.Graphics.Post.Effects
                 ssaoHandle = ssao.Textures[0].Handle;
 
             _backend.BeginInstance(_shader.Handle,
-                new int[] { gbuffer.Textures[0].Handle, gbuffer.Textures[1].Handle, gbuffer.Textures[2].Handle, gbuffer.Textures[3].Handle, ssaoHandle, smaa.EdgeRenderTargetTexture, smaa.BlendRenderTarget, csmShadowBuffer.Textures[0].Handle },
+                new int[] { gbuffer.Textures[0].Handle, gbuffer.Textures[1].Handle, gbuffer.Textures[2].Handle, gbuffer.Textures[3].Handle, ssaoHandle, smaa.EdgeRenderTargetTexture, smaa.BlendRenderTarget, csmShadowBuffer?.Textures[0]?.Handle ?? 0 },
                 new int[] { _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering, _backend.DefaultSamplerNoFiltering });
             _backend.BindShaderVariable(_shaderParams.SamplerGBuffer0, 0);
             _backend.BindShaderVariable(_shaderParams.SamplerGBuffer1, 1);

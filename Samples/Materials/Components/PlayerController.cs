@@ -22,7 +22,7 @@ namespace Triton.Samples.Components
 
         public TerrainData Terrain { get; set; }
 
-        private KnightAnimator _animator;
+        //private KnightAnimator _animator;
 
         private ThirdPersonCamera _camera;
 
@@ -31,7 +31,7 @@ namespace Triton.Samples.Components
             base.OnActivate();
 
             _characterController = Owner.GetComponent<CharacterControllerComponent>();
-            _animator = Owner.Children.First().GetComponent<KnightAnimator>();
+            //_animator = Owner.Children.First().GetComponent<KnightAnimator>();
             _camera = Owner.GetComponent<ThirdPersonCamera>();
         }
 
@@ -70,11 +70,11 @@ namespace Triton.Samples.Components
 
                 _characterController.SetTargetVelocity(faceDirection * 3.5f * (Input.IsKeyDown(Key.ShiftLeft) ? 15.0f : 1.0f));
 
-                _animator.SetActiveAnimation("Soldier_walk");
+                //_animator.SetActiveAnimation("Soldier_walk");
             }
             else
             {
-                _animator.SetActiveAnimation("Idle");
+                //_animator.SetActiveAnimation("Idle");
                 _characterController.SetTargetVelocity(Vector3.Zero);
             }
 
