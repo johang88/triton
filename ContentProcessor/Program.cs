@@ -155,7 +155,7 @@ namespace ContentProcessor
                     if (!System.IO.File.Exists(sourcePath))
                         continue;
 
-                    if (System.IO.File.GetLastWriteTime(sourcePath) <= entry.Value.LastCompilation)
+                    if (entry.Value.Version == compiler.Version && System.IO.File.GetLastWriteTime(sourcePath) <= entry.Value.LastCompilation)
                         continue;
 
                     var fileOutputDirectory = Path.GetDirectoryName(outputPath);
@@ -184,6 +184,7 @@ namespace ContentProcessor
                     Log.WriteLine($"Compiled {entry.Value.Id}");
 
                     entry.Value.LastCompilation = DateTime.Now;
+                    entry.Value.Version = compiler.Version;
                 }
                 catch (Exception e)
                 {
@@ -204,6 +205,7 @@ namespace ContentProcessor
             public string Id { get; set; }
             public DateTime LastCompilation { get; set; }
             public string Type { get; set; }
+            public int Version { get; set; }
         }
     }
 }

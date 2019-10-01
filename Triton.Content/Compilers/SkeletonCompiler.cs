@@ -14,10 +14,11 @@ namespace Triton.Content.Compilers
 	public class SkeletonCompiler : ICompiler
 	{
         public string Extension => ".skeleton";
+        public int Version => 1;
 
         private Factory<string, ISkeletonConverter> ImporterFactory;
 
-		const int Version = 0x0100;
+		const int FormatVersion = 0x0100;
 
 		public SkeletonCompiler()
 		{
@@ -47,7 +48,7 @@ namespace Triton.Content.Compilers
                 writer.Write('L');
 
                 // Version
-                writer.Write(Version);
+                writer.Write(FormatVersion);
 
                 // Bone count
                 writer.Write(skeleton.Bones.Count);

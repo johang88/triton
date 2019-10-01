@@ -14,10 +14,11 @@ namespace Triton.Content.Compilers
 	public class MeshCompiler : ICompiler
 	{
         public string Extension => ".mesh";
+        public int Version => 1;
 
         private Factory<string, IMeshImporter> ImporterFactory;
 
-		const int Version = 0x0160;
+		const int FormatVersion = 0x0160;
 
 		public MeshCompiler()
 		{
@@ -52,7 +53,7 @@ namespace Triton.Content.Compilers
 				writer.Write('H');
 
 				// Version
-				writer.Write(Version);
+				writer.Write(FormatVersion);
 
 				// Skeleton link
 				if (!string.IsNullOrWhiteSpace(mesh.SkeletonPath))

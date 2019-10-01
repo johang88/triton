@@ -1,152 +1,182 @@
 {
   "collision/room.col.xml": {
     "Id": "collision/room",
-    "LastCompilation": "2019-10-01T19:45:14.691381+02:00",
-    "Type": "collision"
+    "LastCompilation": "2019-10-01T20:42:42.3695939+02:00",
+    "Type": "collision",
+    "Version": 1
   },
   "materials/ceiling.mat": {
     "Id": "materials/ceiling",
     "LastCompilation": "0001-01-01T00:00:00",
-    "Type": "material"
+    "Type": "material",
+    "Version": 0
   },
   "materials/city_floor.mat": {
     "Id": "materials/city_floor",
     "LastCompilation": "0001-01-01T00:00:00",
-    "Type": "material"
+    "Type": "material",
+    "Version": 0
   },
   "materials/city_wall.mat": {
     "Id": "materials/city_wall",
     "LastCompilation": "0001-01-01T00:00:00",
-    "Type": "material"
+    "Type": "material",
+    "Version": 0
   },
   "materials/crate.mat": {
     "Id": "materials/crate",
     "LastCompilation": "0001-01-01T00:00:00",
-    "Type": "material"
+    "Type": "material",
+    "Version": 0
   },
   "materials/default.mat": {
     "Id": "materials/default",
     "LastCompilation": "0001-01-01T00:00:00",
-    "Type": "material"
+    "Type": "material",
+    "Version": 0
   },
   "materials/floor.mat": {
     "Id": "materials/floor",
     "LastCompilation": "0001-01-01T00:00:00",
-    "Type": "material"
+    "Type": "material",
+    "Version": 0
   },
   "materials/gold.mat": {
     "Id": "materials/gold",
     "LastCompilation": "0001-01-01T00:00:00",
-    "Type": "material"
+    "Type": "material",
+    "Version": 0
   },
   "materials/iron.mat": {
     "Id": "materials/iron",
     "LastCompilation": "0001-01-01T00:00:00",
-    "Type": "material"
+    "Type": "material",
+    "Version": 0
   },
   "materials/light_sphere.mat": {
     "Id": "materials/light_sphere",
     "LastCompilation": "0001-01-01T00:00:00",
-    "Type": "material"
+    "Type": "material",
+    "Version": 0
   },
   "materials/sphere.mat": {
     "Id": "materials/sphere",
     "LastCompilation": "0001-01-01T00:00:00",
-    "Type": "material"
+    "Type": "material",
+    "Version": 0
   },
   "materials/wall.mat": {
     "Id": "materials/wall",
     "LastCompilation": "0001-01-01T00:00:00",
-    "Type": "material"
+    "Type": "material",
+    "Version": 0
   },
   "materials/wood.mat": {
     "Id": "materials/wood",
     "LastCompilation": "0001-01-01T00:00:00",
-    "Type": "material"
+    "Type": "material",
+    "Version": 0
   },
   "models/city.mesh.xml": {
     "Id": "models/city",
-    "LastCompilation": "2019-10-01T19:45:15.2244226+02:00",
-    "Type": "mesh"
+    "LastCompilation": "2019-10-01T20:42:42.9222044+02:00",
+    "Type": "mesh",
+    "Version": 1
   },
   "models/container.mesh.xml": {
     "Id": "models/container",
-    "LastCompilation": "2019-10-01T19:45:15.2423473+02:00",
-    "Type": "mesh"
+    "LastCompilation": "2019-10-01T20:42:42.9411547+02:00",
+    "Type": "mesh",
+    "Version": 1
   },
   "models/corridor.mesh.xml": {
     "Id": "models/corridor",
-    "LastCompilation": "2019-10-01T19:45:17.1118849+02:00",
-    "Type": "mesh"
+    "LastCompilation": "2019-10-01T20:42:44.7498494+02:00",
+    "Type": "mesh",
+    "Version": 1
   },
   "models/crate.mesh.xml": {
     "Id": "models/crate",
-    "LastCompilation": "2019-10-01T19:45:17.1308338+02:00",
-    "Type": "mesh"
+    "LastCompilation": "2019-10-01T20:42:44.7907403+02:00",
+    "Type": "mesh",
+    "Version": 1
   },
   "models/floor.mesh.xml": {
     "Id": "models/floor",
-    "LastCompilation": "2019-10-01T19:45:17.222588+02:00",
-    "Type": "mesh"
+    "LastCompilation": "2019-10-01T20:42:44.8675343+02:00",
+    "Type": "mesh",
+    "Version": 1
   },
   "models/room.mesh.xml": {
     "Id": "models/room",
-    "LastCompilation": "2019-10-01T19:45:17.2545031+02:00",
-    "Type": "mesh"
+    "LastCompilation": "2019-10-01T20:42:44.9174319+02:00",
+    "Type": "mesh",
+    "Version": 1
   },
   "models/sphere.mesh.xml": {
     "Id": "models/sphere",
-    "LastCompilation": "2019-10-01T19:45:17.3063641+02:00",
-    "Type": "mesh"
+    "LastCompilation": "2019-10-01T20:42:44.9672984+02:00",
+    "Type": "mesh",
+    "Version": 1
   },
   "models/torus.mesh.xml": {
     "Id": "models/torus",
-    "LastCompilation": "2019-10-01T19:45:17.5998221+02:00",
-    "Type": "mesh"
+    "LastCompilation": "2019-10-01T20:42:45.2445626+02:00",
+    "Type": "mesh",
+    "Version": 1
   },
   "textures/crate_d.tga": {
     "Id": "textures/crate_d",
-    "LastCompilation": "2019-10-01T19:45:17.7597466+02:00",
-    "Type": "texture"
+    "LastCompilation": "2019-10-01T20:42:45.3978191+02:00",
+    "Type": "texture",
+    "Version": 1
   },
   "textures/crate_n.tga": {
     "Id": "textures/crate_n",
-    "LastCompilation": "2019-10-01T19:45:17.9144326+02:00",
-    "Type": "texture"
+    "LastCompilation": "2019-10-01T20:42:45.5503792+02:00",
+    "Type": "texture",
+    "Version": 1
   },
   "textures/crate_s.tga": {
     "Id": "textures/crate_s",
-    "LastCompilation": "2019-10-01T19:45:18.0630397+02:00",
-    "Type": "texture"
+    "LastCompilation": "2019-10-01T20:42:45.7060918+02:00",
+    "Type": "texture",
+    "Version": 1
   },
   "textures/floor_d.png": {
     "Id": "textures/floor_d",
-    "LastCompilation": "2019-10-01T19:45:19.7884381+02:00",
-    "Type": "texture"
+    "LastCompilation": "2019-10-01T20:42:47.4497795+02:00",
+    "Type": "texture",
+    "Version": 1
   },
   "textures/floor_n.png": {
     "Id": "textures/floor_n",
-    "LastCompilation": "2019-10-01T19:45:21.5318434+02:00",
-    "Type": "texture"
+    "LastCompilation": "2019-10-01T20:42:49.5454201+02:00",
+    "Type": "texture",
+    "Version": 1
   },
   "textures/floor_rm.png": {
     "Id": "textures/floor_rm",
-    "LastCompilation": "2019-10-01T19:45:23.0592489+02:00",
-    "Type": "texture"
+    "LastCompilation": "2019-10-01T20:42:51.4648369+02:00",
+    "Type": "texture",
+    "Version": 1
   },
   "textures/metalgrid_d.png": {
     "Id": "textures/metalgrid_d",
-    "LastCompilation": "2019-10-01T19:45:24.7173212+02:00",
-    "Type": "texture"
+    "LastCompilation": "2019-10-01T20:42:53.7504155+02:00",
+    "Type": "texture",
+    "Version": 1
   },
   "textures/metalgrid_n.png": {
     "Id": "textures/metalgrid_n",
-    "LastCompilation": "2019-10-01T19:45:26.3422479+02:00",
-    "Type": "texture"
+    "LastCompilation": "2019-10-01T20:42:55.5674164+02:00",
+    "Type": "texture",
+    "Version": 1
   },
   "textures/metalgrid_rm.png": {
     "Id": "textures/metalgrid_rm",
-    "LastCompilation": "2019-10-01T19:45:27.8016707+02:00",
-    "Type": "texture"
+    "LastCompilation": "2019-10-01T20:42:57.0757422+02:00",
+    "Type": "texture",
+    "Version": 1
   }
 }
