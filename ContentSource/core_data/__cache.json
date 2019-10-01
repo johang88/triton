@@ -1,32 +1,38 @@
 {
   "models/unit_cone.mesh.xml": {
     "Id": "models/unit_cone",
-    "LastCompilation": "2019-10-01T19:44:46.9772517+02:00",
-    "Type": "mesh"
+    "LastCompilation": "2019-10-01T20:42:11.2100641+02:00",
+    "Type": "mesh",
+    "Version": 1
   },
   "models/unit_sphere.mesh.xml": {
     "Id": "models/unit_sphere",
-    "LastCompilation": "2019-10-01T19:44:47.0301107+02:00",
-    "Type": "mesh"
+    "LastCompilation": "2019-10-01T20:42:11.2589335+02:00",
+    "Type": "mesh",
+    "Version": 1
   },
   "textures/lookup.png": {
     "Id": "textures/lookup",
-    "LastCompilation": "2019-10-01T19:44:47.4080999+02:00",
-    "Type": "texture"
+    "LastCompilation": "2019-10-01T20:42:12.2950201+02:00",
+    "Type": "texture",
+    "Version": 1
   },
   "textures/missing.tga": {
     "Id": "textures/missing",
-    "LastCompilation": "2019-10-01T19:44:47.4400137+02:00",
-    "Type": "texture"
+    "LastCompilation": "2019-10-01T20:42:12.3374165+02:00",
+    "Type": "texture",
+    "Version": 1
   },
   "textures/missing_n.tga": {
     "Id": "textures/missing_n",
-    "LastCompilation": "2019-10-01T19:44:47.4699339+02:00",
-    "Type": "texture"
+    "LastCompilation": "2019-10-01T20:42:12.3693307+02:00",
+    "Type": "texture",
+    "Version": 1
   },
   "textures/random_n.tga": {
     "Id": "textures/random_n",
-    "LastCompilation": "2019-10-01T19:44:47.4878857+02:00",
-    "Type": "texture"
+    "LastCompilation": "2019-10-01T20:42:12.4092246+02:00",
+    "Type": "texture",
+    "Version": 1
   }
 }

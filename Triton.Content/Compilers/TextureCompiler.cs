@@ -13,6 +13,7 @@ namespace Triton.Content.Compilers
 	public class TextureCompiler : ICompiler
 	{
         public string Extension => ".dds";
+        public int Version => 1;
 
         public void Compile(CompilationContext context)
 		{

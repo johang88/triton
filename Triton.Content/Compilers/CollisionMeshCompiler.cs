@@ -14,10 +14,11 @@ namespace Triton.Content.Compilers
 	public class CollisionMeshCompiler : ICompiler
 	{
         public string Extension => ".col";
+        public int Version => 1;
 
         private Factory<string, IMeshImporter> ImporterFactory;
 
-		const int Version = 0x0100;
+		const int FormatVersion = 0x0100;
 
 		public CollisionMeshCompiler()
 		{
@@ -96,7 +97,7 @@ namespace Triton.Content.Compilers
 				writer.Write('M');
 
 				// Version
-				writer.Write(Version);
+				writer.Write(FormatVersion);
 
 				// No convex mesh support
 				writer.Write(false);

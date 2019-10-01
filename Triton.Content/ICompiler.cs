@@ -9,6 +9,8 @@ namespace Triton.Content
     public interface ICompiler
     {
         string Extension { get; }
+        int Version { get; }
+
 		void Compile(CompilationContext context);
     }
 }
