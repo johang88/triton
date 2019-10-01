@@ -26,10 +26,12 @@ namespace Triton.Content.Compilers
 
                     var defines = new DdsWriteDefines
                     {
-                        Compression = image.HasAlpha ? DdsCompression.None : DdsCompression.Dxt1, // Wat, why no dxt5???
                         WeightByAlpha = image.HasAlpha,
                         Mipmaps = 1 + (int)System.Math.Floor(System.Math.Log(System.Math.Max(image.Width, image.Height), 2))
                     };
+
+                    // Has to set custom value as DdsCompression enum does not contain dxt5
+                    image.Settings.SetDefine(MagickFormat.Dds, "compression", image.HasAlpha ? "dxt5" : "dxt1");
 
                     image.Write(context.OutputPath, defines);
                 }
