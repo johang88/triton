@@ -60,6 +60,9 @@
     <Reference Include="MurmurHash">
       <HintPath>..\packages\murmurhash.1.0.0\lib\net45\MurmurHash.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -76,9 +79,6 @@
     <Compile Include="Compilers\MeshCompiler.cs" />
     <Compile Include="Compilers\SkeletonCompiler.cs" />
     <Compile Include="Compilers\TextureCompiler.cs" />
-    <Compile Include="ContentData.cs" />
-    <Compile Include="Database\ContentEntry.cs" />
-    <Compile Include="Database\DB.cs" />
     <Compile Include="ICompiler.cs" />
     <Compile Include="Meshes\Converters\AssimpConverter.cs" />
     <Compile Include="Meshes\Converters\OgreXmlConverter.cs" />
@@ -93,8 +93,6 @@
     <Compile Include="Skeletons\Skeleton.cs" />
     <Compile Include="Skeletons\Track.cs" />
     <Compile Include="Skeletons\Transform.cs" />
-    <Compile Include="SQLite\SQLite.cs" />
-    <Compile Include="SQLite\SQLiteAsync.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">

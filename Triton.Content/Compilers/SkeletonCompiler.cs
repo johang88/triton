@@ -13,7 +13,9 @@ namespace Triton.Content.Compilers
 {
 	public class SkeletonCompiler : ICompiler
 	{
-		private Factory<string, ISkeletonConverter> ImporterFactory;
+        public string Extension => ".skeleton";
+
+        private Factory<string, ISkeletonConverter> ImporterFactory;
 
 		const int Version = 0x0100;
 
@@ -23,16 +25,14 @@ namespace Triton.Content.Compilers
 			ImporterFactory.Add(".xml", () => new Skeletons.Converters.OgreXmlConverter());
 		}
 
-		public void Compile(CompilationContext context, string inputPath, string outputPath, Database.ContentEntry contentData)
+		public void Compile(CompilationContext context)
         {
-            outputPath += ".skeleton";
-
-            string extension = Path.GetExtension(inputPath.Replace(".skeleton.xml", ".xml")).ToLowerInvariant();
+            string extension = Path.GetExtension(context.InputPath.Replace(".skeleton.xml", ".xml")).ToLowerInvariant();
 
             var importer = ImporterFactory.Create(extension);
-            var skeleton = importer.Import(File.OpenRead(inputPath));
+            var skeleton = importer.Import(File.OpenRead(context.InputPath));
 
-            SerializeSkeleton(outputPath, skeleton);
+            SerializeSkeleton(context.OutputPath, skeleton);
         }
 
         internal static void SerializeSkeleton(string outputPath, Skeleton skeleton)

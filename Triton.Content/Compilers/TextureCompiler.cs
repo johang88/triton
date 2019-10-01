@@ -10,26 +10,17 @@ using ImageMagick.Defines;
 
 namespace Triton.Content.Compilers
 {
-	public class TextureSettings
-	{
-		public bool IsNormalMap { get; set; }
-	}
-
 	public class TextureCompiler : ICompiler
 	{
-		public void Compile(CompilationContext context, string inputPath, string outputPath, Database.ContentEntry contentData)
+        public string Extension => ".dds";
+
+        public void Compile(CompilationContext context)
 		{
-			var filename = Path.GetFileNameWithoutExtension(inputPath);
-			var extension = Path.GetExtension(inputPath);
-
-			outputPath += ".dds";
-
-			var settings = new TextureSettings();
-			settings.IsNormalMap = filename.EndsWith("_n");
+			var extension = Path.GetExtension(context.InputPath);
 
 			if (extension != ".dds")
 			{
-                using (var image = new MagickImage(inputPath))
+                using (var image = new MagickImage(context.InputPath))
                 {
                     image.Format = MagickFormat.Dds;
 
@@ -40,12 +31,12 @@ namespace Triton.Content.Compilers
                         Mipmaps = 1 + (int)System.Math.Floor(System.Math.Log(System.Math.Max(image.Width, image.Height), 2))
                     };
 
-                    image.Write(outputPath, defines);
+                    image.Write(context.OutputPath, defines);
                 }
             }
 			else
 			{
-				File.Copy(inputPath, outputPath, true);
+				File.Copy(context.InputPath, context.OutputPath, true);
 			}
 		}
 	}

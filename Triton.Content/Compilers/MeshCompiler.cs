@@ -13,7 +13,9 @@ namespace Triton.Content.Compilers
 {
 	public class MeshCompiler : ICompiler
 	{
-		private Factory<string, IMeshImporter> ImporterFactory;
+        public string Extension => ".mesh";
+
+        private Factory<string, IMeshImporter> ImporterFactory;
 
 		const int Version = 0x0160;
 
@@ -26,22 +28,21 @@ namespace Triton.Content.Compilers
 			ImporterFactory.Add(".x", () => new Meshes.Converters.AssimpConverter());
 		}
 
-		public void Compile(CompilationContext context, string inputPath, string outputPath, Database.ContentEntry contentData)
+		public void Compile(CompilationContext context)
 		{
-			outputPath += ".mesh";
-
-			string extension = Path.GetExtension(inputPath.Replace(".mesh.xml", ".xml")).ToLowerInvariant();
+			string extension = Path.GetExtension(context.InputPath.Replace(".mesh.xml", ".xml")).ToLowerInvariant();
 
 			var importer = ImporterFactory.Create(extension);
-			var mesh = importer.Import(inputPath);
+			var mesh = importer.Import(context.InputPath);
 
             if (mesh.Skeleton != null)
             {
-                mesh.SkeletonPath = contentData.Id.Substring(contentData.Id.IndexOf('/')); // A bit hacky until we can make stuff proper
-                SkeletonCompiler.SerializeSkeleton(outputPath.Replace(".mesh", ".skeleton"), mesh.Skeleton);
+                var skeletonOutputPath = context.OutputPath.Replace(".mesh", ".skeleton");
+                mesh.SkeletonPath = context.GetReferencePath(skeletonOutputPath.Replace(".skeleton", ""));
+                SkeletonCompiler.SerializeSkeleton(skeletonOutputPath, mesh.Skeleton);
             }
 
-			using (var stream = File.Open(outputPath, FileMode.Create))
+			using (var stream = File.Open(context.OutputPath, FileMode.Create))
 			using (var writer = new BinaryWriter(stream))
 			{
 				// Magic
