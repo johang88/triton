@@ -4,51 +4,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace Triton.Content
 {
-	public class CompilationContext
-	{
-		private readonly string InputPath;
-		private readonly string OutputPath;
-		
-		public CompilationContext(string inputPath, string outputPath)
-		{
-			InputPath = inputPath;
-			OutputPath = outputPath;
-		}
+    public class CompilationContext
+    {
+        public string InputPath { get; }
+        public string OutputPath { get; }
 
-		public string GetInputPath(string path)
-		{
-			return Path.Combine(InputPath, path);
-		}
+        private readonly string _metaData;
+        private readonly string _baseOutputPath;
 
-		public string GetOutputPath(string path)
-		{
-			return Path.Combine(OutputPath, path);
-		}
+        public CompilationContext(string inputPath, string outputPath, string baseOutputPath, string metaData)
+        {
+            InputPath = inputPath ?? throw new ArgumentNullException(nameof(inputPath));
+            OutputPath = outputPath ?? throw new ArgumentNullException(nameof(outputPath));
+            _metaData = metaData;
+            _baseOutputPath = baseOutputPath ?? throw new ArgumentNullException(nameof(baseOutputPath));
+        }
 
-		public Stream OpenInput(string path)
-		{
-			return File.OpenRead(GetInputPath(path));
-		}
+        public string GetReferencePath(string outputPath)
+            => outputPath.Replace(_baseOutputPath, "").Replace("\\", "/");
 
-		public Stream OpenOutput(string path)
-		{
-			path = GetOutputPath(path);
-			var directory = Path.GetDirectoryName(path);
-
-			if (!Directory.Exists(directory))
-			{
-				Directory.CreateDirectory(directory);
-			}
-
-			return File.Open(path, FileMode.Create);
-		}
-
-		public string GetShaderTemplate()
-		{
-			return File.ReadAllText(GetOutputPath("core_data/shaders/deferred/gbuffer.glsl"));
-		}
-	}
+        public TMetaData GetMetaData<TMetaData>()
+            => _metaData != null ? JsonConvert.DeserializeObject<TMetaData>(_metaData) : default;
+    }
 }

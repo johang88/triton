@@ -8,6 +8,7 @@ namespace Triton.Content
 {
     public interface ICompiler
     {
-		void Compile(CompilationContext context, string inputPath, string outputPath, Database.ContentEntry contentData);
+        string Extension { get; }
+		void Compile(CompilationContext context);
     }
 }
