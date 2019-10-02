@@ -106,11 +106,10 @@ namespace ContentProcessor
 
             if (System.IO.File.Exists(cachePath))
             {
-                using (var stream = System.IO.File.Open(cachePath, FileMode.Open, FileAccess.Read, FileShare.Delete))
-                using (var reader = new StreamReader(stream))
-                {
-                    cache = JsonConvert.DeserializeObject<Dictionary<string, ContentEntry>>(reader.ReadToEnd());
-                }
+                using var stream = System.IO.File.Open(cachePath, FileMode.Open, FileAccess.Read, FileShare.Delete);
+                using var reader = new StreamReader(stream);
+
+                cache = JsonConvert.DeserializeObject<Dictionary<string, ContentEntry>>(reader.ReadToEnd());
             }
 
             // Import missing entries from cache automatically

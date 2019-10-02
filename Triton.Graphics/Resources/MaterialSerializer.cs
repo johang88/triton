@@ -34,57 +34,56 @@ namespace Triton.Graphics.Resources
 
             var (_, parameters) = _resourceManager.GetResourceProperties(material);
 
-            using (var stream = new System.IO.MemoryStream(data))
-			using (var reader = new System.IO.StreamReader(stream))
-			{
-                var materialJsonData = await reader.ReadToEndAsync();
-                var materialDesc = JsonConvert.DeserializeObject<MaterialDesc>(materialJsonData);
+            using var stream = new System.IO.MemoryStream(data);
+            using var reader = new System.IO.StreamReader(stream);
 
-                var shaderDefines = new List<string>();
+            var materialJsonData = await reader.ReadToEndAsync();
+            var materialDesc = JsonConvert.DeserializeObject<MaterialDesc>(materialJsonData);
 
-                if (materialDesc.Textures != null)
+            var shaderDefines = new List<string>();
+
+            if (materialDesc.Textures != null)
+            {
+                foreach (var texture in materialDesc.Textures)
                 {
-                    foreach (var texture in materialDesc.Textures)
-                    {
-                        var samplerName = $"sampler{texture.Key}";
-                        var define = $"HAS_SAMPLER_{texture.Key.ToUpperInvariant()}";
+                    var samplerName = $"sampler{texture.Key}";
+                    var define = $"HAS_SAMPLER_{texture.Key.ToUpperInvariant()}";
 
-                        shaderDefines.Add(define);
-                        material.Textures.Add(samplerName, await _resourceManager.LoadAsync<Texture>(texture.Value));
-                    }
+                    shaderDefines.Add(define);
+                    material.Textures.Add(samplerName, await _resourceManager.LoadAsync<Texture>(texture.Value));
                 }
-
-                if (materialDesc.Defines?.Length > 0)
-                {
-                    shaderDefines.AddRange(materialDesc.Defines);
-                }
-
-                if (materialDesc.Uniforms != null)
-                {
-                    foreach (var uniform in materialDesc.Uniforms)
-                    {
-                        var uniformName = $"u{uniform.Key}";
-                        var define = $"HAS_{uniform.Key.ToUpperInvariant()}";
-
-                        shaderDefines.Add(define);
-
-                        // Derive type
-                        if (uniform.Value.Contains(' '))
-                        {
-                            // Assume vec4 for now
-                            material.AddUniform(uniformName, StringConverter.ParseVector4(uniform.Value));
-                        }
-                        else
-                        {
-                            // Assume float for now
-                            material.AddUniform(uniformName, StringConverter.Parse<float>(uniform.Value));
-                        }
-                    }
-                }
-
-                material.Shader = await _resourceManager.LoadAsync<ShaderProgram>(materialDesc.Shader, string.Join(";", shaderDefines));
             }
-		}
+
+            if (materialDesc.Defines?.Length > 0)
+            {
+                shaderDefines.AddRange(materialDesc.Defines);
+            }
+
+            if (materialDesc.Uniforms != null)
+            {
+                foreach (var uniform in materialDesc.Uniforms)
+                {
+                    var uniformName = $"u{uniform.Key}";
+                    var define = $"HAS_{uniform.Key.ToUpperInvariant()}";
+
+                    shaderDefines.Add(define);
+
+                    // Derive type
+                    if (uniform.Value.Contains(' '))
+                    {
+                        // Assume vec4 for now
+                        material.AddUniform(uniformName, StringConverter.ParseVector4(uniform.Value));
+                    }
+                    else
+                    {
+                        // Assume float for now
+                        material.AddUniform(uniformName, StringConverter.Parse<float>(uniform.Value));
+                    }
+                }
+            }
+
+            material.Shader = await _resourceManager.LoadAsync<ShaderProgram>(materialDesc.Shader, string.Join(";", shaderDefines));
+        }
 
         public byte[] Serialize(object resource)
             => throw new NotImplementedException();

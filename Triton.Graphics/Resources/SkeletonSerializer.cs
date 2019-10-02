@@ -8,92 +8,91 @@ using Triton.IO;
 
 namespace Triton.Graphics.Resources
 {
-	class SkeletonSerializer : Triton.Resources.IResourceSerializer<Skeleton>
-	{
-		static readonly char[] Magic = new char[] { 'S', 'K', 'E', 'L' };
-		const int Version_1 = 0x0100;
+    class SkeletonSerializer : Triton.Resources.IResourceSerializer<Skeleton>
+    {
+        static readonly char[] Magic = new char[] { 'S', 'K', 'E', 'L' };
+        const int Version_1 = 0x0100;
 
-		private readonly Triton.IO.FileSystem FileSystem;
+        private readonly Triton.IO.FileSystem FileSystem;
 
         public bool SupportsStreaming => false;
 
         public SkeletonSerializer(Triton.IO.FileSystem fileSystem)
-		{
+        {
             FileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-		}
+        }
 
-		public string Extension { get { return ".skeleton"; } }
-		public string DefaultFilename { get { return ""; } }
+        public string Extension { get { return ".skeleton"; } }
+        public string DefaultFilename { get { return ""; } }
 
-		public object Create(Type type)
-		=> new Skeleton();
+        public object Create(Type type)
+        => new Skeleton();
 
-		public Task Deserialize(object resource, byte[] data)
-		{
-			var skeleton = (Skeleton)resource;
+        public Task Deserialize(object resource, byte[] data)
+        {
+            var skeleton = (Skeleton)resource;
 
-			using (var stream = new System.IO.MemoryStream(data))
-			using (var reader = new System.IO.BinaryReader(stream))
-			{
-				var magic = reader.ReadChars(4);
-				for (var i = 0; i < Magic.Length; i++)
-				{
-					if (magic[i] != Magic[i])
-						throw new ArgumentException("invalid skeleton");
-				}
+            using var stream = new System.IO.MemoryStream(data);
+            using var reader = new System.IO.BinaryReader(stream);
 
-				var version = reader.ReadInt32();
+            var magic = reader.ReadChars(4);
+            for (var i = 0; i < Magic.Length; i++)
+            {
+                if (magic[i] != Magic[i])
+                    throw new ArgumentException("invalid skeleton");
+            }
 
-				var validVersions = new int[] { Version_1 };
+            var version = reader.ReadInt32();
 
-				if (!validVersions.Contains(version))
-					throw new ArgumentException("invalid skeleton, unknown version");
+            var validVersions = new int[] { Version_1 };
 
-				var boneCount = reader.ReadInt32();
-				skeleton.BindPose = new Transform[boneCount];
+            if (!validVersions.Contains(version))
+                throw new ArgumentException("invalid skeleton, unknown version");
 
-				for (var i = 0; i < boneCount; i++)
-				{
-					skeleton.BindPose[i].Position = reader.ReadVector3();
-					skeleton.BindPose[i].Orientation = reader.ReadQuaternion();
-				}
+            var boneCount = reader.ReadInt32();
+            skeleton.BindPose = new Transform[boneCount];
 
-				var boneParentCount = reader.ReadInt32();
-				skeleton.BoneParents = new int[boneParentCount];
+            for (var i = 0; i < boneCount; i++)
+            {
+                skeleton.BindPose[i].Position = reader.ReadVector3();
+                skeleton.BindPose[i].Orientation = reader.ReadQuaternion();
+            }
 
-				for (var i = 0; i < boneParentCount; i++)
-				{
-					skeleton.BoneParents[i] = reader.ReadInt32();
-				}
+            var boneParentCount = reader.ReadInt32();
+            skeleton.BoneParents = new int[boneParentCount];
 
-				var animationCount = reader.ReadInt32();
-				skeleton.Animations = new Animation[animationCount];
+            for (var i = 0; i < boneParentCount; i++)
+            {
+                skeleton.BoneParents[i] = reader.ReadInt32();
+            }
 
-				for (var i = 0; i < animationCount; i++)
-				{
-					var animation = new Animation(reader.ReadString(), reader.ReadSingle());
+            var animationCount = reader.ReadInt32();
+            skeleton.Animations = new Animation[animationCount];
 
-					var trackCount = reader.ReadInt32();
-					animation.Tracks = new Track[trackCount];
+            for (var i = 0; i < animationCount; i++)
+            {
+                var animation = new Animation(reader.ReadString(), reader.ReadSingle());
 
-					for (var t = 0; t < trackCount; t++)
-					{
-						animation.Tracks[t].BoneIndex = reader.ReadInt32();
+                var trackCount = reader.ReadInt32();
+                animation.Tracks = new Track[trackCount];
 
-						var keyFrameCount = reader.ReadInt32();
-						animation.Tracks[t].KeyFrames = new KeyFrame[keyFrameCount];
+                for (var t = 0; t < trackCount; t++)
+                {
+                    animation.Tracks[t].BoneIndex = reader.ReadInt32();
 
-						for (var k = 0; k < keyFrameCount; k++)
-						{
-							animation.Tracks[t].KeyFrames[k].Time = reader.ReadSingle();
-							animation.Tracks[t].KeyFrames[k].Transform.Position = reader.ReadVector3();
-							animation.Tracks[t].KeyFrames[k].Transform.Orientation = reader.ReadQuaternion();
-						}
-					}
+                    var keyFrameCount = reader.ReadInt32();
+                    animation.Tracks[t].KeyFrames = new KeyFrame[keyFrameCount];
 
-					skeleton.Animations[i] = animation;
-				}
-			}
+                    for (var k = 0; k < keyFrameCount; k++)
+                    {
+                        animation.Tracks[t].KeyFrames[k].Time = reader.ReadSingle();
+                        animation.Tracks[t].KeyFrames[k].Transform.Position = reader.ReadVector3();
+                        animation.Tracks[t].KeyFrames[k].Transform.Orientation = reader.ReadQuaternion();
+                    }
+                }
+
+                skeleton.Animations[i] = animation;
+            }
 
             return Task.FromResult(0);
         }

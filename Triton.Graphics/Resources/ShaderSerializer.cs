@@ -44,22 +44,21 @@ namespace Triton.Graphics.Resources
                 parameters = parameters.Replace(',', '_').Replace('/', '_').Replace('\\', '_');
                 if (!string.IsNullOrWhiteSpace(parameters))
                     parameters = '-' + parameters;
+
                 var filename = name.Replace('/', '_') + parameters + '.' + type;
-                using (var stream = _fileSystem.OpenWrite("/tmp/" + filename))
-                using (var writer = new System.IO.StreamWriter(stream))
-                {
-                    writer.Write(content);
-                }
+                
+                using var stream = _fileSystem.OpenWrite("/tmp/" + filename);
+                using var writer = new System.IO.StreamWriter(stream);
+
+                writer.Write(content);
             }
         }
 
         public object Create(Type type)
             => new ShaderProgram(_backend);
 
-        private string InsertHeader(string type, string defines, string source)
-        {
-            return string.Format("#version 460 core\n#define {0}\n{1}\n", type, defines) + source;
-        }
+        private string InsertHeader(string type, string defines, string source) 
+            => string.Format("#version 460 core\n#define {0}\n{1}\n", type, defines) + source;
 
         private Dictionary<Renderer.ShaderType, string> GetShaderSources(string name, string shaderSource, string parameters)
         {

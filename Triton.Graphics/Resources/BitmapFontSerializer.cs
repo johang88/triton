@@ -30,35 +30,34 @@ namespace Triton.Graphics.Resources
 		{
 			var bitmapFont = (BitmapFont)resource;
 
-			using (var stream = new System.IO.MemoryStream(data))
-			using (var reader = new System.IO.StreamReader(stream))
-			{
-				while (stream.Position < stream.Length)
-				{
-					var line = reader.ReadLine();
-					if (line.Length == 0)
-						continue;
+            using var stream = new System.IO.MemoryStream(data);
+            using var reader = new System.IO.StreamReader(stream);
 
-					var commands = line.Split(' ');
-					switch (commands[0])
-					{
-						case "info": // Ignore
-							break;
-						case "common":
-							ParseCommonInfo(bitmapFont, ParseCommands(commands));
-							break;
-						case "page":
-							await ParsePageInfo(bitmapFont, ParseCommands(commands));
-							break;
-						case "chars": // Ignore
-							break;
-						case "char":
-							ParseCharInfo(bitmapFont, ParseCommands(commands));
-							break;
-					}
-				}
-			}
-		}
+            while (stream.Position < stream.Length)
+            {
+                var line = reader.ReadLine();
+                if (line.Length == 0)
+                    continue;
+
+                var commands = line.Split(' ');
+                switch (commands[0])
+                {
+                    case "info": // Ignore
+                        break;
+                    case "common":
+                        ParseCommonInfo(bitmapFont, ParseCommands(commands));
+                        break;
+                    case "page":
+                        await ParsePageInfo(bitmapFont, ParseCommands(commands));
+                        break;
+                    case "chars": // Ignore
+                        break;
+                    case "char":
+                        ParseCharInfo(bitmapFont, ParseCommands(commands));
+                        break;
+                }
+            }
+        }
 
 		private Dictionary<string, string> ParseCommands(string[] commands)
 		{
