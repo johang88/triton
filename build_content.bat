@@ -1,1 +1,1 @@
-Build\ContentProcessor.exe in=ContentSource out=Data
+Build\netcoreapp3.0\ContentProcessor.exe in=ContentSource out=Data

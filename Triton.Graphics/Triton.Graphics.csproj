@@ -1,191 +1,23 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6A7E740C-692D-4E66-BC84-E79D6BF0B025}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Triton.Graphics</RootNamespace>
-    <AssemblyName>Triton.Graphics</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>7.3</LangVersion>
+    <OutputPath></OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>7.3</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenTK, Version=3.0.1.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <HintPath>..\packages\OpenTK.3.0.1\lib\net20\OpenTK.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="OpenTK" Version="3.1.0" />
+	<PackageReference Include="Newtonsoft.Json" Version="12.0.3-beta1" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="AmbientLight.cs" />
-    <Compile Include="Backend.cs" />
-    <Compile Include="Backend.Packets.cs" />
-    <Compile Include="BatchBuffer.cs" />
-    <Compile Include="Camera.cs" />
-    <Compile Include="Components\LightComponent.cs" />
-    <Compile Include="Components\MeshComponent.cs" />
-    <Compile Include="Components\ParticleSystemComponent.cs" />
-    <Compile Include="Components\RenderableComponent.cs" />
-    <Compile Include="Components\SkinnedMeshComponent.cs" />
-    <Compile Include="Components\TerrainComponent.cs" />
-    <Compile Include="Deferred\AmbientLightParams.cs" />
-    <Compile Include="Deferred\CombineParams.cs" />
-    <Compile Include="Deferred\ShadowRenderer.cs" />
-    <Compile Include="Deferred\DeferredRenderer.cs" />
-    <Compile Include="Deferred\LightParams.cs" />
-    <Compile Include="Deferred\ShadowBufferRenderer.cs" />
-    <Compile Include="Deferred\ShadowQuality.cs" />
-    <Compile Include="Deferred\RenderShadowsParams.cs" />
-    <Compile Include="IRenderable.cs" />
-    <Compile Include="LightingMode.cs" />
-    <Compile Include="LighType.cs" />
-    <Compile Include="MeshInstance.cs" />
-    <Compile Include="Particles\Generators\BasicColorGenerator.cs" />
-    <Compile Include="Particles\Generators\BasicTimeGenerator.cs" />
-    <Compile Include="Particles\Generators\BasicVelocityGenerator.cs" />
-    <Compile Include="Particles\Generators\BoxPositionGenerator.cs" />
-    <Compile Include="Particles\Generators\CirclePositionGenerator.cs" />
-    <Compile Include="Particles\IParticleGenerator.cs" />
-    <Compile Include="Particles\IParticleRenderer.cs" />
-    <Compile Include="Particles\IParticleUpdater.cs" />
-    <Compile Include="Particles\ParticleData.cs" />
-    <Compile Include="Particles\ParticleEmitter.cs" />
-    <Compile Include="Particles\ParticleSystem.cs" />
-    <Compile Include="Particles\Renderers\BillboardRenderer.cs" />
-    <Compile Include="Particles\Renderers\MeshRenderer.cs" />
-    <Compile Include="Particles\Renderers\OrientationMode.cs" />
-    <Compile Include="Particles\Updaters\AttractorsUpdater.cs" />
-    <Compile Include="Particles\Updaters\BasicColorUpdater.cs" />
-    <Compile Include="Particles\Updaters\BasicTimeUpdater.cs" />
-    <Compile Include="Particles\Updaters\EulerUpdater.cs" />
-    <Compile Include="Particles\Updaters\FloorUpdater.cs" />
-    <Compile Include="Post\AntiAliasing.cs" />
-    <Compile Include="Post\AntiAliasingQuality.cs" />
-    <Compile Include="Post\DofSettings.cs" />
-    <Compile Include="Post\Effects\AdaptLuminance.cs" />
-    <Compile Include="Post\Effects\AtmosphericScattering.cs" />
-    <Compile Include="Post\Effects\BaseEffect.cs" />
-    <Compile Include="Post\Effects\Bloom.cs" />
-    <Compile Include="Post\Effects\Fog.cs" />
-    <Compile Include="Post\Effects\FXAA.cs" />
-    <Compile Include="Post\Effects\Gamma.cs" />
-    <Compile Include="Post\Effects\SMAA.cs" />
-    <Compile Include="Post\Effects\SSAO.cs" />
-    <Compile Include="Post\Effects\Tonemap.cs" />
-    <Compile Include="Post\Effects\Visualize.cs" />
-    <Compile Include="Post\HDRSettings.cs" />
-    <Compile Include="Post\PostEffectManager.cs" />
-    <Compile Include="Post\RenderTargetManager.cs" />
-    <Compile Include="Post\ScreenSpaceReflectionsSettings.cs" />
-    <Compile Include="Post\VisualizationMode.cs" />
-    <Compile Include="Profiler.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RenderOperation.cs" />
-    <Compile Include="RenderOperations.cs" />
-    <Compile Include="RenderTarget.cs" />
-    <Compile Include="Resources\BitmapFont.cs" />
-    <Compile Include="Resources\BitmapFontSerializer.cs" />
-    <Compile Include="Resources\Material.cs" />
-    <Compile Include="Resources\MaterialSerializer.cs" />
-    <Compile Include="Resources\Mesh.cs" />
-    <Compile Include="Resources\MeshSerializer.cs" />
-    <Compile Include="Resources\ResourceSerializers.cs" />
-    <Compile Include="Resources\ShaderSerializer.cs" />
-    <Compile Include="Resources\ShaderProgram.cs" />
-    <Compile Include="Resources\SkeletonSerializer.cs" />
-    <Compile Include="Resources\Texture.cs" />
-    <Compile Include="Resources\TextureSerializer.cs" />
-    <Compile Include="Shaders\Preprocessor.cs" />
-    <Compile Include="SkeletalAnimation\Animation.cs" />
-    <Compile Include="SkeletalAnimation\AnimationBlender.cs" />
-    <Compile Include="SkeletalAnimation\AnimationState.cs" />
-    <Compile Include="SkeletalAnimation\KeyFrame.cs" />
-    <Compile Include="SkeletalAnimation\Skeleton.cs" />
-    <Compile Include="SkeletalAnimation\SkeletonInstance.cs" />
-    <Compile Include="SkeletalAnimation\Track.cs" />
-    <Compile Include="SkeletalAnimation\Transform.cs" />
-    <Compile Include="SpriteBatch.cs" />
-    <Compile Include="Stage.cs" />
+    <ProjectReference Include="..\Triton.Math\Triton.Math.csproj" />
+    <ProjectReference Include="..\Triton.Renderer\Triton.Renderer.csproj" />
+    <ProjectReference Include="..\Triton\Triton.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">
-      <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>
-      <Name>Triton.Math</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Triton.Renderer\Triton.Renderer.csproj">
-      <Project>{d8da8b59-a4b9-4de1-920e-5d056375c71e}</Project>
-      <Name>Triton.Renderer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Triton\Triton.csproj">
-      <Project>{a8e78b39-52c9-40d8-908a-886567990595}</Project>
-      <Name>Triton</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="OpenTK.dll.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>
