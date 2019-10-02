@@ -16,7 +16,7 @@ namespace Triton.Game.World.Components
         protected GameObject Parent => Owner.Parent;
         protected Camera Camera => Stage.Camera;
         protected InputManager Input => Owner.World.Services.Get<InputManager>();
-        protected Physics.World PhysicsWorld => Owner.World.Services.Get<Physics.World>();
+        //protected Physics.World PhysicsWorld => Owner.World.Services.Get<Physics.World>();
         protected Resources.ResourceManager ResourceManager => Owner.World.Services.Get<Resources.ResourceManager>();
     }
 }

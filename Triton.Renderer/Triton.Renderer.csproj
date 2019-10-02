@@ -1,123 +1,21 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D8DA8B59-A4B9-4DE1-920E-5D056375C71E}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Triton.Renderer</RootNamespace>
-    <AssemblyName>Triton.Renderer</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputPath></OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="OpenTK, Version=3.0.1.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <HintPath>..\packages\OpenTK.3.0.1\lib\net20\OpenTK.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="OpenTK" Version="3.1.0" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="BlendingFactorDest.cs" />
-    <Compile Include="BlendingFactorSrc.cs" />
-    <Compile Include="BufferTarget.cs" />
-    <Compile Include="ClearFlags.cs" />
-    <Compile Include="CullFaceMode.cs" />
-    <Compile Include="DDS\LoaderDDS.cs" />
-    <Compile Include="DepthFunction.cs" />
-    <Compile Include="GLWrapper.cs" />
-    <Compile Include="IndexType.cs" />
-    <Compile Include="Meshes\BufferManager.cs" />
-    <Compile Include="Meshes\DrawMeshMultiData.cs" />
-    <Compile Include="Meshes\MeshManager.cs" />
-    <Compile Include="RenderStates\RenderStateManager.cs" />
-    <Compile Include="RenderSystem.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PixelFormat.cs" />
-    <Compile Include="RenderTargets\Definition.cs" />
-    <Compile Include="RenderTargets\RenderTargetManager.cs" />
-    <Compile Include="SamplerParameterName.cs" />
-    <Compile Include="Samplers\SamplerManager.cs" />
-    <Compile Include="Shaders\ShaderManager.cs" />
-    <Compile Include="ShaderType.cs" />
-    <Compile Include="TextureCompareMode.cs" />
-    <Compile Include="TextureMagFilter.cs" />
-    <Compile Include="TextureMinFilter.cs" />
-    <Compile Include="Textures\TextureManager.cs" />
-    <Compile Include="TextureTarget.cs" />
-    <Compile Include="TextureWrapMode.cs" />
-    <Compile Include="VertexPointerType.cs" />
-    <Compile Include="VertexFormat.cs" />
-    <Compile Include="VertexFormatElement.cs" />
-    <Compile Include="VertexFormatSemantic.cs" />
+    <ProjectReference Include="..\Triton.Math\Triton.Math.csproj" />
+    <ProjectReference Include="..\Triton\Triton.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Triton.Math\Triton.Math.csproj">
-      <Project>{f49a11cd-2fce-4247-9205-68f5e6b470b3}</Project>
-      <Name>Triton.Math</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Triton\Triton.csproj">
-      <Project>{a8e78b39-52c9-40d8-908a-886567990595}</Project>
-      <Name>Triton</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="OpenTK.dll.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>
