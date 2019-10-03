@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.IO;
-using Triton.Logging;
+using Serilog;
 
 namespace Triton.Resources
 {
@@ -153,10 +153,7 @@ namespace Triton.Resources
 
             resource.State = ResourceLoadingState.Loaded;
 
-            if (!string.IsNullOrWhiteSpace(resource.Parameters))
-                Log.WriteLine("Loaded {0}?{2} of type {1}", resource.Name, resource.Resource.GetType(), resource.Parameters);
-            else
-                Log.WriteLine("Loaded {0} of type {1}", resource.Name, resource.Resource.GetType());
+            Log.Information("Loaded {Name} {@ResourceInfo}", resource.Name, new { Type = resource.Resource.GetType(), resource.Parameters });
         }
 
         private async Task<byte[]> LoadDataForResource(ResourceReference resource, IResourceSerializer serializer)
@@ -170,7 +167,7 @@ namespace Triton.Resources
 
             if (!_fileSystem.FileExists(path) && !string.IsNullOrWhiteSpace(serializer.DefaultFilename))
             {
-                Log.WriteLine($"{path} can not be found", LogLevel.Error);
+                Log.Error("{Path} can nit be found", path);
                 path = serializer.DefaultFilename;
             }
 
@@ -217,7 +214,7 @@ namespace Triton.Resources
                     }
 
                     resourceReference.State = ResourceLoadingState.Unloaded;
-                    Log.WriteLine("Unloaded {0} of type {1}", resourceReference.Name, resourceType);
+                    Log.Information("Unloaded {Name} of type {Type}", resourceReference.Name, resourceType);
                 }
 
                 var task = new Task(unloadAction);

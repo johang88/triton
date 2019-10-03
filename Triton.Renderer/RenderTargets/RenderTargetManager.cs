@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK.Graphics.OpenGL;
-using Triton.Logging;
+using Serilog;
 using OGL = OpenTK.Graphics.OpenGL;
 
 namespace Triton.Renderer.RenderTargets
@@ -97,11 +97,9 @@ namespace Triton.Renderer.RenderTargets
 
             var drawBuffers = new List<DrawBuffersEnum>();
 
-            Log.WriteLine("Creating frame buffer object, {0}x{1}", definition.Width, definition.Height);
+            Log.Information("Creating frame buffer object: {@Definition}", definition);
             foreach (var attachment in definition.Attachments)
             {
-                Log.WriteLine(" - ap = {0}, pf = {1}, pif = {2}, pt = {3}", attachment.AttachmentPoint, attachment.PixelFormat, attachment.PixelInternalFormat, attachment.PixelType);
-
                 if (attachment.AttachmentPoint == Definition.AttachmentPoint.Color)
                 {
                     drawBuffers.Add(DrawBuffersEnum.ColorAttachment0 + attachment.Index);
@@ -125,8 +123,7 @@ namespace Triton.Renderer.RenderTargets
                     else if (attachment.Index != 0)
                     {
                         var depthHandle = attachment.Index;
-                        int depthIndex, depthId;
-                        ExtractHandle(depthHandle, out depthIndex, out depthId);
+                        ExtractHandle(depthHandle, out var depthIndex, out var depthId);
 
                         _handles[index].SharedDepth = true;
                         GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, _handles[depthIndex].DepthBufferObject);
@@ -145,7 +142,7 @@ namespace Triton.Renderer.RenderTargets
             var status = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
             if (status != FramebufferErrorCode.FramebufferComplete)
             {
-                Log.WriteLine("Could not create framebuffer, status = " + status.ToString(), LogLevel.Error);
+                Log.Error("Failed to create frame buffer, {FrameBufferStatus}", status);
                 throw new Exception("Framebuffer not complete, " + status.ToString());
             }
 
@@ -157,8 +154,7 @@ namespace Triton.Renderer.RenderTargets
 
         public void Destroy(int handle)
         {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
+            ExtractHandle(handle, out var index, out var id);
 
             if (id == -1 || _handles[index].Id != id)
                 return;
@@ -190,8 +186,7 @@ namespace Triton.Renderer.RenderTargets
 
         public Definition GetDefinition(int handle)
         {
-            int index, id;
-            ExtractHandle(handle, out index, out id);
+            ExtractHandle(handle, out var index, out var id);
 
             return _handles[index].Definition;
         }

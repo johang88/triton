@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Triton.Logging;
 using Triton.Resources;
 using Triton.Utility;
 
@@ -140,7 +140,16 @@ namespace Triton.Graphics.Resources
             }
 
             if (!string.IsNullOrWhiteSpace(errors))
-                Log.WriteLine(name + ": " + errors, success ? LogLevel.Info : LogLevel.Error);
+            {
+                if (success)
+                {
+                    Log.Error("{name}: {errors}", name, errors);
+                }
+                else
+                {
+                    Log.Information("{name}: {errors}", name, errors);
+                }
+            }
         }
 
         public Task Deserialize(object resource, byte[] data)
@@ -166,7 +175,7 @@ namespace Triton.Graphics.Resources
         {
             if (!_shaders.ContainsKey(name))
             {
-                Log.WriteLine($"Untracked shader '{name}'", LogLevel.Warning);
+                Log.Warning("Untracked shader {name}", name);
                 return;
             }
 

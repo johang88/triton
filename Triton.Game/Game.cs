@@ -12,9 +12,9 @@ using OpenTK.Input;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using Triton.Graphics;
-using Triton.Logging;
 using Triton.Utility;
 using System.IO;
+using Serilog;
 
 namespace Triton.Game
 {
@@ -81,8 +81,11 @@ namespace Triton.Game
         public Game(string name, string logPath = "logs/")
         {
             _name = name;
-            Log.AddOutputHandler(new Logging.Console());
-            Log.AddOutputHandler(new Logging.File(string.Format("{0}/{1}.txt", logPath, name)));
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.File($"{logPath}/{name}.txt")
+                .CreateLogger();
 
             FileSystem = new IO.FileSystem(MountFileSystem());
             ResourceGroupManager = new Resources.ResourceGroupManager(FileSystem);
@@ -225,7 +228,7 @@ namespace Triton.Game
                 Thread.Sleep(1);
             }
 
-            Log.WriteLine("Core resources loaded");
+            Log.Information("Core resources loaded");
             LoadResources();
 
             while (!Resources.AllResourcesLoaded())

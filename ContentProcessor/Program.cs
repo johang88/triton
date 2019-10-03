@@ -7,8 +7,8 @@ using System.IO;
 using System.Threading;
 using Triton.Content;
 using Triton.Tools;
-using Triton.Logging;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace ContentProcessor
 {
@@ -20,8 +20,11 @@ namespace ContentProcessor
 
         public Program(string[] parameters)
         {
-            Log.AddOutputHandler(new Triton.Logging.Console());
-            Log.AddOutputHandler(new Triton.Logging.File("Logs/ContentProcessor.txt"));
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.File("Logs/ContentProcessor.txt")
+                .CreateLogger();
 
             _extensionToType = new Dictionary<string, string>
             {
@@ -63,13 +66,13 @@ namespace ContentProcessor
 
             if (!Directory.Exists(inputDir))
             {
-                Log.WriteLine("ERROR: Input dir does not exist");
+                Log.Error("{InputDir} does not exist", inputDir);
                 return;
             }
 
             if (!Directory.Exists(outputDir))
             {
-                Log.WriteLine("Output dir does not exist, creating");
+                Log.Information("{OutputDir} does not exist, creating", outputDir);
                 Directory.CreateDirectory(outputDir);
             }
 
@@ -178,16 +181,16 @@ namespace ContentProcessor
                         metaData
                         );
 
-                    Log.WriteLine($"Compiling {entry.Value.Id}");
+                    Log.Information("Compiling {SourceFile}", entry.Value.Id);
                     compiler.Compile(context);
-                    Log.WriteLine($"Compiled {entry.Value.Id}");
+                    Log.Information("Compiled {SourceFile}", entry.Value.Id);
 
                     entry.Value.LastCompilation = DateTime.Now;
                     entry.Value.Version = compiler.Version;
                 }
                 catch (Exception e)
                 {
-                    Log.WriteLine(string.Format("{0}\n\t{1}", entry.Key, e.ToString()), LogLevel.Error);
+                    Log.Error(e, "Failed to compile {SourceFile}", entry.Value.Id);
                 }
             }
 
