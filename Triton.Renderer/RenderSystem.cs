@@ -8,9 +8,9 @@ using OpenTK.Graphics;
 using OGL = OpenTK.Graphics.OpenGL;
 using System.Runtime.InteropServices;
 using Triton.Utility;
-using Triton.Logging;
 using System.Runtime.CompilerServices;
 using Triton.Renderer.Meshes;
+using Serilog;
 
 namespace Triton.Renderer
 {
@@ -80,10 +80,7 @@ namespace Triton.Renderer
             var major = GL.GetInteger(GetPName.MajorVersion);
             var minor = GL.GetInteger(GetPName.MinorVersion);
 
-            Log.WriteLine("OpenGL Context ({0}.{1}) initialized", major, minor);
-            Log.WriteLine(" - Color format: {0}", _context.GraphicsMode.ColorFormat);
-            Log.WriteLine(" - Depth: {0}", _context.GraphicsMode.Depth);
-            Log.WriteLine(" - FSAA Samples: {0}", _context.GraphicsMode.Samples);
+            Log.Information("OpenGL Context {Major}.{Minor}", major, minor);
 
             GLWrapper.Initialize();
 
@@ -137,7 +134,7 @@ namespace Triton.Renderer
             if (severity == DebugSeverity.DebugSeverityLow || severity == DebugSeverity.DebugSeverityMedium || severity == DebugSeverity.DebugSeverityHigh)
             {
                 var msg = Marshal.PtrToStringAnsi(message, length);
-                Log.WriteLine(string.Format("{0} {1} {2}", severity, type, msg));
+                Log.Information("GL Debug Callback: {@Message}", new { severity, type, msg });
             }
         }
 

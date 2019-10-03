@@ -7,7 +7,7 @@ using Assimp;
 using Assimp.Configs;
 using System.IO;
 using Triton.IO;
-using Triton.Logging;
+using Serilog;
 
 namespace Triton.Content.Meshes.Converters
 {
@@ -33,25 +33,25 @@ namespace Triton.Content.Meshes.Converters
                     // Validate sub mesh data
                     if (meshToImport.PrimitiveType != PrimitiveType.Triangle)
                     {
-                        Log.WriteLine("{0}:{1} invalid primitive type {2} should be Triangle", filename, meshToImport.Name, meshToImport.PrimitiveType);
+                        Log.Information("{Filename} Invalid prrimitive type, should be triangle. {MeshInfo}", filename, new { meshToImport.Name, meshToImport.PrimitiveType });
                         continue;
                     }
 
                     if (!meshToImport.HasNormals)
                     {
-                        Log.WriteLine("{0}:{1} does not have any normals", filename, meshToImport.Name);
+                        Log.Information("{Filename} Does not have any normals. {MeshInfo}", filename, new { meshToImport.Name });
                         continue;
                     }
 
                     if (!meshToImport.HasTangentBasis)
                     {
-                        Log.WriteLine("{0}:{1} does not have any tangents", filename, meshToImport.Name);
+                        Log.Information("{Filename} Does not have any tangents. {MeshInfo}", filename, new { meshToImport.Name });
                         continue;
                     }
 
                     if (meshToImport.TextureCoordinateChannelCount == 0)
                     {
-                        Log.WriteLine("{0}:{1} does not have any texture channels", filename, meshToImport.Name);
+                        Log.Information("{Filename} Does not have any texture channels. {MeshInfo}", filename, new { meshToImport.Name });
                         continue;
                     }
 
@@ -318,7 +318,7 @@ namespace Triton.Content.Meshes.Converters
                     }
                     else
                     {
-                        Log.WriteLine($"Missing bone binding for node {parentIndex.Key}", LogLevel.Warning);
+                        Log.Warning("Missing bone binding for node {Node}", parentIndex.Key);
                     }
                 }
 
