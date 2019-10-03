@@ -18,13 +18,8 @@ namespace Triton.Samples
 {
     class MaterialsGame : Triton.Samples.BaseGame
     {
-        private GameObject Player;
-        private GameObject Light;
-
-        private List<GameObject> _balls = new List<GameObject>();
-
-        private float _rotationX = 1.026f;
-        private float _rotationY = -0.025f;
+        private readonly List<GameObject> _balls = new List<GameObject>();
+        private GameObject _player;
 
         public MaterialsGame()
             : base("Materials")
@@ -48,34 +43,17 @@ namespace Triton.Samples
 
             Stage.AmbientLight = new Graphics.AmbientLight
             {
-                Irradiance = Resources.Load<Graphics.Resources.Texture>("/textures/sunTempleInteriorDiffuseHDR"),
-                Specular = Resources.Load<Graphics.Resources.Texture>("/textures/sunTempleInteriorSpecularHDR"),
+                Irradiance = Resources.Load<Graphics.Resources.Texture>("/textures/sky_irradiance"),
+                Specular = Resources.Load<Graphics.Resources.Texture>("/textures/sky_specular"),
                 IrradianceStrength = 2,
                 SpecularStrength = 2
             };
 
-            //var terrain = new GameObject();
-            //var terrainData = TerrainData.CreateFromFile(FileSystem, "/terrain.raw");
-            //terrainData.MaxHeight = 512;
-            //terrain.Components.Add(new TerrainComponent
-            //{
-            //    Material = Resources.Load<Material>("/materials/terrain"),
-            //    TerrainData = terrainData
-            //});
-            //terrain.Components.Add(new RigidBodyComponent
-            //{
-            //    RigidBodyType = Physics.RigidBodyType.Static,
-            //    ColliderShape = new Triton.Physics.Shapes.TerrainColliderShape
-            //    {
-            //        TerrainData = terrainData
-            //    }
-            //});
-            //GameWorld.Add(terrain);
-
-            Player = new GameObject();
-            Player.Position = new Vector3(0, 10.2f, -2);
-            //Player.Position.Y = terrainData.GetHeightAt(Player.Position.X, Player.Position.Z) + 1f;
-            Player.Components.Add(new CharacterControllerComponent
+            _player = new GameObject
+            {
+                Position = new Vector3(2, 0, 2)
+            };
+            _player.Components.Add(new CharacterControllerComponent
             {
                 ColliderShape = new Triton.Physics.Shapes.CapsuleColliderShape
                 {
@@ -83,11 +61,10 @@ namespace Triton.Samples
                     Radius = 0.15f
                 }
             });
-            Player.Components.Add(new PlayerController
+            _player.Components.Add(new PlayerController
             {
-                //Terrain = terrainData
             });
-            Player.Components.Add(new ThirdPersonCamera());
+            _player.Components.Add(new ThirdPersonCamera());
 
             var knight = new GameObject
             {
@@ -99,14 +76,14 @@ namespace Triton.Samples
                 Mesh = Resources.Load<Mesh>("/models/knight_test")
             });
             knight.Components.Add(new KnightAnimator());
-            Player.Children.Add(knight);
+            _player.Children.Add(knight);
 
-            GameWorld.Add(Player);
+            GameWorld.Add(_player);
 
-            var roomPrefab = Resources.Load<Prefab>("/prefabs/suntemple");
+            var roomPrefab = Resources.Load<Prefab>("/prefabs/room");
             roomPrefab.Instantiate(GameWorld);
 
-            var center = new Vector3(-3, 10.2f, 2);
+            var center = new Vector3(0, 1, 0);
             var ballPrefab = Resources.Load<Prefab>("/prefabs/ball");
             for (int i = 0; i < 5; i++)
             {
@@ -122,68 +99,11 @@ namespace Triton.Samples
                 ball.Position = center + new Vector3(-3 + i * 1.5f, 0.3f, -2);
             }
 
-            Light = new GameObject
-            {
-                Position = new Vector3(0, 0.4f, 0),
-                Orientation = Quaternion.FromAxisAngle(Vector3.UnitX, 0.43f)
-            };
-            Light.Components.Add(new LightComponent
-            {
-                Type = Graphics.LighType.Directional,
-                Intensity = 4,
-                Color = new Vector3(1.1f, 1, 1),
-                Range = 100,
-                InnerAngle = 0.94f,
-                OuterAngle = 0.98f,
-                CastShadows = true
-            });
-            GameWorld.Add(Light);
-
-            //var particles = new GameObject
-            //{
-            //    Position = new Vector3(0, 0.1f, 0),
-            //};
-            //particles.Components.Add(new ParticleSystemComponent
-            //{
-            //    ParticleSystem = new Graphics.Particles.ParticleSystem(500)
-            //    {
-            //        //Renderer = new Graphics.Particles.Renderers.MeshRenderer
-            //        //{
-            //        //    Mesh = Resources.Load<Mesh>("/models/sphere")
-            //        //},
-            //        Renderer = new Graphics.Particles.Renderers.BillboardRenderer(GraphicsBackend)
-            //        {
-            //            Material = Resources.Load<Material>("/materials/sphere")
-            //        },
-            //        Emitters = new List<Graphics.Particles.ParticleEmitter>()
-            //        {
-            //            new Graphics.Particles.ParticleEmitter
-            //            {
-            //                Generators = new List<Graphics.Particles.IParticleGenerator>()
-            //                {
-            //                    new Graphics.Particles.Generators.BasicTimeGenerator { MinTime = 0.1f, MaxTime = 0.3f },
-            //                    new Graphics.Particles.Generators.BasicVelocityGenerator { MinStartVelocity = new Vector3(-1, -1, -1) * 10, MaxStartVelocity = new Vector3(1, 1, 1) * 10 },
-            //                    new Graphics.Particles.Generators.BoxPositionGenerator() { Position = Vector3.Zero, MaxStartPosOffset = Vector3.Zero }
-            //                }
-            //            }
-            //        },
-            //        Updaters = new List<Graphics.Particles.IParticleUpdater>()
-            //        {
-            //            new Graphics.Particles.Updaters.BasicTimeUpdater(),
-            //            new Graphics.Particles.Updaters.EulerUpdater() { GlobalAcceleration = new Vector3(0, 0, 0) },
-            //            //new Graphics.Particles.Updaters.FloorUpdater() { BounceFactor = 0.5f, FloorPositionY = 0.0f }
-            //        }
-            //    }
-            //});
-            //GameWorld.Add(particles);
-
             Stage.ClearColor = new Vector4(1, 1, 1, 1) * 2;
 
             DeferredRenderer.Settings.ShadowQuality = Graphics.Deferred.ShadowQuality.High;
             DebugFlags |= Game.DebugFlags.RenderStats;
             DebugFlags |= Game.DebugFlags.ShadowMaps;
-
-            //PostEffectManager.VisualizationMode = Graphics.Post.VisualizationMode.SSAO;
         }
 
         protected override void Update(float frameTime)
@@ -194,16 +114,11 @@ namespace Triton.Samples
             {
                 CursorVisible = !CursorVisible;
             }
-
-            Light.Orientation = Quaternion.FromAxisAngle(Vector3.UnitX, _rotationX) * Quaternion.FromAxisAngle(Vector3.UnitY, _rotationY);
         }
 
         protected override void RenderUI(float deltaTime)
         {
             base.RenderUI(deltaTime);
-
-            ImGui.SliderFloat("LightRotation X", ref _rotationX, -3.14f * 2.0f, 3.14f * 2.0f);
-            ImGui.SliderFloat("LightRotation Y", ref _rotationY, -3.14f * 2.0f, 3.14f * 2.0f);
         }
     }
 }
