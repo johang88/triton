@@ -33,7 +33,7 @@ Open up `Triton.sln` and hit compile.
 There are several samples available in the samples folder. Actually ... just the one.
 
 ## Content pipeline
-The content processor will process all media files in the specified folder and write optimized versions to the specified output folder. The `nVidia command lines tools` has to be installed and present in the PATH in order for the content processor to function properly.
+`ContentProcessor.exe in=<inputDir> out=<outputDir>` processes the input folder as a package if it contains a `package.json` file, it the package file is not present then it processes each sub directory that contains a package file. Currently only meshes and textures are processed. Collision meshes can be compiled as well but need to use ogre xml format `.col.xml` or have their type changed manually in the `__cache.json` file that gets created for the package.
 
 Example: `ContentProcessor.exe in=..\Media out=..Data'
 
