@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<NodeGraphControl>
-     <NodeGraphControl.NodeGraphView ViewX="-14" ViewY="-117" ViewZoom="1">
-          <NodeGraphNodeCollection>
-               <Triton.Content.Materials.CustomNodes.RootNode Name="Material" X="100" Y="0" Width="140" Height="116" Comment="" CanBeSelected="False" />
-          </NodeGraphNodeCollection>
-          <NodeGraphLinkCollection />
-     </NodeGraphControl.NodeGraphView>
-</NodeGraphControl>
